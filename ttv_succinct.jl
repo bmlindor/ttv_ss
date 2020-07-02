@@ -5,9 +5,9 @@
 include("laplace_wisdom.jl")
 
 
-u{T<:Number}(gamma::T,c1::T,c2::T)= ((3+gamma*gamma)*c1+2*gamma*c2)/(gamma*gamma*(1-gamma*gamma))
+u(gamma::T,c1::T,c2::T) where {T<:Number}= ((3+gamma*gamma)*c1+2*gamma*c2)/(gamma*gamma*(1-gamma*gamma))
 # m=+/-1
-v{T<:Number}(z::T,d1::T,d2::T,m::Integer)= ((m*(1-z*z)+6*z)*d1+(2+z*z)*d2)/(z*(1-z*z)*(z+m)*(z+2*m))
+v(z::T,d1::T,d2::T,m::Integer) where {T<:Number}= ((m*(1-z*z)+6*z)*d1+(2+z*z)*d2)/(z*(1-z*z)*(z+m)*(z+2*m))
 
 function ttv_succinct!(jmax::Integer,alpha::Number,f1::Array{Float64,2},f2::Array{Float64,2})
 
