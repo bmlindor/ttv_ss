@@ -35,14 +35,14 @@ function ttv_nplanet(nplanet::Int64,jmax::Int64,ntrans::Vector{Int64},data::Vect
       p1 = TTVFaster.Planet_plane_hk(data[(iplanet-1)*5+1],data[(iplanet-1)*5+2],data[(iplanet-1)*5+3],data[(iplanet-1)*5+4],data[(iplanet-1)*5+5])
     # Create an array of times for the inner planet:
       n1 = ntrans[iplanet]
-      time1 = collect(p1.trans0 + linspace(0,n1-1,n1) * p1.period)
+      time1 = collect(p1.trans0 .+ range(0,stop=n1-1,length=n1) .* p1.period)
     # Loop over outer planets:
       for jplanet=iplanet+1:nplanet
     # Create a Planet_plane_hk type for the outer planet:
         p2=TTVFaster.Planet_plane_hk(data[(jplanet-1)*5+1],data[(jplanet-1)*5+2],data[(jplanet-1)*5+3],data[(jplanet-1)*5+4],data[(jplanet-1)*5+5])
     # Create an array of times for the outer planet:
         n2 = ntrans[jplanet]
-        time2 = collect(p2.trans0 + linspace(0,n2-1,n2) * p2.period)
+        time2 = collect(p2.trans0 .+ range(0,stop=n2-1,length=n2) .* p2.period)
     # Define arrays to hold the TTVs:
         ttv1=Array(ttv_el_type,n1)
         ttv2=Array(ttv_el_type,n2)
