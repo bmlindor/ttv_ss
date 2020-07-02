@@ -8,17 +8,17 @@ v{T<:Number}(z::T,d1::T,d2::T,m::Integer)= ((m*(1-z*z)+6*z)*d1+(2+z*z)*d2)/(z*(1
 
 function ttv_succinct!(jmax::Integer,alpha::Number,f1::Array{Float64,2},f2::Array{Float64,2},b::Array{Float64,2},alpha0::Number,b0::Array{Float64,2})
 
-# See simple_solution.pdf 7/16/2015
+  # See simple_solution.pdf 7/16/2015
 
-# Fourth-order Taylor expansion approximation of Laplace coefficients:
-dalpha = alpha-alpha0
-for i=0:2
-  for j=0:jmax
-    b[j+1,i+1]=b0[i+1,j+1]+dalpha*(b0[i+2,j+1]+0.5*dalpha*(b0[i+3,j+1]+dalpha/3.0*(b0[i+4,j+1]+dalpha*0.25*b0[i+5,j+1])))
+  # Fourth-order Taylor expansion approximation of Laplace coefficients:
+  dalpha = alpha-alpha0
+  for i=0:2
+    for j=0:jmax
+      b[j+1,i+1]=b0[i+1,j+1]+dalpha*(b0[i+2,j+1]+0.5*dalpha*(b0[i+3,j+1]+dalpha/3.0*(b0[i+4,j+1]+dalpha*0.25*b0[i+5,j+1])))
+    end
   end
-end
 
-sqrtalpha = sqrt(alpha)
+  sqrtalpha = sqrt(alpha)
 
 # Loop over j:
 @inbounds for j=0:jmax

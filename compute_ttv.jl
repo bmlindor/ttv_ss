@@ -11,7 +11,7 @@ export Planet_plane                   # Deprecated, only exported to make the er
 
 include("ttv_succinct.jl")
 
-immutable Planet_plane
+struct Planet_plane
 # Parameters of a planet in a plane-parallel system
   # Mass ratio of the planet to the star:
   mass_ratio :: Float64
@@ -23,7 +23,7 @@ immutable Planet_plane
   omega    :: Float64
 end
 
-type Planet_plane_hk{T<:Number} # Parameters of a planet in a plane-parallel system
+struct Planet_plane_hk{T<:Number} # Parameters of a planet in a plane-parallel system
   # Mass ratio of the planet to the star:
   mass_ratio :: T
   # Initial time of transit:
