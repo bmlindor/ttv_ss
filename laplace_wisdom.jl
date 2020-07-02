@@ -14,7 +14,7 @@ function laplace_wisdom(s::Rational,i::Integer,j::Integer,a::Number)
 # double laplace(double s, int i, int j, double a);  c
 
 ##define LAPLACE_EPS 1.0e-12
-const LAPLACE_EPS = convert(eltype(a),1.0e-12)
+global LAPLACE_EPS = convert(eltype(a),1.0e-12)
 
 #if (i lt 0) then i = -i
 i=abs(i)
