@@ -1,6 +1,6 @@
 module LaplaceCoefficients
 
-VERSION < v"0.4-dev" && using Docile
+# VERSION < v"0.4-dev" && using Docile
 
 export laplace_coefficients_initialize
 export laplace_wisdom

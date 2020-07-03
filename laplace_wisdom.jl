@@ -27,7 +27,7 @@ function laplace_wisdom(s::Rational,i::Integer,j::Integer,a::Number)
     lap_coef_sum = factor4
     q0 = 0
   else
-    q0 = fld(j + 1 - i,2)
+    q0 = fld(j + 1 - i,2) #largest integer less than or equal to x/y
     lap_coef_sum = zero(a)
     factor4 = one(a)
   end

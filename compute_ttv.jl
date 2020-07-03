@@ -34,27 +34,27 @@ struct Planet_plane_hk{T<:Number} # Parameters of a planet in a plane-parallel s
   esinw    :: T
 end
 
-"""
-# Error message to explain to anyone who tries to use the old version
-"""
+# """
+# # Error message to explain to anyone who tries to use the old version
+# """
 function compute_ttv!(jmax::Integer,p1::Planet_plane,p2::Planet_plane,time1::Vector,time2::Vector,ttv1::Vector,ttv2::Vector)
   error("The Planet_plane data structure has been deprecated in favor of Planet_plane_hk")
 end
 
-"""
-# Computes transit-timing variations to linear order in
-# eccentricity for non-resonant, plane-parallel planets.
-# Input:
-#   jmax:  Maximum j over which to sum the TTV calculation for both planets
-#     p1:  Planet type for inner planet
-#     p2:  Planet type for outer planet
-#  time1:  Transit times for inner planet
-#  time2:  Transit times for outer planet
-#
-# Output:
-#   ttv1: TTVs of the inner planet
-#   ttv2: TTVs of the outer planet
-"""
+# """
+# # Computes transit-timing variations to linear order in
+# # eccentricity for non-resonant, plane-parallel planets.
+# # Input:
+# #   jmax:  Maximum j over which to sum the TTV calculation for both planets
+# #     p1:  Planet type for inner planet
+# #     p2:  Planet type for outer planet
+# #  time1:  Transit times for inner planet
+# #  time2:  Transit times for outer planet
+# #
+# # Output:
+# #   ttv1: TTVs of the inner planet
+# #   ttv2: TTVs of the outer planet
+# """
 function compute_ttv!(jmax::Integer,p1::Planet_plane_hk,p2::Planet_plane_hk,time1::Vector,time2::Vector,ttv1::Vector,ttv2::Vector)
 
 # Compute the semi-major axis ratio of the planets:
