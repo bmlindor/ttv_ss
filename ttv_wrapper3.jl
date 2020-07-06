@@ -16,14 +16,14 @@ function ttv_wrapper3(tt,param)
     n1 = ntrans[1]
     t01 = param[3]
     per1 = param[2]
-    ttv1 = collect(linspace(t01,t01+per1*(n1-1),n1))
+    ttv1 = collect(range(t01,stop=t01+per1*(n1-1),length=n1))
     for i=1:n1
      ttv1[i]+= ttv[1,i]
     end
     n2 = ntrans[2]
     t02 = param[8]
     per2 = param[7]
-    ttv2 = collect(linspace(t02,t02+per2*(n2-1),n2))
+    ttv2 = collect(range(t02,stop=t02+per2*(n2-1),length=n2))
     for i=1:n2
       ttv2[i] += ttv[2,i]
     end
