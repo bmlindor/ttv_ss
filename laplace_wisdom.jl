@@ -40,7 +40,7 @@ function laplace_wisdom(s::Rational,i::Integer,j::Integer,a::Number)
   for q=1:q0-1       #/* no contribution for q = 0 */
     factor1 *= s + q
     factor2 *= s + i + q
-    factor3 *= i+q+1
+    factor3 *= i + q + 1
   end
   if q0 > 1
     q=q0
