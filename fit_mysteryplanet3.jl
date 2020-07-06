@@ -66,8 +66,8 @@ function fit_mysteryplanet3()
     n2 = 24
     p1=TTVFaster.Planet_plane_hk(data[1],data[2],data[3],data[4],data[ 5])
     p2=TTVFaster.Planet_plane_hk(data[6],data[7],data[8],data[9],data[10])
-    time1 = collect(p1.trans0 + linspace(0,n1-1,n1) * p1.period)
-    time2 = collect(p2.trans0 + linspace(0,n2-1,n2) * p2.period)
+    time1 = collect(p1.trans0 .+ range(0,stop=n1-1,length=n1) .* p1.period)
+    time2 = collect(p2.trans0 .+ range(0,stop=n2-1,length=n2) .* p2.period)
     # Initialize the computation of the Laplace coefficients:
     ttv1 = zeros(n1)
     ttv2 = zeros(n2)
@@ -105,7 +105,7 @@ function fit_mysteryplanet3()
     #p3in  = 11*365
     #p3out = 13*365
     #p3 = linspace(p3in,p3out,np3)
-    p3 = logspace(log10(p3in),log10(p3out),np3)
+    p3 = 10 .^ range(log10(p3in),stop=log10(p3out),length=np3)
     nphase = 10
     chi_p3 = zeros(np3)
     nparam = 15
@@ -113,7 +113,7 @@ function fit_mysteryplanet3()
     chi_best = 1e100 #global best fit
     pbest = zeros(nparam)
     for j=1:np3
-      phase = p3[j]*linspace(0,1,nphase) #searches over period of jupiter
+      phase = p3[j]*range(0,stop=1,length=nphase) #searches over period of jupiter
       chi_phase = zeros(nphase)
       chi_p3[j] = 1e100
       for i=1:nphase #loops over jupiter phases
