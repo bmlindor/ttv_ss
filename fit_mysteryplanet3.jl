@@ -74,9 +74,10 @@ function fit_mysteryplanet3()
     ttv2 = zeros(n2)
 
     dummy=TTVFaster.compute_ttv!(jmax,p1,p2,time1,time2,ttv1,ttv2) #first call to TTVFaster w/o optim
-    scatter(time1,tt1 .-t1)
+
+    scatter(time1,tt1.-t1)
     plot(time1,ttv1)
-    scatter(time2,tt2 .-t2,color="green")
+    scatter(time2,tt2.-t2,color="green")
     plot(time2,ttv2)
 
         #globals are used by TTVFaster, actual observed data held fixed in optim
@@ -156,10 +157,10 @@ function fit_mysteryplanet3()
     println("Minimum: ",chi_best," Param: ",fit.param)
     println(fit.param)
 
-    scatter(time1,tt1 .-t1)
-    plot(time1,ttmodel[1:n1] .-t1)
-    scatter(time2,tt2 .-t2,color="green")
-    plot(time2,ttmodel[n1+1:n1+n2] .-t2)
+    scatter(time1,tt1.-t1)
+    plot(time1,ttmodel[1:n1].-t1)
+    scatter(time2,tt2.-t2,color="green")
+    plot(time2,ttmodel[n1+1:n1+n2].-t2)
 
     println("Hit return to continue")
     read(STDIN,Char)
