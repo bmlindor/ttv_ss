@@ -66,8 +66,8 @@ function compute_ttv!(jmax::Integer,p1::Planet_plane_hk,p2::Planet_plane_hk,time
   # Number of times:
   global ntime1 = length(time1)
   global ntime2 = length(time2)
-  f1=Array(Float64,jmax+2,5)
-  f2=Array(Float64,jmax+2,5)
+  f1=zeros(jmax+2,5)
+  f2=zeros(jmax+2,5)
   # Compute the coefficients:
   ttv_succinct!(jmax+1,alpha,f1,f2)  # I need to compute coefficients one higher than jmax
   # Compute TTVs for inner planet (equation 33):
