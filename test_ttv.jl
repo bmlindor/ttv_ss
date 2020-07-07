@@ -23,12 +23,12 @@ function test_ttv(jmax::Integer,n1::Integer,n2::Integer,data::Vector; WriteOutpu
   #ttv1=Array(Float64,n1)
   #ttv2=Array(Float64,n2)
   ttv_el_type = eltype(data) == Float64 ? Float64 : Number
-  ttv1=Array(ttv_el_type,n1)
-  ttv2=Array(ttv_el_type,n2)
+  ttv1=zeros(ttv_el_type,n1)
+  ttv2=zeros(ttv_el_type,n2)
   # Define arrays to hold the TTV coefficients and Laplace coefficients:
-  f1=Array(Float64,jmax+2,5)
-  f2=Array(Float64,jmax+2,5)
-  b=Array(Float64,jmax+2,3)
+  f1=zeros(Float64,jmax+2,5)
+  f2=zeros(Float64,jmax+2,5)
+  b=zeros(Float64,jmax+2,3)
   hashsum = 0
   for i in 1:num_evals
      # Call the compute_ttv code which implements equation (33)

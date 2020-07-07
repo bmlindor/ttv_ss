@@ -14,7 +14,7 @@ function ttv_succinct!(jmax::Integer,alpha::Number,f1::Array{Float64,2},f2::Arra
   # See simple_solution.pdf 7/16/2015
 
   
-  b=Array(Float64,jmax+2,3)
+  b=zeros(Float64,jmax+2,3)
   #println("Computing Laplace Coeffcients: ",alpha)
   for i=0:2
     for j=0:jmax

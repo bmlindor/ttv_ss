@@ -11,7 +11,7 @@ function ttv_nplanet(nplanet::Int64,jmax::Int64,ntrans::Vector{Int64},data::Vect
     # Need to create an array to store TTVs with maximum length equal to maximum number
     # of transit times of any planet:
     ntransmax = maximum(ntrans)
-    #ttv = Array(ttv_el_type,nplanet,ntransmax)
+    #ttv = zeros(ttv_el_type,nplanet,ntransmax)
     ttv = zeros(nplanet,ntransmax)
     # Each planet requires 5 elements in data: mass_ratio, period, trans0, ecosw, esinw:
     @assert(length(data)==5*nplanet)
@@ -26,7 +26,7 @@ function ttv_nplanet(nplanet::Int64,jmax::Int64,ntrans::Vector{Int64},data::Vect
     end
     # Set up planets planar-planet types for all of the planets:
     #planet = Array{Planet_plane_hk}(nplanet)
-    planet = Array{Any}(nplanet)
+    #planet = Array{Any}(nplanet)
     # Loop over pairs of planets to compute pairwise TTVs
     # Loop over inner planets:
     #println("Looping over planets in ttv_nplanet:")
@@ -44,8 +44,8 @@ function ttv_nplanet(nplanet::Int64,jmax::Int64,ntrans::Vector{Int64},data::Vect
         n2 = ntrans[jplanet]
         time2 = collect(p2.trans0 .+ range(0,stop=n2-1,length=n2) .* p2.period)
     # Define arrays to hold the TTVs:
-        ttv1=Array(ttv_el_type,n1)
-        ttv2=Array(ttv_el_type,n2)
+        ttv1=zeros(ttv_el_type,n1)
+        ttv2=zeros(ttv_el_type,n2)
     # Call the compute_ttv code which implements equation (33) from Agol & Deck (2016):
     #    println("Calling compute_ttv")
         TTVFaster.compute_ttv!(jmax,p1,p2,time1,time2,ttv1,ttv2)
