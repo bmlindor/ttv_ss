@@ -176,4 +176,4 @@ coeff_venus, ttv_venus = find_ttvs(tt_venus, P_venus)
 writedlm("ttv_earth.txt", zip(tt_earth,ttv_earth))
 writedlm("ttv_venus.txt", zip(tt_venus,ttv_venus))
 
-function fit_mysteryplanet()
+fit_mysteryplanet3()
