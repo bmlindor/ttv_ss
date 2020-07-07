@@ -63,8 +63,8 @@ function fit_mysteryplanet3()
         #sets up data structure to hold planet properties, passed to TTVFaster
     jmax = 5
     data=param
-    n1 = 38
-    n2 = 24
+    n1 = length(tt1)
+    n2 = length(tt2)
     p1=TTVFaster.Planet_plane_hk(data[1],data[2],data[3],data[4],data[ 5])
     p2=TTVFaster.Planet_plane_hk(data[6],data[7],data[8],data[9],data[10])
     time1 = collect(p1.trans0 .+ range(0,stop=n1-1,length=n1) .* p1.period)
