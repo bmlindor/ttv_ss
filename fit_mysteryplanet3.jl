@@ -4,6 +4,7 @@ include("ttv_wrapper_fixp3.jl")
 include("regress.jl")
 include("chisquare3.jl")
 include("chisquare2.jl")
+include("compute_ttv.jl")
 using LsqFit
 using PyPlot
 using Optim
@@ -33,14 +34,14 @@ function fit_mysteryplanet3()
     x = zeros(2,nt1)
     x[1,1:nt1] .= 1.0
     x[2,1:nt1]=range(0,stop=nt1-1,length=nt1)
-    sigtt1 = ones(nt1).*30 ./24 ./3600
+    sigtt1 = ones(nt1).* 30 ./ 24 ./3600
     coeff1 = regress(x,tt1,sigtt1)
     t01 = coeff1[1]; per1 = coeff1[2]
 
     x = zeros(2,nt2)
     x[1,1:nt2].=1.0
     x[2,1:nt2]=range(0,stop=nt2-1,length=nt2)
-    sigtt2 = ones(nt2).*30 ./24 ./3600
+    sigtt2 = ones(nt2).* 30 ./ 24 ./3600
     coeff2 = regress(x,tt2,sigtt2)
     sigtt=[sigtt1;sigtt2]
     t02 = coeff2[1]; per2 = coeff2[2]
@@ -122,7 +123,7 @@ function fit_mysteryplanet3()
         p3_cur = p3[j] #sets jupiter period to global value
         fit = curve_fit(ttv_wrapper_fixp3,tt0,tt,weight,param3) #optimizes fit w/ 3 planet model
         ttmodel=ttv_wrapper_fixp3(tt0,fit.param)
-        chi_phase[i]= sum((tt-ttmodel).^2./sigtt.^2)
+        chi_phase[i]= sum((tt-ttmodel).^2 ./sigtt.^2)
         if chi_phase[i] < chi_best # check that best fit for period is better than global best fit
           chi_best = chi_phase[i]
           pbest = [fit.param[1:11];p3_cur;fit.param[12:14]]
@@ -152,7 +153,7 @@ function fit_mysteryplanet3()
     println("Best-fit parameters: ",pbest)
     fit = curve_fit(ttv_wrapper3,tt0,tt,weight,pbest)
     ttmodel=ttv_wrapper3(tt0,pbest)
-    chi_best= sum((tt-ttmodel).^2./sigtt.^2)
+    chi_best= sum((tt-ttmodel).^2 ./sigtt.^2)
     println("Minimum: ",chi_best," Param: ",fit.param)
     println(fit.param)
 

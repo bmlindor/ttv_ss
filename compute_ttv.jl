@@ -4,7 +4,7 @@
 
 module TTVFaster
 
-VERSION < v"0.4-dev" && using Docile
+# VERSION < v"0.4-dev" && using Docile
 
 export Planet_plane_hk, compute_ttv!
 export Planet_plane                   # Deprecated, only exported to make the error message work
