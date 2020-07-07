@@ -273,5 +273,3 @@ function fit_mysteryplanet3()
     end
     return par_mcmc,chi_mcmc
 end
-
-fit_mysteryplanet3()
