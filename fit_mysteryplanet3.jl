@@ -36,14 +36,14 @@ function fit_mysteryplanet3()
     x[1,1:nt1] .= 1.0
     x[2,1:nt1]=range(0,stop=nt1-1,length=nt1)
     sigtt1 = ones(nt1).* 30 ./ 24 ./3600
-    coeff1,covcoeff1 = regress(x,tt1,sigtt1)
+    coeff1, covcoeff1 = regress(x,tt1,sigtt1)
     t01 = coeff1[1]; per1 = coeff1[2]
 
     x = zeros(2,nt2)
     x[1,1:nt2].=1.0
     x[2,1:nt2]=range(0,stop=nt2-1,length=nt2)
     sigtt2 = ones(nt2).* 30 ./ 24 ./3600
-    coeff2,covcoeff2 = regress(x,tt2,sigtt2)
+    coeff2, covcoeff2 = regress(x,tt2,sigtt2)
     sigtt=[sigtt1;sigtt2]
     t02 = coeff2[1]; per2 = coeff2[2]
     t1  = collect(t01 .+ per1 .* range(0,stop=nt1-1,length=nt1)) #best fit linear transit times w/o ttvs
@@ -273,3 +273,5 @@ function fit_mysteryplanet3()
     end
     return par_mcmc,chi_mcmc
 end
+
+fit_mysteryplanet3()
