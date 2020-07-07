@@ -8,7 +8,7 @@ include("ttv_nplanet.jl")
 function ttv_wrapper2(tt,param)
 # These lines need modification for different choices of parameters:
     nplanet = 2
-    ntrans = [38,24]
+    ntrans = [n1,n2]
     jmax = 5
     # Call ttv_nplanet:
     ttv = ttv_nplanet(nplanet,jmax,ntrans,param)
