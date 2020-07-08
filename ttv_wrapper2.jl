@@ -14,14 +14,14 @@ function ttv_wrapper2(tt,param)
     ttv = ttv_nplanet(nplanet,jmax,ntrans,param)
     # We measure transit times, not TTVs, so add
     # back in the linear ephemeris:
-    n1 = ntrans[1]
+    # n1 = ntrans[1]
     t01 = param[3]
     per1 = param[2]
     ttv1 = collect(range(t01,stop=t01+per1*(n1-1),length=n1))
     for i=1:n1
      ttv1[i]+= ttv[1,i]
     end
-    n2 = ntrans[2]
+    # n2 = ntrans[2]
     t02 = param[8]
     per2 = param[7]
     ttv2 = collect(range(t02,stop=t02+per2*(n2-1),length=n2))

@@ -7,6 +7,7 @@ if !@isdefined(CGS)
   using Main.CGS
 end
 include("regress.jl")
+include("fit_mysteryplanet3.jl")
 
 # Initial JD times for days in 100 years
 nyear = 100
@@ -173,7 +174,25 @@ end
 coeff_earth, ttv_earth = find_ttvs(tt_earth, P_earth)
 coeff_venus, ttv_venus = find_ttvs(tt_venus, P_venus)
 
-writedlm("ttv_earth.txt", zip(tt_earth,ttv_earth))
-writedlm("ttv_venus.txt", zip(tt_venus,ttv_venus))
+# writedlm("ttv_earth.txt", zip(tt_earth,ttv_earth))
+# writedlm("ttv_venus.txt", zip(tt_venus,ttv_venus))
+# need to include ttv wrappers
+# function chisquare2(param)
+#     chisq = 0.0
+#     tt_model = ttv_wrapper2(tt0,param)
+#     for j=1:length(tt0)
+#       chisq += (tt[j]-tt_model[j])^2/sigtt[j]^2
+#     end
+#     return chisq
+# end
 
-fit_mysteryplanet3()
+# function chisquare3(param)
+#     chisq = 0.0
+#     tt_model = ttv_wrapper3(tt0,param)
+#     for j=1:length(tt0)
+#       chisq += (tt[j]-tt_model[j])^2/sigtt[j]^2
+#     end
+#     return chisq
+# end
+
+
