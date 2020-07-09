@@ -90,13 +90,24 @@ function fit_mysteryplanet3()
     nplanet = 2
     # create initial simplex? need function for this?
     # result = optimize(f0, xcurr, NelderMead(initial_simplex=MySimplexer(),show_trace=true,iterations=1))
-    res = optimize(params -> chisquare(nplanet, ntrans, params, tt, sigtt), init_param) 
-    init_param = res.minimizer
+    println("Initial chi-square: ",chisquare(tt0, nplanet, ntrans, init_param, tt, sigtt))
+#    res = optimize(params -> chisquare(nplanet, ntrans, params, tt, sigtt), init_param) 
+#    init_param = res.minimizer
+    param1 = init_param .+ 100.0
+    while maximum(abs.(param1 .- init_param)) > 1e-5
+      param1 = init_param
+      res = curve_fit((tt0,params) -> ttv_wrapper(tt0, nplanet, ntrans, params), tt0, tt, weight, init_param)
+      init_param = res.param
+      println("init_param: ",init_param)
+      println("Initial chi-square: ",chisquare(tt0, nplanet, ntrans, init_param, tt, sigtt))
+    end
+#    res = optimize(params -> chisquare(tt0, nplanet, ntrans, params, tt, sigtt), init_param) 
+#    init_param = res.minimizer
     #optimizes 2 planet fit
 
     #fit2 = curve_fit(ttv_wrapper2,tt0,tt,weight,param; show_trace=true)
 
-    #println("Finished 2-planet fit: ",param)
+    println("Finished 2-planet fit: ",init_param)
 
     # Now, let's add the 3rd planet:
     ntrans = [nt1, nt2, 2] #requires at least 2 transits for each planet (even if it doesnt transit)
@@ -128,11 +139,11 @@ function fit_mysteryplanet3()
         param3 = [init_param;param_tmp] #concatenate 2 planet model to 3 planet model params
         p3_cur = p3[j] #sets jupiter period to global value
         # fit = curve_fit(ttv_wrapper_fixp3,tt0,tt,weight,param3) #optimizes fit w/ 3 planet model
-        fit = curve_fit(params -> ttv_wrapper(nplanet, ntrans, params, true, p3_cur),tt0,tt,weight,param3)
+        fit = curve_fit((tt0, params) -> ttv_wrapper(tt0, nplanet, ntrans, params, true, p3_cur),tt0,tt,weight,param3)
 
         # ttmodel=ttv_wrapper_fixp3(tt0,fit.param)
         #ttv_wrapper(nplanet, ntrans, params; fixp3 = false, p3_cur = 0.0)
-        ttmodel = ttv_wrapper(nplanet, ntrans, init_param, true, p3_cur)
+        ttmodel = ttv_wrapper(tt0, nplanet, ntrans, init_param, true, p3_cur)
         chi_phase[i]= sum((tt-ttmodel).^2 ./sigtt.^2)
         if chi_phase[i] < chi_best # check that best fit for period is better than global best fit
           chi_best = chi_phase[i]
@@ -162,10 +173,10 @@ function fit_mysteryplanet3()
     #  ttmodel=ttv_wrapper3(tt0,param3)
     println("Best-fit parameters: ",pbest)
     # fit = curve_fit(ttv_wrapper3,tt0,tt,weight,pbest)
-    fit = curve_fit(params -> ttv_wrapper(nplanet, ntrans, params),tt0,tt,weight,pbest)
+    fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet, ntrans, params),tt0,tt,weight,pbest)
     # ttmodel=ttv_wrapper3(tt0,pbest)
     pbest = fit.param
-    ttmodel = ttv_wrapper(nplanet, ntrans, pbest)
+    ttmodel = ttv_wrapper(tt0, nplanet, ntrans, pbest)
     chi_best= sum((tt-ttmodel).^2 ./sigtt.^2)
     println("Minimum: ",chi_best," Param: ",pbest)
 
@@ -199,7 +210,7 @@ function fit_mysteryplanet3()
       while chi_trial > chi_best + 1000
         par_trial = fit.param + errors.*randn(nparam)
         # model = ttv_wrapper3(tt0,par_trial)
-        model = ttv_wrapper(nplanet, ntrans, par_trial)
+        model = ttv_wrapper(tt0, nplanet, ntrans, par_trial)
         chi_trial = sum(((tt-model)./sigtt).^2)
         println("chi_trial: ",chi_trial)
       end
@@ -223,7 +234,7 @@ function fit_mysteryplanet3()
         par_trial=vec(z*par_mcmc[j,i-1,:]+(1.0-z)*par_mcmc[ipartner,i-1,:])
     # Compute model & chi-square:  
         # model_trial =ttv_wrapper3(tt0,par_trial)
-        model_trial = ttv_wrapper(nplanet, ntrans, par_trial)
+        model_trial = ttv_wrapper(tt0, nplanet, ntrans, par_trial)
         chi_trial=sum(((tt-model_trial)./sigtt).^2)
     # Next, determine whether to accept this trial step:
         alp = z^(nparam-1)*exp(-0.5*(chi_trial - chi_mcmc[j,i-1]))
