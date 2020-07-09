@@ -1,5 +1,5 @@
 include("ttv_nplanet.jl")
-function ttv_wrapper(nplanet, ntrans, params, fixp3::Bool = false, p3_cur::Float64 = 0.0)
+function ttv_wrapper(tt0, nplanet, ntrans, params, fixp3::Bool = false, p3_cur::Float64 = 0.0)
     # These lines need modification for different choices of parameters:
     if nplanet == 2
         n1, n2 = ntrans
