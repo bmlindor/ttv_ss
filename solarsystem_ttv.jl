@@ -195,44 +195,83 @@ coeff_venus, ttv_venus = find_ttvs(tt_venus, P_venus)
 #     return chisq
 # end
 
-nplanet = 2
-ntrans = [nt1,nt2]
-
 include("ttv_nplanet.jl")
-function ttv_wrapper(nplanet, ntrans, tt, data)
+function ttv_wrapper(nplanet, ntrans, params; fixp3 = false, p3_cur = 0.0)
     # These lines need modification for different choices of parameters:
-#     nplanet = 2
-#     ntrans = [n1,n2]
-    while nplanet ==2
+    if nplanet == 2
         n1, n2 = ntrans
     end
-    while nplanet ==3
+    if nplanet == 3
         n1, n2, n3 = ntrans
+    end
+    if nplanet == 3 && fixp3
+        param = [params[1:11];p3_cur;params[12:14]]
+    else 
+        param = params
     end
     jmax = 5
     # Call ttv_nplanet:
-    ttv = ttv_nplanet(nplanet, jmax, ntrans, params)
-    # We measure transit times, not TTVs, so add
-    # back in the linear ephemeris:
-    # n1 = ntrans[1]
+    ttv = ttv_nplanet(nplanet, jmax, ntrans, param)
+    # We measure transit times, not TTVs, so add back in the linear ephemeris:
     t01 = params[3]
     per1 = params[2]
-    ttv1 = collect(range(t01,stop = t01+per1*(n1-1),length = n1))
+    ttv1 = collect(range(t01,stop = t01+per1*(n1-1),length = n1)) #this doesnt account for skipped transits
     for i=1:n1
      ttv1[i]+= ttv[1,i]
     end
-    # n2 = ntrans[2]
     t02 = params[8]
     per2 = params[7]
     ttv2 = collect(range(t02,stop = t02+per2*(n2-1),length = n2))
     for i=1:n2
       ttv2[i] += ttv[2,i]
     end
-    # If transit times of additional planets were observable
-    # these would need to be added in.
+    # If transit times of additional planets were observable these would need to be added in.
     #println("param2: ",param)
     return [ttv1;ttv2]
 end
+
+ttv
+
+function chisquare(nplanet, ntrans, params, tt, sigtt; fixp3 = false, p3_cur = 0.0)
+    chisq = 0.0
+    tt_model = ttv_wrapper(nplanet, ntrans, params; fixp3, p3_cur)
+    for j=1:length(tt)
+      chisq += (tt[j]-tt_model[j])^2/sigtt[j]^2
+    end
+    println(nplanet)
+    return chisq
+end
+
+
+data1 = readdlm("ttv_venus.txt")
+tt1 = vec(data1[:,1]); ttv1 = vec(data1[:,2])
+
+data2 = readdlm("ttv_earth.txt")
+tt2 = vec(data2[:,1]); ttv2 = vec(data2[:,2])
+
+nt1 = length(tt1)
+t01 = coeff_venus[1]; per1 = coeff_venus[2]
+
+nt2 = length(tt2)
+t02 = coeff_earth[1]; per2 = coeff_earth[2];
+# best fit linear transit times w/o ttvs
+t1  = collect(t01 .+ per1 .* range(0,stop = nt1-1,length = nt1)) 
+t2  = collect(t02 .+ per2 .* range(0,stop = nt2-1,length = nt2))
+    # Best-fit linear transit times:
+tt0 = [t1;t2] # appends t2 times to t1 times
+weight = ones(nt1+nt2) #assigns each data point stat weight d.t. noise [will add noise later]
+# Actual transit times:
+tt = [tt1;tt2]
+
+# Okay, now let's do a 2-planet fit:
+# initial params defined for both planets
+# mass ratio, period, initial transit time, e*cos(omega), e*sin(omega)
+# param = [3e-6,per1,t01,0.01,0.01,3e-6,per2,t02,0.01,0.01] 
+# println("Initial parameters: ",param)
+
+# println("Need to define ntrans and nplanet!!")
+# nplanet = 2
+# ntrans = [nt1,nt2]
 
 fit_mysteryplanet3()
 
