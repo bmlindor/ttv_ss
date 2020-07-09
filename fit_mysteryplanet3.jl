@@ -140,10 +140,10 @@ function fit_mysteryplanet3()
         p3_cur = p3[j] #sets jupiter period to global value
         # fit = curve_fit(ttv_wrapper_fixp3,tt0,tt,weight,param3) #optimizes fit w/ 3 planet model
         fit = curve_fit((tt0, params) -> ttv_wrapper(tt0, nplanet, ntrans, params, true, p3_cur),tt0,tt,weight,param3)
-
+        param3 = fit.param
         # ttmodel=ttv_wrapper_fixp3(tt0,fit.param)
         #ttv_wrapper(nplanet, ntrans, params; fixp3 = false, p3_cur = 0.0)
-        ttmodel = ttv_wrapper(tt0, nplanet, ntrans, init_param, true, p3_cur)
+        ttmodel = ttv_wrapper(tt0, nplanet, ntrans, param3, true, p3_cur)
         chi_phase[i]= sum((tt-ttmodel).^2 ./sigtt.^2)
         if chi_phase[i] < chi_best # check that best fit for period is better than global best fit
           chi_best = chi_phase[i]
@@ -157,11 +157,11 @@ function fit_mysteryplanet3()
       println("Period: ",p3[j]," chi: ",chi_p3[j]," Param: ",vec(param_p3[1:nparam,j]))
     end
     clf()
-    plot(p3/365.25,exp(-0.5*(chi_p3-minimum(chi_p3)))) #to show that max likelihood peaks at actual period
+    plot(p3/365.25,exp.(-0.5*(chi_p3 .-minimum(chi_p3)))) #to show that max likelihood peaks at actual period
     xlabel("Period of planet 3 [years]")
     ylabel("Likelihood")
     println("Hit return to continue")
-    read(STDIN,Char)
+    read(stdin,Char)
     clf()
 
     #
@@ -186,7 +186,7 @@ function fit_mysteryplanet3()
     plot(time2,ttmodel[nt1+1:nt1+nt2].-t2)
 
     println("Hit return to continue")
-    read(STDIN,Char)
+    read(stdin,Char)
     clf()
 
     #println(fit2.param)
@@ -244,12 +244,12 @@ function fit_mysteryplanet3()
         if alp >= rand()
     # If step is accepted, add it to the chains!
           par_mcmc[j,i,:] = par_trial
-          chi_mcmc[j,i,:] = chi_trial
+          chi_mcmc[j,i] = chi_trial
           accept = accept + 1
         else
     # If step is rejected, then copy last step:
           par_mcmc[j,i,:] = par_mcmc[j,i-1,:]
-          chi_mcmc[j,i,:] = chi_mcmc[j,i-1]
+          chi_mcmc[j,i] = chi_mcmc[j,i-1]
         end
       end
       if mod(i,1000) == 0
@@ -265,7 +265,7 @@ function fit_mysteryplanet3()
       xlabel("MCMC step")
       ylabel(pname[i])
       println("Hit return to continue")
-      read(STDIN,Char)
+      read(stdin,Char)
       clf()
     end
 
@@ -292,7 +292,7 @@ function fit_mysteryplanet3()
         xlabel(pname[i])
         ylabel(pname[j])
         println("Hit return to continue")
-        read(STDIN,Char)
+        read(stdin,Char)
         clf()
       end
     end
