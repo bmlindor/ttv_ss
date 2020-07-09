@@ -194,7 +194,8 @@ function fit_mysteryplanet3()
     # Only initiate models with reasonable chi-square values:
       while chi_trial > chi_best + 1000
         par_trial = fit.param + errors.*randn(nparam)
-        model = ttv_wrapper3(tt0,par_trial)
+        # model = ttv_wrapper3(tt0,par_trial)
+        model = ttv_wrapper(nplanet, ntrans, par_trial)
         chi_trial = sum(((tt-model)./sigtt).^2)
         println("chi_trial: ",chi_trial)
       end
@@ -217,7 +218,8 @@ function fit_mysteryplanet3()
         z=(rand()*(sqrt(ascale)-1.0/sqrt(ascale))+1.0/sqrt(ascale))^2
         par_trial=vec(z*par_mcmc[j,i-1,:]+(1.0-z)*par_mcmc[ipartner,i-1,:])
     # Compute model & chi-square:  
-        model_trial =ttv_wrapper3(tt0,par_trial)
+        # model_trial =ttv_wrapper3(tt0,par_trial)
+        model_trial = ttv_wrapper(nplanet, ntrans, par_trial)
         chi_trial=sum(((tt-model_trial)./sigtt).^2)
     # Next, determine whether to accept this trial step:
         alp = z^(nparam-1)*exp(-0.5*(chi_trial - chi_mcmc[j,i-1]))

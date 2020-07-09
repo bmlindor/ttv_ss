@@ -7,7 +7,6 @@ if !@isdefined(CGS)
   using Main.CGS
 end
 include("regress.jl")
-include("fit_mysteryplanet3.jl")
 
 # Initial JD times for days in 100 years
 nyear = 100
@@ -195,7 +194,6 @@ coeff_venus, ttv_venus = find_ttvs(tt_venus, P_venus)
 #     return chisq
 # end
 
-include("ttv_nplanet.jl")
 function ttv_wrapper(nplanet, ntrans, params; fixp3 = false, p3_cur = 0.0)
     # These lines need modification for different choices of parameters:
     if nplanet == 2
@@ -230,7 +228,6 @@ function ttv_wrapper(nplanet, ntrans, params; fixp3 = false, p3_cur = 0.0)
     return [ttv1;ttv2]
 end
 
-ttv
 
 function chisquare(nplanet, ntrans, params, tt, sigtt; fixp3 = false, p3_cur = 0.0)
     chisq = 0.0
@@ -243,25 +240,25 @@ function chisquare(nplanet, ntrans, params, tt, sigtt; fixp3 = false, p3_cur = 0
 end
 
 
-data1 = readdlm("ttv_venus.txt")
-tt1 = vec(data1[:,1]); ttv1 = vec(data1[:,2])
+# data1 = readdlm("ttv_venus.txt")
+# tt1 = vec(data1[:,1]); ttv1 = vec(data1[:,2])
 
-data2 = readdlm("ttv_earth.txt")
-tt2 = vec(data2[:,1]); ttv2 = vec(data2[:,2])
+# data2 = readdlm("ttv_earth.txt")
+# tt2 = vec(data2[:,1]); ttv2 = vec(data2[:,2])
 
-nt1 = length(tt1)
-t01 = coeff_venus[1]; per1 = coeff_venus[2]
+# nt1 = length(tt1)
+# t01 = coeff_venus[1]; per1 = coeff_venus[2]
 
-nt2 = length(tt2)
-t02 = coeff_earth[1]; per2 = coeff_earth[2];
-# best fit linear transit times w/o ttvs
-t1  = collect(t01 .+ per1 .* range(0,stop = nt1-1,length = nt1)) 
-t2  = collect(t02 .+ per2 .* range(0,stop = nt2-1,length = nt2))
-    # Best-fit linear transit times:
-tt0 = [t1;t2] # appends t2 times to t1 times
-weight = ones(nt1+nt2) #assigns each data point stat weight d.t. noise [will add noise later]
-# Actual transit times:
-tt = [tt1;tt2]
+# nt2 = length(tt2)
+# t02 = coeff_earth[1]; per2 = coeff_earth[2];
+# # best fit linear transit times w/o ttvs
+# t1  = collect(t01 .+ per1 .* range(0,stop = nt1-1,length = nt1)) 
+# t2  = collect(t02 .+ per2 .* range(0,stop = nt2-1,length = nt2))
+#     # Best-fit linear transit times:
+# tt0 = [t1;t2] # appends t2 times to t1 times
+# weight = ones(nt1+nt2) #assigns each data point stat weight d.t. noise [will add noise later]
+# # Actual transit times:
+# tt = [tt1;tt2]
 
 # Okay, now let's do a 2-planet fit:
 # initial params defined for both planets
@@ -272,6 +269,4 @@ tt = [tt1;tt2]
 # println("Need to define ntrans and nplanet!!")
 # nplanet = 2
 # ntrans = [nt1,nt2]
-
-fit_mysteryplanet3()
 
