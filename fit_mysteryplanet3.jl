@@ -5,6 +5,7 @@ include("regress.jl")
 include("chisquare3.jl")
 include("chisquare2.jl")
 include("compute_ttv.jl")
+include("solarsystem_ttv.jl")
 using LsqFit
 using PyPlot
 using Optim
@@ -56,24 +57,20 @@ function fit_mysteryplanet3()
 
     # Okay, now let's do a 2-planet fit:
         #mass ratio, period, initial transit time, e*cos(omega), e*sin(omega)
-    param = [3e-6,per1,t01,0.01,0.01,3e-6,per2,t02,0.01,0.01] #initial params defined for both planets
+    init_param = [3e-6,per1,t01,0.01,0.01,3e-6,per2,t02,0.01,0.01] #initial params defined for both planets
     println("Initial parameters: ",param)
     #model = ttv_wrapper2(tt0,param)
 
         #sets up data structure to hold planet properties, passed to TTVFaster
     jmax = 5
-    data=param
-    n1 = length(tt1);
-    # global n1
-    n2 = length(tt2);
-    # global n2
+    data=init_param
     p1=TTVFaster.Planet_plane_hk(data[1],data[2],data[3],data[4],data[ 5])
     p2=TTVFaster.Planet_plane_hk(data[6],data[7],data[8],data[9],data[10])
-    time1 = collect(p1.trans0 .+ range(0,stop=n1-1,length=n1) .* p1.period)
-    time2 = collect(p2.trans0 .+ range(0,stop=n2-1,length=n2) .* p2.period)
+    time1 = collect(p1.trans0 .+ range(0,stop=nt1-1,length=nt1) .* p1.period)
+    time2 = collect(p2.trans0 .+ range(0,stop=nt2-1,length=nt2) .* p2.period)
     # Initialize the computation of the Laplace coefficients:
-    ttv1 = zeros(n1)
-    ttv2 = zeros(n2)
+    ttv1 = zeros(nt1)
+    ttv2 = zeros(nt2)
 
     dummy=TTVFaster.compute_ttv!(jmax,p1,p2,time1,time2,ttv1,ttv2) #first call to TTVFaster w/o optim
 
@@ -83,20 +80,23 @@ function fit_mysteryplanet3()
     plot(time2,ttv2)
 
         #globals are used by TTVFaster, actual observed data held fixed in optim
-    global tt0
-    global tt
-    global sigtt
     p3_cur = 11.86*365.25 #jupiter period in days, initial value
-    global p3_cur
 
     #res = optimize(chisquare2, param, method = :l_bfgs, iterations = 21)
-    res = optimize(chisquare2, param) #optimizes 2 planet fit
+    # chisquare(nplanet, ntrans, params, fixp3::Bool, tt, sigtt)
+    ntrans = [nt1, nt2]
+    nplanet = 2
+    res = optimize(params -> chisquare(nplanet, ntrans, params, tt, sigtt), init_param) 
+    init_param = res.minimizer
+    #optimizes 2 planet fit
 
     #fit2 = curve_fit(ttv_wrapper2,tt0,tt,weight,param; show_trace=true)
 
     #println("Finished 2-planet fit: ",param)
 
     # Now, let's add the 3rd planet:
+    ntrans = [nt1, nt2, 2] #requires at least 2 transits for each planet (even if it doesnt transit)
+    nplanet = 3
     #p3 = 11.86*365.25
     # Number of periods of the 3rd planet to search over:
     p3in  = 4000
@@ -120,11 +120,15 @@ function fit_mysteryplanet3()
       chi_phase = zeros(nphase)
       chi_p3[j] = 1e100
       for i=1:nphase #loops over jupiter phases
-        param_tmp = [1e-3,phase[i],0.01,0.01] 
-        param3 = [param;param_tmp] #concatenate 2 planet model to 3 planet model params
+        param_tmp = [1e-3,phase[i],0.01,0.01] # jupiter params: mass ratio, phase, ecosw, esinw
+        param3 = [init_param;param_tmp] #concatenate 2 planet model to 3 planet model params
         p3_cur = p3[j] #sets jupiter period to global value
-        fit = curve_fit(ttv_wrapper_fixp3,tt0,tt,weight,param3) #optimizes fit w/ 3 planet model
-        ttmodel=ttv_wrapper_fixp3(tt0,fit.param)
+        # fit = curve_fit(ttv_wrapper_fixp3,tt0,tt,weight,param3) #optimizes fit w/ 3 planet model
+        fit = curve_fit(params -> ttv_wrapper(nplanet, ntrans, params; true, p3_cur),tt0,tt,weight,param3)
+
+        # ttmodel=ttv_wrapper_fixp3(tt0,fit.param)
+        #ttv_wrapper(nplanet, ntrans, params; fixp3 = false, p3_cur = 0.0)
+        ttmodel = ttv_wrapper(nplanet, ntrans, init_param; true, p3_cur)
         chi_phase[i]= sum((tt-ttmodel).^2 ./sigtt.^2)
         if chi_phase[i] < chi_best # check that best fit for period is better than global best fit
           chi_best = chi_phase[i]
@@ -153,16 +157,18 @@ function fit_mysteryplanet3()
     #  res = optimize(chisquare3, param3, method = :l_bfgs)
     #  ttmodel=ttv_wrapper3(tt0,param3)
     println("Best-fit parameters: ",pbest)
-    fit = curve_fit(ttv_wrapper3,tt0,tt,weight,pbest)
-    ttmodel=ttv_wrapper3(tt0,pbest)
+    # fit = curve_fit(ttv_wrapper3,tt0,tt,weight,pbest)
+    fit = curve_fit(params -> ttv_wrapper(nplanet, ntrans, params),tt0,tt,weight,pbest)
+    # ttmodel=ttv_wrapper3(tt0,pbest)
+    pbest = fit.param
+    ttmodel = ttv_wrapper(nplanet, ntrans, pbest)
     chi_best= sum((tt-ttmodel).^2 ./sigtt.^2)
-    println("Minimum: ",chi_best," Param: ",fit.param)
-    println(fit.param)
+    println("Minimum: ",chi_best," Param: ",pbest)
 
     scatter(time1,tt1.-t1)
-    plot(time1,ttmodel[1:n1].-t1)
+    plot(time1,ttmodel[1:nt1].-t1)
     scatter(time2,tt2.-t2,color="green")
-    plot(time2,ttmodel[n1+1:n1+n2].-t2)
+    plot(time2,ttmodel[nt1+1:nt1+nt2].-t2)
 
     println("Hit return to continue")
     read(STDIN,Char)
