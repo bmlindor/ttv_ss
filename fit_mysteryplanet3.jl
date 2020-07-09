@@ -1,11 +1,13 @@
-include("ttv_wrapper2.jl")
-include("ttv_wrapper3.jl")
-include("ttv_wrapper_fixp3.jl")
+# include("ttv_wrapper2.jl")
+# include("ttv_wrapper3.jl")
+# include("ttv_wrapper_fixp3.jl")
 include("regress.jl")
-include("chisquare3.jl")
-include("chisquare2.jl")
+# include("chisquare3.jl")
+# include("chisquare2.jl")
 include("compute_ttv.jl")
-include("solarsystem_ttv.jl")
+include("chisquare.jl")
+include("ttv_wrapper.jl")
+# include("solarsystem_ttv.jl")
 using LsqFit
 using PyPlot
 using Optim
@@ -58,7 +60,7 @@ function fit_mysteryplanet3()
     # Okay, now let's do a 2-planet fit:
         #mass ratio, period, initial transit time, e*cos(omega), e*sin(omega)
     init_param = [3e-6,per1,t01,0.01,0.01,3e-6,per2,t02,0.01,0.01] #initial params defined for both planets
-    println("Initial parameters: ",param)
+    println("Initial parameters: ",init_param)
     #model = ttv_wrapper2(tt0,param)
 
         #sets up data structure to hold planet properties, passed to TTVFaster
@@ -86,6 +88,8 @@ function fit_mysteryplanet3()
     # chisquare(nplanet, ntrans, params, fixp3::Bool, tt, sigtt)
     ntrans = [nt1, nt2]
     nplanet = 2
+    # create initial simplex? need function for this?
+    # result = optimize(f0, xcurr, NelderMead(initial_simplex=MySimplexer(),show_trace=true,iterations=1))
     res = optimize(params -> chisquare(nplanet, ntrans, params, tt, sigtt), init_param) 
     init_param = res.minimizer
     #optimizes 2 planet fit
@@ -124,11 +128,11 @@ function fit_mysteryplanet3()
         param3 = [init_param;param_tmp] #concatenate 2 planet model to 3 planet model params
         p3_cur = p3[j] #sets jupiter period to global value
         # fit = curve_fit(ttv_wrapper_fixp3,tt0,tt,weight,param3) #optimizes fit w/ 3 planet model
-        fit = curve_fit(params -> ttv_wrapper(nplanet, ntrans, params; true, p3_cur),tt0,tt,weight,param3)
+        fit = curve_fit(params -> ttv_wrapper(nplanet, ntrans, params, true, p3_cur),tt0,tt,weight,param3)
 
         # ttmodel=ttv_wrapper_fixp3(tt0,fit.param)
         #ttv_wrapper(nplanet, ntrans, params; fixp3 = false, p3_cur = 0.0)
-        ttmodel = ttv_wrapper(nplanet, ntrans, init_param; true, p3_cur)
+        ttmodel = ttv_wrapper(nplanet, ntrans, init_param, true, p3_cur)
         chi_phase[i]= sum((tt-ttmodel).^2 ./sigtt.^2)
         if chi_phase[i] < chi_best # check that best fit for period is better than global best fit
           chi_best = chi_phase[i]
