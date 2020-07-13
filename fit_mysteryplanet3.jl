@@ -99,7 +99,7 @@ function fit_mysteryplanet3()
       res = curve_fit((tt0,params) -> ttv_wrapper(tt0, nplanet, ntrans, params), tt0, tt, weight, init_param)
       init_param = res.param
       println("init_param: ",init_param)
-      println("Initial chi-square: ",chisquare(tt0, nplanet, ntrans, init_param, tt, sigtt))
+      println("New Initial chi-square: ",chisquare(tt0, nplanet, ntrans, init_param, tt, sigtt))
     end
 #    res = optimize(params -> chisquare(tt0, nplanet, ntrans, params, tt, sigtt), init_param) 
 #    init_param = res.minimizer
