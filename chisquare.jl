@@ -1,3 +1,4 @@
+# Julia v1.1
 include("ttv_wrapper.jl")
 function chisquare(tt0, nplanet, ntrans, params, tt, sigtt, fixp3::Bool = false, p3_cur::Float64 = 0.0)
     chisq = 0.0
