@@ -13,7 +13,7 @@ using PyPlot
 using Optim
 using DelimitedFiles
 
-function fit_mysteryplanet3()
+function fit_mysteryplanet3(p3in::Float64=4000.0, p3out::Float64=4600.0, np3::Int=10, nphase::Int=10)
     #=
      To do:
      1). Carry out a linear fit to the transit times.
@@ -110,61 +110,61 @@ function fit_mysteryplanet3()
     println("Finished 2-planet fit: ",init_param)
     # Now, let's add the 3rd planet:
 
-    function fit_planet3(p3in::Int=4000, p3out::Int=4600, np3::Int=10, nphase::Int=10)
-      ntrans = [nt1, nt2, 2] #requires at least 2 transits for each planet (even if it doesnt transit)
-      nplanet = 3
-      #p3 = 11.86*365.25
-      # Number of periods of the 3rd planet to search over:
-      # p3in  = 4000
-      # p3out = 4600
-      # np3 = 10
-      #p3in  = 500 #larger range in period
-      #p3out = 10000
-      #np3 = 1000
-      #p3in  = 11*365
-      #p3out = 13*365
-      p3 = 10 .^ range(log10(p3in),stop=log10(p3out),length=np3)
-      # nphase = 10
-      chi_p3 = zeros(np3)
-      nparam = 15
-      param_p3 = zeros(nparam,np3)
-      chi_best = 1e100 #global best fit
-      pbest = zeros(nparam)
-      for j=1:np3
-        phase = p3[j]*range(0,stop=1,length=nphase) #searches over period of jupiter
-        chi_phase = zeros(nphase)
-        chi_p3[j] = 1e100
-        for i=1:nphase #loops over jupiter phases
-          param_tmp = [1e-3,phase[i],0.01,0.01] # jupiter params: mass ratio, phase, ecosw, esinw
-          param3 = [init_param;param_tmp] #concatenate 2 planet model to 3 planet model params
-          p3_cur = p3[j] #sets jupiter period to global value
-          # fit = curve_fit(ttv_wrapper_fixp3,tt0,tt,weight,param3) #optimizes fit w/ 3 planet model
-          fit = curve_fit((tt0, params) -> ttv_wrapper(tt0, nplanet, ntrans, params, true, p3_cur),tt0,tt,weight,param3) 
-          param3 = fit.param
-          # ttmodel=ttv_wrapper_fixp3(tt0,fit.param)
-          #ttv_wrapper(nplanet, ntrans, params; fixp3 = false, p3_cur = 0.0)
-          ttmodel = ttv_wrapper(tt0, nplanet, ntrans, param3, true, p3_cur)
-          chi_phase[i]= sum((tt-ttmodel).^2 ./sigtt.^2)
-          if chi_phase[i] < chi_best # check that best fit for period is better than global best fit
-            chi_best = chi_phase[i]
-            pbest = [fit.param[1:11];p3_cur;fit.param[12:14]]
-          end
-          if chi_phase[i] < chi_p3[j] # checks best fit over all phases of jupiter for this particular period
-            chi_p3[j] = chi_phase[i]
-            param_p3[1:nparam,j] =  [fit.param[1:11];p3_cur;fit.param[12:14]]
-          end
+    # function fit_planet3(p3in::Int=4000, p3out::Int=4600, np3::Int=10, nphase::Int=10)
+    ntrans = [nt1, nt2, 2] #requires at least 2 transits for each planet (even if it doesnt transit)
+    nplanet = 3
+    #p3 = 11.86*365.25
+    # Number of periods of the 3rd planet to search over:
+    # p3in  = 4000
+    # p3out = 4600
+    # np3 = 10
+    #p3in  = 500 #larger range in period
+    #p3out = 10000
+    #np3 = 1000
+    #p3in  = 11*365
+    #p3out = 13*365
+    p3 = 10 .^ range(log10(p3in),stop=log10(p3out),length=np3)
+    # nphase = 10
+    chi_p3 = zeros(np3)
+    nparam = 15
+    param_p3 = zeros(nparam,np3)
+    chi_best = 1e100 #global best fit
+    pbest = zeros(nparam)
+    for j=1:np3
+      phase = p3[j]*range(0,stop=1,length=nphase) #searches over period of jupiter
+      chi_phase = zeros(nphase)
+      chi_p3[j] = 1e100
+      for i=1:nphase #loops over jupiter phases
+        param_tmp = [1e-3,phase[i],0.01,0.01] # jupiter params: mass ratio, phase, ecosw, esinw
+        param3 = [init_param;param_tmp] #concatenate 2 planet model to 3 planet model params
+        p3_cur = p3[j] #sets jupiter period to global value
+        # fit = curve_fit(ttv_wrapper_fixp3,tt0,tt,weight,param3) #optimizes fit w/ 3 planet model
+        fit = curve_fit((tt0, params) -> ttv_wrapper(tt0, nplanet, ntrans, params, true, p3_cur),tt0,tt,weight,param3) 
+        param3 = fit.param
+        # ttmodel=ttv_wrapper_fixp3(tt0,fit.param)
+        #ttv_wrapper(nplanet, ntrans, params; fixp3 = false, p3_cur = 0.0)
+        ttmodel = ttv_wrapper(tt0, nplanet, ntrans, param3, true, p3_cur)
+        chi_phase[i]= sum((tt-ttmodel).^2 ./sigtt.^2)
+        if chi_phase[i] < chi_best # check that best fit for period is better than global best fit
+          chi_best = chi_phase[i]
+          pbest = [fit.param[1:11];p3_cur;fit.param[12:14]]
         end
-        println("Period: ",p3[j]," chi: ",chi_p3[j]," Param: ",vec(param_p3[1:nparam,j]))
+        if chi_phase[i] < chi_p3[j] # checks best fit over all phases of jupiter for this particular period
+          chi_p3[j] = chi_phase[i]
+          param_p3[1:nparam,j] =  [fit.param[1:11];p3_cur;fit.param[12:14]]
+        end
       end
-    
-      clf()
-      plot(p3/365.25,exp.(-0.5*(chi_p3 .-minimum(chi_p3)))) #to show that max likelihood peaks at actual period
-      xlabel("Period of planet 3 [years]")
-      ylabel("Likelihood")
-      println("Hit return to continue")
-      read(stdin,Char)
-      clf()
+      println("Period: ",p3[j]," chi: ",chi_p3[j]," Param: ",vec(param_p3[1:nparam,j]))
     end
+  
+    clf()
+    plot(p3/365.25,exp.(-0.5*(chi_p3 .-minimum(chi_p3)))) #to show that max likelihood peaks at actual period
+    xlabel("Period of planet 3 [years]")
+    ylabel("Likelihood")
+    println("Hit return to continue")
+    read(stdin,Char)
+    clf()
+    # end
 
     #
     #println("Calling ttv_wrapper3")
