@@ -124,18 +124,18 @@ function find_transit(body_id, eph, jd1, jd2, n_obs, N)
 end
 
 # Find the transit times for given body_id, planetary period, and number of refinement steps N
-function find_times(body_id, eph, t0, Period, P_err, n_obs, N)
+function find_times(body_id, eph, t0, period, period_err, n_obs, N)
     times = Float64[]
     t_final = t0[end]
     i=1
     # initializes & finds first transit time
-    JD,ff,i_min,pos,JD_tt = find_transit(body_id,eph,t0[i],t0[i]+Period,n_obs,1000)
+    JD,ff,i_min,pos,JD_tt = find_transit(body_id,eph,t0[i],t0[i]+period,n_obs,1000)
     push!(times, JD_tt)
     
     # Find subsequent transit times by shifting time frame by 1 planetary period
     while JD_tt < t_final
-        t_start = JD_tt+Period-P_err
-        t_end = JD_tt+Period+P_err
+        t_start = JD_tt+period-period_err
+        t_end = JD_tt+period+period_err
         JD,ff,i_min,pos,JD_tt = find_transit(body_id,eph,t_start,t_end,n_obs,N)
         push!(times, JD_tt)
     end
