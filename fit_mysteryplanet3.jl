@@ -1,21 +1,23 @@
+# Julia v1.1
 # include("ttv_wrapper2.jl")
 # include("ttv_wrapper3.jl")
 # include("ttv_wrapper_fixp3.jl")
-include("regress.jl")
 # include("chisquare3.jl")
 # include("chisquare2.jl")
+include("regress.jl")
 include("compute_ttv.jl")
 include("chisquare.jl")
 include("ttv_wrapper.jl")
-# include("solarsystem_ttv.jl")
-using LsqFit
-using PyPlot
-using Optim
-using DelimitedFiles
+using PyPlot, CALCEPH, DelimitedFiles
+using Statistics, DataFitting, Random, Optim, LsqFit
+using Unitful, UnitfulAstro, LinearAlgebra
+
 
 function fit_mysteryplanet3(p3in::Float64=4000.0, p3out::Float64=4600.0, np3::Int=10, nphase::Int=10)
     #=
      To do:
+     # generalize to call in any file (with or w/o noise)
+
      1). Carry out a linear fit to the transit times.
      2). Write a wrapper to call ttv_nplanet.jl which then
          computes the chi-square of the fit.
