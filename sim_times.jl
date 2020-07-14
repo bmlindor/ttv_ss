@@ -221,30 +221,21 @@ nt2 = length(tt2)
 
 # Okay, let's do a linear fit to the transit times (first column):
   #linear fit that we already did
-x = zeros(2,nt1)
-x[1,1:nt1] .= 1.0
-x[2,1:nt1]=range(0,stop=nt1-1,length=nt1)
-sigtt1 = ones(nt1).* 30 ./ 24 ./3600
-coeff1, covcoeff1 = regress(x,tt1,sigtt1)
-t01 = coeff1[1]; per1 = coeff1[2]
+nt1 = length(tt1)
+t01 = coeff_venus[1]; per1 = coeff_venus[2]
 
-x = zeros(2,nt2)
-x[1,1:nt2].=1.0
-x[2,1:nt2]=range(0,stop=nt2-1,length=nt2)
-sigtt2 = ones(nt2).* 30 ./ 24 ./3600
-coeff2, covcoeff2 = regress(x,tt2,sigtt2)
-sigtt=[sigtt1;sigtt2]
-t02 = coeff2[1]; per2 = coeff2[2]
-t1  = collect(t01 .+ per1 .* range(0,stop=nt1-1,length=nt1)) #best fit linear transit times w/o ttvs
-t2  = collect(t02 .+ per2 .* range(0,stop=nt2-1,length=nt2))
-# Best-fit linear transit times:
-tt0 = [t1;t2]
-weight = ones(nt1+nt2) #assigns each data point stat weight d.t. noise
+nt2 = length(tt2)
+t02 = coeff_earth[1]; per2 = coeff_earth[2];
+# best fit linear transit times w/o ttvs
+t1  = collect(t01 .+ per1 .* range(0,stop = nt1-1,length = nt1)) 
+t2  = collect(t02 .+ per2 .* range(0,stop = nt2-1,length = nt2))
+    # Best-fit linear transit times:
+tt0 = [t1;t2] # appends t2 times to t1 times
 # Actual transit times:
-tt=[tt1;tt2]
+tt = [tt1;tt2]
 
-tt1 = tt1 .* 24*60 #days --> minutes
-tt2 = tt2 .* 24*60
+# tt1 = tt1 .* 24*60 #days --> minutes
+# tt2 = tt2 .* 24*60
 dom1 = Domain(tt1)
 dom2 = Domain(tt2)
 rng = MersenneTwister(0)
@@ -255,7 +246,10 @@ noise2 = randn(rng, nt2) * nvar2/2
 tt1_noised = noise1 .+ tt1
 tt2_noised = noise2 .+ tt2
 
-println(tt2_noised)
+weight = ones(nt1+nt2) #assigns each data point stat weight d.t. noise [will add noise later]
+println(tt)
+println(tt1)
+println(noise1)
 # subplot(211) 
 # suptitle("Transit Timing Variations") # Supe title, title for all subplots combine
 # plot(V_tt, V_tv, color = "k")
@@ -276,19 +270,7 @@ println(tt2_noised)
 # data2 = readdlm("ttv_earth.txt")
 # tt2 = vec(data2[:,1]); ttv2 = vec(data2[:,2])
 
-# nt1 = length(tt1)
-# t01 = coeff_venus[1]; per1 = coeff_venus[2]
 
-# nt2 = length(tt2)
-# t02 = coeff_earth[1]; per2 = coeff_earth[2];
-# # best fit linear transit times w/o ttvs
-# t1  = collect(t01 .+ per1 .* range(0,stop = nt1-1,length = nt1)) 
-# t2  = collect(t02 .+ per2 .* range(0,stop = nt2-1,length = nt2))
-#     # Best-fit linear transit times:
-# tt0 = [t1;t2] # appends t2 times to t1 times
-# weight = ones(nt1+nt2) #assigns each data point stat weight d.t. noise [will add noise later]
-# # Actual transit times:
-# tt = [tt1;tt2]
 
 # Okay, now let's do a 2-planet fit:
 # initial params defined for both planets
