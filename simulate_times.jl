@@ -155,13 +155,13 @@ ntvenus = length(tt_venus)
 # Find ttvs via linear regression of transit time data
 # accounts for missing transits (noncontinuous) 
 # by rounding [difference in consecutive transit times/Period]
-function find_ttvs(tt, Period; sigma_x = ones(length(tt)))
+function find_ttvs(tt, period; sigma_x = ones(length(tt)))
     nt = length(tt)
     x = zeros(2,nt)
     x[1,1:nt] .= 1.0
     x[2,1] = 0.0 # for fitting time of first transit
     for i=2:nt
-        x[2,i] = x[2,i-1] + round((tt[i]-tt[i-1])/Period) 
+        x[2,i] = x[2,i-1] + round((tt[i]-tt[i-1])/period) 
     end
         
     coeff, cov = regress(x, tt, sigma_x)
@@ -173,8 +173,8 @@ end
 coeff_earth, ttv_earth = find_ttvs(tt_earth, P_earth)
 coeff_venus, ttv_venus = find_ttvs(tt_venus, P_venus)
 
-# writedlm("ttv_earth.txt", zip(tt_earth,ttv_earth))
-# writedlm("ttv_venus.txt", zip(tt_venus,ttv_venus))
+writedlm("ttv_earth.txt", zip(tt_earth,ttv_earth))
+writedlm("ttv_venus.txt", zip(tt_venus,ttv_venus))
 # need to include ttv wrappers
 # function chisquare2(param)
 #     chisq = 0.0
