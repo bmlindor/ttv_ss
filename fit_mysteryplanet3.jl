@@ -74,7 +74,7 @@ function fit_mysteryplanet3(p3in::Float64=4000.0, p3out::Float64=4600.0, np3::In
     ttv1 = zeros(nt1)
     ttv2 = zeros(nt2)
 
-    # dummy=TTVFaster.compute_ttv!(jmax,p1,p2,time1,time2,ttv1,ttv2) #first call to TTVFaster w/o optim
+    dummy=TTVFaster.compute_ttv!(jmax,p1,p2,time1,time2,ttv1,ttv2) #first call to TTVFaster w/o optim
 
     scatter(time1,tt1.-t1)
     plot(time1,ttv1)
