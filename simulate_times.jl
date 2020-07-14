@@ -194,83 +194,51 @@ coeff_venus, ttv_venus = find_ttvs(tt_venus, P_venus)
 #     return chisq
 # end
 
-function ttv_wrapper(nplanet, ntrans, params, fixp3::Bool = false, p3_cur::Float64 = 0.0)
-    # These lines need modification for different choices of parameters:
-    if nplanet == 2
-        n1, n2 = ntrans
-    end
-    if nplanet == 3
-        n1, n2, n3 = ntrans
-    end
-    if nplanet == 3 && fixp3
-        param = [params[1:11];p3_cur;params[12:14]]
-    else 
-        param = params
-    end
-    jmax = 5
-    # Call ttv_nplanet:
-    ttv = ttv_nplanet(nplanet, jmax, ntrans, param)
-    # We measure transit times, not TTVs, so add back in the linear ephemeris:
-    t01 = params[3]
-    per1 = params[2]
-    ttv1 = collect(range(t01,stop = t01+per1*(n1-1),length = n1)) #this doesnt account for skipped transits
-    for i=1:n1
-     ttv1[i]+= ttv[1,i]
-    end
-    t02 = params[8]
-    per2 = params[7]
-    ttv2 = collect(range(t02,stop = t02+per2*(n2-1),length = n2))
-    for i=1:n2
-      ttv2[i] += ttv[2,i]
-    end
-    # If transit times of additional planets were observable these would need to be added in.
-    #println("param2: ",param)
-    return [ttv1;ttv2]
+function plot_ecliptic()
+    title("Orbits Along Ecliptic")
+    plot(xsun,ysun,label="Sun")
+    plot(vec(pva_venus[2,1:np0]),vec(pva_venus[3,1:np0]),label="Venus")
+    plot(vec(pva_earth[2,1:np0]),vec(pva_earth[3,1:np0]),label="Earth")
+    xlabel("[AU]")
+    ylabel("[AU]")
+    legend()
 end
 
+# function plot_ttvs()
+# end
 
-function chisquare(nplanet, ntrans, params, tt, sigtt, fixp3::Bool = false, p3_cur::Float64 = 0.0)
-    chisq = 0.0
-    println(params)
-    tt_model = ttv_wrapper(nplanet, ntrans, params, fixp3, p3_cur)
-    for j=1:length(tt)
-      chisq += (tt[j]-tt_model[j])^2/sigtt[j]^2
-    end
-    println(nplanet)
-    return chisq
-end
 
 # Okay, so now add noise to the TTVs of both bodies:
 
-E_ttv = readdlm("agol_ttv_earth.txt") #Earth
-V_ttv = readdlm("agol_ttv_venus.txt") #Venus
-#Transit Times
-E_tt = E_ttv[:,1] .* 24*60; V_tt = V_ttv[:,1].* 24*60; #days --> minutes
-#Transit Timing Variations
-E_tv = E_ttv[:,2] .* 24 * 60 ; V_tv = V_ttv[:,2] .*24 * 60 ;#days --> minutes
-E_tt
+# E_ttv = readdlm("agol_ttv_earth.txt") #Earth
+# V_ttv = readdlm("agol_ttv_venus.txt") #Venus
+# #Transit Times
+# E_tt = E_ttv[:,1] .* 24*60; V_tt = V_ttv[:,1].* 24*60; #days --> minutes
+# #Transit Timing Variations
+# E_tv = E_ttv[:,2] .* 24 * 60 ; V_tv = V_ttv[:,2] .*24 * 60 ;#days --> minutes
+# E_tt
 
-dom1 = Domain(tt1) ; dom2 = Domain(V_tt)
-rng = MersenneTwister(0)
-E_nvar = Statistics.std(E_tv) ; V_nvar = Statistics.std(V_tv)
-E_noise = randn(rng, length(E_tv)) * E_nvar/2 ; V_noise = randn(rng, length(V_tv)) * V_nvar/2
-E_tv_noised = E_noise + E_tv ; V_tv_noised = V_noise + V_tv
-data1 = Measures(E_tv_noised, 1.0) ; data2 = Measures(V_tv_noised, 1.0)
+# dom1 = Domain(tt1) ; dom2 = Domain(V_tt)
+# rng = MersenneTwister(0)
+# E_nvar = Statistics.std(E_tv) ; V_nvar = Statistics.std(V_tv)
+# E_noise = randn(rng, length(E_tv)) * E_nvar/2 ; V_noise = randn(rng, length(V_tv)) * V_nvar/2
+# E_tv_noised = E_noise + E_tv ; V_tv_noised = V_noise + V_tv
+# data1 = Measures(E_tv_noised, 1.0) ; data2 = Measures(V_tv_noised, 1.0)
 
-subplot(211) 
-suptitle("Transit Timing Variations") # Supe title, title for all subplots combine
-plot(V_tt, V_tv, color = "k")
-plot(V_tt, V_tv_noised, label = "+noise")
-ylabel("Venus [min]"); legend()
-subplot(212)
-plot(E_tt, E_tv, color = "k")
-plot(E_tt, E_tv_noised, label = "+noise")
-ylabel("Earth [min]"); legend()
-xlabel("transit times")
-#ylabel("timing variations [minutes]") #legend();
-plot(E_tt, E_tv, label = "Earth", color = "k")
-errorbar(E_tt,E_tv,yerr = E_nvar, label ="Std", fmt = ".", alpha = 0.75)
-legend();xlabel("transit times");ylabel("timing variations [minutes]")
+# subplot(211) 
+# suptitle("Transit Timing Variations") # Supe title, title for all subplots combine
+# plot(V_tt, V_tv, color = "k")
+# plot(V_tt, V_tv_noised, label = "+noise")
+# ylabel("Venus [min]"); legend()
+# subplot(212)
+# plot(E_tt, E_tv, color = "k")
+# plot(E_tt, E_tv_noised, label = "+noise")
+# ylabel("Earth [min]"); legend()
+# xlabel("transit times")
+# #ylabel("timing variations [minutes]") #legend();
+# plot(E_tt, E_tv, label = "Earth", color = "k")
+# errorbar(E_tt,E_tv,yerr = E_nvar, label ="Std", fmt = ".", alpha = 0.75)
+# legend();xlabel("transit times");ylabel("timing variations [minutes]")
 # data1 = readdlm("ttv_venus.txt")
 # tt1 = vec(data1[:,1]); ttv1 = vec(data1[:,2])
 
