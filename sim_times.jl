@@ -48,6 +48,17 @@ n_obs = cross(L_earth,L_venus)
 n_obs /= norm(n_obs) #from one direction when both transit
 x_obs, y_obs, z_obs = n_obs[1], n_obs[2], n_obs[3]
 
+function plot_ecliptic()
+    title("Orbits Along Ecliptic")
+    plot(xsun,ysun,label="Sun")
+    plot(vec(pva_venus[2,1:np0]),vec(pva_venus[3,1:np0]),label="Venus")
+    plot(vec(pva_earth[2,1:np0]),vec(pva_earth[3,1:np0]),label="Earth")
+    xlabel("[AU]")
+    ylabel("[AU]")
+    legend()
+end
+
+
 # Finds the transit by calculating the position, velocity, and acceleration for a body,
     # Finds local minimum of f(t) by solving for time when f(t) = x_bar dot v_bar = 0
     # Returns transit time in JD
@@ -194,15 +205,6 @@ writedlm("ttv_venus.txt", zip(tt_venus,ttv_venus))
 #     return chisq
 # end
 
-function plot_ecliptic()
-    title("Orbits Along Ecliptic")
-    plot(xsun,ysun,label="Sun")
-    plot(vec(pva_venus[2,1:np0]),vec(pva_venus[3,1:np0]),label="Venus")
-    plot(vec(pva_earth[2,1:np0]),vec(pva_earth[3,1:np0]),label="Earth")
-    xlabel("[AU]")
-    ylabel("[AU]")
-    legend()
-end
 
 # function plot_ttvs()
 # end
@@ -210,34 +212,63 @@ end
 
 # Okay, so now add noise to the TTVs of both bodies:
 
-# E_ttv = readdlm("agol_ttv_earth.txt") #Earth
-# V_ttv = readdlm("agol_ttv_venus.txt") #Venus
-# #Transit Times
-# E_tt = E_ttv[:,1] .* 24*60; V_tt = V_ttv[:,1].* 24*60; #days --> minutes
-# #Transit Timing Variations
-# E_tv = E_ttv[:,2] .* 24 * 60 ; V_tv = V_ttv[:,2] .*24 * 60 ;#days --> minutes
-# E_tt
+data1 = readdlm("ttv_venus.txt")
+tt1 = vec(data1[:,1])
+nt1 = length(tt1)
+data2 = readdlm("ttv_earth.txt")
+tt2 = vec(data2[:,1])
+nt2 = length(tt2)
 
-# dom1 = Domain(tt1) ; dom2 = Domain(V_tt)
-# rng = MersenneTwister(0)
-# E_nvar = Statistics.std(E_tv) ; V_nvar = Statistics.std(V_tv)
-# E_noise = randn(rng, length(E_tv)) * E_nvar/2 ; V_noise = randn(rng, length(V_tv)) * V_nvar/2
-# E_tv_noised = E_noise + E_tv ; V_tv_noised = V_noise + V_tv
-# data1 = Measures(E_tv_noised, 1.0) ; data2 = Measures(V_tv_noised, 1.0)
+# Okay, let's do a linear fit to the transit times (first column):
+  #linear fit that we already did
+x = zeros(2,nt1)
+x[1,1:nt1] .= 1.0
+x[2,1:nt1]=range(0,stop=nt1-1,length=nt1)
+sigtt1 = ones(nt1).* 30 ./ 24 ./3600
+coeff1, covcoeff1 = regress(x,tt1,sigtt1)
+t01 = coeff1[1]; per1 = coeff1[2]
 
+x = zeros(2,nt2)
+x[1,1:nt2].=1.0
+x[2,1:nt2]=range(0,stop=nt2-1,length=nt2)
+sigtt2 = ones(nt2).* 30 ./ 24 ./3600
+coeff2, covcoeff2 = regress(x,tt2,sigtt2)
+sigtt=[sigtt1;sigtt2]
+t02 = coeff2[1]; per2 = coeff2[2]
+t1  = collect(t01 .+ per1 .* range(0,stop=nt1-1,length=nt1)) #best fit linear transit times w/o ttvs
+t2  = collect(t02 .+ per2 .* range(0,stop=nt2-1,length=nt2))
+# Best-fit linear transit times:
+tt0 = [t1;t2]
+weight = ones(nt1+nt2) #assigns each data point stat weight d.t. noise
+# Actual transit times:
+tt=[tt1;tt2]
+
+tt1 = tt1 .* 24*60 #days --> minutes
+tt2 = tt2 .* 24*60
+dom1 = Domain(tt1)
+dom2 = Domain(tt2)
+rng = MersenneTwister(0)
+nvar1 = Statistics.std(tt1)
+nvar2 = Statistics.std(tt2) 
+noise1 = randn(rng, nt1) * nvar1/2
+noise2 = randn(rng, nt2) * nvar2/2
+tt1_noised = noise1 .+ tt1
+tt2_noised = noise2 .+ tt2
+
+println(tt2_noised)
 # subplot(211) 
 # suptitle("Transit Timing Variations") # Supe title, title for all subplots combine
 # plot(V_tt, V_tv, color = "k")
 # plot(V_tt, V_tv_noised, label = "+noise")
 # ylabel("Venus [min]"); legend()
 # subplot(212)
-# plot(E_tt, E_tv, color = "k")
-# plot(E_tt, E_tv_noised, label = "+noise")
+# plot(tt2, E_tv, color = "k")
+# plot(tt2, E_tv_noised, label = "+noise")
 # ylabel("Earth [min]"); legend()
 # xlabel("transit times")
 # #ylabel("timing variations [minutes]") #legend();
-# plot(E_tt, E_tv, label = "Earth", color = "k")
-# errorbar(E_tt,E_tv,yerr = E_nvar, label ="Std", fmt = ".", alpha = 0.75)
+# plot(tt2, E_tv, label = "Earth", color = "k")
+# errorbar(tt2,E_tv,yerr = E_nvar, label ="Std", fmt = ".", alpha = 0.75)
 # legend();xlabel("transit times");ylabel("timing variations [minutes]")
 # data1 = readdlm("ttv_venus.txt")
 # tt1 = vec(data1[:,1]); ttv1 = vec(data1[:,2])
