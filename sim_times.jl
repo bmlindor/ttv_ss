@@ -143,15 +143,24 @@ function sim_times(nyear::Int64=10, noise::Bool=false)
     P_earth = 365
     P_err = 2
     tt1 = find_times(2, eph, t0, P_venus, P_err, n_obs, 10)
+    nt1 = length(tt1)
     tt2 = find_times(3, eph, t0, P_earth, P_err, n_obs, 10)
+    nt2 = length(tt2)
     # Actual transit times:
     tt = [tt1;tt2]
+
+    # Add noise to transit times
+    function add_noise(tt)
+        rng = MersenneTwister(1234)
+        noise = randn(rng, Float64, length(tt))
+        return noise
+    end
 
     # Find ttvs via linear regression of transit time data
     # accounts for missing transits (noncontinuous) 
     # by rounding [difference in consecutive transit times/Period]
     # function find_ttvs(tt, period; sigma_x = ones(length(tt)))
-    function find_ttvs(tt, noise::Bool, period)
+    function find_ttvs(tt, period, noise::Bool)
         nt = length(tt)
         x = zeros(2,nt)
         x[1,1:nt] .= 1.0
@@ -161,9 +170,7 @@ function sim_times(nyear::Int64=10, noise::Bool=false)
         end
         # coeff, cov = regress(x, tt, sigma_x)
         if noise
-            rng = MersenneTwister(1234)
-            noise = randn(rng, Float64, nt)
-            sigtt = noise ./
+            sigtt = add_noise(tt)
         end
         else
             sigtt = ones(nt)
@@ -174,15 +181,13 @@ function sim_times(nyear::Int64=10, noise::Bool=false)
         return coeff, ttv
     end
     sigma_x = ones(length(tt))
-    coeff_venus, ttv1 = find_ttvs(tt1, sigma_x, P_venus)
-    coeff_earth, ttv2 = find_ttvs(tt2, sigma_x, P_earth)
+    coeff_venus, ttv1 = find_ttvs(tt1, P_venus)
+    coeff_earth, ttv2 = find_ttvs(tt2, P_earth)
     # coeff_venus, ttv1 = find_ttvs(tt1, sigtt1, P_venus)
     # coeff_earth, ttv2 = find_ttvs(tt2, sigtt2, P_earth)
     t01 = coeff_venus[1]; per1 = coeff_venus[2]
     t02 = coeff_earth[1]; per2 = coeff_earth[2]
 
-    nt1 = length(tt1)
-    nt2 = length(tt2)
     # best fit linear transit times w/o ttvs
     t1  = collect(t01 .+ per1 .* range(0,stop = nt1-1,length = nt1)) 
     t2  = collect(t02 .+ per2 .* range(0,stop = nt2-1,length = nt2))
@@ -193,13 +198,6 @@ function sim_times(nyear::Int64=10, noise::Bool=false)
     # plot(time1,ttv1)
     # scatter(time2,tt2.-t2,color="green")
     # plot(time2,ttv2)
-
-    # Add noise to transit times
-    function add_noise(tt)
-        rng = MersenneTwister(1234)
-        noise = randn(rng, Float64, length(tt))
-        return noise
-    end
 
     println(tt1, ttv1, noise1)
     # println(tt_earth, ttv_earth)
