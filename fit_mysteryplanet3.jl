@@ -17,6 +17,7 @@ function fit_mysteryplanet3(p3in::Float64=4000.0, p3out::Float64=4600.0, np3::In
     #=
      To do:
      # generalize to call in any file (with or w/o noise)
+     # change xs to function that accounts for discontinuous data
 
      1). Carry out a linear fit to the transit times.
      2). Write a wrapper to call ttv_nplanet.jl which then
@@ -39,8 +40,8 @@ function fit_mysteryplanet3(p3in::Float64=4000.0, p3out::Float64=4600.0, np3::In
       #linear fit that we already did
     x = zeros(2,nt1)
     x[1,1:nt1] .= 1.0
-    x[2,1:nt1]=range(0,stop=nt1-1,length=nt1)
-    sigtt1 = ones(nt1).* 30 ./ 24 ./3600
+    x[2,1:nt1]=range(0,stop=nt1-1,length=nt1) 
+    sigtt1 = ones(nt1).* 30 ./ 24 ./3600 # what units are these? our times are in days
     coeff1, covcoeff1 = regress(x,tt1,sigtt1)
     t01 = coeff1[1]; per1 = coeff1[2]
 
