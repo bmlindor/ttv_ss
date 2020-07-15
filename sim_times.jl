@@ -8,13 +8,13 @@ if !@isdefined(CGS)
 end
 include("regress.jl")
 
-function sim_times(nyear::Int64, add_noise::Bool=false)
+function sim_times(nyear::Int64=10, noise::Bool=false)
     # To do: generalize to be able to add noise
     # Initial JD times for days in 100 years
     # nyear = 100
     np0 = 365*nyear 
     t0 = 2451544.5 - 50*365.25 .+ range(0.5,stop = np0 - 0.5,length = np0)
-    println(t0)
+    # println(t0)
 
     # Make a circle to represent the Sun:
     theta_sun = range(0,stop = 2*pi,length = 100)
@@ -150,7 +150,8 @@ function sim_times(nyear::Int64, add_noise::Bool=false)
     # Find ttvs via linear regression of transit time data
     # accounts for missing transits (noncontinuous) 
     # by rounding [difference in consecutive transit times/Period]
-    function find_ttvs(tt, period; sigma_x = ones(length(tt)))
+    # function find_ttvs(tt, period; sigma_x = ones(length(tt)))
+    function find_ttvs(tt, noise::Bool, period)
         nt = length(tt)
         x = zeros(2,nt)
         x[1,1:nt] .= 1.0
@@ -158,14 +159,25 @@ function sim_times(nyear::Int64, add_noise::Bool=false)
         for i=2:nt
             x[2,i] = x[2,i-1] + round((tt[i]-tt[i-1])/period) 
         end
-        coeff, cov = regress(x, tt, sigma_x)
-        # coeff[1] = best linear fit approx of first tt, coeff[2] = average period
+        # coeff, cov = regress(x, tt, sigma_x)
+        if noise
+            rng = MersenneTwister(1234)
+            noise = randn(rng, Float64, nt)
+            sigtt = noise ./
+        end
+        else
+            sigtt = ones(nt)
+        end
+        coeff, covcoeff = regress(x, tt, sigtt)
+        # coeff[1] is best linear fit approx of first tt, coeff[2] is average period
         ttv = tt .- coeff[1].*vec(x[1,1:nt]) .- coeff[2].*vec(x[2,1:nt])
         return coeff, ttv
     end
-
-    coeff_venus, ttv_venus = find_ttvs(tt1, P_venus)
-    coeff_earth, ttv_earth = find_ttvs(tt2, P_earth)
+    sigma_x = ones(length(tt))
+    coeff_venus, ttv1 = find_ttvs(tt1, sigma_x, P_venus)
+    coeff_earth, ttv2 = find_ttvs(tt2, sigma_x, P_earth)
+    # coeff_venus, ttv1 = find_ttvs(tt1, sigtt1, P_venus)
+    # coeff_earth, ttv2 = find_ttvs(tt2, sigtt2, P_earth)
     t01 = coeff_venus[1]; per1 = coeff_venus[2]
     t02 = coeff_earth[1]; per2 = coeff_earth[2]
 
@@ -176,22 +188,30 @@ function sim_times(nyear::Int64, add_noise::Bool=false)
     t2  = collect(t02 .+ per2 .* range(0,stop = nt2-1,length = nt2))
     # Best-fit linear transit times:
     tt0 = [t1;t2] # appends t2 times to t1 times
-    println(tt1)
-    if add_noise
+
+    # scatter(time1,tt1.-t1)
+    # plot(time1,ttv1)
+    # scatter(time2,tt2.-t2,color="green")
+    # plot(time2,ttv2)
+
+    # Add noise to transit times
+    function add_noise(tt)
         rng = MersenneTwister(1234)
-        noise = randn(rng, Float64, (nt1))
-        println(noise)
-    end 
+        noise = randn(rng, Float64, length(tt))
+        return noise
+    end
+
+    println(tt1, ttv1, noise1)
     # println(tt_earth, ttv_earth)
     # writedlm("ttv_venus.txt", zip(tt1,ttv_venus))
     # writedlm("ttv_earth.txt", zip(tt2,ttv_earth))
-    println(tt1+noise)
-    println(tt1)
+    # println(tt1+noise)
+    # println(tt1)
 
 end
 
 # Okay, so now add noise to the TTVs of both bodies:
-
+# plot(((tt2.-2435000)./per2), ttv2)
 
 # # tt1 = tt1 .* 24*60 #days --> minutes
 # # tt2 = tt2 .* 24*60
