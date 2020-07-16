@@ -8,13 +8,16 @@ if !@isdefined(CGS)
 end
 include("regress.jl")
 
-function sim_times(nyear::Int64, jd1::Float64, jd2::Float64, addnoise::Bool=false, sigma::Float64=0.0)
+function sim_times(jd1::Float64, jd2::Float64, Nsteps::Int64, addnoise::Bool=false, sigma::Float64=0.0, seed::Int=42)
     # To do: generalize to be able to add noise
     # Initial JD times for days in 100 years
     # nyear = 100
-    np0 = 365*nyear 
-    @assert jd1 >= 
-    @assert jd2 <=
+    # np0 = 365*nyear 
+    @assert jd1 >= 2414105.0
+    @assert jd2 <= 2488985.0
+    Random.seed!(seed)
+    dt = (jd2 - jd1)/Nsteps
+    t0 = range(jd1, stop=jd2, length = Nsteps)
     # t0 = 2451544.5 - 50*365.25 .+ range(0.5,stop = np0 - 0.5,length = np0)
     # println(t0)
 
@@ -38,10 +41,13 @@ function sim_times(nyear::Int64, jd1::Float64, jd2::Float64, addnoise::Bool=fals
     options = useNaifId + unitDay + unitAU
 
     # Find observer location required to see transits
-    pva_sun = zeros(9, np0)
-    pva_venus = zeros(9, np0)
-    pva_earth = zeros(9, np0)
-    for i=1:np0
+    # pva_sun = zeros(9, np0)
+
+    pva_sun = zeros(9, Nsteps)
+    pva_venus = zeros(9, Nsteps)
+    pva_earth = zeros(9, Nsteps)
+    # for i=1:np0
+    for i=1:Nsteps
        pva_sun[1:9,i] = compute(eph,t0[i],0.5,10,10,options,2)
        pva_venus[1:9,i] = compute(eph,t0[i],0.5,2,10,options,2) # useNaifId = 2 for Venus 
        pva_earth[1:9,i] = compute(eph,t0[i],0.5,3,10,options,2) # useNaifId = 3 for Earth-Moon bary
@@ -51,7 +57,6 @@ function sim_times(nyear::Int64, jd1::Float64, jd2::Float64, addnoise::Bool=fals
     n_obs = cross(L_earth,L_venus)
     n_obs /= norm(n_obs) #from one direction when both transit
     x_obs, y_obs, z_obs = n_obs[1], n_obs[2], n_obs[3]
-
 
     # Finds the transit by calculating the position, velocity, and acceleration for a body,
         # Finds local minimum of f(t) by solving for time when f(t) = x_bar dot v_bar = 0
@@ -174,26 +179,38 @@ function sim_times(nyear::Int64, jd1::Float64, jd2::Float64, addnoise::Bool=fals
         end
         # coeff, cov = regress(x, tt, sigma_x)
         if addnoise
-            Random.seed!(42)
-            sigtt = sigma / (24 * 3600)
-            noise = randn(Float64, length(tt)) .* sigtt  #sigma in seconds
-            println("Noise added with σ of ", string(sigma), " seconds.")
+            sigtt = ones(nt) * sigma / (24 * 3600) # sigma in seconds, sigtt in days
+            noise = randn(nt) .* sigtt  
+            # println(noise)
+            # println("Noise added with σ of ", string(sigma), " seconds.")
         else
             sigtt = ones(nt)
-            println("No noise added.")
+            # println("No noise added.")
         end
         coeff, covcoeff = regress(x, tt, sigtt)
         # println(tt, sigtt, std(sigtt))
         # coeff[1] is best linear fit approx of first tt, coeff[2] is average period
-        # ttv = tt .- coeff[1].*vec(x[1,1:nt]) .- coeff[2].*vec(x[2,1:nt])
+        ttv = tt .- coeff[1].*vec(x[1,1:nt]) .- coeff[2].*vec(x[2,1:nt])
         # return coeff, ttv
-        return coeff, sigtt
+        # might want to return sigtt at some point?
+        return coeff, noise, ttv
     end
     sigma_x = ones(length(tt))
     # coeff_venus, ttv1 = find_ttvs(tt1, P_venus,noise::Bool)
-    coeff_venus, sigtt1= find_coeffs(tt1, P_venus, addnoise, sigma);
-    coeff_earth, sigtt2= find_coeffs(tt2, P_earth, addnoise, sigma);
-    return tt1, sigtt1, sigtt1 + tt1
+    coeff_venus, noise1, ttv1 = find_coeffs(tt1, P_venus, addnoise, sigma);
+    coeff_earth, noise2, ttv2 = find_coeffs(tt2, P_earth, addnoise, sigma);
+
+    # noisy_ttvenus = noise1 + tt1
+    # noisy_ttearth = noise2 + tt2
+
+    if addnoise
+        writedlm("noisy_ttvenus.txt", zip(tt1, ttv1, noise1, noise1+tt1))
+        writedlm("noisy_ttearth.txt", zip(tt2, ttv2, noise2, noise2+tt2))
+    else
+        writedlm("tt_venus.txt", zip(tt1, ttv1))
+        writedlm("tt_earth.txt", zip(tt2, ttv2))
+    end
+    return tt1, noise1, noise1+tt1, tt2, noise2, noise2+tt2
 
     # println(tt1+sigtt1)
     # coeff_earth, ttv2 = find_ttvs(tt2, P_earth)
@@ -213,18 +230,10 @@ function sim_times(nyear::Int64, jd1::Float64, jd2::Float64, addnoise::Bool=fals
     # scatter(time2,tt2.-t2,color="green")
     # plot(time2,ttv2)
 
-    # println(tt_earth, ttv_earth)
-    # if addnoise
-    #     writedlm("noisy_ttvenus.txt", zip(tt1, sigtt1, sigtt1+ tt1))
-    # else
-    #     writedlm("tt_venus.txt", zip(tt1))
-    # end
-    # writedlm("ttv_venus.txt", zip(tt1,ttv_venus))
-    # writedlm("ttv_earth.txt", zip(tt2,ttv_earth))
-    # println(tt1+noise)
-    # println(tt1)
-end
 
+end
+    # test = sim_times(10, true, 30.0)
+    # serialize("testfile.txt", test) #for large amount of data
 # Okay, so now add noise to the TTVs of both bodies:
 # plot(((tt2.-2435000)./per2), ttv2)
 
