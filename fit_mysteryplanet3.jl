@@ -161,6 +161,8 @@ function fit_mysteryplanet3(p3in::Float64=4000.0, p3out::Float64=4600.0, np3::In
     end
   
     clf()
+    # Rescale to set minimum chi-square equal to number of degrees of freedom
+    #  = number of transits - number of model parameters (15):
     plot(p3/365.25,exp.(-0.5*(chi_p3 .-minimum(chi_p3)))) #to show that max likelihood peaks at actual period
     xlabel("Period of planet 3 [years]")
     ylabel("Likelihood")
