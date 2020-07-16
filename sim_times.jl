@@ -8,12 +8,14 @@ if !@isdefined(CGS)
 end
 include("regress.jl")
 
-function sim_times(nyear::Int64, addnoise::Bool=false, sigma::Float64=0.0)
+function sim_times(nyear::Int64, jd1::Float64, jd2::Float64, addnoise::Bool=false, sigma::Float64=0.0)
     # To do: generalize to be able to add noise
     # Initial JD times for days in 100 years
     # nyear = 100
     np0 = 365*nyear 
-    t0 = 2451544.5 - 50*365.25 .+ range(0.5,stop = np0 - 0.5,length = np0)
+    @assert jd1 >= 
+    @assert jd2 <=
+    # t0 = 2451544.5 - 50*365.25 .+ range(0.5,stop = np0 - 0.5,length = np0)
     # println(t0)
 
     # Make a circle to represent the Sun:
@@ -175,8 +177,10 @@ function sim_times(nyear::Int64, addnoise::Bool=false, sigma::Float64=0.0)
             Random.seed!(42)
             noise = randn(Float64, length(tt)) .* sigma / (24 * 3600) #sigma in seconds
             sigtt = noise
+            println("Noise added with σ of ", string(sigma), " seconds.")
         else
             sigtt = ones(nt)
+            println("No noise added.")
         end
         coeff, covcoeff = regress(x, tt, sigtt)
         # println(tt, sigtt, std(sigtt))
@@ -187,8 +191,9 @@ function sim_times(nyear::Int64, addnoise::Bool=false, sigma::Float64=0.0)
     end
     sigma_x = ones(length(tt))
     # coeff_venus, ttv1 = find_ttvs(tt1, P_venus,noise::Bool)
-    coeff_venus, sigtt1= find_coeffs(tt1, P_venus, addnoise, sigma)
-    coeff_earth, sigtt2= find_coeffs(tt2, P_earth, addnoise, sigma)
+    coeff_venus, sigtt1= find_coeffs(tt1, P_venus, addnoise, sigma);
+    coeff_earth, sigtt2= find_coeffs(tt2, P_earth, addnoise, sigma);
+    return tt1, sigtt1, sigtt1 + tt1
 
     # println(tt1+sigtt1)
     # coeff_earth, ttv2 = find_ttvs(tt2, P_earth)
@@ -209,6 +214,11 @@ function sim_times(nyear::Int64, addnoise::Bool=false, sigma::Float64=0.0)
     # plot(time2,ttv2)
 
     # println(tt_earth, ttv_earth)
+    # if addnoise
+    #     writedlm("noisy_ttvenus.txt", zip(tt1, sigtt1, sigtt1+ tt1))
+    # else
+    #     writedlm("tt_venus.txt", zip(tt1))
+    # end
     # writedlm("ttv_venus.txt", zip(tt1,ttv_venus))
     # writedlm("ttv_earth.txt", zip(tt2,ttv_earth))
     # println(tt1+noise)
