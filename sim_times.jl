@@ -175,8 +175,8 @@ function sim_times(nyear::Int64, jd1::Float64, jd2::Float64, addnoise::Bool=fals
         # coeff, cov = regress(x, tt, sigma_x)
         if addnoise
             Random.seed!(42)
-            noise = randn(Float64, length(tt)) .* sigma / (24 * 3600) #sigma in seconds
-            sigtt = noise
+            sigtt = sigma / (24 * 3600)
+            noise = randn(Float64, length(tt)) .* sigtt  #sigma in seconds
             println("Noise added with σ of ", string(sigma), " seconds.")
         else
             sigtt = ones(nt)
