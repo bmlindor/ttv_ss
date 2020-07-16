@@ -13,7 +13,7 @@ using Statistics, DataFitting, Random, Optim, LsqFit
 using Unitful, UnitfulAstro, LinearAlgebra
 
 
-function fit_mysteryplanet3(p3in::Float64=4000.0, p3out::Float64=4600.0, np3::Int=10, nphase::Int=10)
+function fit_mysteryplanet3(p3in::Float64=4000.0, p3out::Float64=4600.0, np3::Int=10, nphase::Int=10, addnoise::Bool=false, sigma::Float64=30.0)
     #=
      To do:
      # generalize to call in any file (with or w/o noise)
