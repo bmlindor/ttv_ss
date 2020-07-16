@@ -12,8 +12,8 @@ using PyPlot, CALCEPH, DelimitedFiles
 using Statistics, DataFitting, Random, Optim, LsqFit
 using Unitful, UnitfulAstro, LinearAlgebra
 
-
-function fit_mysteryplanet3(p3in::Float64=4000.0, p3out::Float64=4600.0, np3::Int=10, nphase::Int=10, addnoise::Bool=false, sigma::Float64=30.0)
+function fit_mysteryplanet3(filename1::String, filename2::String, 
+  p3in::Float64=4000.0, p3out::Float64=4600.0, np3::Int=10, nphase::Int=10, addnoise::Bool=false)
     #=
      To do:
      # generalize to call in any file (with or w/o noise)
@@ -28,35 +28,57 @@ function fit_mysteryplanet3(p3in::Float64=4000.0, p3out::Float64=4600.0, np3::In
      5). Write a markov chain to compute the best-fit parameters
          for the 3 planets.
     =#
-
-    data1 = readdlm("ttv_venus.txt")
+    data1 = readdlm(filename1)
+    data2 = readdlm(filename2)
     tt1 = vec(data1[:,1])
     nt1 = length(tt1)
-    data2 = readdlm("ttv_earth.txt")
     tt2 = vec(data2[:,1])
     nt2 = length(tt2)
-
+    if addnoise 
+      sigtt1 = data1[:,3]
+      sigtt2 = data2[:,3]
+    else
+      sigtt1 = ones(nt1).* 30 ./ 24 ./3600
+      sigtt2 = ones(nt2).* 30 ./ 24 ./3600
+    end
     # Okay, let's do a linear fit to the transit times (first column):
-      #linear fit that we already did
-    x = zeros(2,nt1)
-    x[1,1:nt1] .= 1.0
-    x[2,1:nt1]=range(0,stop=nt1-1,length=nt1) 
-    sigtt1 = ones(nt1).* 30 ./ 24 ./3600 # what units are these? our times are in days
-    coeff1, covcoeff1 = regress(x,tt1,sigtt1)
-    t01 = coeff1[1]; per1 = coeff1[2]
+    function find_coeffs(tt, period, sigtt)
+      nt = length(tt)
+      x = zeros(2,nt)
+      x[1,1:nt] .= 1.0
+      x[2,1] = 0.0 
+      for i=2:nt
+        x[2,i] = x[2,i-1] + round((tt[i]-tt[i-1])/period) 
+      end
+      coeff, covcoeff = regress(x, tt, sigtt)
+      # println(tt, sigtt, std(sigtt))
+      return coeff, covcoeff
+    end
+    # x = zeros(2,nt1)
+    # x[1,1:nt1] .= 1.0
+    # x[2,1:nt1]=range(0,stop=nt1-1,length=nt1) 
+    # # sigtt1 = ones(nt1).* 30 ./ 24 ./3600 # days
+    # coeff1, covcoeff1 = regress(x,tt1,noise1)
+    #  x = zeros(2,nt2)
+    # x[1,1:nt2].=1.0
+    # x[2,1:nt2]=range(0,stop=nt2-1,length=nt2)
+    # # sigtt2 = ones(nt2).* 30 ./ 24 ./3600
+    # coeff2, covcoeff2 = regress(x,tt2,noise2)
+    # t01 = coeff1[1]; per1 = coeff1[2]
+    p1est = median(tt1[2:end] - tt1[1:end-1])
+    p2est = median(tt2[2:end] - tt2[1:end-1])
 
-    x = zeros(2,nt2)
-    x[1,1:nt2].=1.0
-    x[2,1:nt2]=range(0,stop=nt2-1,length=nt2)
-    sigtt2 = ones(nt2).* 30 ./ 24 ./3600
-    coeff2, covcoeff2 = regress(x,tt2,sigtt2)
+    coeff1, covcoeff1 = find_coeffs(tt1, p1est, sigtt1)
+    coeff2, covcoeff2 = find_coeffs(tt2, p2est, sigtt2)
+
     sigtt=[sigtt1;sigtt2]
+    t01 = coeff1[1]; per1 = coeff1[2]
     t02 = coeff2[1]; per2 = coeff2[2]
     t1  = collect(t01 .+ per1 .* range(0,stop=nt1-1,length=nt1)) #best fit linear transit times w/o ttvs
     t2  = collect(t02 .+ per2 .* range(0,stop=nt2-1,length=nt2))
     # Best-fit linear transit times:
     tt0 = [t1;t2]
-    weight = ones(nt1+nt2) #assigns each data point stat weight d.t. noise
+    weight = ones(nt1+nt2)./ sigtt.^2 #assigns each data point stat weight d.t. noise = 1/σ^2
     # Actual transit times:
     tt=[tt1;tt2]
 
@@ -198,6 +220,6 @@ function fit_mysteryplanet3(p3in::Float64=4000.0, p3out::Float64=4600.0, np3::In
 
     #println(fit2.param)
     #end
-
-
+    writedlm("p3_fit.txt", zip(chi_best, pbest, chi_p3, param_p3))
+    return chi_best, pbest
 end
