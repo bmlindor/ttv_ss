@@ -188,11 +188,11 @@ function sim_times(jd1::Float64, jd2::Float64, Nsteps::Int64, addnoise::Bool=fal
         ttv = tt .- coeff[1].*vec(x[1,1:nt]) .- coeff[2].*vec(x[2,1:nt])
         # return coeff, ttv
         # might want to return sigtt at some point?
-        return coeff, noise, ttv
+        return coeff, noise, sigtt,ttv
     end
     # coeff_venus, ttv1 = find_ttvs(tt1, P_venus,noise::Bool)
-    coeff_venus, noise1, ttv1 = find_coeffs(tt1, P_venus, addnoise, sigma);
-    coeff_earth, noise2, ttv2 = find_coeffs(tt2, P_earth, addnoise, sigma);
+    coeff_venus, noise1, sigtt1, ttv1 = find_coeffs(tt1, P_venus, addnoise, sigma);
+    coeff_earth, noise2, sigtt2, ttv2 = find_coeffs(tt2, P_earth, addnoise, sigma);
 
     t01 = coeff_venus[1]; per1 = coeff_venus[2]
     t02 = coeff_earth[1]; per2 = coeff_earth[2]
@@ -230,8 +230,8 @@ function sim_times(jd1::Float64, jd2::Float64, Nsteps::Int64, addnoise::Bool=fal
     # end
 
     if addnoise
-        writedlm("noisy_ttvenus.txt", zip(tt1, noise1, noise1+tt1))
-        writedlm("noisy_ttearth.txt", zip(tt2, noise2, noise2+tt2))
+        writedlm("noisy_ttvenus.txt", zip(noise1+tt1, noise1, sigtt1))
+        writedlm("noisy_ttearth.txt", zip(noise2+tt2, noise2, sigtt2))
     else
         writedlm("tt_venus.txt", zip(tt1))
         writedlm("tt_earth.txt", zip(tt2))
