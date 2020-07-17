@@ -11,6 +11,7 @@ include("regress.jl")
 
 function sim_times(jd1::Float64, jd2::Float64, Nsteps::Int64, addnoise::Bool=false, sigma::Float64=0.0, seed::Int=42)
     # To do: output file with arguments in header
+    #       output data frame with header?
 
     # Initial JD times for days in 100 years
     # nyear = 100
@@ -219,25 +220,24 @@ function sim_times(jd1::Float64, jd2::Float64, Nsteps::Int64, addnoise::Bool=fal
         # title(sigma)
         xlabel("JD (years)")
         ylabel("TTVs")
+        # savefig("images/")
     end
-    plot_ttvs(sigma)
+    # plot_ttvs(sigma)
 
     # function write_file(jd1, jd2, sigma, tt)
     #     size = [1.0:1.0:length(tt)+2]
     #     for i 
-
-
     # end
 
-    # if addnoise
-    #     writedlm("noisy_ttvenus.txt", zip(tt1, noise1, noise1+tt1))
-    #     writedlm("noisy_ttearth.txt", zip(tt2, noise2, noise2+tt2))
-    # else
-    #     writedlm("tt_venus.txt", zip(tt1))
-    #     writedlm("tt_earth.txt", zip(tt2))
+    if addnoise
+        writedlm("noisy_ttvenus.txt", zip(tt1, noise1, noise1+tt1))
+        writedlm("noisy_ttearth.txt", zip(tt2, noise2, noise2+tt2))
+    else
+        writedlm("tt_venus.txt", zip(tt1))
+        writedlm("tt_earth.txt", zip(tt2))
 
-    # end
-    # return tt1, noise1, noise1+tt1, tt2, noise2, noise2+tt2
+    end
+    return tt1, noise1, noise1+tt1, tt2, noise2, noise2+tt2
 
     # println(tt1+sigtt1)
 
