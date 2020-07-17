@@ -106,6 +106,8 @@ function fit_mysteryplanet3(filename1::String, filename2::String,
     scatter(time2,tt2.-t2,color="green")
     plot(time2,ttv2)
 
+    #planet number, epoch, tt_noisy, ttv_error
+
         #globals are used by TTVFaster, actual observed data held fixed in optim
     p3_cur = 11.86*365.25 #jupiter period in days, initial value
 
