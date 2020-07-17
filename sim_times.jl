@@ -1,5 +1,6 @@
 # Julia v1.1
-using PyPlot, CALCEPH, DelimitedFiles
+using PyPlot, CALCEPH 
+using FITSIO, DelimitedFiles
 using Statistics, DataFitting, Random
 using Unitful, UnitfulAstro, LinearAlgebra
 if !@isdefined(CGS)
@@ -9,7 +10,8 @@ end
 include("regress.jl")
 
 function sim_times(jd1::Float64, jd2::Float64, Nsteps::Int64, addnoise::Bool=false, sigma::Float64=0.0, seed::Int=42)
-    # To do: generalize to be able to add noise
+    # To do: output file with arguments in header
+
     # Initial JD times for days in 100 years
     # nyear = 100
     # np0 = 365*nyear 
@@ -17,9 +19,9 @@ function sim_times(jd1::Float64, jd2::Float64, Nsteps::Int64, addnoise::Bool=fal
     @assert jd2 <= 2488985.0
     Random.seed!(seed)
     dt = (jd2 - jd1)/Nsteps
-    t0 = range(jd1, stop=jd2, length = Nsteps)
+    t0 = range(jd1, stop=jd2-1, length = Nsteps)
     # t0 = 2451544.5 - 50*365.25 .+ range(0.5,stop = np0 - 0.5,length = np0)
-    # println(t0)
+    # println(t0[1]) #= 2.4332825e6  
 
     # Make a circle to represent the Sun:
     theta_sun = range(0,stop = 2*pi,length = 100)
@@ -156,21 +158,13 @@ function sim_times(jd1::Float64, jd2::Float64, Nsteps::Int64, addnoise::Bool=fal
     # Actual transit times:
     tt = [tt1;tt2]
 
-    # Add noise to transit times
-    # function noise(tt, sigma) # sigma in seconds
-        
-        
-    #     # gauss = tt + noise
-    #     # print(tt, std(noise))
-    #     return noise
-    # end
-
     # Find ttvs via linear regression of transit time data
     # accounts for missing transits (noncontinuous) 
     # by rounding [difference in consecutive transit times/Period]
     # function find_ttvs(tt, period; sigma_x = ones(length(tt)))
     function find_coeffs(tt, period, addnoise, sigma)
         nt = length(tt)
+        noise = zeros(nt)
         x = zeros(2,nt)
         x[1,1:nt] .= 1.0
         x[2,1] = 0.0 # for fitting time of first transit
@@ -178,10 +172,10 @@ function sim_times(jd1::Float64, jd2::Float64, Nsteps::Int64, addnoise::Bool=fal
             x[2,i] = x[2,i-1] + round((tt[i]-tt[i-1])/period) 
         end
         # coeff, cov = regress(x, tt, sigma_x)
+        # Add noise to transit times
         if addnoise
             sigtt = ones(nt) * sigma / (24 * 3600) # sigma in seconds, sigtt in days
             noise = randn(nt) .* sigtt  
-            # println(noise)
             # println("Noise added with σ of ", string(sigma), " seconds.")
         else
             sigtt = ones(nt)
@@ -195,58 +189,59 @@ function sim_times(jd1::Float64, jd2::Float64, Nsteps::Int64, addnoise::Bool=fal
         # might want to return sigtt at some point?
         return coeff, noise, ttv
     end
-    sigma_x = ones(length(tt))
     # coeff_venus, ttv1 = find_ttvs(tt1, P_venus,noise::Bool)
     coeff_venus, noise1, ttv1 = find_coeffs(tt1, P_venus, addnoise, sigma);
     coeff_earth, noise2, ttv2 = find_coeffs(tt2, P_earth, addnoise, sigma);
 
-    # noisy_ttvenus = noise1 + tt1
-    # noisy_ttearth = noise2 + tt2
+    t01 = coeff_venus[1]; per1 = coeff_venus[2]
+    t02 = coeff_earth[1]; per2 = coeff_earth[2]
 
-    if addnoise
-        writedlm("noisy_ttvenus.txt", zip(tt1, ttv1, noise1, noise1+tt1))
-        writedlm("noisy_ttearth.txt", zip(tt2, ttv2, noise2, noise2+tt2))
-    else
-        writedlm("tt_venus.txt", zip(tt1, ttv1))
-        writedlm("tt_earth.txt", zip(tt2, ttv2))
+    # best fit linear transit times w/o ttvs
+    t1  = collect(t01 .+ per1 .* range(0,stop = nt1-1,length = nt1)) 
+    t2  = collect(t02 .+ per2 .* range(0,stop = nt2-1,length = nt2))
+    # Best-fit linear transit times:
+    tt0 = [t1;t2] # appends t2 times to t1 times
+
+    # Plot transit times and TTVs
+    function plot_ttvs(sigma)
+        # subplot(211)
+        # scatter((t1.-t01)./per1,tt1.-t1) #x is tranit number 
+        # plot((t1.- t01)./per1,ttv1) 
+        # errorbar((t1.-t01)./per1,ttv1, noise1)
+        scatter((t1.-t01)./365.25, tt1.-t1) # x is JD in years
+        plot((t1.-t01)./365.25, ttv1)
+        # subplot(212)
+        scatter((t2.-t02)./365.25, tt2.-t2, color="green")
+        plot((t2.-t02)./365.25, ttv2)
+        errorbar((t2.-t02)./365.25,ttv2, noise2)
+        # scatter((t2.-t02)./per2,tt2.-t2,color="green") 
+        # plot((t2.-t02)./per2,ttv2)
+        # title(sigma)
+        xlabel("JD (years)")
+        ylabel("TTVs")
     end
-    return tt1, noise1, noise1+tt1, tt2, noise2, noise2+tt2
+    plot_ttvs(sigma)
+
+    # function write_file(jd1, jd2, sigma, tt)
+    #     size = [1.0:1.0:length(tt)+2]
+    #     for i 
+
+
+    # end
+
+    # if addnoise
+    #     writedlm("noisy_ttvenus.txt", zip(tt1, noise1, noise1+tt1))
+    #     writedlm("noisy_ttearth.txt", zip(tt2, noise2, noise2+tt2))
+    # else
+    #     writedlm("tt_venus.txt", zip(tt1))
+    #     writedlm("tt_earth.txt", zip(tt2))
+
+    # end
+    # return tt1, noise1, noise1+tt1, tt2, noise2, noise2+tt2
 
     # println(tt1+sigtt1)
-    # coeff_earth, ttv2 = find_ttvs(tt2, P_earth)
-    # # coeff_venus, ttv1 = find_ttvs(tt1, sigtt1, P_venus)
-    # # coeff_earth, ttv2 = find_ttvs(tt2, sigtt2, P_earth)
-    # t01 = coeff_venus[1]; per1 = coeff_venus[2]
-    # t02 = coeff_earth[1]; per2 = coeff_earth[2]
-
-    # # best fit linear transit times w/o ttvs
-    # t1  = collect(t01 .+ per1 .* range(0,stop = nt1-1,length = nt1)) 
-    # t2  = collect(t02 .+ per2 .* range(0,stop = nt2-1,length = nt2))
-    # # Best-fit linear transit times:
-    # tt0 = [t1;t2] # appends t2 times to t1 times
-
-    # scatter(time1,tt1.-t1)
-    # plot(time1,ttv1)
-    # scatter(time2,tt2.-t2,color="green")
-    # plot(time2,ttv2)
-
 
 end
     # test = sim_times(10, true, 30.0)
     # serialize("testfile.txt", test) #for large amount of data
-# Okay, so now add noise to the TTVs of both bodies:
-# plot(((tt2.-2435000)./per2), ttv2)
-
-# # tt1 = tt1 .* 24*60 #days --> minutes
-# # tt2 = tt2 .* 24*60
-# dom1 = Domain(tt1)
-# dom2 = Domain(tt2)
-# rng = MersenneTwister(0)
-# nvar1 = Statistics.std(tt1)
-# nvar2 = Statistics.std(tt2) 
-# noise1 = randn(rng, nt1) * nvar1/2
-# noise2 = randn(rng, nt2) * nvar2/2
-# tt1_noised = noise1 .+ tt1
-# tt2_noised = noise2 .+ tt2
-
 
