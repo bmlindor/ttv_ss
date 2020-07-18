@@ -167,8 +167,17 @@ function fit_mysteryplanet3(filename1::String, filename2::String,
         param3 = [init_param;param_tmp] #concatenate 2 planet model to 3 planet model params
         p3_cur = p3[j] #sets jupiter period to global value
         # fit = curve_fit(ttv_wrapper_fixp3,tt0,tt,weight,param3) #optimizes fit w/ 3 planet model
-        fit = curve_fit((tt0, params) -> ttv_wrapper(tt0, nplanet, ntrans, params, true, p3_cur),tt0,tt,weight,param3) 
-        param3 = fit.param
+        # fit = curve_fit((tt0, params) -> ttv_wrapper(tt0, nplanet, ntrans, params, true, p3_cur),tt0,tt,weight,param3) 
+        # param3 = fit.param
+
+        param1 = param3 .+ 100.0
+        while maximum(abs.(param1 .- param3)) > 1e-5
+          param1 = param3
+          res = curve_fit((tt0,params) -> ttv_wrapper(tt0, nplanet, ntrans,params,true,p3_cur),tt0,tt, weight, param3)
+          param3 = res.param
+          println("init_param: ",param3)
+          println("New Initial chi-square: ",chisquare(tt0, nplanet, ntrans, param3, tt, sigtt, true, p3_cur))
+        end
         # ttmodel=ttv_wrapper_fixp3(tt0,fit.param)
         #ttv_wrapper(nplanet, ntrans, params; fixp3 = false, p3_cur = 0.0)
         ttmodel = ttv_wrapper(tt0, nplanet, ntrans, param3, true, p3_cur)
@@ -224,6 +233,7 @@ function fit_mysteryplanet3(filename1::String, filename2::String,
     #println(fit2.param)
     #end
     @save "p3_fir_params.jld2" param_p3
-    writedlm("p3_fit.txt", zip(chi_best, pbest, chi_p3))
+    writedlm("p3_bestfit.txt", zip(chi_best, pbest))
+    writedlm("p3_fit.txt", zip(chi_p3, param_p3))
     return chi_best, pbest
 end
