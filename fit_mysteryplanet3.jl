@@ -11,6 +11,7 @@ include("ttv_wrapper.jl")
 using PyPlot, CALCEPH, DelimitedFiles
 using Statistics, DataFitting, Random, Optim, LsqFit
 using Unitful, UnitfulAstro, LinearAlgebra
+using JLD2
 
 function fit_mysteryplanet3(filename1::String, filename2::String, 
   p3in::Float64=4000.0, p3out::Float64=4600.0, np3::Int=10, nphase::Int=10, addnoise::Bool=false)
@@ -202,7 +203,7 @@ function fit_mysteryplanet3(filename1::String, filename2::String,
     #res = optimize(chisquare3, param3, method = :l_bfgs, iterations = 21)
     #  res = optimize(chisquare3, param3, method = :l_bfgs)
     #  ttmodel=ttv_wrapper3(tt0,param3)
-    println("Best-fit parameters: ",pbest)
+    println("Best-fit parameters: ",pbest) # global best fit
     # fit = curve_fit(ttv_wrapper3,tt0,tt,weight,pbest)
     fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet, ntrans, params),tt0,tt,weight,pbest)
     # ttmodel=ttv_wrapper3(tt0,pbest)
@@ -218,10 +219,11 @@ function fit_mysteryplanet3(filename1::String, filename2::String,
 
     println("Hit return to continue")
     read(stdin,Char)
-    clf()
+    # clf()
 
     #println(fit2.param)
     #end
-    writedlm("p3_fit.txt", zip(chi_best, pbest, chi_p3, param_p3))
+    @save "p3_fir_params.jld2" param_p3
+    writedlm("p3_fit.txt", zip(chi_best, pbest, chi_p3))
     return chi_best, pbest
 end
