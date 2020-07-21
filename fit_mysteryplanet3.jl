@@ -173,8 +173,8 @@ function fit_mysteryplanet3(filename1::String, filename2::String,
         param1 = param3 .+ 100.0
         while maximum(abs.(param1 .- param3)) > 1e-5
           param1 = param3
-          res = curve_fit((tt0,params) -> ttv_wrapper(tt0, nplanet, ntrans,params,true,p3_cur),tt0,tt, weight, param3)
-          param3 = res.param
+          fit = curve_fit((tt0,params) -> ttv_wrapper(tt0, nplanet, ntrans,params,true,p3_cur),tt0,tt, weight, param3)
+          param3 = fit.param
           println("init_param: ",param3)
           println("New Initial chi-square: ",chisquare(tt0, nplanet, ntrans, param3, tt, sigtt, true, p3_cur))
         end
@@ -234,6 +234,6 @@ function fit_mysteryplanet3(filename1::String, filename2::String,
     #end
     @save "p3_fir_params.jld2" param_p3
     writedlm("p3_bestfit.txt", zip(chi_best, pbest))
-    writedlm("p3_fit.txt", zip(chi_p3, param_p3))
+    # writedlm("p3_fit.txt", zip(chi_p3, param_p3))
     return chi_best, pbest
 end
