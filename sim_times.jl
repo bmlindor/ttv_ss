@@ -157,7 +157,6 @@ function sim_times(jd1::Float64, jd2::Float64, Nsteps::Int64, addnoise::Bool=fal
     tt2 = find_times(3, eph, t0, P_earth, P_err, n_obs, 10)
     nt2 = length(tt2)
     # Actual transit times:
-    tt = [tt1;tt2]
 
     # Find ttvs via linear regression of transit time data
     # accounts for missing transits (noncontinuous) 
@@ -202,6 +201,8 @@ function sim_times(jd1::Float64, jd2::Float64, Nsteps::Int64, addnoise::Bool=fal
     t2  = collect(t02 .+ per2 .* range(0,stop = nt2-1,length = nt2))
     # Best-fit linear transit times:
     tt0 = [t1;t2] # appends t2 times to t1 times
+    
+
 
     # Plot transit times and TTVs
     function plot_ttvs(sigma)
@@ -223,6 +224,9 @@ function sim_times(jd1::Float64, jd2::Float64, Nsteps::Int64, addnoise::Bool=fal
         # savefig("images/")
     end
     # plot_ttvs(sigma)
+    body = zeros((nt1+nt2))
+    body[1:nt1] .= 1.0
+    body[nt1+1:nt1+nt2] .= 2.0
 
     # function write_file(jd1, jd2, sigma, tt)
     #     size = [1.0:1.0:length(tt)+2]
@@ -230,11 +234,15 @@ function sim_times(jd1::Float64, jd2::Float64, Nsteps::Int64, addnoise::Bool=fal
     # end
 
     if addnoise
-        writedlm("noisy_ttvenus.txt", zip(noise1+tt1, noise1, sigtt1))
-        writedlm("noisy_ttearth.txt", zip(noise2+tt2, noise2, sigtt2))
+        tt = [tt1+noise1;tt2+noise2]
+        noise = [noise1;noise2]
+        sigtt = [sigtt1;sigtt2]
+        writedlm("INPUTS/tt_data.txt", zip(body, tt0, tt, sigtt))
+        # writedlm("INPUTS/noisy_ttvenus.txt", zip(noise1+tt1, noise1, sigtt1))
+        # writedlm("INPUTS/noisy_ttearth.txt", zip(noise2+tt2, noise2, sigtt2))
     else
-        writedlm("tt_venus.txt", zip(tt1))
-        writedlm("tt_earth.txt", zip(tt2))
+        writedlm("INPUTS/tt_venus.txt", zip(tt1))
+        writedlm("INPUTS/tt_earth.txt", zip(tt2))
 
     end
     return tt1, noise1, noise1+tt1, tt2, noise2, noise2+tt2
