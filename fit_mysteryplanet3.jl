@@ -101,11 +101,13 @@ function fit_mysteryplanet3(filename1::String, filename2::String,
     ttv2 = zeros(nt2)
 
     dummy=TTVFaster.compute_ttv!(jmax,p1,p2,time1,time2,ttv1,ttv2) #first call to TTVFaster w/o optim
-
-    scatter(time1,tt1.-t1)
-    plot(time1,ttv1)
-    scatter(time2,tt2.-t2,color="green")
-    plot(time2,ttv2)
+    function plot_2planetfit()
+      scatter(time1,tt1.-t1)
+      plot(time1,ttv1)
+      scatter(time2,tt2.-t2,color="green")
+      plot(time2,ttv2)
+      savefig("images/2planetfit.png")
+    end
 
     #planet number, epoch, tt_noisy, ttv_error
 
@@ -126,8 +128,8 @@ function fit_mysteryplanet3(filename1::String, filename2::String,
       param1 = init_param
       res = curve_fit((tt0,params) -> ttv_wrapper(tt0, nplanet, ntrans, params), tt0, tt, weight, init_param)
       init_param = res.param
-      println("init_param: ",init_param)
-      println("New Initial chi-square: ",chisquare(tt0, nplanet, ntrans, init_param, tt, sigtt))
+      # println("init_param: ",init_param)
+      # println("New Initial chi-square: ",chisquare(tt0, nplanet, ntrans, init_param, tt, sigtt))
     end
 #    res = optimize(params -> chisquare(tt0, nplanet, ntrans, params, tt, sigtt), init_param) 
 #    init_param = res.minimizer
@@ -175,8 +177,8 @@ function fit_mysteryplanet3(filename1::String, filename2::String,
           param1 = param3
           fit = curve_fit((tt0,params) -> ttv_wrapper(tt0, nplanet, ntrans,params,true,p3_cur),tt0,tt, weight, param3)
           param3 = fit.param
-          println("init_param: ",param3)
-          println("New Initial chi-square: ",chisquare(tt0, nplanet, ntrans, param3, tt, sigtt, true, p3_cur))
+          # println("init_param: ",param3)
+          # println("New Initial chi-square: ",chisquare(tt0, nplanet, ntrans, param3, tt, sigtt, true, p3_cur))
         end
         # ttmodel=ttv_wrapper_fixp3(tt0,fit.param)
         #ttv_wrapper(nplanet, ntrans, params; fixp3 = false, p3_cur = 0.0)
@@ -191,18 +193,21 @@ function fit_mysteryplanet3(filename1::String, filename2::String,
           param_p3[1:nparam,j] =  [fit.param[1:11];p3_cur;fit.param[12:14]]
         end
       end
-      println("Period: ",p3[j]," chi: ",chi_p3[j]," Param: ",vec(param_p3[1:nparam,j]))
+      # println("Period: ",p3[j]," chi: ",chi_p3[j]," Param: ",vec(param_p3[1:nparam,j]))
     end
   
     clf()
     # Rescale to set minimum chi-square equal to number of degrees of freedom
     #  = number of transits - number of model parameters (15):
-    plot(p3/365.25,exp.(-0.5*(chi_p3 .-minimum(chi_p3)))) #to show that max likelihood peaks at actual period
-    xlabel("Period of planet 3 [years]")
-    ylabel("Likelihood")
-    println("Hit return to continue")
-    read(stdin,Char)
-    clf()
+    function plot_likelihood()
+      plot(p3/365.25,exp.(-0.5*(chi_p3 .-minimum(chi_p3)))) #to show that max likelihood peaks at actual period
+      xlabel("Period of planet 3 [years]")
+      ylabel("Likelihood")
+      savefig("images/p3period.png")
+    end
+    # println("Hit return to continue")
+    # read(stdin,Char)
+    # clf()
     # end
 
     #
@@ -212,7 +217,7 @@ function fit_mysteryplanet3(filename1::String, filename2::String,
     #res = optimize(chisquare3, param3, method = :l_bfgs, iterations = 21)
     #  res = optimize(chisquare3, param3, method = :l_bfgs)
     #  ttmodel=ttv_wrapper3(tt0,param3)
-    println("Best-fit parameters: ",pbest) # global best fit
+    # println("Best-fit parameters: ",pbest) # global best fit
     # fit = curve_fit(ttv_wrapper3,tt0,tt,weight,pbest)
     fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet, ntrans, params),tt0,tt,weight,pbest)
     # ttmodel=ttv_wrapper3(tt0,pbest)
@@ -221,19 +226,22 @@ function fit_mysteryplanet3(filename1::String, filename2::String,
     chi_best= sum((tt-ttmodel).^2 ./sigtt.^2)
     println("Minimum: ",chi_best," Param: ",pbest)
 
-    scatter(time1,tt1.-t1)
-    plot(time1,ttmodel[1:nt1].-t1)
-    scatter(time2,tt2.-t2,color="green")
-    plot(time2,ttmodel[nt1+1:nt1+nt2].-t2)
+    function plot_3planetfit()
+      scatter(time1,tt1.-t1)
+      plot(time1,ttmodel[1:nt1].-t1)
+      scatter(time2,tt2.-t2,color="green")
+      plot(time2,ttmodel[nt1+1:nt1+nt2].-t2)
+      savefig("images/3planetfit.png")
+    end
 
-    println("Hit return to continue")
-    read(stdin,Char)
+    # println("Hit return to continue")
+    # read(stdin,Char)
     # clf()
 
     #println(fit2.param)
     #end
     @save "p3_fir_params.jld2" param_p3
-    writedlm("p3_bestfit.txt", zip(chi_best, pbest))
+    writedlm("output/p3_bestfit.txt", zip(chi_best, pbest))
     # writedlm("p3_fit.txt", zip(chi_p3, param_p3))
     return chi_best, pbest
 end
