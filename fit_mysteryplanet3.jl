@@ -104,6 +104,7 @@ function fit_mysteryplanet3(filename::String,
 
     dummy=TTVFaster.compute_ttv!(jmax,p1,p2,time1,time2,ttv1,ttv2) #first call to TTVFaster w/o optim
     function plot_2planetfit(p3in, p3out, sigma)
+      clf()
       scatter(time1,tt1.-t1)
       plot(time1,ttv1)
       scatter(time2,tt2.-t2,color="green")
@@ -198,11 +199,10 @@ function fit_mysteryplanet3(filename::String,
       end
       # println("Period: ",p3[j]," chi: ",chi_p3[j]," Param: ",vec(param_p3[1:nparam,j]))
     end
-  
-    clf()
-    # Rescale to set minimum chi-square equal to number of degrees of freedom
+      # Rescale to set minimum chi-square equal to number of degrees of freedom
     #  = number of transits - number of model parameters (15):
     function plot_likelihood(p3in, p3out, sigma)
+      clf()
       plot(p3/365.25,exp.(-0.5*(chi_p3 .-minimum(chi_p3)))) #to show that max likelihood peaks at actual period
       xlabel("Period of planet 3 [years]")
       ylabel("Likelihood")
@@ -232,6 +232,7 @@ function fit_mysteryplanet3(filename::String,
     println("Minimum: ",chi_best," Param: ",pbest)
 
     function plot_3planetfit(p3in, p3out, sigma)
+      clf()
       scatter(time1,tt1.-t1)
       plot(time1,ttmodel[1:nt1].-t1)
       scatter(time2,tt2.-t2,color="green")
@@ -248,7 +249,7 @@ function fit_mysteryplanet3(filename::String,
 
     #println(fit2.param)
     #end
-    @save "p3_fir_params.jld2" param_p3 chi_p3 chi_best pbest tt tt_model sigtt
+    @save "p3_fir_params.jld2" param_p3 chi_p3 chi_best pbest tt ttmodel sigtt
     # writedlm("OUTPUTS/p3_bestfit.txt", zip(chi_best, pbest))
     # writedlm("p3_fit.txt", zip(chi_p3, param_p3))
     return chi_best, pbest
