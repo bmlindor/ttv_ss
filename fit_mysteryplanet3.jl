@@ -13,8 +13,9 @@ using Statistics, DataFitting, Random, Optim, LsqFit
 using Unitful, UnitfulAstro, LinearAlgebra
 using JLD2
 
-function fit_mysteryplanet3(filename1::String, filename2::String, 
-  p3in::Float64=4000.0, p3out::Float64=4600.0, np3::Int=10, nphase::Int=10, addnoise::Bool=false)
+function fit_mysteryplanet3(filename::String, 
+  p3in::Float64=4000.0, p3out::Float64=4600.0, np3::Int=10, nphase::Int=10, 
+  addnoise::Bool=false, sigma::Float64=0.0)
     #=
      To do:
      # generalize to call in any file (with or w/o noise)
@@ -29,15 +30,15 @@ function fit_mysteryplanet3(filename1::String, filename2::String,
      5). Write a markov chain to compute the best-fit parameters
          for the 3 planets.
     =#
-    data1 = readdlm(filename1)
-    data2 = readdlm(filename2)
-    tt1 = vec(data1[:,1])
-    nt1 = length(tt1)
-    tt2 = vec(data2[:,1])
-    nt2 = length(tt2)
+    data1 = readdlm(filename)
+    nt1 = sum(data1[:,1] .== 1.0)
+    nt2 = sum(data1[:,1] .== 2.0)
+    tt1 = vec(data1[1:nt1,3])
+    tt2 = vec(data1[nt1+1:nt1+nt2,3])
+    
     if addnoise 
-      sigtt1 = data1[:,3]
-      sigtt2 = data2[:,3]
+      sigtt1 = data1[1:nt1,4]
+      sigtt2 = data1[nt1+1:nt1+nt2,4]
     else
       sigtt1 = ones(nt1).* 30 ./ 24 ./3600
       sigtt2 = ones(nt2).* 30 ./ 24 ./3600
@@ -72,7 +73,8 @@ function fit_mysteryplanet3(filename1::String, filename2::String,
     coeff1, covcoeff1 = find_coeffs(tt1, p1est, sigtt1)
     coeff2, covcoeff2 = find_coeffs(tt2, p2est, sigtt2)
 
-    sigtt=[sigtt1;sigtt2]
+    sigtt=[sigtt1;sigtt2] #  sigtt = ones(nt) * sigma / (24 * 3600) # sigma in seconds, sigtt in days
+
     t01 = coeff1[1]; per1 = coeff1[2]
     t02 = coeff2[1]; per2 = coeff2[2]
     t1  = collect(t01 .+ per1 .* range(0,stop=nt1-1,length=nt1)) #best fit linear transit times w/o ttvs
@@ -101,12 +103,13 @@ function fit_mysteryplanet3(filename1::String, filename2::String,
     ttv2 = zeros(nt2)
 
     dummy=TTVFaster.compute_ttv!(jmax,p1,p2,time1,time2,ttv1,ttv2) #first call to TTVFaster w/o optim
-    function plot_2planetfit()
+    function plot_2planetfit(p3in, p3out, sigma)
       scatter(time1,tt1.-t1)
       plot(time1,ttv1)
       scatter(time2,tt2.-t2,color="green")
       plot(time2,ttv2)
-      savefig("images/2planetfit.png")
+      name = string("IMAGES/2planetfitp",p3in,"in",p3out,"out",sigma,"s.png")
+      savefig(name)
     end
 
     #planet number, epoch, tt_noisy, ttv_error
@@ -177,8 +180,8 @@ function fit_mysteryplanet3(filename1::String, filename2::String,
           param1 = param3
           fit = curve_fit((tt0,params) -> ttv_wrapper(tt0, nplanet, ntrans,params,true,p3_cur),tt0,tt, weight, param3)
           param3 = fit.param
-          # println("init_param: ",param3)
-          # println("New Initial chi-square: ",chisquare(tt0, nplanet, ntrans, param3, tt, sigtt, true, p3_cur))
+          println("init_param: ",param3)
+          println("New Initial chi-square: ",chisquare(tt0, nplanet, ntrans, param3, tt, sigtt, true, p3_cur))
         end
         # ttmodel=ttv_wrapper_fixp3(tt0,fit.param)
         #ttv_wrapper(nplanet, ntrans, params; fixp3 = false, p3_cur = 0.0)
@@ -199,11 +202,13 @@ function fit_mysteryplanet3(filename1::String, filename2::String,
     clf()
     # Rescale to set minimum chi-square equal to number of degrees of freedom
     #  = number of transits - number of model parameters (15):
-    function plot_likelihood()
+    function plot_likelihood(p3in, p3out, sigma)
       plot(p3/365.25,exp.(-0.5*(chi_p3 .-minimum(chi_p3)))) #to show that max likelihood peaks at actual period
       xlabel("Period of planet 3 [years]")
       ylabel("Likelihood")
-      savefig("images/p3period.png")
+      name = string("IMAGES/p3likelihood",p3in,"in",p3out,"out",sigma,"s.png")
+      savefig(name)
+      # savefig("images/p3period.png")
     end
     # println("Hit return to continue")
     # read(stdin,Char)
@@ -217,7 +222,7 @@ function fit_mysteryplanet3(filename1::String, filename2::String,
     #res = optimize(chisquare3, param3, method = :l_bfgs, iterations = 21)
     #  res = optimize(chisquare3, param3, method = :l_bfgs)
     #  ttmodel=ttv_wrapper3(tt0,param3)
-    # println("Best-fit parameters: ",pbest) # global best fit
+    println("Best-fit parameters: ",pbest) # global best fit
     # fit = curve_fit(ttv_wrapper3,tt0,tt,weight,pbest)
     fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet, ntrans, params),tt0,tt,weight,pbest)
     # ttmodel=ttv_wrapper3(tt0,pbest)
@@ -226,22 +231,25 @@ function fit_mysteryplanet3(filename1::String, filename2::String,
     chi_best= sum((tt-ttmodel).^2 ./sigtt.^2)
     println("Minimum: ",chi_best," Param: ",pbest)
 
-    function plot_3planetfit()
+    function plot_3planetfit(p3in, p3out, sigma)
       scatter(time1,tt1.-t1)
       plot(time1,ttmodel[1:nt1].-t1)
       scatter(time2,tt2.-t2,color="green")
       plot(time2,ttmodel[nt1+1:nt1+nt2].-t2)
-      savefig("images/3planetfit.png")
+      name = string("IMAGES/3planetfitp",p3in,"in",p3out,"out",sigma,"s.png")
+      savefig(name)
     end
-
+    plot_2planetfit(p3in, p3out, sigma)
+    plot_likelihood(p3in, p3out, sigma)
+    plot_3planetfit(p3in, p3out, sigma)
     # println("Hit return to continue")
     # read(stdin,Char)
     # clf()
 
     #println(fit2.param)
     #end
-    @save "p3_fir_params.jld2" param_p3
-    writedlm("output/p3_bestfit.txt", zip(chi_best, pbest))
+    @save "p3_fir_params.jld2" param_p3 chi_p3 chi_best pbest tt tt_model sigtt
+    # writedlm("OUTPUTS/p3_bestfit.txt", zip(chi_best, pbest))
     # writedlm("p3_fit.txt", zip(chi_p3, param_p3))
     return chi_best, pbest
 end
