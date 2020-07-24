@@ -1,5 +1,7 @@
 include("ttv_wrapper.jl")  
-@load ""
+@load "OUTPUTS/p3_fit_test.jld2"
+# param_p3 chi_p3 chi_best pbest tt ttmodel sigtt p3in p3out np3
+
 # Run a Markov chain:
 function MCMC(param::Array{Float64, 1},nsteps::Int64,nwalkers::Int64, 
   nplanet::Float64,ntrans::Array{Float64, 1},tt0::Array{Float64, 1}, tt::Array{Float64, 1}, sigtt::Array{Float64, 1}) 
@@ -116,3 +118,5 @@ function MCMC(param::Array{Float64, 1},nsteps::Int64,nwalkers::Int64,
   # plot_MCparams()
   return par_mcmc,chi_mcmc
 end
+
+MCMC()
