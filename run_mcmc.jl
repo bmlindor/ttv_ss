@@ -1,16 +1,19 @@
 include("ttv_wrapper.jl")  
+using JLD2
+using Statistics
+
 @load "OUTPUTS/p3_fit_test.jld2"
 # param_p3 chi_p3 chi_best pbest tt ttmodel sigtt p3in p3out np3
 
 # Run a Markov chain:
 function MCMC(param::Array{Float64, 1},nsteps::Int64,nwalkers::Int64, 
-  nplanet::Float64,ntrans::Array{Float64, 1},tt0::Array{Float64, 1}, tt::Array{Float64, 1}, sigtt::Array{Float64, 1}) 
+  nplanet::Int64,ntrans::Array{Int64, 1},tt0::Array{Float64, 1}, tt::Array{Float64, 1}, sigtt::Array{Float64, 1}) 
   # To do:
   #ttv_wrapper(tt0, nplanet, ntrans, params, fixp3::Bool = false, p3_cur::Float64 = 0.0)
     #give it -param, nsteps, nparam, nwalkers, tt0, tt, sigtt, ntrans, nplanet
   nparam = length(param)
-  errors = [1e-7,1e-5,1e-5,1e-2,1e-2,1e-7,1e-5,1e-5,1e-2,1e-2,1e-6,1e-1,1e-1,1e-2,1e-2,1e-4]
-  pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)","mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)","mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)","sigsys"]
+  errors = [1e-7,1e-5,1e-5,1e-2,1e-2,1e-7,1e-5,1e-5,1e-2,1e-2,1e-6,1e-1,1e-1,1e-2,1e-2,1e-9]
+  pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)","mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)","mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)","sigsys^2"]
   nwalkers = nparam * 3
   # nsteps = 10000
   #nsteps = 100
@@ -24,10 +27,11 @@ function MCMC(param::Array{Float64, 1},nsteps::Int64,nwalkers::Int64,
     chi_trial = 1e100
   # Only initiate models with reasonable chi-square values:
     while chi_trial > chi_best + 1000
-      par_trial = fit.param + errors.*randn(nparam)
+      par_trial = param + errors.*randn(nparam)
       # model = ttv_wrapper3(tt0,par_trial)# 
       model = ttv_wrapper(tt0, nplanet, ntrans, par_trial[1:end-1])
-      chi_trial = sum((tt-model).^2 ./(sigtt.^2 .+ par_trial[end]^2) .+ log(sigtt.^2 .+ par_trial[end]^2)) #-2 * log likelihood
+      println(length(tt)," ",length(model))
+      chi_trial = sum((tt-model).^2 ./(sigtt.^2 .+ par_trial[end]) .+ log.(sigtt.^2 .+ par_trial[end])) #-2 * log likelihood
       println("chi_trial: ",chi_trial)
     end
     chi_mcmc[j,1]=chi_trial
@@ -51,7 +55,7 @@ function MCMC(param::Array{Float64, 1},nsteps::Int64,nwalkers::Int64,
   # Compute model & chi-square:  
       # model_trial =ttv_wrapper3(tt0,par_trial)
       model_trial = ttv_wrapper(tt0, nplanet, ntrans, par_trial[1:end-1])
-      chi_trial = sum((tt-model_trial).^2 ./(sigtt.^2 .+ par_trial[end]^2) .+ log(sigtt.^2 .+ par_trial[end]^2)) #-2 * log likelihood
+      chi_trial = sum((tt-model_trial).^2 ./(sigtt.^2 .+ par_trial[end]) .+ log.(sigtt.^2 .+ par_trial[end])) #-2 * log likelihood
   # Next, determine whether to accept this trial step:
       alp = z^(nparam-1)*exp(-0.5*(chi_trial - chi_mcmc[j,i-1]))
       if rand() < 0.0001
@@ -119,4 +123,9 @@ function MCMC(param::Array{Float64, 1},nsteps::Int64,nwalkers::Int64,
   return par_mcmc,chi_mcmc
 end
 
-MCMC()
+param = [pbest;1e-4^2]
+nsteps = 1000
+nwalkers = 50
+nplanet = 3
+ntrans = [82,51,2]
+par_mcmc,chi_mcmc = MCMC(param,nsteps,nwalkers,nplanet,ntrans,tt0, tt, sigtt) 
