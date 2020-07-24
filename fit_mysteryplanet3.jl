@@ -247,9 +247,8 @@ function fit_mysteryplanet3(filename::String,
     # read(stdin,Char)
     # clf()
 
-    #println(fit2.param)
-    #end
-    @save "OUTPUTS/p3_fit_params.jld2" param_p3 chi_p3 chi_best pbest tt ttmodel sigtt p3in p3out np3
+    
+    @save "OUTPUTS/p3_fit_test.jld2" param_p3 chi_p3 chi_best pbest tt ttmodel sigtt p3in p3out np3
     # writedlm("OUTPUTS/p3_bestfit.txt", zip(chi_best, pbest))
     # writedlm("p3_fit.txt", zip(chi_p3, param_p3))
     return chi_best, pbest
