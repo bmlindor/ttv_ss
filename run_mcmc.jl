@@ -1,24 +1,29 @@
 include("ttv_wrapper.jl")  
 
 # Run a Markov chain:
-function MCMC() 
+function MCMC(param::Array{Float64, 1},nsteps::Int64,nwalkers::Int64, 
+  nplanet::Float64,ntrans,tt0, tt, sigtt, fixp3::Bool, p3_cur::Float64) 
+  # To do:
+  #ttv_wrapper(tt0, nplanet, ntrans, params, fixp3::Bool = false, p3_cur::Float64 = 0.0)
+    #give it -param, nsteps, nparam, nwalkers, tt0, tt, sigtt, ntrans, nplanet
+  nparam = length(param)
   errors = [1e-7,1e-5,1e-5,1e-2,1e-2,1e-7,1e-5,1e-5,1e-2,1e-2,1e-6,1e-1,1e-1,1e-2,1e-2]
   pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)","mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)","mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)"]
   nwalkers = nparam * 3
-  nsteps = 10000
+  # nsteps = 10000
   #nsteps = 100
   # Set up arrays to hold the results:
   par_mcmc = zeros(nwalkers,nsteps,nparam)
   chi_mcmc = zeros(nwalkers,nsteps)
   # Initialize walkers:
-  par_trial = fit.param
+  par_trial = copy(param)
   for j=1:nwalkers
   # Select from within uncertainties:
     chi_trial = 1e100
   # Only initiate models with reasonable chi-square values:
     while chi_trial > chi_best + 1000
       par_trial = fit.param + errors.*randn(nparam)
-      # model = ttv_wrapper3(tt0,par_trial)
+      # model = ttv_wrapper3(tt0,par_trial)# 
       model = ttv_wrapper(tt0, nplanet, ntrans, par_trial)
       chi_trial = sum(((tt-model)./sigtt).^2)
       println("chi_trial: ",chi_trial)
