@@ -109,7 +109,7 @@ function fit_mysteryplanet3(filename::String,
       plot(time1,ttv1)
       scatter(time2,tt2.-t2,color="green")
       plot(time2,ttv2)
-      name = string("IMAGES/2planetfitp",p3in,"in",p3out,"out",sigma,"s.png")
+      name = string("IMAGES/2planetfitp",p3in,"in_",p3out,"out_",np3,"steps_",sigma,"s.png")
       savefig(name)
     end
 
@@ -206,7 +206,7 @@ function fit_mysteryplanet3(filename::String,
       plot(p3/365.25,exp.(-0.5*(chi_p3 .-minimum(chi_p3)))) #to show that max likelihood peaks at actual period
       xlabel("Period of planet 3 [years]")
       ylabel("Likelihood")
-      name = string("IMAGES/p3likelihood",p3in,"in",p3out,"out",sigma,"s.png")
+      name = string("IMAGES/p3likelihood",p3in,"in_",p3out,"out_",np3,"steps_",sigma,"s.png")
       savefig(name)
       # savefig("images/p3period.png")
     end
@@ -237,7 +237,7 @@ function fit_mysteryplanet3(filename::String,
       plot(time1,ttmodel[1:nt1].-t1)
       scatter(time2,tt2.-t2,color="green")
       plot(time2,ttmodel[nt1+1:nt1+nt2].-t2)
-      name = string("IMAGES/3planetfitp",p3in,"in",p3out,"out",sigma,"s.png")
+      name = string("IMAGES/3planetfitp",p3in,"in_",p3out,"out_",np3,"steps_",sigma,"s.png")
       savefig(name)
     end
     plot_2planetfit(p3in, p3out, sigma)
@@ -249,7 +249,7 @@ function fit_mysteryplanet3(filename::String,
 
     #println(fit2.param)
     #end
-    @save "p3_fir_params.jld2" param_p3 chi_p3 chi_best pbest tt ttmodel sigtt
+    @save "OUTPUTS/p3_fit_params.jld2" param_p3 chi_p3 chi_best pbest tt ttmodel sigtt p3in p3out np3
     # writedlm("OUTPUTS/p3_bestfit.txt", zip(chi_best, pbest))
     # writedlm("p3_fit.txt", zip(chi_p3, param_p3))
     return chi_best, pbest
