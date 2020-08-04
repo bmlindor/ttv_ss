@@ -6,25 +6,25 @@ using Unitful, UnitfulAstro, LinearAlgebra
 using JLD2
 
 # Run a Markov chain:
-function MCMC(param::Array{Float64, 1},nsteps::Int64,nwalkers::Int64, 
-  nplanet::Int64,ntrans::Array{Int64, 1},tt0::Array{Float64, 1}, tt::Array{Float64, 1}, sigtt::Array{Float64, 1}) 
+function MCMC(param::Array{Float64, 1},label::String,nsteps::Int64,nwalkers::Int64,nplanet::Int64,ntrans::Array{Int64, 1},tt0::Array{Float64, 1},tt::Array{Float64, 1},sigtt::Array{Float64, 1}) 
   # To do:
     #give it -param, nsteps, nparam, nwalkers, tt0, tt, sigtt, ntrans, nplanet
     #add to MCMC(): 1/eccentricity prior
   nparam = length(param)
   errors = [1e-7,1e-5,1e-5,1e-2,1e-2,
-            1e-7,1e-5,1e-5,1e-2,1e-2,
-            1e-6,1e-1,1e-1,1e-2,1e-2,
-            1e-9]
+        1e-7,1e-5,1e-5,1e-2,1e-2,
+        1e-6,1e-1,1e-1,1e-2,1e-2,
+        1e-9]
   pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
           "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
-          "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)","sigsys^2"]
+          "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)",
+          "sigsys^2"]
   nwalkers = nparam * 3
   # Set up arrays to hold the results:
   par_mcmc = zeros(nwalkers,nsteps,nparam)
   lprob_mcmc = zeros(nwalkers,nsteps)
 
-  function log_prior(param) #log prior
+  function calc_lprior(param) #log prior
 # We will place a joint prior on eccentricity vector
 # such that each planet has an eccentricity which lies between
 # 0 and emax2, with a gradual decrease from emax1 to emax2:
@@ -48,15 +48,15 @@ function MCMC(param::Array{Float64, 1},nsteps::Int64,nwalkers::Int64,
   par_trial = copy(param)
   for j=1:nwalkers
   # Select from within uncertainties:
-    chi_trial = 1e100
+    lprob_trial = 1e100
   # Only initiate models with reasonable chi-square values:
-    while chi_trial > chi_best + 1000
+    while lprob_trial > lprob_best + 1000
       par_trial = param + errors.*randn(nparam)
       # model = ttv_wrapper3(tt0,par_trial)# 
       model = ttv_wrapper(tt0, nplanet, ntrans, par_trial[1:end-1])
       println(length(tt)," ",length(model))
       ll = -0.5 * sum((tt-model).^2 ./(sigtt.^2 .+ par_trial[end]) .+ log.(sigtt.^2 .+ par_trial[end]))
-      lprob_trial = lprior(par_trial) + ll 
+      lprob_trial = calc_lprior(par_trial) + ll 
       println("lprob_trial: ",lprob_trial)
     end
     lprob_mcmc[j,1]=lprob_trial
@@ -103,7 +103,7 @@ function MCMC(param::Array{Float64, 1},nsteps::Int64,nwalkers::Int64,
       accept = 0
     end
   end
-  function plot_MCstep()
+  function plot_MCstep(label)
     clf()
     for i=1:nparam
       for j=1:nwalkers
@@ -131,7 +131,7 @@ function MCMC(param::Array{Float64, 1},nsteps::Int64,nwalkers::Int64,
   end
 
   println("Burn-in ends: ",iburn)
-  function plot_MCparams()
+  function plot_MCparams(label)
     clf()
     for i=2:nparam
       for j=1:i-1
@@ -148,7 +148,22 @@ function MCMC(param::Array{Float64, 1},nsteps::Int64,nwalkers::Int64,
   return par_mcmc,lprob_mcmc
 end
 
-println("Must define .jld2 file label!!!!")
-# @load string(“OUTPUTS/p3_fit_params”,label,”.jld2”) 
-# @load "OUTPUTS/p3_fit_params.jld2"
-# par_mcmc, lprob_mcmc = MCMC(param,nsteps,nwalkers,nplanet,ntrans,tt0, tt, sigtt) 
+@load "OUTPUTS/p3_fittestparams.jld2" #param_p3 lprob_p3 lprob_best pbest tt0 tt ttmodel sigtt p3in p3out np3 nphase
+param = pbest
+nsteps = 1000
+nwalkers = 50
+nplanet = 3
+ntrans = [82,51,2]
+# function MCMC(param::Array{Float64, 1},
+#   label::String,
+#   nsteps::Int64,
+#   nwalkers::Int64,
+#   nplanet::Int64,
+#   ntrans::Array{Int64, 1},
+#   tt0::Array{Float64, 1},
+#   tt::Array{Float64, 1},
+#   sigtt::Array{Float64, 1}) 
+
+par_mcmc, lprob_mcmc = MCMC(param, "test", nsteps, nwalkers, nplanet, ntrans, tt0, tt, sigtt) 
+
+# @save nwalkers, nsteps, accept/(1000*nwalkers)
