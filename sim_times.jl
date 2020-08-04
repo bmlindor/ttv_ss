@@ -201,7 +201,6 @@ function sim_times(jd1::Float64, jd2::Float64, Nsteps::Int64, addnoise::Bool=fal
     t2  = collect(t02 .+ per2 .* range(0,stop = nt2-1,length = nt2))
     # Best-fit linear transit times:
     tt0 = [t1;t2] # appends t2 times to t1 times
-    
 
 
     # Plot transit times and TTVs
@@ -225,10 +224,6 @@ function sim_times(jd1::Float64, jd2::Float64, Nsteps::Int64, addnoise::Bool=fal
     end
     # plot_ttvs(sigma)
 
-    # function write_file(jd1, jd2, sigma, tt)
-    #     size = [1.0:1.0:length(tt)+2]
-    #     for i 
-    # end
     function write_file(jd1, jd2, sigma)
         body = zeros((nt1+nt2))
         body[1:nt1] .= 1.0
@@ -239,17 +234,11 @@ function sim_times(jd1::Float64, jd2::Float64, Nsteps::Int64, addnoise::Bool=fal
             sigtt = [sigtt1;sigtt2]
             name = string("INPUTS/tt_data",sigma,"s.txt")
             writedlm(name, zip(body, tt0, tt, sigtt))
-            # writedlm("INPUTS/noisy_ttvenus.txt", zip(noise1+tt1, noise1, sigtt1))
-            # writedlm("INPUTS/noisy_ttearth.txt", zip(noise2+tt2, noise2, sigtt2))
         else
             writedlm("INPUTS/tt_data.txt", zip(body, tt))
-        # writedlm("INPUTS/tt_earth.txt", zip(tt2))
         end
     end
     write_file(jd1, jd2, sigma)
-    return tt1, noise1, noise1+tt1, tt2, noise2, noise2+tt2
-    # println(tt1+sigtt1)
+    return tt1, noise1+tt1, tt2, noise2+tt2
 end
-    # test = sim_times(10, true, 30.0)
-    # serialize("testfile.txt", test) #for large amount of data
 
