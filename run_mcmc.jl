@@ -1,4 +1,5 @@
 include("ttv_wrapper.jl")  
+include("bounds.jl")
 using PyPlot, CALCEPH, DelimitedFiles
 using Statistics, DataFitting, Random, Optim, LsqFit
 using Unitful, UnitfulAstro, LinearAlgebra
@@ -11,14 +12,38 @@ function MCMC(param::Array{Float64, 1},nsteps::Int64,nwalkers::Int64,
     #give it -param, nsteps, nparam, nwalkers, tt0, tt, sigtt, ntrans, nplanet
     #add to MCMC(): 1/eccentricity prior
   nparam = length(param)
-  errors = [1e-7,1e-5,1e-5,1e-2,1e-2,1e-7,1e-5,1e-5,1e-2,1e-2,1e-6,1e-1,1e-1,1e-2,1e-2,1e-9]
-  pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)","mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)","mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)","sigsys^2"]
+  errors = [1e-7,1e-5,1e-5,1e-2,1e-2,
+            1e-7,1e-5,1e-5,1e-2,1e-2,
+            1e-6,1e-1,1e-1,1e-2,1e-2,
+            1e-9]
+  pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
+          "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
+          "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)","sigsys^2"]
   nwalkers = nparam * 3
-  # nsteps = 10000
-  #nsteps = 100
   # Set up arrays to hold the results:
   par_mcmc = zeros(nwalkers,nsteps,nparam)
-  chi_mcmc = zeros(nwalkers,nsteps)
+  lprob_mcmc = zeros(nwalkers,nsteps)
+
+  function log_prior(param) #log prior
+# We will place a joint prior on eccentricity vector
+# such that each planet has an eccentricity which lies between
+# 0 and emax2, with a gradual decrease from emax1 to emax2:
+  # Eccentricity priors:
+    emax1 = 0.2; emax2 = 0.3
+    # Define -log(prior):
+    lprior = 0.0
+    # Loop over planets:
+    for i=1:nplanet
+    # Place prior on eccentricities:
+    ecc = sqrt(param[(i-1)*5+4]^2+param[(i-1)*5+5]^2)
+    lprior_tmp,dpdx = log_bounds_upper(ecc,emax1,emax2)
+    lprior += lprior_tmp
+    # Adding in prior of 1/eccentricity to account for Jacobian
+    # factor of e*cos(omega) and e*sin(omega):
+    lprior += -log(ecc)  # Add this to log prior
+    end
+  end
+
   # Initialize walkers:
   par_trial = copy(param)
   for j=1:nwalkers
@@ -30,12 +55,13 @@ function MCMC(param::Array{Float64, 1},nsteps::Int64,nwalkers::Int64,
       # model = ttv_wrapper3(tt0,par_trial)# 
       model = ttv_wrapper(tt0, nplanet, ntrans, par_trial[1:end-1])
       println(length(tt)," ",length(model))
-      chi_trial = sum((tt-model).^2 ./(sigtt.^2 .+ par_trial[end]) .+ log.(sigtt.^2 .+ par_trial[end])) #-2 * log likelihood
-      println("chi_trial: ",chi_trial)
+      ll = -0.5 * sum((tt-model).^2 ./(sigtt.^2 .+ par_trial[end]) .+ log.(sigtt.^2 .+ par_trial[end]))
+      lprob_trial = lprior(par_trial) + ll 
+      println("lprob_trial: ",lprob_trial)
     end
-    chi_mcmc[j,1]=chi_trial
+    lprob_mcmc[j,1]=lprob_trial
     par_mcmc[j,1,:]=par_trial
-    println("Success: ",par_trial,chi_trial)
+    println("Success: ",par_trial,lprob_trial)
   end
   # Initialize scale length & acceptance counter:
   ascale = 2.0
@@ -54,21 +80,22 @@ function MCMC(param::Array{Float64, 1},nsteps::Int64,nwalkers::Int64,
   # Compute model & chi-square:  
       # model_trial =ttv_wrapper3(tt0,par_trial)
       model_trial = ttv_wrapper(tt0, nplanet, ntrans, par_trial[1:end-1])
-      chi_trial = sum((tt-model_trial).^2 ./(sigtt.^2 .+ par_trial[end]) .+ log.(sigtt.^2 .+ par_trial[end])) #-2 * log likelihood
+      ll = -.5 *sum((tt-model_trial).^2 ./(sigtt.^2 .+ par_trial[end]) .+ log.(sigtt.^2 .+ par_trial[end]))
+      lprob_trial = lprior(par_trial) + ll 
   # Next, determine whether to accept this trial step:
-      alp = z^(nparam-1)*exp(-0.5*(chi_trial - chi_mcmc[j,i-1]))
+      alp = z^(nparam-1)*exp((lprob_trial - lprob_mcmc[j,i-1]))
       if rand() < 0.0001
-        println("Step: ",i," Walker: ",j," Chi-square: ",chi_trial," Prob: ",alp," Frac: ",accept/(mod(i-1,1000)*nwalkers+j))
+        println("Step: ",i," Walker: ",j," Chi-square: ",lprob_trial," Prob: ",alp," Frac: ",accept/(mod(i-1,1000)*nwalkers+j))
       end
       if alp >= rand()
   # If step is accepted, add it to the chains!
         par_mcmc[j,i,:] = par_trial
-        chi_mcmc[j,i] = chi_trial
+        lprob_mcmc[j,i] = lprob_trial
         accept = accept + 1
       else
   # If step is rejected, then copy last step:
         par_mcmc[j,i,:] = par_mcmc[j,i-1,:]
-        chi_mcmc[j,i] = chi_mcmc[j,i-1]
+        lprob_mcmc[j,i] = lprob_mcmc[j,i-1]
       end
     end
     if mod(i,1000) == 0
@@ -118,12 +145,10 @@ function MCMC(param::Array{Float64, 1},nsteps::Int64,nwalkers::Int64,
   end
   plot_MCstep()
   plot_MCparams()
-  return par_mcmc,chi_mcmc
+  return par_mcmc,lprob_mcmc
 end
 
-param = [pbest;1e-4^2]
-nsteps = 1000
-nwalkers = 50
-nplanet = 3
-ntrans = [82,51,2]
-par_mcmc,chi_mcmc = MCMC(param,nsteps,nwalkers,nplanet,ntrans,tt0, tt, sigtt) 
+println("Must define .jld2 file label!!!!")
+# @load string(“OUTPUTS/p3_fit_params”,label,”.jld2”) 
+# @load "OUTPUTS/p3_fit_params.jld2"
+# par_mcmc, lprob_mcmc = MCMC(param,nsteps,nwalkers,nplanet,ntrans,tt0, tt, sigtt) 

@@ -55,7 +55,7 @@ function fit_mysteryplanet3(filename::String, label::String,
     coeff2, covcoeff2 = find_coeffs(tt2, p2est, sigtt2)
 
     sigtt=[sigtt1;sigtt2] 
-    @assert sigtt[1:end] .* (24 * 3600) .== sigma 
+    # @assert (sigtt[1] .* (24 * 3600) .= sigma)
 
     t01 = coeff1[1]; per1 = coeff1[2]
     t02 = coeff2[1]; per2 = coeff2[2]
@@ -69,7 +69,8 @@ function fit_mysteryplanet3(filename::String, label::String,
 
     # Okay, now let's do a 2-planet fit:
     # param_names = mass ratio, period, initial transit time, e*cos(omega), e*sin(omega)
-    init_param = [3e-6,per1,t01,0.01,0.01, 3e-6,per2,t02,0.01,0.01] #for both planets
+    init_param = [3e-6,per1,t01,0.01,0.01,
+                  3e-6,per2,t02,0.01,0.01] 
     println("Initial parameters: ",init_param)
     #model = ttv_wrapper2(tt0,param)
     # Set up data structure to hold planet properties, passed to TTVFaster
@@ -98,6 +99,7 @@ function fit_mysteryplanet3(filename::String, label::String,
     p3_cur = 11.86*365.25 #jupiter period in days, initial value
     #res = optimize(chisquare2, param, method = :l_bfgs, iterations = 21)
     ntrans = [nt1, nt2]
+    Nobs = sum(ntrans)
     nplanet = 2
     # create initial simplex? need function for this?
     # result = optimize(f0, xcurr, NelderMead(initial_simplex=MySimplexer(),show_trace=true,iterations=1))
@@ -123,15 +125,15 @@ function fit_mysteryplanet3(filename::String, label::String,
     #p3 = 11.86*365.25
     # Grid of periods to search over:
     p3 = 10 .^ range(log10(p3in),stop=log10(p3out),length=np3)
-    chi_p3 = zeros(np3)
+    lprob_p3 = zeros(np3)
     nparam = 15
     param_p3 = zeros(nparam,np3)
-    chi_best = 1e100 #global best fit
+    lprob_best = -1e100 #global best fit
     pbest = zeros(nparam)
     for j=1:np3
       phase = p3[j]*range(0,stop=1,length=nphase) #searches over period of jupiter
-      chi_phase = zeros(nphase)
-      chi_p3[j] = 1e100
+      lprob_phase = zeros(nphase)
+      lprob_p3[j] = -1e100
       for i=1:nphase #loops over jupiter phases
         param_tmp = [1e-3,phase[i],0.01,0.01] # jupiter params: mass ratio, phase, ecosw, esinw
         param3 = [init_param;param_tmp] #concatenate 2 planet model to 3 planet model params
@@ -148,21 +150,21 @@ function fit_mysteryplanet3(filename::String, label::String,
           # println("New Initial chi-square: ",chisquare(tt0, nplanet, ntrans, param3, tt, sigtt, true, p3_cur))
         end
         ttmodel = ttv_wrapper(tt0, nplanet, ntrans, param3, true, p3_cur)
-        chi_phase[i]= sum((tt-ttmodel).^2 ./sigtt.^2)
-        if chi_phase[i] < chi_best # check that best fit for period is better than global best fit
-          chi_best = chi_phase[i]
+        lprob_phase[i]= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
+        if lprob_phase[i] > lprob_best # check that best fit for period is better than global best fit
+          lprob_best = lprob_phase[i]
           pbest = [fit.param[1:11];p3_cur;fit.param[12:14]]
         end
-        if chi_phase[i] < chi_p3[j] # checks best fit over all phases of jupiter for this particular period
-          chi_p3[j] = chi_phase[i]
+        if lprob_phase[i] > lprob_p3[j] # checks best fit over all phases of jupiter for this particular period
+          lprob_p3[j] = lprob_phase[i]
           param_p3[1:nparam,j] =  [fit.param[1:11];p3_cur;fit.param[12:14]]
         end
       end
-      println("Period: ",p3[j]," chi: ",chi_p3[j]," Param: ",vec(param_p3[1:nparam,j]))
+      println("Period: ",p3[j]," chi: ",lprob_p3[j]," Param: ",vec(param_p3[1:nparam,j]))
     end
     function plot_likelihood(p3in, p3out, sigma)
       clf()
-      plot(p3/365.25,exp.(-0.5*(chi_p3 .-minimum(chi_p3)))) #to show that max likelihood peaks at actual period
+      plot(p3/365.25,exp.((lprob_p3 .-maximum(lprob_p3)))) #to show that max likelihood peaks at actual period
       xlabel("Period of planet 3 [years]")
       ylabel("Likelihood")
       name = string("IMAGES/p3likelihood",label,".png")
@@ -175,19 +177,19 @@ function fit_mysteryplanet3(filename::String, label::String,
     #res = optimize(chisquare3, param3, method = :l_bfgs, iterations = 21)
     #  res = optimize(chisquare3, param3, method = :l_bfgs)
     #  ttmodel=ttv_wrapper3(tt0,param3)
-    println("Finished 3-planet fit, parameters: ",pbest) # global best fit
+    println("Finished 3-planet fit w/ fixed period")
+    println("parameters: ",pbest)
 
-    # what is the following code doing? Is there a difference between the previous pbest and the pbest on line 184?
     # fit = curve_fit(ttv_wrapper3,tt0,tt,weight,pbest)
     fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet, ntrans, params),tt0,tt,weight,pbest)
     # ttmodel=ttv_wrapper3(tt0,pbest)
     pbest = fit.param
     ttmodel = ttv_wrapper(tt0, nplanet, ntrans, pbest)
-    chi_best= sum((tt-ttmodel).^2 ./sigtt.^2) #need to add systematic error
+    lprob_best= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
     sigsys2 = 1e-6
-    # chi_trial = sum((tt-model).^2 ./(sigtt.^2 .+ par_trial[end]) .+ log.(sigtt.^2 .+ par_trial[end])) #-2 * log likelihood
 
-    println("Minimum: ",chi_best," Param: ",pbest)
+    println("Finished global 3-planet fit.")
+    println("Maximum: ",lprob_best," Param: ",pbest)
 
     function plot_3planetfit(p3in, p3out, sigma)
       clf()
@@ -204,8 +206,8 @@ function fit_mysteryplanet3(filename::String, label::String,
 
     file = string("OUTPUTS/p3_fit",label,"params.jld2")
     results = string("OUTPUTS/p3_fit",label,"results.txt")
-    @save file param_p3 chi_p3 chi_best pbest tt0 tt ttmodel sigtt p3in p3out np3 nphase
+    @save file param_p3 lprob_p3 lprob_best pbest tt0 tt ttmodel sigtt p3in p3out np3 nphase
     # @save results chi_best pbest
-    writedlm(results, zip(chi_best, pbest))
+    # writedlm(results, chi_best, pbest)
     # return chi_best, pbest
 end

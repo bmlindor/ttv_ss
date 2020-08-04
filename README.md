@@ -59,6 +59,8 @@ julia> @load "OUTPUTS/p3_fit_test.jld2"
 TODO:
 -add systematic err to fit_p3
 -Create slurm file to run multiple grids on hyak.mox
+
+julia ttv_like_planet_b.jl &> ttv_likelihood_planetb_3.0sig.txt &
 -define format for grids and MCMC runs 
 run_types = [extrashort=(4230-4430), short=(2000-5000), medium=(700-10000), wide=(500-18000)]
 grid_types = [extrafine=1000, fine=100, medium=10, coarse=2]
