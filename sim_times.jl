@@ -40,7 +40,7 @@ function sim_times(jd1::Float64, jd2::Float64, Nsteps::Int64, addnoise::Bool=fal
     # adjust as step through day? 
 
     # Load ephemerides from data and set units
-    eph = Ephem("planets.dat") ; prefetch(eph)
+    eph = Ephem("INPUTS/planets.dat") ; prefetch(eph)
     options = useNaifId + unitDay + unitAU
 
     # Find observer location required to see transits
