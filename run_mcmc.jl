@@ -1,15 +1,15 @@
 include("ttv_wrapper.jl")  
+using PyPlot, CALCEPH, DelimitedFiles
+using Statistics, DataFitting, Random, Optim, LsqFit
+using Unitful, UnitfulAstro, LinearAlgebra
 using JLD2
-using Statistics
-
-@load "OUTPUTS/p3_fit_test.jld2"
-# param_p3 chi_p3 chi_best pbest tt ttmodel sigtt p3in p3out np3
 
 # Run a Markov chain:
 function MCMC(param::Array{Float64, 1},nsteps::Int64,nwalkers::Int64, 
   nplanet::Int64,ntrans::Array{Int64, 1},tt0::Array{Float64, 1}, tt::Array{Float64, 1}, sigtt::Array{Float64, 1}) 
   # To do:
     #give it -param, nsteps, nparam, nwalkers, tt0, tt, sigtt, ntrans, nplanet
+    #add to MCMC(): 1/eccentricity prior
   nparam = length(param)
   errors = [1e-7,1e-5,1e-5,1e-2,1e-2,1e-7,1e-5,1e-5,1e-2,1e-2,1e-6,1e-1,1e-1,1e-2,1e-2,1e-9]
   pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)","mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)","mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)","sigsys^2"]
@@ -77,16 +77,16 @@ function MCMC(param::Array{Float64, 1},nsteps::Int64,nwalkers::Int64,
     end
   end
   function plot_MCstep()
+    clf()
     for i=1:nparam
       for j=1:nwalkers
         plot(vec(par_mcmc[j,1:nsteps,i]))
       end
       xlabel("MCMC step")
       ylabel(pname[i])
-      # println("Hit return to continue")
-      # read(stdin,Char)
-      # clf()
     end
+    name = string("IMAGES/MCMCsteps",label,".png")
+    savefig(name)
   end
   # Now, determine time of burn-in by calculating first time median is crossed:
   iburn = 0
@@ -111,14 +111,13 @@ function MCMC(param::Array{Float64, 1},nsteps::Int64,nwalkers::Int64,
         scatter(vec(par_mcmc[1:nwalkers,iburn:nsteps,i]),vec(par_mcmc[1:nwalkers,iburn:nsteps,j]))
         xlabel(pname[i])
         ylabel(pname[j])
-        # println("Hit return to continue")
-        # read(stdin,Char)
-        
       end
     end
+    name = string("IMAGES/MCMCparams",label,".png")
+    savefig(name)
   end
-  # plot_MCstep()
-  # plot_MCparams()
+  plot_MCstep()
+  plot_MCparams()
   return par_mcmc,chi_mcmc
 end
 

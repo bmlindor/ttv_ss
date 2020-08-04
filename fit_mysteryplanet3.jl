@@ -175,7 +175,9 @@ function fit_mysteryplanet3(filename::String, label::String,
     #res = optimize(chisquare3, param3, method = :l_bfgs, iterations = 21)
     #  res = optimize(chisquare3, param3, method = :l_bfgs)
     #  ttmodel=ttv_wrapper3(tt0,param3)
-    println("Finished 3-planet fit. Best-fit parameters: ",pbest) # global best fit
+    println("Finished 3-planet fit, parameters: ",pbest) # global best fit
+
+    # what is the following code doing? Is there a difference between the previous pbest and the pbest on line 184?
     # fit = curve_fit(ttv_wrapper3,tt0,tt,weight,pbest)
     fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet, ntrans, params),tt0,tt,weight,pbest)
     # ttmodel=ttv_wrapper3(tt0,pbest)
@@ -200,9 +202,10 @@ function fit_mysteryplanet3(filename::String, label::String,
     plot_likelihood(p3in, p3out, sigma);
     plot_3planetfit(p3in, p3out, sigma);
 
-    file_save = string(“OUTPUTS/p3_fit_params”,label,”.jld2”)
-    @save file_save param_p3 chi_p3 chi_best pbest tt0 tt ttmodel sigtt p3in p3out np3
-    # writedlm("OUTPUTS/p3_bestfit.txt", zip(chi_best, pbest))
-    # writedlm("p3_fit.txt", zip(chi_p3, param_p3))
+    file = string("OUTPUTS/p3_fit",label,"params.jld2")
+    results = string("OUTPUTS/p3_fit",label,"results.txt")
+    @save file param_p3 chi_p3 chi_best pbest tt0 tt ttmodel sigtt p3in p3out np3 nphase
+    # @save results chi_best pbest
+    writedlm(results, zip(chi_best, pbest))
     # return chi_best, pbest
 end

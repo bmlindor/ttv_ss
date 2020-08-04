@@ -1,22 +1,21 @@
 Using the Solar System as a proxy for an exoplanetary system, 
 given transit timing variations of Venus and Earth, carry out
-a fit with TTVFaster to find period & mass of Jupiter.
+a fit with TTVFaster and Nbody Grad to find period & mass of Jupiter.
 
 1). Simulate transit times from JPLEphemeris. Add noise to data.
 
 include("sim_times.jl")
 sim_times(2.4332825e6, 2.4515445e6, 1000, true, sigma)
 
-For example, in this case the sim_times has multiple methods 
-with the following arguments
-(jd1::Float64, jd2::Float64, Nsteps::Int64, addnoise::Bool=false, sigma::Float64=0.0, seed::Int=42)
+Note: sim_times has multiple methods with the following arguments
+sim_times(jd1::Float64, jd2::Float64, Nsteps::Int64, addnoise::Bool=false, sigma::Float64=0.0, seed::Int=42)
 
-2). Carry out a linear fit to the transit times. 
+2a). Carry out a linear fit to the transit times. 
 
-3). Call ttv_nplanet.jl from wrapper then compute the chi-square 
+2b). Call ttv_nplanet.jl from wrapper then compute the chi-square 
 of the fit. Carry out an initial fit of the 2 inner planets
 
-4). Then add in the third planet. Initialize a grid of periods & 
+2c). Then add in the third planet. Initialize a grid of periods & 
 phases of the outer planet, compute the best-fit at each.
 Optimize the fit to the two sets of transit times by varying all of the
 other parameters. 
@@ -25,13 +24,20 @@ Notes: assume 2 transits for Jupiter because transits are required for TTVFaster
 Show that likelihood curve peaks at period of Jupiter.
 Note: the third planet can't be too close to the transiting planets.
 
-5).  Taking the minimum chi-square, run a markov chain with
+fit_mysteryplanet3(filename::String, label::String,
+  p3in::Float64=4000.0, p3out::Float64=4600.0, np3::Int=10, nphase::Int=10, 
+  addnoise::Bool=false, sigma::Float64=0.0)
+
+3).  Taking the minimum chi-square, run a markov chain with
 all 3 planets.  Assuming the host star has the same mass
 as the Sun, which 3 planets did you detect?  What are their
 masses and eccentricities (as well as uncertainties on these
 quantities)?
 
-6). Refine TTVFaster estimates from finding Jupiter by applying Nbody Grad,
+MCMC(param::Array{Float64, 1},nsteps::Int64,nwalkers::Int64, 
+  nplanet::Int64,ntrans::Array{Int64, 1},tt0::Array{Float64, 1}, tt::Array{Float64, 1}, sigtt::Array{Float64, 1}) 
+
+4). Refine TTVFaster estimates from finding Jupiter by applying Nbody Grad,
 get better parameters (masses of Venus and Earth)
 
 Learn Julia the Hard Way:
@@ -42,6 +48,7 @@ https://github.com/JuliaIO/JLD2.jl
 
 can save fit_p3 data:
 julia> using JLD2
+julia> @save "OUTPUTS/p3_fit.jld2" param_p3
 julia> @save "evj_mcmc_01_chi.jld2" chi_mcmc
 julia> @save "evj_mcmc_01_par.jld2" par_mcmc
 
@@ -49,8 +56,22 @@ The, I can restore these later:
 julia> using JLD2
 julia> @load "OUTPUTS/p3_fit_test.jld2"
 
+TODO:
+-add systematic err to fit_p3
+-Create slurm file to run multiple grids on hyak.mox
+-define format for grids and MCMC runs 
+run_types = [extrashort=(4230-4430), short=(2000-5000), medium=(700-10000), wide=(500-18000)]
+grid_types = [extrafine=1000, fine=100, medium=10, coarse=2]
+noise = [10.0, 15.0, 30.0, 45.0, 60.0, 120.0, 240.0]
+label 	run_type	grid_type	noise	
+test 	extrashort	coarse		30
+try001	short	 	medium		30
+try002	medium		fine		30
+try003	medium		fine
 
 5/25/2016 --> 8/4/2020
+Updated everything to be compatible with Julia v1.1
+
 Okay, so things to do next:
 1). Add in the Moon. [ ]
 2a). See how many observations would be needed (minimum bumber of years required) [ ]
@@ -82,3 +103,5 @@ about the Sun?
 3). The masses inferred with sufficient data are good, although
 still a bit more discrepant than I would like:  I need to
 implement an N-body fit.
+
+
