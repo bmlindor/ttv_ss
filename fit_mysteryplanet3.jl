@@ -164,7 +164,7 @@ function fit_mysteryplanet3(filename::String, label::String,
     end
     function plot_likelihood(p3in, p3out, sigma)
       clf()
-      plot(p3/365.25,exp.((lprob_p3 .-maximum(lprob_p3)))) #to show that max likelihood peaks at actual period
+      plot(p3/365.25,exp.((lprob_p3 .-maximum(lprob_p3)))) 
       xlabel("Period of planet 3 [years]")
       ylabel("Likelihood")
       name = string("IMAGES/p3likelihood",label,".png")
@@ -177,8 +177,7 @@ function fit_mysteryplanet3(filename::String, label::String,
     #res = optimize(chisquare3, param3, method = :l_bfgs, iterations = 21)
     #  res = optimize(chisquare3, param3, method = :l_bfgs)
     #  ttmodel=ttv_wrapper3(tt0,param3)
-    println("Finished 3-planet fit w/ fixed period")
-    println("parameters: ",pbest)
+    println("Finished 3-planet fit w/ fixed period: ",pbest)
 
     # fit = curve_fit(ttv_wrapper3,tt0,tt,weight,pbest)
     fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet, ntrans, params),tt0,tt,weight,pbest)
