@@ -4,7 +4,7 @@ include("sim_times.jl")
 include("fit_mysteryplanet3.jl")
 # sig_grid = [10.0, 15.0, 30.0, 45.0, 60.0]
 # p3in = 500.0; p3out = 18000.0; np3 = 1000
-p3in = 4300.0; p3out = 4300.0; np3 = 1
+p3in = 4230.0; p3out = 4430.0; np3 = 100
 p3 = 10 .^ range(log10(p3in),stop=log10(p3out),length=np3)
 function run_fitp3(p3in, p3out, np3, sigma)
 	# sim = sim_times(2.4332825e6, 2.4515445e6, 1000, true, sigma)
