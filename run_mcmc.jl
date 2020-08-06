@@ -40,20 +40,24 @@ function MCMC(param::Array{Float64, 1},label::String,nsteps::Int64,nwalkers::Int
     # factor of e*cos(omega) and e*sin(omega):
     lprior += -log(ecc)  # Add this to log prior
     end
+    return lprior
   end
+
+  Nobs = sum(ntrans) - 2
 
   # Initialize walkers:
   par_trial = copy(param)
   for j=1:nwalkers
   # Select from within uncertainties:
-    lprob_trial = 1e100
+    lprob_trial = -1e100
   # Only initiate models with reasonable chi-square values:
     while lprob_trial < lprob_best - 1000
       par_trial = param + errors.*randn(nparam)
       # model = ttv_wrapper3(tt0,par_trial)# 
       model = ttv_wrapper(tt0, nplanet, ntrans, par_trial[1:end])
       println(length(tt)," ",length(model))
-      ll = (-0.5 * sum((tt-model).^2 ./(sigtt.^2 .+ par_trial[end]) .+ log.(sigtt.^2 .+ par_trial[end])))
+      ll =  log(sum((tt-model).^2 ./sigtt.^2))
+      # ll = (-0.5 * sum((tt-model).^2 ./(sigtt.^2 .+ par_trial[end]) .+ log.(sigtt.^2 .+ par_trial[end])))
       lprob_trial = calc_lprior(par_trial) + ll*(1 - Nobs/2) 
       println("lprob_trial: ",lprob_trial)
     end
@@ -77,9 +81,10 @@ function MCMC(param::Array{Float64, 1},label::String,nsteps::Int64,nwalkers::Int
       par_trial=vec(z*par_mcmc[j,i-1,:]+(1.0-z)*par_mcmc[ipartner,i-1,:])
   # Compute model & chi-square:  
       # model_trial =ttv_wrapper3(tt0,par_trial)
-      model_trial = ttv_wrapper(tt0, nplanet, ntrans, par_trial[1:end-1])
-      ll = -.5 *sum((tt-model_trial).^2 ./(sigtt.^2 .+ par_trial[end]) .+ log.(sigtt.^2 .+ par_trial[end]))
-      lprob_trial = lprior(par_trial) + ll 
+      model_trial = ttv_wrapper(tt0, nplanet, ntrans, par_trial[1:end])
+      # ll = -.5 *sum((tt-model_trial).^2 ./(sigtt.^2 .+ par_trial[end]) .+ log.(sigtt.^2 .+ par_trial[end]))
+      ll =  log(sum((tt-model_trial).^2 ./sigtt.^2))
+      lprob_trial = calc_lprior(par_trial) + ll*(1 - Nobs/2) 
   # Next, determine whether to accept this trial step:
       alp = z^(nparam-1)*exp((lprob_trial - lprob_mcmc[j,i-1]))
       if rand() < 0.0001
@@ -141,8 +146,8 @@ function MCMC(param::Array{Float64, 1},label::String,nsteps::Int64,nwalkers::Int
     name = string("IMAGES/MCMCparams",label,".png")
     savefig(name)
   end
-  plot_MCstep()
-  plot_MCparams()
+  plot_MCstep(label)
+  plot_MCparams(label)
   return par_mcmc,lprob_mcmc
 end
 
