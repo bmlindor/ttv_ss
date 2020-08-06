@@ -13,12 +13,10 @@ function MCMC(param::Array{Float64, 1},label::String,nsteps::Int64,nwalkers::Int
   nparam = length(param)
   errors = [1e-7,1e-5,1e-5,1e-2,1e-2,
         1e-7,1e-5,1e-5,1e-2,1e-2,
-        1e-6,1e-1,1e-1,1e-2,1e-2,
-        1e-9]
+        1e-6,1e-1,1e-1,1e-2,1e-2]
   pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
           "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
-          "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)",
-          "sigsys^2"]
+          "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)"]
   nwalkers = nparam * 3
   # Set up arrays to hold the results:
   par_mcmc = zeros(nwalkers,nsteps,nparam)
@@ -50,13 +48,13 @@ function MCMC(param::Array{Float64, 1},label::String,nsteps::Int64,nwalkers::Int
   # Select from within uncertainties:
     lprob_trial = 1e100
   # Only initiate models with reasonable chi-square values:
-    while lprob_trial > lprob_best + 1000
+    while lprob_trial < lprob_best - 1000
       par_trial = param + errors.*randn(nparam)
       # model = ttv_wrapper3(tt0,par_trial)# 
-      model = ttv_wrapper(tt0, nplanet, ntrans, par_trial[1:end-1])
+      model = ttv_wrapper(tt0, nplanet, ntrans, par_trial[1:end])
       println(length(tt)," ",length(model))
-      ll = -0.5 * sum((tt-model).^2 ./(sigtt.^2 .+ par_trial[end]) .+ log.(sigtt.^2 .+ par_trial[end]))
-      lprob_trial = calc_lprior(par_trial) + ll 
+      ll = (-0.5 * sum((tt-model).^2 ./(sigtt.^2 .+ par_trial[end]) .+ log.(sigtt.^2 .+ par_trial[end])))
+      lprob_trial = calc_lprior(par_trial) + ll*(1 - Nobs/2) 
       println("lprob_trial: ",lprob_trial)
     end
     lprob_mcmc[j,1]=lprob_trial
