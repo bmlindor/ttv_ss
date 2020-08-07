@@ -17,7 +17,8 @@ function MCMC(param::Array{Float64, 1},label::String,nsteps::Int64,nwalkers::Int
   pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
           "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
           "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)"]
-  nwalkers = nparam * 3
+  # nwalkers = nparam * 3
+  @assert (nwalkers > 2*nparam)
   # Set up arrays to hold the results:
   par_mcmc = zeros(nwalkers,nsteps,nparam)
   lprob_mcmc = zeros(nwalkers,nsteps)
@@ -106,18 +107,19 @@ function MCMC(param::Array{Float64, 1},label::String,nsteps::Int64,nwalkers::Int
       accept = 0
     end
   end
-  function plot_MCstep(label)
-    clf()
-    for i=1:nparam
-      for j=1:nwalkers
-        plot(vec(par_mcmc[j,1:nsteps,i]))
-      end
-      xlabel("MCMC step")
-      ylabel(pname[i])
-    end
-    name = string("IMAGES/MCMCsteps",label,".png")
-    savefig(name)
-  end
+  # function plot_MCstep(label)
+  #   clf()
+  #   subplot(531)
+  #   for i=1:nparam
+  #     for j=1:nwalkers
+  #       plot(vec(par_mcmc[j,1:nsteps,i]))
+  #     end
+  #     xlabel("MCMC step")
+  #     ylabel(pname[i])
+  #   end
+  #   name = string("IMAGES/MCMCsteps",label,".png")
+  #   savefig(name)
+  # end
   # Now, determine time of burn-in by calculating first time median is crossed:
   iburn = 0
   for i=1:nparam
@@ -134,20 +136,21 @@ function MCMC(param::Array{Float64, 1},label::String,nsteps::Int64,nwalkers::Int
   end
 
   println("Burn-in ends: ",iburn)
-  function plot_MCparams(label)
-    clf()
-    for i=2:nparam
-      for j=1:i-1
-        scatter(vec(par_mcmc[1:nwalkers,iburn:nsteps,i]),vec(par_mcmc[1:nwalkers,iburn:nsteps,j]))
-        xlabel(pname[i])
-        ylabel(pname[j])
-      end
-    end
-    name = string("IMAGES/MCMCparams",label,".png")
-    savefig(name)
-  end
-  plot_MCstep(label)
-  plot_MCparams(label)
+  # function plot_MCparams(label)
+  #   clf()
+  #   for i=2:nparam
+  #     for j=1:i-1
+  #       scatter(vec(par_mcmc[1:nwalkers,iburn:nsteps,i]),vec(par_mcmc[1:nwalkers,iburn:nsteps,j]))
+  #       xlabel(pname[i])
+  #       ylabel(pname[j])
+  #     end
+  #   end
+  #   name = string("IMAGES/MCMCparams",label,".png")
+  #   savefig(name)
+  # end
+  # plot_MCstep(label)
+  # plot_MCparams(label)
+  @save par_mcmc, lprob_mcmc, accept, iburn, steps, nwalkers, nsteps
   return par_mcmc,lprob_mcmc
 end
 
