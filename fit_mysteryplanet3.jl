@@ -3,6 +3,7 @@ include("regress.jl")
 include("compute_ttv.jl")
 include("chisquare.jl")
 include("ttv_wrapper.jl")
+include("decompose_ttvs.jl")
 using PyPlot, CALCEPH, DelimitedFiles
 using Statistics, DataFitting, Random, Optim, LsqFit
 using Unitful, UnitfulAstro, LinearAlgebra
@@ -205,7 +206,7 @@ function fit_mysteryplanet3(filename::String, label::String,
 
     file = string("OUTPUTS/p3_fit",label,"params.jld2")
     results = string("OUTPUTS/p3_fit",label,"results.txt")
-    @save file param_p3 lprob_p3 lprob_best pbest tt0 tt ttmodel sigtt p3in p3out np3 nphase
+    @save file param_p3 lprob_p3 lprob_best pbest ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase
     # @save results chi_best pbest
     # writedlm(results, chi_best, pbest)
     # return chi_best, pbest
