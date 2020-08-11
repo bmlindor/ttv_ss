@@ -150,7 +150,8 @@ function MCMC(param::Array{Float64, 1},label::String,nsteps::Int64,nwalkers::Int
   # end
   # plot_MCstep(label)
   # plot_MCparams(label)
-  @save par_mcmc, lprob_mcmc, accept, iburn, steps, nwalkers, nsteps
+  file = string("OUTPUTS/mcmc",label,".jld2")
+  @save file par_mcmc, lprob_mcmc, accept, iburn, steps, nwalkers, nsteps
   return par_mcmc,lprob_mcmc
 end
 
