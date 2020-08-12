@@ -1,9 +1,9 @@
 include("ttv_wrapper.jl")  
 include("bounds.jl")
-using PyPlot, CALCEPH, DelimitedFiles
+using PyPlot
+using DelimitedFiles, JLD2
 using Statistics, DataFitting, Random, Optim, LsqFit
 using Unitful, UnitfulAstro, LinearAlgebra
-using JLD2
 
 # Run a Markov chain:
 function MCMC(param::Array{Float64, 1},label::String,nsteps::Int64,nwalkers::Int64,nplanet::Int64,ntrans::Array{Int64, 1},tt0::Array{Float64, 1},tt::Array{Float64, 1},sigtt::Array{Float64, 1}) 
@@ -18,7 +18,7 @@ function MCMC(param::Array{Float64, 1},label::String,nsteps::Int64,nwalkers::Int
           "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
           "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)"]
   # nwalkers = nparam * 3
-  @assert (nwalkers > 2*nparam)
+  @assert (nwalkers >= 30)
   # Set up arrays to hold the results:
   par_mcmc = zeros(nwalkers,nsteps,nparam)
   lprob_mcmc = zeros(nwalkers,nsteps)
@@ -60,7 +60,7 @@ function MCMC(param::Array{Float64, 1},label::String,nsteps::Int64,nwalkers::Int
       ll =  log(sum((tt-model).^2 ./sigtt.^2))
       # ll = (-0.5 * sum((tt-model).^2 ./(sigtt.^2 .+ par_trial[end]) .+ log.(sigtt.^2 .+ par_trial[end])))
       lprob_trial = calc_lprior(par_trial) + ll*(1 - Nobs/2) 
-      println("lprob_trial: ",lprob_trial)
+      println("Trial Log Prob: ",lprob_trial)
     end
     lprob_mcmc[j,1]=lprob_trial
     par_mcmc[j,1,:]=par_trial
@@ -89,7 +89,7 @@ function MCMC(param::Array{Float64, 1},label::String,nsteps::Int64,nwalkers::Int
   # Next, determine whether to accept this trial step:
       alp = z^(nparam-1)*exp((lprob_trial - lprob_mcmc[j,i-1]))
       if rand() < 0.0001
-        println("Step: ",i," Walker: ",j," Chi-square: ",lprob_trial," Prob: ",alp," Frac: ",accept/(mod(i-1,1000)*nwalkers+j))
+        println("Step: ",i," Walker: ",j," Trial Log Prob: " ,lprob_trial," Prob: ",alp," Frac: ",accept/(mod(i-1,1000)*nwalkers+j))
       end
       if alp >= rand()
   # If step is accepted, add it to the chains!
@@ -103,23 +103,24 @@ function MCMC(param::Array{Float64, 1},label::String,nsteps::Int64,nwalkers::Int
       end
     end
     if mod(i,1000) == 0
-      println("Number of steps: ",i," acceptance rate: ",accept/(1000*nwalkers))
+      println("Number of steps: ",i," Acceptance Rate: ",accept/(1000*nwalkers))
       accept = 0
     end
   end
-  # function plot_MCstep(label)
-  #   clf()
-  #   subplot(531)
-  #   for i=1:nparam
-  #     for j=1:nwalkers
-  #       plot(vec(par_mcmc[j,1:nsteps,i]))
-  #     end
-  #     xlabel("MCMC step")
-  #     ylabel(pname[i])
-  #   end
-  #   name = string("IMAGES/MCMCsteps",label,".png")
-  #   savefig(name)
-  # end
+#   function plot_MCstep(label)
+#     clf()
+#     subplot(531)
+#     for i=1:nparam
+#       for j=1:nwalkers
+#         plot(vec(par_mcmc[j,1:nsteps,i]))
+#       end
+#       xlabel("MCMC step")
+#       ylabel(pname[i])
+#     end
+#     name = string("IMAGES/MCMCsteps",label,".png")
+#     savefig(name)
+#   end
+    
   # Now, determine time of burn-in by calculating first time median is crossed:
   iburn = 0
   for i=1:nparam
@@ -135,8 +136,7 @@ function MCMC(param::Array{Float64, 1},label::String,nsteps::Int64,nwalkers::Int
     end
   end
 
-  println("Burn-in ends: ",iburn)
-  # function plot_MCparams(label)
+  println("Burn-in Number (ends): ",iburn)
   #   clf()
   #   for i=2:nparam
   #     for j=1:i-1
@@ -150,27 +150,16 @@ function MCMC(param::Array{Float64, 1},label::String,nsteps::Int64,nwalkers::Int
   # end
   # plot_MCstep(label)
   # plot_MCparams(label)
-  file = string("OUTPUTS/mcmc",label,".jld2")
-  @save file par_mcmc, lprob_mcmc, accept, iburn, steps, nwalkers, nsteps
+  file = string("OUTPUTS/mcmc_results",label,".jld2")
+  @save file par_mcmc lprob_mcmc nwalkers nsteps accept iburn
   return par_mcmc,lprob_mcmc
 end
 
-@load "OUTPUTS/p3_fittestparams.jld2" #param_p3 lprob_p3 lprob_best pbest tt0 tt ttmodel sigtt p3in p3out np3 nphase
-param = pbest
-nsteps = 1000
-nwalkers = 50
-nplanet = 3
-ntrans = [82,51,2]
-# function MCMC(param::Array{Float64, 1},
-#   label::String,
-#   nsteps::Int64,
-#   nwalkers::Int64,
-#   nplanet::Int64,
-#   ntrans::Array{Int64, 1},
-#   tt0::Array{Float64, 1},
-#   tt::Array{Float64, 1},
-#   sigtt::Array{Float64, 1}) 
+# @load "OUTPUTS/p3_fittestparams.jld2" #param_p3 lprob_p3 lprob_best pbest ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase
+# param = pbest
+# nsteps = 1000
+# nwalkers = 50
 
-par_mcmc, lprob_mcmc = MCMC(param, "test", nsteps, nwalkers, nplanet, ntrans, tt0, tt, sigtt) 
+# par_mcmc, lprob_mcmc = MCMC(param, "test", nsteps, nwalkers, nplanet, ntrans, tt0, tt, sigtt) 
 
 # @save nwalkers, nsteps, accept/(1000*nwalkers)

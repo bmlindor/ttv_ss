@@ -1,6 +1,7 @@
 # Julia v1.1
-using PyPlot, CALCEPH 
-using FITSIO, DelimitedFiles
+using PyPlot
+using CALCEPH 
+using DelimitedFiles, JLD2
 using Statistics, DataFitting, Random
 using Unitful, UnitfulAstro, LinearAlgebra
 if !@isdefined(CGS)

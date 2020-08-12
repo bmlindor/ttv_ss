@@ -3,11 +3,10 @@ include("regress.jl")
 include("compute_ttv.jl")
 include("chisquare.jl")
 include("ttv_wrapper.jl")
-include("decompose_ttvs.jl")
-using PyPlot, CALCEPH, DelimitedFiles
+using PyPlot
+using DelimitedFiles, JLD2
 using Statistics, DataFitting, Random, Optim, LsqFit
 using Unitful, UnitfulAstro, LinearAlgebra
-using JLD2
 
 function fit_mysteryplanet3(filename::String, label::String,
   p3in::Float64=4000.0, p3out::Float64=4600.0, np3::Int=10, nphase::Int=10, 
@@ -200,14 +199,13 @@ function fit_mysteryplanet3(filename::String, label::String,
       name = string("IMAGES/3planetfitp",label,".png")
       savefig(name)
     end
-    plot_2planetfit(p3in, p3out, sigma);
-    plot_likelihood(p3in, p3out, sigma);
-    plot_3planetfit(p3in, p3out, sigma);
+#     plot_2planetfit(p3in, p3out, sigma);
+#     plot_likelihood(p3in, p3out, sigma);
+#     plot_3planetfit(p3in, p3out, sigma);
 
     file = string("OUTPUTS/p3_fit",label,"params.jld2")
     results = string("OUTPUTS/p3_fit",label,"results.txt")
     @save file param_p3 lprob_p3 lprob_best pbest ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase
-    # @save results chi_best pbest
-    # writedlm(results, chi_best, pbest)
-    # return chi_best, pbest
+    writedlm(results, pbest)
+#     return chi_best, pbest
 end
