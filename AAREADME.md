@@ -11,7 +11,7 @@ NB: for best accuracy the first time argument should be the integer part and the
 
 For planets without moons, Mercury and Venus, the barycenter location coincides with the body center of mass. 
 
-NAIFID: 
+NaifID: 
       2           'VENUS BARYCENTER'
       3           'EARTH MOON BARYCENTER'
       399         'EARTH'
@@ -22,7 +22,7 @@ include("sim_times.jl")
 sim_times(2.4332825e6, 2.4515445e6, 1000, true, sigma)
 
 Note: sim_times has multiple methods with the following arguments
-sim_times(jd1::Float64, jd2::Float64, Nsteps::Int64, addnoise::Bool=false, sigma::Float64=0.0, seed::Int=42)
+sim_times(jd1::Float64, jd2::Float64, Nsteps::Int64, addnoise::Bool=false, sigma::Float64=0.0, seed::Int=42, EMB::Bool=true)
 
 2a). Carry out a linear fit to the transit times. 
 
@@ -40,7 +40,7 @@ Note: the third planet can't be too close to the transiting planets.
 
 fit_mysteryplanet3(filename::String, label::String,
   p3in::Float64=4000.0, p3out::Float64=4600.0, np3::Int=10, nphase::Int=10, 
-  addnoise::Bool=false, sigma::Float64=0.0)
+  addnoise::Bool=false, sigma::Float64=0.0, EMB::Bool=true)
 
 3).  Taking the minimum chi-square, run a markov chain with
 all 3 planets.  Assuming the host star has the same mass
