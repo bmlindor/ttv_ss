@@ -30,16 +30,6 @@ function sim_times(jd1::Float64, jd2::Float64, Nsteps::Int64, addnoise::Bool=fal
     xsun = CGS.RSUN/CGS.AU * cos.(theta_sun)
     ysun = CGS.RSUN/CGS.AU * sin.(theta_sun)
 
-    # For planets without moons, Mercury and Venus, 
-    # the barycenter location coincides with the body center of mass. 
-
-    # CALCELPH retrieves the position, velocity and acceleration of Earth (geocenter) relative
-    # to the Earth-Moon system barycenter in kilometers, kilometers per second and
-    # kilometers per second square at JD= 2451624.5 TDB timescale
-    # for best accuracy the first time argument should be the integer part and the
-    # delta the fractional part 
-    # adjust as step through day? 
-
     # Load ephemerides from data and set units
     eph = Ephem("INPUTS/planets.dat") ; prefetch(eph)
     options = useNaifId + unitDay + unitAU

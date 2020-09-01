@@ -2,6 +2,15 @@ Using the Solar System as a proxy for an exoplanetary system,
 given transit timing variations of Venus and Earth, carry out
 a fit with TTVFaster and Nbody Grad to find period & mass of Jupiter.
 
+CALCEPH 
+retrieves the position, velocity and acceleration of Earth (geocenter) relative
+to the Earth-Moon system barycenter in kilometers, kilometers per second and
+kilometers per second square at JD= 2451624.5 TDB timescale
+
+NB: for best accuracy the first time argument should be the integer part and the delta the fractional part (step through day)
+
+For planets without moons, Mercury and Venus, the barycenter location coincides with the body center of mass. 
+
 1). Simulate transit times from JPLEphemeris. Add noise to data.
 
 include("sim_times.jl")
