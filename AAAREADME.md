@@ -11,6 +11,11 @@ NB: for best accuracy the first time argument should be the integer part and the
 
 For planets without moons, Mercury and Venus, the barycenter location coincides with the body center of mass. 
 
+NAIFID: 
+      2           'VENUS BARYCENTER'
+      3           'EARTH MOON BARYCENTER'
+      399         'EARTH'
+
 1). Simulate transit times from JPLEphemeris. Add noise to data.
 
 include("sim_times.jl")
