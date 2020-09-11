@@ -177,35 +177,32 @@ function fit_moon(filename::String, label::String,
     # Now, search for Moon:
     nparam = 18
     deltaphi_cur = 2.312
-    deltaphi = 10 .^ range(log10(dpin),stop=log10(dpout),length=ndp)
+    deltaphi = range(dpin,stop=dpout,length=ndp)
     lprob_dp = zeros(ndp)
     param_dp = zeros(nparam,ndp)
     lprob_best = -1e100 #global best fit
     pbest_dp = zeros(nparam)
     for j=1:ndp
-      phiphase = deltaphi[j]*range(0,stop=1,length=nphiphase)
-      lprob_phase = zeros(nphiphase)
+      # phiphase = deltaphi[j]*range(0,stop=1,length=nphiphase)
+      # lprob_phase = zeros(nphiphase)
       lprob_dp[j] = -1e100 
-      for i=1:nphiphase
-        param_tmp = [0.01,0.01,phiphase[i]] # lunar params: t_s , t_c , deltaphi 
-        deltaphi_cur = deltaphi[j]
-        param1 = param4 .+ 100.0
-        while maximum(abs.(param1 .- param4)) > 1e-5
-          param4 = [pbest_p3;param_tmp]
-          fit = curve_fit((tt0,param4) -> ttv_wrapper(tt0,nplanet,ntrans,param4,false),tt0, tt, weight, param4)
-          param4 = fit.param 
-        end
-        ttmodel = ttv_wrapper(tt0, nplanet, ntrans,[fit.param[1:17];deltaphi_cur],false)
-        lprob_phase[i]= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
-        if lprob_phase[i] > lprob_best 
-          lprob_best = lprob_phase[i]
-          pbest_dp = [fit.param[1:17];deltaphi_cur]
-        end
-        if lprob_phase[i] > lprob_dp[j] 
-          lprob_dp[j] = lprob_phase[i]
-          param_dp[1:nparam,j] =  [fit.param[1:17];deltaphi_cur]
-        end
+      # for i=1:nphiphase
+      param_tmp = [0.01,0.01,deltaphi[j]] # lunar params: t_s , t_c , deltaphi 
+      param4 = [pbest_p3;param_tmp]
+      deltaphi_cur = deltaphi[j]
+      param1 = param4 .+ 100.0
+      while maximum(abs.(param1 .- param4)) > 1e-5
+        param1 = param4
+        fit = curve_fit((tt0,param4) -> ttv_wrapper(tt0,nplanet,ntrans,param4,false),tt0, tt, weight, param4)
+        param4 = fit.param 
       end
+      ttmodel = ttv_wrapper(tt0, nplanet, ntrans,[fit.param[1:17];deltaphi_cur],false)
+      lprob_dp[j]= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
+      if lprob_dp[j] > lprob_best 
+        lprob_best = lprob_dp[j]
+        pbest_dp = [fit.param[1:17];deltaphi_cur]
+      end
+      # end
       println("deltaphi: ",deltaphi[j]," chi: ",lprob_dp[j]," Param: ",vec(param_dp[1:nparam,j]))
     end
 
