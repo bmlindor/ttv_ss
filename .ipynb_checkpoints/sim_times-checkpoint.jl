@@ -10,7 +10,8 @@ if !@isdefined(CGS)
 end
 include("regress.jl")
 
-function sim_times(jd1::Float64, jd2::Float64, Nsteps::Int64, addnoise::Bool=false, sigma::Float64=0.0, seed::Int=42)
+function sim_times(jd1::Float64, jd2::Float64, Nsteps::Int64, 
+    addnoise::Bool=false, sigma::Float64=0.0, seed::Int=42, EMB::Bool=true)
     # To do: output file with arguments in header
     #       output data frame with header?
 
@@ -30,16 +31,6 @@ function sim_times(jd1::Float64, jd2::Float64, Nsteps::Int64, addnoise::Bool=fal
     xsun = CGS.RSUN/CGS.AU * cos.(theta_sun)
     ysun = CGS.RSUN/CGS.AU * sin.(theta_sun)
 
-    # For planets without moons, Mercury and Venus, 
-    # the barycenter location coincides with the body center of mass. 
-
-    # CALCELPH retrieves the position, velocity and acceleration of Earth (geocenter) relative
-    # to the Earth-Moon system barycenter in kilometers, kilometers per second and
-    # kilometers per second square at JD= 2451624.5 TDB timescale
-    # for best accuracy the first time argument should be the integer part and the
-    # delta the fractional part 
-    # adjust as step through day? 
-
     # Load ephemerides from data and set units
     eph = Ephem("INPUTS/planets.dat") ; prefetch(eph)
     options = useNaifId + unitDay + unitAU
@@ -52,9 +43,14 @@ function sim_times(jd1::Float64, jd2::Float64, Nsteps::Int64, addnoise::Bool=fal
     pva_earth = zeros(9, Nsteps)
     # for i=1:np0
     for i=1:Nsteps
-       pva_sun[1:9,i] = compute(eph,t0[i],0.5,10,10,options,2)
-       pva_venus[1:9,i] = compute(eph,t0[i],0.5,2,10,options,2) # useNaifId = 2 for Venus 
-       pva_earth[1:9,i] = compute(eph,t0[i],0.5,3,10,options,2) # useNaifId = 3 for Earth-Moon bary
+        pva_sun[1:9,i] = compute(eph,t0[i],0.5,10,10,options,2)
+        pva_venus[1:9,i] = compute(eph,t0[i],0.5,2,10,options,2)
+        if EMB
+            pva_earth[1:9,i] = compute(eph,t0[i],0.5,3,10,options,2) 
+        else
+            pva_earth[1:9,i] = compute(eph,t0[i],0.5,399,10,options,2)
+        end
+
     end
     L_venus = cross(pva_venus[1:3], pva_venus[4:6])
     L_earth = cross(pva_earth[1:3], pva_earth[4:6])

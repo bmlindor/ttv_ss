@@ -15,7 +15,7 @@ function ttv_wrapper(tt0, nplanet, ntrans, params, fixp3::Bool = false, p3_cur::
     end
     jmax = 5
     # Call ttv_nplanet:
-    ttv = ttv_nplanet(nplanet, jmax, ntrans, param[1:15])
+    ttv = ttv_nplanet(nplanet, jmax, ntrans, param[1:5*nplanet])
     # We measure transit times, not TTVs, so add back in the linear ephemeris:
     t01 = params[3]
     per1 = params[2]
