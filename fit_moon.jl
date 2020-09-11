@@ -10,7 +10,7 @@ using Unitful, UnitfulAstro, LinearAlgebra
 
 function fit_moon(filename::String, label::String,
   p3in::Float64=4000.0, p3out::Float64=4600.0, np3::Int=10, nphase::Int=10, 
-  addnoise::Bool=false, sigma::Float64=0.0, EMB::Bool=false)
+  addnoise::Bool=false, sigma::Float64=0.0)
     #=
      To do:
      # generalize to call in any file (with or w/o noise)
@@ -108,7 +108,7 @@ function fit_moon(filename::String, label::String,
     param1 = init_param .+ 100.0
     while maximum(abs.(param1 .- init_param)) > 1e-5
       param1 = init_param
-      res = curve_fit((tt0,params) -> ttv_wrapper(tt0, nplanet, ntrans, params), tt0, tt, weight, init_param)
+      res = curve_fit((tt0,params) -> ttv_wrapper(tt0, nplanet, ntrans, params, true), tt0, tt, weight, init_param)
       init_param = res.param
       # println("init_param: ",init_param)
       # println("New Initial chi-square: ",chisquare(tt0, nplanet, ntrans, init_param, tt, sigtt))
@@ -144,12 +144,12 @@ function fit_moon(filename::String, label::String,
         param1 = param3 .+ 100.0
         while maximum(abs.(param1 .- param3)) > 1e-5
           param1 = param3
-          fit = curve_fit((tt0,params) -> ttv_wrapper(tt0, nplanet, ntrans,params,true,p3_cur),tt0,tt, weight, param3)
+          fit = curve_fit((tt0,params) -> ttv_wrapper(tt0, nplanet, ntrans,params,true,true,p3_cur),tt0,tt, weight, param3)
           param3 = fit.param
           # println("init_param: ",param3)
           # println("New Initial chi-square: ",chisquare(tt0, nplanet, ntrans, param3, tt, sigtt, true, p3_cur))
         end
-        ttmodel = ttv_wrapper(tt0, nplanet, ntrans, param3, true, p3_cur)
+        ttmodel = ttv_wrapper(tt0, nplanet, ntrans, param3, true,true, p3_cur)
         lprob_phase[i]= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
         if lprob_phase[i] > lprob_best # check that best fit for period is better than global best fit
           lprob_best = lprob_phase[i]
@@ -195,11 +195,11 @@ function fit_moon(filename::String, label::String,
     # param1 = param4 .+ 100.0
     # while maximum(abs.(param1 .- param4)) > 1e-5
       # param1 = param4
-    fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params),tt0, tt, weight, param4)
+    fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,false),tt0, tt, weight, param4)
       # param4 = fit.param
     #end
     pbest_m2 = fit.param
-    ttmodel = ttv_wrapper(tt0, nplanet, ntrans, pbest_m2)
+    ttmodel = ttv_wrapper(tt0, nplanet, ntrans, pbest_m2,false)
     lprob_global = (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
     println("Finished lunar fit: ", pbest_m2)
 
