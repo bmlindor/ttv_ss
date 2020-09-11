@@ -1,6 +1,6 @@
 # Julia v1.1
 include("ttv_nplanet.jl")
-function ttv_wrapper(tt0, nplanet, ntrans, params, fixp3::Bool = false, p3_cur::Float64 = 0.0, EMB::Bool = true)
+function ttv_wrapper(tt0, nplanet, ntrans, params, EMB::Bool=false, fixp3::Bool = false, p3_cur::Float64 = 0.0)
     # These lines need modification for different choices of parameters:
     if nplanet == 2
         n1, n2 = ntrans
