@@ -203,6 +203,7 @@ function fit_moon(filename::String, label::String,
         pbest_dp = [fit.param[1:17];deltaphi_cur]
       end
       # end
+      param_dp[1:nparam,j] = [fit.param[1:17];deltaphi_cur]
       println("deltaphi: ",deltaphi[j]," chi: ",lprob_dp[j]," Param: ",vec(param_dp[1:nparam,j]))
     end
 
