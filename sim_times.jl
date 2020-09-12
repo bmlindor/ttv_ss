@@ -49,6 +49,12 @@ function sim_times(jd1::Float64, jd2::Float64, Nsteps::Int64,
             pva_earth[1:9,i] = compute(eph,t0[i],0.5,3,10,options,2) 
         else
             pva_earth[1:9,i] = compute(eph,t0[i],0.5,399,10,options,2)
+#            pva_emb = compute(eph,t0[i],0.5,3,10,options,2)
+#            pva_moon = compute(eph,t0[i],0.5,301,10,options,2)
+#            println("Earth - EMB: ",norm(pva_earth[1:3,i] .- pva_emb[1:3]))
+#            println("Earth - Moon: ",norm(pva_earth[1:3,i] .- pva_moon[1:3]))
+#            println("Moon - EMB: ",norm(pva_moon[1:3] .- pva_emb[1:3]))
+#            println("Ratio: ",norm(pva_earth[1:3,i] .- pva_emb[1:3])/norm(pva_moon[1:3] .- pva_emb[1:3]))
         end
 
     end
@@ -151,7 +157,13 @@ function sim_times(jd1::Float64, jd2::Float64, Nsteps::Int64,
     P_err = 2
     tt1 = find_times(2, eph, t0, P_venus, P_err, n_obs, 10)
     nt1 = length(tt1)
-    tt2 = find_times(3, eph, t0, P_earth, P_err, n_obs, 10)
+    if EMB
+      # Find times of Earth-Moon barycenter transit:
+      tt2 = find_times(3, eph, t0, P_earth, P_err, n_obs, 10)
+    else
+      # Find times of Earth transit:
+      tt2 = find_times(399, eph, t0, P_earth, P_err, n_obs, 10)
+    end
     nt2 = length(tt2)
     # Actual transit times:
 
