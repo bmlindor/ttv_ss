@@ -211,7 +211,7 @@ function fit_moon(filename::String, label::String,
     pbest_global = fit.param
     ttmodel = ttv_wrapper(tt0, nplanet, ntrans, pbest_global, false)
     lprob_global = (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
-    println("Finished lunar fit: ", pbest_global)
+    println("Finished lunar fit: ",lprob_global," ",pbest_global)
 
     # param_m2 = [0.01, 0.01, 2.312]
     # param4 = [pbest_p3;param_m2]
