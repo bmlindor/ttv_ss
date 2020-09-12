@@ -3,6 +3,7 @@ using DelimitedFiles, JLD2
 include("sim_times.jl")
 include("fit_mysteryplanet3.jl")
 include("run_mcmc.jl")
+include("fit_moon.jl")
 # sig_grid = [10.0, 15.0, 30.0, 45.0, 60.0]
 # p3in = 500.0; p3out = 18000.0; np3 = 1000
 # Modify the following variables as necessary:
