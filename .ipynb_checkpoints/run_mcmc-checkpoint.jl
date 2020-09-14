@@ -6,7 +6,7 @@ using Statistics, DataFitting, Random, Optim, LsqFit
 using Unitful, UnitfulAstro, LinearAlgebra
 
 # Run a Markov chain:
-function MCMC(param::Array{Float64, 1},label::String,nsteps::Int64,nwalkers::Int64,nplanet::Int64,ntrans::Array{Int64, 1},tt0::Array{Float64, 1},tt::Array{Float64, 1},sigtt::Array{Float64, 1}) 
+function MCMC(param::Array{Float64, 1},label::String,nsteps::Int64,nwalkers::Int64,nplanet::Int64,ntrans::Array{Int64, 1},tt0::Array{Float64, 1},tt::Array{Float64, 1},sigtt::Array{Float64, 1}, EMB::Bool=true) 
   # To do:
     #give it -param, nsteps, nparam, nwalkers, tt0, tt, sigtt, ntrans, nplanet
     #add to MCMC(): 1/eccentricity prior
@@ -14,6 +14,7 @@ function MCMC(param::Array{Float64, 1},label::String,nsteps::Int64,nwalkers::Int
   errors = [1e-7,1e-5,1e-5,1e-2,1e-2,
         1e-7,1e-5,1e-5,1e-2,1e-2,
         1e-6,1e-1,1e-1,1e-2,1e-2]
+    
   pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
           "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
           "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)"]

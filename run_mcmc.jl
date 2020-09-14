@@ -6,17 +6,32 @@ using Statistics, DataFitting, Random, Optim, LsqFit
 using Unitful, UnitfulAstro, LinearAlgebra
 
 # Run a Markov chain:
-function MCMC(param::Array{Float64, 1},label::String,nsteps::Int64,nwalkers::Int64,nplanet::Int64,ntrans::Array{Int64, 1},tt0::Array{Float64, 1},tt::Array{Float64, 1},sigtt::Array{Float64, 1}) 
+function MCMC(param::Array{Float64, 1},label::String,
+  nsteps::Int64,nwalkers::Int64,nplanet::Int64,ntrans::Array{Int64, 1},
+  tt0::Array{Float64, 1},tt::Array{Float64, 1},sigtt::Array{Float64, 1},
+  EMB::Bool=true,use_sigsys::Bool=true) 
   # To do:
     #give it -param, nsteps, nparam, nwalkers, tt0, tt, sigtt, ntrans, nplanet
     #add to MCMC(): 1/eccentricity prior
   nparam = length(param)
-  errors = [1e-7,1e-5,1e-5,1e-2,1e-2,
-        1e-7,1e-5,1e-5,1e-2,1e-2,
-        1e-6,1e-1,1e-1,1e-2,1e-2]
-  pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
-          "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
-          "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)"]
+
+  if EMB
+    errors = [1e-7,1e-5,1e-5,1e-2,1e-2,
+          1e-7,1e-5,1e-5,1e-2,1e-2,
+          1e-6,1e-1,1e-1,1e-2,1e-2]
+    pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
+        "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
+        "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)"]
+  else
+    errors = [1e-7,1e-5,1e-5,1e-2,1e-2,
+      1e-7,1e-5,1e-5,1e-2,1e-2,
+      1e-6,1e-1,1e-1,1e-2,1e-2,
+      1e-2,1e-2,1e-5]
+    pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
+            "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
+            "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)", 
+            "tmax sin(phi0)", "tmax cos(phi0)", "deltaphi"]
+  end
   # nwalkers = nparam * 3
   @assert (nwalkers >= 30)
   # Set up arrays to hold the results:
@@ -29,25 +44,35 @@ function MCMC(param::Array{Float64, 1},label::String,nsteps::Int64,nwalkers::Int
 # 0 and emax2, with a gradual decrease from emax1 to emax2:
   # Eccentricity priors:
     emax1 = 0.2; emax2 = 0.3
+  # deltaphi priors:
+    dpmin = 0.0; dpmax = pi
     # Define -log(prior):
     lprior = 0.0
     # Loop over planets:
     for i=1:nplanet
-    # Place prior on eccentricities:
-    ecc = sqrt(param[(i-1)*5+4]^2+param[(i-1)*5+5]^2)
-    lprior_tmp,dpdx = log_bounds_upper(ecc,emax1,emax2)
-    lprior += lprior_tmp
-    # Adding in prior of 1/eccentricity to account for Jacobian
-    # factor of e*cos(omega) and e*sin(omega):
-    lprior += -log(ecc)  # Add this to log prior
+      # Place prior on eccentricities:
+      ecc = sqrt(param[(i-1)*5+4]^2+param[(i-1)*5+5]^2)
+      lprior_tmp,dpdx = log_bounds_upper(ecc,emax1,emax2)
+      lprior += lprior_tmp
+      # Adding in prior of 1/eccentricity to account for Jacobian
+      # factor of e*cos(omega) and e*sin(omega):
+      lprior += -log(ecc)  # Add this to log prior
+    end
+    if deltaphi < dpmin || deltaphi > dpmax
+      lprior += -Inf
     end
     return lprior
   end
 
   Nobs = sum(ntrans) - 2
 
+  # par_trial = copy(param)
   # Initialize walkers:
-  par_trial = copy(param)
+  if use_sigsys
+    par_trial = [param[1:end];1e-4]
+  else
+    par_trial = param[1:end]
+  end
   for j=1:nwalkers
   # Select from within uncertainties:
     lprob_trial = -1e100
@@ -55,11 +80,20 @@ function MCMC(param::Array{Float64, 1},label::String,nsteps::Int64,nwalkers::Int
     while lprob_trial < lprob_best - 1000
       par_trial = param + errors.*randn(nparam)
       # model = ttv_wrapper3(tt0,par_trial)# 
-      model = ttv_wrapper(tt0, nplanet, ntrans, par_trial[1:end])
+      if EMB
+        model = ttv_wrapper(tt0, nplanet, ntrans, par_trial[1:nparam],true)
+      else 
+        model = ttv_wrapper(tt0, nplanet, ntrans, par_trial[1:nparam],false)
+      end
       println(length(tt)," ",length(model))
-      ll =  log(sum((tt-model).^2 ./sigtt.^2))
-      # ll = (-0.5 * sum((tt-model).^2 ./(sigtt.^2 .+ par_trial[end]) .+ log.(sigtt.^2 .+ par_trial[end])))
-      lprob_trial = calc_lprior(par_trial) + ll*(1 - Nobs/2) 
+      if use_sigsys
+        # ll = (-0.5 * sum((tt-model).^2 ./(sigtt.^2 .+ sigsys.^2) .+ log.(sigtt.^2 .+ sigsys.^2)))
+       lprob_trial = (-0.5 * sum((tt-model).^2 ./(sigtt.^2 .+ par_trial[end]) .+ log.(sigtt.^2 .+ par_trial[end])))
+      else
+        # ll = log(sum((tt-model).^2 ./sigtt.^2))
+        lprob_trial = log(sum((tt-model).^2 ./sigtt.^2))*(1 - Nobs/2) #mostly useful for grid search
+      end
+        lprob_trial += calc_lprior(par_trial) 
       println("Trial Log Prob: ",lprob_trial)
     end
     lprob_mcmc[j,1]=lprob_trial
@@ -82,7 +116,7 @@ function MCMC(param::Array{Float64, 1},label::String,nsteps::Int64,nwalkers::Int
       par_trial=vec(z*par_mcmc[j,i-1,:]+(1.0-z)*par_mcmc[ipartner,i-1,:])
   # Compute model & chi-square:  
       # model_trial =ttv_wrapper3(tt0,par_trial)
-      model_trial = ttv_wrapper(tt0, nplanet, ntrans, par_trial[1:end])
+      model_trial = ttv_wrapper(tt0, nplanet, ntrans, par_trial[1:nparam])
       # ll = -.5 *sum((tt-model_trial).^2 ./(sigtt.^2 .+ par_trial[end]) .+ log.(sigtt.^2 .+ par_trial[end]))
       ll =  log(sum((tt-model_trial).^2 ./sigtt.^2))
       lprob_trial = calc_lprior(par_trial) + ll*(1 - Nobs/2) 
@@ -150,16 +184,8 @@ function MCMC(param::Array{Float64, 1},label::String,nsteps::Int64,nwalkers::Int
   # end
   # plot_MCstep(label)
   # plot_MCparams(label)
+
   file = string("OUTPUTS/mcmc_results",label,".jld2")
   @save file par_mcmc lprob_mcmc nwalkers nsteps accept iburn
   return par_mcmc,lprob_mcmc
 end
-
-# @load "OUTPUTS/p3_fittestparams.jld2" #param_p3 lprob_p3 lprob_best pbest ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase
-# param = pbest
-# nsteps = 1000
-# nwalkers = 50
-
-# par_mcmc, lprob_mcmc = MCMC(param, "test", nsteps, nwalkers, nplanet, ntrans, tt0, tt, sigtt) 
-
-# @save nwalkers, nsteps, accept/(1000*nwalkers)
