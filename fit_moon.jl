@@ -10,7 +10,7 @@ using Unitful, UnitfulAstro, LinearAlgebra
 
 function fit_moon(filename::String, label::String,
   p3in::Float64, p3out::Float64, np3::Int, nphase::Int, 
-  dpin::Float64, dpout::Float64, ndp::Int, nphiphase::Int,
+  dpin::Float64, dpout::Float64, ndp::Int,
   addnoise::Bool=false, sigma::Float64=0.0)
     #=
      To do:
@@ -213,33 +213,8 @@ function fit_moon(filename::String, label::String,
     lprob_global = (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
     println("Finished lunar fit: ",lprob_global," ",pbest_global)
 
-    # param_m2 = [0.01, 0.01, 2.312]
-    # param4 = [pbest_p3;param_m2]
-        # p3_cur = p3[j] #sets jupiter period to global value
-        # fit = curve_fit(ttv_wrapper_fixp3,tt0,tt,weight,param3) #optimizes fit w/ 3 planet model
-        # fit = curve_fit((tt0, params) -> ttv_wrapper(tt0, nplanet, ntrans, params, true, p3_cur),tt0,tt,weight,param3) 
-        # param3 = fit.param
-    # param1 = param4 .+ 100.0
-    # while maximum(abs.(param1 .- param4)) > 1e-5
-      # param1 = param4
-    # fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,false),tt0, tt, weight, param4)
-      # param4 = fit.param
-    #end
-    # pbest_m2 = fit.param
-    # ttmodel = ttv_wrapper(tt0, nplanet, ntrans, pbest_m2,false)
-
-
-
     # Rescale to set minimum chi-square equal to number of degrees of freedom
     #  = number of transits - number of model parameters (15):
-    #ttmodel=ttv_wrapper3(tt0,param3)
-    #res = optimize(chisquare3, param3, method = :l_bfgs, iterations = 21)
-    #  res = optimize(chisquare3, param3, method = :l_bfgs)
-    #  ttmodel=ttv_wrapper3(tt0,param3)
-
-    # fit = curve_fit(ttv_wrapper3,tt0,tt,weight,pbest)
-
-
 
     function plot_3planetfit(p3in, p3out, sigma)
       clf()
@@ -254,9 +229,9 @@ function fit_moon(filename::String, label::String,
 #     plot_likelihood(p3in, p3out, sigma);
 #     plot_3planetfit(p3in, p3out, sigma);
 
-    file = string("OUTPUTS/p3_fit",label,"params.jld2")
-    results = string("OUTPUTS/p3_fit",label,"results.txt")
-    #@save file param_p3 lprob_p3 lprob_best pbest ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase
-    #writedlm(results, pbest)
-#     return chi_best, pbest
+    file = string("OUTPUTS/moon_fit",label,"params.jld2")
+    @save file pbest_dp lprob_dp lprob_global pbest_global ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase dpin dpout phiphase
+    # results = string("OUTPUTS/p3_fit",label,"results.txt")
+    # #writedlm(results, pbest)
+    return chi_best, pbest_global
 end
