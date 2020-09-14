@@ -10,7 +10,7 @@ if !@isdefined(CGS)
 end
 include("regress.jl")
 
-function sim_times(jd1::Float64, jd2::Float64, Nsteps::Int64, 
+function sim_times(jd1::Float64, jd2::Float64, jdsize::Int64, 
     addnoise::Bool=false, sigma::Float64=0.0, EMB::Bool=true, seed::Int=42)
     # To do: output file with arguments in header
     #       output data frame with header?
@@ -21,8 +21,8 @@ function sim_times(jd1::Float64, jd2::Float64, Nsteps::Int64,
     @assert jd1 >= 2414105.0
     @assert jd2 <= 2488985.0
     Random.seed!(seed)
-    dt = (jd2 - jd1)/Nsteps
-    t0 = range(jd1, stop=jd2-1, length = Nsteps)
+    dt = (jd2 - jd1)/jdsize
+    t0 = range(jd1, stop=jd2-1, length = jdsize)
     # t0 = 2451544.5 - 50*365.25 .+ range(0.5,stop = np0 - 0.5,length = np0)
     # println(t0[1]) #= 2.4332825e6  
 
@@ -38,11 +38,11 @@ function sim_times(jd1::Float64, jd2::Float64, Nsteps::Int64,
     # Find observer location required to see transits
     # pva_sun = zeros(9, np0)
 
-    pva_sun = zeros(9, Nsteps)
-    pva_venus = zeros(9, Nsteps)
-    pva_earth = zeros(9, Nsteps)
+    pva_sun = zeros(9, jdsize)
+    pva_venus = zeros(9, jdsize)
+    pva_earth = zeros(9, jdsize)
     # for i=1:np0
-    for i=1:Nsteps
+    for i=1:jdsize
         pva_sun[1:9,i] = compute(eph,t0[i],0.5,10,10,options,2)
         pva_venus[1:9,i] = compute(eph,t0[i],0.5,2,10,options,2)
         if EMB
