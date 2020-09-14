@@ -230,7 +230,7 @@ function fit_moon(filename::String, label::String,
 #     plot_3planetfit(p3in, p3out, sigma);
 
     file = string("OUTPUTS/moon_fit",label,"params.jld2")
-    @save file pbest_dp lprob_dp lprob_global pbest_global ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase dpin dpout phiphase
+    @save file pbest_dp lprob_dp lprob_global pbest_global ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase dpin dpout ndp
     # results = string("OUTPUTS/p3_fit",label,"results.txt")
     # #writedlm(results, pbest)
     return chi_best, pbest_global
