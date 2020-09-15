@@ -14,7 +14,6 @@ function MCMC(param::Array{Float64, 1},label::String,
     #give it -param, nsteps, nparam, nwalkers, tt0, tt, sigtt, ntrans, nplanet
     #add to MCMC(): 1/eccentricity prior
   nparam = length(param)
-
   if EMB
     errors = [1e-7,1e-5,1e-5,1e-2,1e-2,
           1e-7,1e-5,1e-5,1e-2,1e-2,
@@ -32,10 +31,18 @@ function MCMC(param::Array{Float64, 1},label::String,
             "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)", 
             "tmax sin(phi0)", "tmax cos(phi0)", "deltaphi"]
   end
-  # nwalkers = nparam * 3
-  @assert (nwalkers >= 30)
+  # Initialize walkers:
+  if use_sigsys
+    par_trial = [param[1:end];1e-8]
+    nsize = nparam+1
+  else
+    par_trial = param[1:end]
+    nsize = nparam
+  end
+
+  @assert (nwalkers >= 30)  # nwalkers = nparam * 3
   # Set up arrays to hold the results:
-  par_mcmc = zeros(nwalkers,nsteps,nparam)
+  par_mcmc = zeros(nwalkers,nsteps,nsize)
   lprob_mcmc = zeros(nwalkers,nsteps)
 
   function calc_lprior(param) #log prior
@@ -44,8 +51,6 @@ function MCMC(param::Array{Float64, 1},label::String,
 # 0 and emax2, with a gradual decrease from emax1 to emax2:
   # Eccentricity priors:
     emax1 = 0.2; emax2 = 0.3
-  # deltaphi priors:
-    dpmin = 0.0; dpmax = pi
     # Define -log(prior):
     lprior = 0.0
     # Loop over planets:
@@ -58,8 +63,14 @@ function MCMC(param::Array{Float64, 1},label::String,
       # factor of e*cos(omega) and e*sin(omega):
       lprior += -log(ecc)  # Add this to log prior
     end
-    if deltaphi < dpmin || deltaphi > dpmax
-      lprior += -Inf
+    if !EMB 
+      # deltaphi priors:
+      # dpmin = 0.0; dpmax = pi # we know it should be ~2.3 but aliasing 
+      dpmin = pi; dpmax = 2*pi
+      deltaphi = param[18]
+      if deltaphi < dpmin || deltaphi > dpmax
+        lprior += -Inf
+      end
     end
     return lprior
   end
@@ -67,23 +78,21 @@ function MCMC(param::Array{Float64, 1},label::String,
   Nobs = sum(ntrans) - 2
 
   # par_trial = copy(param)
-  # Initialize walkers:
-  if use_sigsys
-    par_trial = [param[1:end];1e-4]
-  else
-    par_trial = param[1:end]
-  end
   for j=1:nwalkers
   # Select from within uncertainties:
     lprob_trial = -1e100
   # Only initiate models with reasonable chi-square values:
     while lprob_trial < lprob_best - 1000
-      par_trial = param + errors.*randn(nparam)
+      par_trial[1:nparam] = param + errors .* randn(nparam)
+      if use_sigsys
+        sigsys = 1e-8
+        par_trial[nparam+1] = sigsys .* abs(randn())
+      end
       # model = ttv_wrapper3(tt0,par_trial)# 
       if EMB
-        model = ttv_wrapper(tt0, nplanet, ntrans, par_trial[1:nparam],true)
+        model = ttv_wrapper(tt0, nplanet, ntrans, par_trial[1:nparam], true)
       else 
-        model = ttv_wrapper(tt0, nplanet, ntrans, par_trial[1:nparam],false)
+        model = ttv_wrapper(tt0, nplanet, ntrans, par_trial[1:nparam], false)
       end
       println(length(tt)," ",length(model))
       if use_sigsys
@@ -116,12 +125,24 @@ function MCMC(param::Array{Float64, 1},label::String,
       par_trial=vec(z*par_mcmc[j,i-1,:]+(1.0-z)*par_mcmc[ipartner,i-1,:])
   # Compute model & chi-square:  
       # model_trial =ttv_wrapper3(tt0,par_trial)
-      model_trial = ttv_wrapper(tt0, nplanet, ntrans, par_trial[1:nparam])
+      # println(par_trial)
+      if EMB
+        model_trial = ttv_wrapper(tt0, nplanet, ntrans, par_trial[1:nparam], true)
+      else 
+        model_trial = ttv_wrapper(tt0, nplanet, ntrans, par_trial[1:nparam], false)
+      end
+      # model_trial = ttv_wrapper(tt0, nplanet, ntrans, par_trial[1:nparam], false)
       # ll = -.5 *sum((tt-model_trial).^2 ./(sigtt.^2 .+ par_trial[end]) .+ log.(sigtt.^2 .+ par_trial[end]))
-      ll =  log(sum((tt-model_trial).^2 ./sigtt.^2))
-      lprob_trial = calc_lprior(par_trial) + ll*(1 - Nobs/2) 
+      # ll =  log(sum((tt-model_trial).^2 ./sigtt.^2))
+      # lprob_trial = calc_lprior(par_trial) + ll*(1 - Nobs/2) 
+      if use_sigsys
+       lprob_trial = (-0.5 * sum((tt-model_trial).^2 ./(sigtt.^2 .+ par_trial[end]) .+ log.(sigtt.^2 .+ par_trial[end])))
+      else
+        lprob_trial = log(sum((tt-model_trial).^2 ./sigtt.^2))*(1 - Nobs/2) #mostly useful for grid search
+      end
+      lprob_trial += calc_lprior(par_trial)       
   # Next, determine whether to accept this trial step:
-      alp = z^(nparam-1)*exp((lprob_trial - lprob_mcmc[j,i-1]))
+      alp = z^(nsize-1)*exp((lprob_trial - lprob_mcmc[j,i-1]))
       if rand() < 0.0001
         println("Step: ",i," Walker: ",j," Trial Log Prob: " ,lprob_trial," Prob: ",alp," Frac: ",accept/(mod(i-1,1000)*nwalkers+j))
       end
@@ -157,7 +178,7 @@ function MCMC(param::Array{Float64, 1},label::String,
     
   # Now, determine time of burn-in by calculating first time median is crossed:
   iburn = 0
-  for i=1:nparam
+  for i=1:nsize
     med_param=median(par_mcmc[1:nwalkers,1:nsteps,i])
     for j=1:nwalkers
       istep=2
