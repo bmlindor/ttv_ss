@@ -17,12 +17,11 @@ p3out = 4430.0
 np3 = 10
 nphase = 6
 dpin = 0.0 
-dpout = pi
+dpout = 2*pi
 ndp = 36
 nsteps = 1000
 nwalkers = 50
 p3 = 10 .^ range(log10(p3in),stop=log10(p3out),length=np3)
-deltaphi = range(dpin,stop=dpout,length=ndp)
 # function run_fitp3(label, p3in, p3out, np3, nphase, sigma)
 sim = sim_times(jd1,jd2,jdsize,true,sigma,false)
 file = string("INPUTS/tt_data",sigma,"s.txt")
@@ -30,7 +29,7 @@ file = string("INPUTS/tt_data",sigma,"s.txt")
 fit = fit_moon(file,label,p3in,p3out,np3,nphase,dpin,dpout,ndp,true,sigma)
 # @load "OUTPUTS/p3_fittestparams.jld2" #param_p3 lprob_p3 lprob_best pbest ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase
 # par_mcmc, lprob_mcmc = MCMC(pbest, label, nsteps, nwalkers, nplanet, ntrans, tt0, tt, sigtt) 
-@load "OUTPUTS/moon_fittestparams.jld2" #pbest_dp lprob_dp lprob_global pbest_global ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase dpin dpout phiphase
+@load "OUTPUTS/moon_fittestparams.jld2" #pbest_dp lprob_dp lprob_best pbest_global ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase dpin dpout phiphase
 par_mcmc, lprob_mcmc = MCMC(pbest_global,label,nsteps,nwalkers,nplanet,ntrans,tt0,tt,sigtt,false,true) 
 
 # file = string("OUTPUTS/mcmc",label,".jld2")

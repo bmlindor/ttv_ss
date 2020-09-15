@@ -182,13 +182,13 @@ function fit_mysteryplanet3(filename::String, label::String,
     # fit = curve_fit(ttv_wrapper3,tt0,tt,weight,pbest)
     fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet, ntrans, params),tt0,tt,weight,pbest)
     # ttmodel=ttv_wrapper3(tt0,pbest)
-    pbest = fit.param
-    ttmodel = ttv_wrapper(tt0, nplanet, ntrans, pbest)
+    pbest_global = fit.param
+    ttmodel = ttv_wrapper(tt0, nplanet, ntrans, pbest_global)
     lprob_best= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
     sigsys2 = 1e-6
 
     println("Finished global 3-planet fit.")
-    println("Maximum: ",lprob_best," Param: ",pbest)
+    println("Maximum: ",lprob_best," Param: ",pbest_global)
 
     function plot_3planetfit(p3in, p3out, sigma)
       clf()
@@ -205,7 +205,7 @@ function fit_mysteryplanet3(filename::String, label::String,
 
     file = string("OUTPUTS/p3_fit",label,"params.jld2")
     results = string("OUTPUTS/p3_fit",label,"results.txt")
-    @save file param_p3 lprob_p3 lprob_best pbest ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase
-    writedlm(results, pbest)
+    @save file param_p3 lprob_p3 lprob_best pbest_global ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase
+    writedlm(results, pbest_global)
 #     return chi_best, pbest
 end

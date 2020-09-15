@@ -93,7 +93,7 @@ function MCMC(param::Array{Float64, 1},label::String,
         # ll = log(sum((tt-model).^2 ./sigtt.^2))
         lprob_trial = log(sum((tt-model).^2 ./sigtt.^2))*(1 - Nobs/2) #mostly useful for grid search
       end
-        lprob_trial += calc_lprior(par_trial) 
+      lprob_trial += calc_lprior(par_trial) 
       println("Trial Log Prob: ",lprob_trial)
     end
     lprob_mcmc[j,1]=lprob_trial

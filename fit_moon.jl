@@ -210,8 +210,8 @@ function fit_moon(filename::String, label::String,
     fit = curve_fit((tt0,params) -> ttv_wrapper(tt0, nplanet, ntrans, params, false),tt0,tt,weight,pbest_dp)
     pbest_global = fit.param
     ttmodel = ttv_wrapper(tt0, nplanet, ntrans, pbest_global, false)
-    lprob_global = (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
-    println("Finished lunar fit: ",lprob_global," ",pbest_global)
+    lprob_best = (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
+    println("Finished lunar fit: ",lprob_best," ",pbest_global)
 
     # Rescale to set minimum chi-square equal to number of degrees of freedom
     #  = number of transits - number of model parameters (15):
@@ -230,8 +230,8 @@ function fit_moon(filename::String, label::String,
 #     plot_3planetfit(p3in, p3out, sigma);
 
     file = string("OUTPUTS/moon_fit",label,"params.jld2")
-    @save file pbest_dp lprob_dp lprob_global pbest_global ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase dpin dpout ndp
+    @save file pbest_dp lprob_dp lprob_best pbest_global ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase dpin dpout ndp
     # results = string("OUTPUTS/p3_fit",label,"results.txt")
     # #writedlm(results, pbest)
-    return chi_best, pbest_global
+    # return chi_best, pbest_global
 end
