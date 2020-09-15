@@ -72,6 +72,13 @@ function MCMC(param::Array{Float64, 1},label::String,
         lprior += -Inf
       end
     end
+    if use_sigsys
+      # sigsys priors:
+      sigsys = param[end]
+      if sigsys < 0 
+        lprior += -Inf
+      end
+    end
     return lprior
   end
 
@@ -85,29 +92,30 @@ function MCMC(param::Array{Float64, 1},label::String,
     while lprob_trial < lprob_best - 1000
       par_trial[1:nparam] = param + errors .* randn(nparam)
       if use_sigsys
-        sigsys = 1e-8
-        par_trial[nparam+1] = sigsys .* abs(randn())
+        par_trial[nparam+1] = 1e-8 .* abs(randn())
       end
-      # model = ttv_wrapper3(tt0,par_trial)# 
-      if EMB
-        model = ttv_wrapper(tt0, nplanet, ntrans, par_trial[1:nparam], true)
-      else 
-        model = ttv_wrapper(tt0, nplanet, ntrans, par_trial[1:nparam], false)
+      lprob_trial = calc_lprior(par_trial)
+      if lprob_trial > -Inf
+        # model = ttv_wrapper3(tt0,par_trial)# 
+        if EMB
+          model = ttv_wrapper(tt0, nplanet, ntrans, par_trial[1:nparam], true)
+        else 
+          model = ttv_wrapper(tt0, nplanet, ntrans, par_trial[1:nparam], false)
+        end
+        # println(length(tt)," ",length(model))
+        if use_sigsys
+          # ll = (-0.5 * sum((tt-model).^2 ./(sigtt.^2 .+ sigsys.^2) .+ log.(sigtt.^2 .+ sigsys.^2)))
+         lprob_trial += (-0.5 * sum((tt-model).^2 ./(sigtt.^2 .+ par_trial[end]) .+ log.(sigtt.^2 .+ par_trial[end])))
+        else
+          # ll = log(sum((tt-model).^2 ./sigtt.^2))
+          lprob_trial += log(sum((tt-model).^2 ./sigtt.^2))*(1 - Nobs/2) #mostly useful for grid search
+        end
       end
-      println(length(tt)," ",length(model))
-      if use_sigsys
-        # ll = (-0.5 * sum((tt-model).^2 ./(sigtt.^2 .+ sigsys.^2) .+ log.(sigtt.^2 .+ sigsys.^2)))
-       lprob_trial = (-0.5 * sum((tt-model).^2 ./(sigtt.^2 .+ par_trial[end]) .+ log.(sigtt.^2 .+ par_trial[end])))
-      else
-        # ll = log(sum((tt-model).^2 ./sigtt.^2))
-        lprob_trial = log(sum((tt-model).^2 ./sigtt.^2))*(1 - Nobs/2) #mostly useful for grid search
-      end
-      lprob_trial += calc_lprior(par_trial) 
-      println("Trial Log Prob: ",lprob_trial)
+      # println("Trial Log Prob: ",lprob_trial)
     end
     lprob_mcmc[j,1]=lprob_trial
     par_mcmc[j,1,:]=par_trial
-    println("Success: ",par_trial,lprob_trial)
+    # println("Success: ",par_trial,lprob_trial)
   end
   # Initialize scale length & acceptance counter:
   ascale = 2.0
@@ -125,22 +133,23 @@ function MCMC(param::Array{Float64, 1},label::String,
       par_trial=vec(z*par_mcmc[j,i-1,:]+(1.0-z)*par_mcmc[ipartner,i-1,:])
   # Compute model & chi-square:  
       # model_trial =ttv_wrapper3(tt0,par_trial)
-      # println(par_trial)
-      if EMB
-        model_trial = ttv_wrapper(tt0, nplanet, ntrans, par_trial[1:nparam], true)
-      else 
-        model_trial = ttv_wrapper(tt0, nplanet, ntrans, par_trial[1:nparam], false)
-      end
-      # model_trial = ttv_wrapper(tt0, nplanet, ntrans, par_trial[1:nparam], false)
-      # ll = -.5 *sum((tt-model_trial).^2 ./(sigtt.^2 .+ par_trial[end]) .+ log.(sigtt.^2 .+ par_trial[end]))
-      # ll =  log(sum((tt-model_trial).^2 ./sigtt.^2))
-      # lprob_trial = calc_lprior(par_trial) + ll*(1 - Nobs/2) 
-      if use_sigsys
-       lprob_trial = (-0.5 * sum((tt-model_trial).^2 ./(sigtt.^2 .+ par_trial[end]) .+ log.(sigtt.^2 .+ par_trial[end])))
-      else
-        lprob_trial = log(sum((tt-model_trial).^2 ./sigtt.^2))*(1 - Nobs/2) #mostly useful for grid search
-      end
-      lprob_trial += calc_lprior(par_trial)       
+      lprob_trial = calc_lprior(par_trial)  
+      if lprob_trial > -Inf
+        if EMB
+          model_trial = ttv_wrapper(tt0, nplanet, ntrans, par_trial[1:nparam], true)
+        else 
+          model_trial = ttv_wrapper(tt0, nplanet, ntrans, par_trial[1:nparam], false)
+        end
+        # model_trial = ttv_wrapper(tt0, nplanet, ntrans, par_trial[1:nparam], false)
+        # ll = -.5 *sum((tt-model_trial).^2 ./(sigtt.^2 .+ par_trial[end]) .+ log.(sigtt.^2 .+ par_trial[end]))
+        # ll =  log(sum((tt-model_trial).^2 ./sigtt.^2))
+        # lprob_trial = calc_lprior(par_trial) + ll*(1 - Nobs/2) 
+        if use_sigsys
+         lprob_trial += (-0.5 * sum((tt-model_trial).^2 ./(sigtt.^2 .+ par_trial[end]) .+ log.(sigtt.^2 .+ par_trial[end])))
+        else
+          lprob_trial += log(sum((tt-model_trial).^2 ./sigtt.^2))*(1 - Nobs/2) #mostly useful for grid search
+        end 
+      end   
   # Next, determine whether to accept this trial step:
       alp = z^(nsize-1)*exp((lprob_trial - lprob_mcmc[j,i-1]))
       if rand() < 0.0001

@@ -18,11 +18,9 @@ NaifID:
 
 1). Simulate transit times from JPLEphemeris. Add noise to data.
 
-include("sim_times.jl")
-sim_times(2.4332825e6, 2.4515445e6, 1000, true, sigma)
-
 Note: sim_times has multiple methods with the following arguments
-sim_times(jd1::Float64, jd2::Float64, Nsteps::Int64, addnoise::Bool=false, sigma::Float64=0.0, seed::Int=42, EMB::Bool=true)
+sim_times(jd1::Float64, jd2::Float64, jdsize::Int64, 
+    addnoise::Bool=false, sigma::Float64=0.0, EMB::Bool=true, seed::Int=42)
 
 2a). Carry out a linear fit to the transit times. 
 
@@ -89,7 +87,7 @@ try003	medium		fine
 Updated everything to be compatible with Julia v1.1
 
 Okay, so things to do next:
-1). Add in the Moon. [ ]
+1). Add in the Moon. [ x ]
 2a). See how many observations would be needed (minimum bumber of years required) [ ]
 2b). See what the necessary precision would be (add noise to simulations). [ ]
 3). Figure out what the actual expected timing precision
@@ -113,11 +111,13 @@ and pass this to routines, or create a closure for this).
 6/1/2016 --> 8/4/2020
 Okay, so where do I stand:
 1). With transit times of Earth & Venus, can infer both of
-their masses, as well as existence of Jupiter
+their masses, as well as existence of Jupiter first then Moon
+1a) what about simultaneously?
 2). Q: What really limits timing precision of Earth & Venus
 about the Sun?
 3). The masses inferred with sufficient data are good, although
 still a bit more discrepant than I would like:  I need to
 implement an N-body fit.
+4). Do actual NBODY Grad fit!!
 
 
