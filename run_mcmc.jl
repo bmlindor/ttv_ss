@@ -46,9 +46,9 @@ function MCMC(param::Array{Float64, 1},label::String,
   lprob_mcmc = zeros(nwalkers,nsteps)
 
   function calc_lprior(param) #log prior
-# We will place a joint prior on eccentricity vector
-# such that each planet has an eccentricity which lies between
-# 0 and emax2, with a gradual decrease from emax1 to emax2:
+  # We will place a joint prior on eccentricity vector
+  # such that each planet has an eccentricity which lies between
+  # 0 and emax2, with a gradual decrease from emax1 to emax2:
   # Eccentricity priors:
     emax1 = 0.2; emax2 = 0.3
     # Define -log(prior):
@@ -171,19 +171,19 @@ function MCMC(param::Array{Float64, 1},label::String,
       accept = 0
     end
   end
-#   function plot_MCstep(label)
-#     clf()
-#     subplot(531)
-#     for i=1:nparam
-#       for j=1:nwalkers
-#         plot(vec(par_mcmc[j,1:nsteps,i]))
-#       end
-#       xlabel("MCMC step")
-#       ylabel(pname[i])
-#     end
-#     name = string("IMAGES/MCMCsteps",label,".png")
-#     savefig(name)
-#   end
+  # function plot_MCstep(label)
+  #   clf()
+  #   subplot(531)
+  #   for i=1:nparam
+  #     for j=1:nwalkers
+  #       plot(vec(par_mcmc[j,1:nsteps,i]))
+  #     end
+  #     xlabel("MCMC step")
+  #     ylabel(pname[i])
+  #   end
+  #   name = string("IMAGES/MCMCsteps",label,".png")
+  #   savefig(name)
+  # end
     
   # Now, determine time of burn-in by calculating first time median is crossed:
   iburn = 0

@@ -83,41 +83,49 @@ try001	short	 	medium		30
 try002	medium		fine		30
 try003	medium		fine
 
-5/25/2016 --> 8/4/2020
+8/4/2020
 Updated everything to be compatible with Julia v1.1
 
-Okay, so things to do next:
-1). Add in the Moon. [ x ]
-2a). See how many observations would be needed (minimum bumber of years required) [ ]
-2b). See what the necessary precision would be (add noise to simulations). [ ]
-3). Figure out what the actual expected timing precision
-would be (limited by stellar noise). [ ]
-4a). Show models are correct: derived Earth and Venus parameters
-4b). Make plots of histograms with correct values, as well
-as plots of orbits with 1-sigma uncertainties overplotted
-with the correct orbits. [ ]
-5). See if we can detect Mars [ ] or Saturn. [ ]
-6). Use TTVFaster for first estimate, compare to NBody Gradient [ ]
-7). Can we measure mean insolation well? [ ]
-8). Figure out why the Earth-Moon barycenter offset causes
-bias in measurements. [ ]
-9). Figure out how to speed things up so I can do a global
-search, and explore duration & error bar dependence. [ ]
-(Maybe make a type to hold the pre-computed Laplace coefficents,
-and pass this to routines, or create a closure for this).
-10). Makes plots of the contributions of individual bodies
-(including the ones we are neglecting). [ ]
-
-6/1/2016 --> 8/4/2020
-Okay, so where do I stand:
+Where Do We Stand:
 1). With transit times of Earth & Venus, can infer both of
 their masses, as well as existence of Jupiter first then Moon
-1a) what about simultaneously?
 2). Q: What really limits timing precision of Earth & Venus
-about the Sun?
+about the Sun? (related to Tyler's work)
 3). The masses inferred with sufficient data are good, although
 still a bit more discrepant than I would like:  I need to
 implement an N-body fit.
-4). Do actual NBODY Grad fit!!
 
+Next Tasks
+1a). Add in the option for Moon. [ x ]
+1b). Fit for Moon deltaphi [ x ]
+2a). See how many observations would be needed (minimum number of years required) [ ]
+2b). See what the necessary precision would be (add noise to simulations). [ ]
+4a). Show models are correct: derived Earth and Venus parameters.
+4b). Make plots of histograms of parameter results from MCMC with correct values. [ ]
+4c). Make plots of orbits with 1-sigma uncertainties overplotted with the correct orbits. [ ]
+4d). Make plots of logL for Jupiter period and Moon deltaphi with correct values at peak [ ]
+6a). Using TTVFaster for first estimate, do NBody Gradient fit. [ ]
+6b). Compare TTVFaster and NBody Grad fits [ ]
+6c). Make plots of posterior results of model fit to simulated times. [ ] 
+7). From posteriors, show how well we can measure mean insolation (eccentricity of Earth's orbit). [ ]
+10). Makes plots of the contributions of individual bodies(including the ones we are neglecting). [ x ]
+11). Write up model desctription. [ ]
+12). Show that model is correct either way (Moon first then Jupiter). [ ]
+
+
+Optional Tasks
+3). Figure out what the actual expected timing precision
+would be (limited by stellar noise -- related to Tyler's work). 
+3a). Could use existing telescope precision info
+5). See if we can detect Mars [ ] or Saturn.
+8). Figure out why the Earth-Moon barycenter offset causes
+bias in measurements (see if this is the case).
+9a). Figure out how to speed things up so I can do a global
+search, and explore duration & error bar dependence. 
+9b). Do inverse matrix fitting for linear parameters (Jupiter period & Moon deltaphi) to speed things up (might be more robust).
+9c). Maybe make a type to hold the pre-computed Laplace coefficents,
+and pass this to routines, or create a closure for this.
+13a). Make model of actual transit light curves.
+13b). Show how well constrained densities are (for Earth and Venus).
+13c). Show how well constrained densities are for Sun.
 

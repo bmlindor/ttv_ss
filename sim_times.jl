@@ -75,12 +75,12 @@ function sim_times(jd1::Float64, jd2::Float64, jdsize::Int64,
         pos = zeros(3,N) # position of body relative to Sun
         # Compute functions of position and velocity wrt time:
         function calc_ffs(t)
-            pva = compute(eph,JD_0,t,body_id,10,options,2)
-            x = pva[1:3]; v = pva[4:6]; a = pva[7:9];
-            f = dot(x, v) - (dot(x, n_obs))*(dot(v, n_obs))
-            Df = dot(v, v) + dot(x, a) - (dot(v, n_obs))^2 - (dot(x, n_obs)*dot(a, n_obs))
-            #Df *= ( 3600 * 24 / 1) # Converts to units of days
-            return f, Df, dot(x, n_obs), x
+        pva = compute(eph,JD_0,t,body_id,10,options,2)
+        x = pva[1:3]; v = pva[4:6]; a = pva[7:9];
+        f = dot(x, v) - (dot(x, n_obs))*(dot(v, n_obs))
+        Df = dot(v, v) + dot(x, a) - (dot(v, n_obs))^2 - (dot(x, n_obs)*dot(a, n_obs))
+        #Df *= ( 3600 * 24 / 1) # Converts to units of days
+        return f, Df, dot(x, n_obs), x
         end
         # Computing minimum sky separation of planet wrt star for all JDs
         dt =  (jd2 - jd1)/(N-1)
@@ -214,40 +214,39 @@ function sim_times(jd1::Float64, jd2::Float64, jdsize::Int64,
 
     # Plot transit times and TTVs
     function plot_ttvs(sigma)
-        # subplot(211)
-        # scatter((t1.-t01)./per1,tt1.-t1) #x is tranit number 
-        # plot((t1.- t01)./per1,ttv1) 
-        # errorbar((t1.-t01)./per1,ttv1, noise1)
-        scatter((t1.-t01)./365.25, tt1.-t1) # x is JD in years
-        plot((t1.-t01)./365.25, ttv1)
-        # subplot(212)
-        scatter((t2.-t02)./365.25, tt2.-t2, color="green")
-        plot((t2.-t02)./365.25, ttv2)
-        errorbar((t2.-t02)./365.25,ttv2, noise2)
-        # scatter((t2.-t02)./per2,tt2.-t2,color="green") 
-        # plot((t2.-t02)./per2,ttv2)
-        # title(sigma)
-        xlabel("JD (years)")
-        ylabel("TTVs")
-        # savefig("OUTPUTs/")
+    # subplot(211)
+    # scatter((t1.-t01)./per1,tt1.-t1) #x is tranit number 
+    # plot((t1.- t01)./per1,ttv1) 
+    # errorbar((t1.-t01)./per1,ttv1, noise1)
+    scatter((t1.-t01)./365.25, tt1.-t1) # x is JD in years
+    plot((t1.-t01)./365.25, ttv1)
+    # subplot(212)
+    scatter((t2.-t02)./365.25, tt2.-t2, color="green")
+    plot((t2.-t02)./365.25, ttv2)
+    errorbar((t2.-t02)./365.25,ttv2, noise2)
+    # scatter((t2.-t02)./per2,tt2.-t2,color="green") 
+    # plot((t2.-t02)./per2,ttv2)
+    # title(sigma)
+    xlabel("JD (years)")
+    ylabel("TTVs")
+    # savefig("OUTPUTs/")
     end
     # plot_ttvs(sigma)
 
     function write_file(jd1, jd2, sigma)
-        body = zeros((nt1+nt2))
-        body[1:nt1] .= 1.0
-        body[nt1+1:nt1+nt2] .= 2.0
-        tt = [tt1+noise1;tt2+noise2]
-        if addnoise
-            noise = [noise1;noise2]
-            sigtt = [sigtt1;sigtt2]
-            name = string("INPUTS/tt_data",sigma,"s.txt")
-            writedlm(name, zip(body, tt0, tt, sigtt))
-        else
-            writedlm("INPUTS/tt_data.txt", zip(body, tt))
-        end
+    body = zeros((nt1+nt2))
+    body[1:nt1] .= 1.0
+    body[nt1+1:nt1+nt2] .= 2.0
+    tt = [tt1+noise1;tt2+noise2]
+    if addnoise
+        noise = [noise1;noise2]
+        sigtt = [sigtt1;sigtt2]
+        name = string("INPUTS/tt_data",sigma,"s.txt")
+        writedlm(name, zip(body, tt0, tt, sigtt))
+    else
+        writedlm("INPUTS/tt_data.txt", zip(body, tt))
+    end
     end
     write_file(jd1, jd2, sigma)
-    return tt1, noise1+tt1, tt2, noise2+tt2
+    # return tt1, noise1+tt1, tt2, noise2+tt2
 end
-
