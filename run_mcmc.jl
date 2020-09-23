@@ -1,4 +1,4 @@
-include("ttv_wrapper.jl")  
+include("/Users/bethleelindor/work/washington/ttv_project/ttv_ss/TTVFaster/ttv_wrapper.jl")  
 include("bounds.jl")
 using PyPlot
 using DelimitedFiles, JLD2

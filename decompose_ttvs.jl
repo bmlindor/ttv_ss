@@ -9,5 +9,5 @@ function decompose_ttvs(nplanet, ntrans, params)
 		pair_ttvs[i,j,1:ntrans[i]] = ttv[1,1:ntrans[i]] #planet i wrt planet j
 		pair_ttvs[j,i,1:ntrans[j]] = ttv[2,1:ntrans[j]] #planet j wrt planet i
 	end
-    return pair_ttvs 
+  return pair_ttvs
 end

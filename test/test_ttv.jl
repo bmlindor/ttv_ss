@@ -31,20 +31,20 @@ function test_ttv(jmax::Integer,n1::Integer,n2::Integer,data::Vector; WriteOutpu
   b=zeros(Float64,jmax+2,3)
   hashsum = 0
   for i in 1:num_evals
-     # Call the compute_ttv code which implements equation (33)
-     TTVFaster.compute_ttv!(jmax,p1,p2,time1,time2,ttv1,ttv2,f1,f2,b,alpha0,b0)
-     if profile
-       hashsum += hash(ttv1)+hash(ttv2)
-     end
+   # Call the compute_ttv code which implements equation (33)
+   TTVFaster.compute_ttv!(jmax,p1,p2,time1,time2,ttv1,ttv2,f1,f2,b,alpha0,b0)
+    if profile
+      hashsum += hash(ttv1)+hash(ttv2)
+    end
   end
   if profile
     println("# Ignore this: ",hashsum) # This just makes sure optimizer doesn't optimize away important calculations.
   end
 
   if WriteOutput
-     # Write the mean ephemeris and TTV results to two files:
-     writedlm("inner_ttv.txt",[time1 ttv1])
-     writedlm("outer_ttv.txt",[time2 ttv2])
+    # Write the mean ephemeris and TTV results to two files:
+    writedlm("inner_ttv.txt",[time1 ttv1])
+    writedlm("outer_ttv.txt",[time2 ttv2])
   end
   return ttv1,ttv2
 end
