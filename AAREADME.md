@@ -7,18 +7,20 @@ retrieves the position, velocity and acceleration of Earth (geocenter) relative
 to the Earth-Moon system barycenter in kilometers, kilometers per second and
 kilometers per second square at JD= 2451624.5 TDB timescale
 
-NB: for best accuracy the first time argument should be the integer part and the delta the fractional part (step through day)
+For best accuracy the first time argument should be the integer part 
+and the delta the fractional part (step through day)
 
-For planets without moons, Mercury and Venus, the barycenter location coincides with the body center of mass. 
+Note: For planets without moons, Mercury and Venus, 
+the barycenter location coincides with the body center of mass. 
 
 NaifID: 
       2           'VENUS BARYCENTER'
       3           'EARTH MOON BARYCENTER'
       399         'EARTH'
 
-1). Simulate transit times from JPLEphemeris. Add noise to data.
+1). Simulate transit times from JPLEphemeris. Add noise option to data.
 
-Note: sim_times has multiple methods with the following arguments
+sim_times has multiple methods with the following arguments
 sim_times(jd1::Float64, jd2::Float64, jdsize::Int64, 
     addnoise::Bool=false, sigma::Float64=0.0, EMB::Bool=true, seed::Int=42)
 
@@ -31,7 +33,8 @@ of the fit. Carry out an initial fit of the 2 inner planets
 phases of the outer planet, compute the best-fit at each.
 Optimize the fit to the two sets of transit times by varying all of the
 other parameters. 
-Notes: assume 2 transits for Jupiter because transits are required for TTVFaster
+
+Note: This assumes 2 transits for Jupiter because transits are required for TTVFaster
 
 Show that likelihood curve peaks at period of Jupiter.
 Note: the third planet can't be too close to the transiting planets.
@@ -46,11 +49,23 @@ as the Sun, which 3 planets did you detect?  What are their
 masses and eccentricities (as well as uncertainties on these
 quantities)?
 
-MCMC(param::Array{Float64, 1},nsteps::Int64,nwalkers::Int64, 
-  nplanet::Int64,ntrans::Array{Int64, 1},tt0::Array{Float64, 1}, tt::Array{Float64, 1}, sigtt::Array{Float64, 1}) 
+MCMC(param::Array{Float64, 1},label::String,
+  nsteps::Int64,nwalkers::Int64,nplanet::Int64,ntrans::Array{Int64, 1},
+  tt0::Array{Float64, 1},tt::Array{Float64, 1},sigtt::Array{Float64, 1},
+  EMB::Bool=true,use_sigsys::Bool=true)  
 
-4). Refine TTVFaster estimates from finding Jupiter by applying Nbody Grad,
-get better parameters (masses of Venus and Earth)
+4). Refine TTVFaster estimates from finding Jupiter by applying NbodyGradient.
+(should get better parameters for the masses of Venus and Earth)
+
+Heirarchy example for Solar System:
+
+Sun Venus Earth Moon Jupiter Saturn ....
+indices = [[-1, 1, 0, 0, 0, 0],  # SUN & VENUS orbit in a binary
+           [ 0, 0,-1, 1, 0, 0],  # EARTH & MOON orbit in a binary 
+           [-1,-1, 1, 1, 0, 0],  # SUN & VENUS orbit about them 
+           [-1,-1,-1,-1, 1, 0],	 # (optional) Jupiter orbits about them
+           [-1,-1,-1,-1,-1, 1],	 # (optional) etc...
+           [ 1, 1, 1, 1, 1, 1]]  # center of mass of the system
 
 Learn Julia the Hard Way:
 https://github.com/chrisvoncsefalvay/learn-julia-the-hard-way/tree/master/_chapters
@@ -68,11 +83,9 @@ The, I can restore these later:
 julia> using JLD2
 julia> @load "OUTPUTS/p3_fit_test.jld2"
 
-TODO:
--add systematic err to fit_p3
--Create slurm file to run multiple grids on hyak.mox
-
 julia ttv_like_planet_b.jl &> ttv_likelihood_planetb_3.0sig.txt &
+
+TODO:
 -define format for grids and MCMC runs 
 run_types = [extrashort=(4230-4430), short=(2000-5000), medium=(700-10000), wide=(500-18000)]
 grid_types = [extrafine=1000, fine=100, medium=10, coarse=2]
@@ -84,9 +97,8 @@ try002	medium		fine		30
 try003	medium		fine
 
 8/4/2020
-Updated everything to be compatible with Julia v1.1
-
-Where Do We Stand:
+##########################	Current State	##########################
+0). Updated TTVFaster to be compatible with Julia v1.1
 1). With transit times of Earth & Venus, can infer both of
 their masses, as well as existence of Jupiter first then Moon
 2). Q: What really limits timing precision of Earth & Venus
@@ -95,25 +107,32 @@ about the Sun? (related to Tyler's work)
 still a bit more discrepant than I would like:  I need to
 implement an N-body fit.
 
-Next Tasks
-1a). Add in the option for Moon. [ x ]
-1b). Fit for Moon deltaphi [ x ]
-2a). See how many observations would be needed (minimum number of years required) [ ]
-2b). See what the necessary precision would be (add noise to simulations). [ ]
+
+##########################	Next Tasks	##########################
+1). Makes plots of the contributions of individual bodies (including the ones we are neglecting). [ x ]
+2a). Add in the option for Moon. [ x ]
+2b). Fit for Moon deltaphi. [ x ]
+3a). Create slurm file to run multiple grids on hyak.mox [ ]
+3b). See how many observations would be needed (minimum number of years required). [ ]
+3c). See what the necessary precision would be (add noise to simulations). [ ]
 4a). Show models are correct: derived Earth and Venus parameters.
 4b). Make plots of histograms of parameter results from MCMC with correct values. [ ]
 4c). Make plots of orbits with 1-sigma uncertainties overplotted with the correct orbits. [ ]
-4d). Make plots of logL for Jupiter period and Moon deltaphi with correct values at peak [ ]
-6a). Using TTVFaster for first estimate, do NBody Gradient fit. [ ]
-6b). Compare TTVFaster and NBody Grad fits [ ]
-6c). Make plots of posterior results of model fit to simulated times. [ ] 
-7). From posteriors, show how well we can measure mean insolation (eccentricity of Earth's orbit). [ ]
-10). Makes plots of the contributions of individual bodies(including the ones we are neglecting). [ x ]
-11). Write up model desctription. [ ]
-12). Show that model is correct either way (Moon first then Jupiter). [ ]
+4d). Make plots of logL for Jupiter period and Moon deltaphi with correct values at peak. [ ]
+5a). Using TTVFaster for first estimate, do NBody Gradient fit. [ ]
+5b). Compare TTVFaster and NBody Grad fits. [ ]
+5c). Make plots of posterior results of model fit to simulated times. [ ] 
+6). From posteriors, show how well we can measure mean insolation (eccentricity of Earth's orbit). [ ]
+7). Show that model is correct either way (Moon first then Jupiter). [ ]
 
 
-Optional Tasks
+##########################	Writing Tasks	##########################
+1). Write up model desctription (as above). [ ]
+2a). Find relevant papers and add them to .bib file [ x ]
+2b). Read and summarize relevant papers [ ]
+
+
+##########################	Optional Tasks	##########################
 3). Figure out what the actual expected timing precision
 would be (limited by stellar noise -- related to Tyler's work). 
 3a). Could use existing telescope precision info

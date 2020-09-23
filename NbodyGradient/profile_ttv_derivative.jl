@@ -1,4 +1,4 @@
-include("/Users/ericagol/Computer/Julia/regress.jl")
+include("/Users/bethleelindor/work/washington/ttv_project/ttv_ss/regress.jl")
 
 n = 8
 include("ttv.jl")

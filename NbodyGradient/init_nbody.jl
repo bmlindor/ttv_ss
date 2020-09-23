@@ -22,6 +22,8 @@ include("kepler_init.jl")
 #  
 
 function init_nbody(elements::Array{T,2},t0::T,n_body::Int64) where {T <: Real}
+#TODO: 
+#-add setup_heiarchy.jl, ensure that hierarchy is correct
 # the "_plane" is to remind us that this is currently plane-parallel, so inclination & Omega are zero
 n_level = n_body-1
 # Input -
