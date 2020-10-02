@@ -228,8 +228,18 @@ function fit_moon(filename::String, label::String,
   # plot_2planetfit(p3in, p3out, sigma);
   # plot_likelihood(p3in, p3out, sigma);
   # plot_3planetfit(p3in, p3out, sigma);
+  pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
+            "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
+            "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)", 
+            "tmax sin(phi0)", "tmax cos(phi0)", "deltaphi"]
 
-  file = string("OUTPUTS/moon_fit",label,"params.jld2")
+  results = string("OUTMOON/moon_fit",label,"results.txt")
+  open(results,"w") do io
+    for i=1:nparam
+      println(io, pname[i], ": ", pbest_global[i])
+    end
+  end
+  file = string("OUTMOON/moon_fit",label,"params.jld2")
   @save file pbest_dp lprob_dp lprob_best pbest_global ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase dpin dpout ndp
   # results = string("OUTPUTS/p3_fit",label,"results.txt")
   # #writedlm(results, pbest)
