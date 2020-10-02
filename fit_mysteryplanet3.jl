@@ -207,13 +207,13 @@ function fit_mysteryplanet3(filename::String, label::String,
         "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
         "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)"]
 
-  file = string("OUTPUTS/p3_fit",label,"params.jld2")
-  results = string("OUTPUTS/p3_fit",label,"results.txt")
-  # open(results,"w") do io
-  #   for i in length(nparam)
-  #     println(io, pname[i], ": ", pbest_global[i])
-  #   end
-  # end
+  results = string("OUTP3/p3_fit",label,"results.txt")
+  open(results,"w") do io
+    for i=1:nparam
+      println(io, pname[i], ": ", pbest_global[i])
+    end
+  end
+  file = string("OUTP3/p3_fit",label,"params.jld2")
   @save file param_p3 lprob_p3 lprob_best pbest_global ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase
   # writedlm(results, pbest_global)
     # return chi_best, pbest

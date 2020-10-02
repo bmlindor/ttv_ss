@@ -2,8 +2,8 @@
 using PyPlot, JLD2
 rc("font", family="serif")
 include("decompose_ttvs.jl")
-@load "OUTPUTS/mcmc_resultstest.jld2"
-@load "OUTPUTS/moon_fittestparams.jld2"
+@load "OUTMOON/mcmc_resultstest.jld2"
+@load "OUTMOON/moon_fittestparams.jld2"
 label = "test"
 
 pair_ttvs = decompose_ttvs(nplanet, ntrans, pbest_global)
@@ -87,13 +87,13 @@ savefig(name)
 #   savefig(name)
 
 #Make plot of MCMC parameters after burn-in
-# figsize=(8,6)
-# for i=2:nparam
-#   for j=1:i-1
-#     scatter(vec(par_mcmc[1:nwalkers,iburn:nsteps,i]),vec(par_mcmc[1:nwalkers,iburn:nsteps,j]))
-#     xlabel(pname[i])
-#     ylabel(pname[j])
-#   end
-# end
-# name = string("IMAGES/MCMCparams",label,".png")
-# savefig(name)
+figsize=(8,6)
+for i=2:nparam
+  for j=1:i-1
+    scatter(vec(par_mcmc[1:nwalkers,iburn:nsteps,i]),vec(par_mcmc[1:nwalkers,iburn:nsteps,j]))
+    xlabel(pname[i])
+    ylabel(pname[j])
+  end
+end
+name = string("IMAGES/MCMCparams",label,".png")
+savefig(name)

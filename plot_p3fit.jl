@@ -2,8 +2,8 @@
 using PyPlot, JLD2
 rc("font", family="serif")
 include("decompose_ttvs.jl")
-@load "OUTPUTS/p3_fittestparams.jld2" #param_p3 lprob_p3 lprob_best pbest ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase
-@load "OUTPUTS/mcmc_resultstest.jld2" #par_mcmc, lprob_mcmc, nwalkers, nsteps, accept, iburn
+@load "OUTP3/p3_fittestparams.jld2" #param_p3 lprob_p3 lprob_best pbest ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase
+@load "OUTP3/mcmc_resultstest.jld2" #par_mcmc, lprob_mcmc, nwalkers, nsteps, accept, iburn
 # @load "OUTPUTS/moon_fittestparams.jld2"
 label = "test"
 
