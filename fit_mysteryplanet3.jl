@@ -1,8 +1,8 @@
 # Julia v1.1
 include("/Users/bethleelindor/work/washington/ttv_project/ttv_ss/TTVFaster/compute_ttv.jl")
 include("/Users/bethleelindor/work/washington/ttv_project/ttv_ss/TTVFaster/ttv_wrapper.jl")
+include("/Users/bethleelindor/work/washington/ttv_project/ttv_ss/TTVFaster/chisquare.jl")
 include("regress.jl")
-include("chisquare.jl")
 using PyPlot
 using DelimitedFiles, JLD2
 using Statistics, DataFitting, Random, Optim, LsqFit
@@ -144,12 +144,12 @@ function fit_mysteryplanet3(filename::String, label::String,
       param1 = param3 .+ 100.0
       while maximum(abs.(param1 .- param3)) > 1e-5
         param1 = param3
-        fit = curve_fit((tt0,params) -> ttv_wrapper(tt0, nplanet, ntrans,params,true,p3_cur),tt0,tt, weight, param3)
+        fit = curve_fit((tt0,param3) -> ttv_wrapper(tt0, nplanet, ntrans,[param3[1:11];p3_cur;param3[12:end]],true),tt0,tt, weight, param3)
         param3 = fit.param
         # println("init_param: ",param3)
         # println("New Initial chi-square: ",chisquare(tt0, nplanet, ntrans, param3, tt, sigtt, true, p3_cur))
       end
-      ttmodel = ttv_wrapper(tt0, nplanet, ntrans, param3, true, p3_cur)
+      ttmodel = ttv_wrapper(tt0, nplanet, ntrans, [param3[1:11];p3_cur;param3[12:end]], true)
       lprob_phase[i]= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
       if lprob_phase[i] > lprob_best # check that best fit for period is better than global best fit
         lprob_best = lprob_phase[i]
@@ -162,6 +162,8 @@ function fit_mysteryplanet3(filename::String, label::String,
     end
     println("Period: ",p3[j]," chi: ",lprob_p3[j]," Param: ",vec(param_p3[1:nparam,j]))
   end
+  println("Finished 3-planet fit w/ fixed period: ",pbest)
+  
   function plot_likelihood(p3in, p3out, sigma)
     clf()
     plot(p3/365.25,exp.((lprob_p3 .-maximum(lprob_p3)))) 
@@ -177,7 +179,6 @@ function fit_mysteryplanet3(filename::String, label::String,
   #res = optimize(chisquare3, param3, method = :l_bfgs, iterations = 21)
   #  res = optimize(chisquare3, param3, method = :l_bfgs)
   #  ttmodel=ttv_wrapper3(tt0,param3)
-  println("Finished 3-planet fit w/ fixed period: ",pbest)
 
   # fit = curve_fit(ttv_wrapper3,tt0,tt,weight,pbest)
   fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet, ntrans, params),tt0,tt,weight,pbest)
@@ -202,10 +203,18 @@ function fit_mysteryplanet3(filename::String, label::String,
   # plot_2planetfit(p3in, p3out, sigma);
   # plot_likelihood(p3in, p3out, sigma);
   # plot_3planetfit(p3in, p3out, sigma);
+  pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
+        "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
+        "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)"]
 
   file = string("OUTPUTS/p3_fit",label,"params.jld2")
   results = string("OUTPUTS/p3_fit",label,"results.txt")
+  # open(results,"w") do io
+  #   for i in length(nparam)
+  #     println(io, pname[i], ": ", pbest_global[i])
+  #   end
+  # end
   @save file param_p3 lprob_p3 lprob_best pbest_global ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase
-  writedlm(results, pbest_global)
-#     return chi_best, pbest
+  # writedlm(results, pbest_global)
+    # return chi_best, pbest
 end

@@ -210,27 +210,65 @@ function sim_times(jd1::Float64, jd2::Float64, jdsize::Int64,
   # Best-fit linear transit times:
   tt0 = [t1;t2] # appends t2 times to t1 times
 
+  # Plot orbits along ecliptic and top-down, point to observer of Venus and Earth transits
+  function plot_orbits()
+    subplot(211)
+    title("Orbits Along Ecliptic")
+    plot(xsun,ysun,label="Sun")
+    plot(vec(pva_venus[2,1:jdsize]),vec(pva_venus[3,1:jdsize]),label="Venus")
+    plot(vec(pva_earth[2,1:jdsize]),vec(pva_earth[3,1:jdsize]),label="Earth")
+    xlabel("[AU]")
+    ylabel("[AU]")
+    legend()
+    subplot(212)
+    title("Top-Down Orbits")
+    plot(xsun,ysun,label="Sun")
+    plot(vec(pva_venus[1,1:jdsize]),vec(pva_venus[2,1:jdsize]),label="Venus")
+    plot(vec(pva_earth[1,1:jdsize]),vec(pva_earth[2,1:jdsize]),label="Earth")
+    xlabel("[AU]")
+    ylabel("[AU]")
+    legend(loc="lower left")
+    clf()
+
+    test = 365 
+    i=1
+    JD_venus,ff_venus,i_min_venus,pos_venus,tt_venus = find_transit(2,eph,t0[i],t0[i]+test,n_obs,test)
+    JD_earth,ff_earth,i_min_earth,pos_earth,tt_earth = find_transit(3,eph,t0[i],t0[i]+test,n_obs,test)
+    # title("Top-Down Orbits w/ Observer")
+    figsize=(8,8)
+    plot(pos_venus[1,i_min_venus], pos_venus[2,i_min_venus],"o",label="Venus Transit",color=:orange)
+    plot(pos_earth[1,i_min_earth], pos_earth[2,i_min_earth],"o",label="Earth Transit")
+    plot(xsun,ysun,"o",label="Sun",color=:yellow)
+    plot(pos_venus[1,:], pos_venus[2,:],color=:grey)
+    plot(pos_earth[1,:], pos_earth[2,:],color=:grey)
+    plot([0,x_obs*1.1], [0,y_obs*1.1], "k--")
+    legend(loc="upper left")
+    xlabel("[AU]")
+    ylabel("[AU]")
+    # savefig("sim_times.eps")
+  end
 
   # Plot transit times and TTVs
   function plot_ttvs(sigma)
-  # subplot(211)
-  # scatter((t1.-t01)./per1,tt1.-t1) #x is tranit number 
-  # plot((t1.- t01)./per1,ttv1) 
-  # errorbar((t1.-t01)./per1,ttv1, noise1)
-  scatter((t1.-t01)./365.25, tt1.-t1) # x is JD in years
-  plot((t1.-t01)./365.25, ttv1)
-  # subplot(212)
-  scatter((t2.-t02)./365.25, tt2.-t2, color="green")
-  plot((t2.-t02)./365.25, ttv2)
-  errorbar((t2.-t02)./365.25,ttv2, noise2)
-  # scatter((t2.-t02)./per2,tt2.-t2,color="green") 
-  # plot((t2.-t02)./per2,ttv2)
-  # title(sigma)
-  xlabel("JD (years)")
-  ylabel("TTVs")
-  # savefig("OUTPUTs/")
+    # subplot(211)
+    # scatter((t1.-t01)./per1,tt1.-t1) #x is tranit number 
+    # plot((t1.- t01)./per1,ttv1) 
+    # errorbar((t1.-t01)./per1,ttv1, noise1)
+    scatter((t1.-t01)./365.25, tt1.-t1) # x is JD in years
+    plot((t1.-t01)./365.25, ttv1)
+    # subplot(212)
+    scatter((t2.-t02)./365.25, tt2.-t2, color="green")
+    plot((t2.-t02)./365.25, ttv2)
+    errorbar((t2.-t02)./365.25,ttv2, noise2)
+    # scatter((t2.-t02)./per2,tt2.-t2,color="green") 
+    # plot((t2.-t02)./per2,ttv2)
+    # title(sigma)
+    xlabel("JD (years)")
+    ylabel("TTVs")
+    # savefig("OUTPUTs/")
   end
   # plot_ttvs(sigma)
+  # plot_orbits()
 
   function write_file(jd1, jd2, sigma)
   body = zeros((nt1+nt2))
@@ -238,14 +276,14 @@ function sim_times(jd1::Float64, jd2::Float64, jdsize::Int64,
   body[nt1+1:nt1+nt2] .= 2.0
   tt = [tt1+noise1;tt2+noise2]
   if addnoise
-      noise = [noise1;noise2]
-      sigtt = [sigtt1;sigtt2]
-      name = string("INPUTS/tt_data",sigma,"s.txt")
-      writedlm(name, zip(body, tt0, tt, sigtt))
+    noise = [noise1;noise2]
+    sigtt = [sigtt1;sigtt2]
+    name = string("INPUTS/tt_data",sigma,"s.txt")
+    writedlm(name, zip(body, tt0, tt, sigtt))
   else
-      writedlm("INPUTS/tt_data.txt", zip(body, tt))
+    writedlm("INPUTS/tt_data.txt", zip(body, tt))
   end
   end
-  write_file(jd1, jd2, sigma)
+  # write_file(jd1, jd2, sigma)
   # return tt1, noise1+tt1, tt2, noise2+tt2
 end

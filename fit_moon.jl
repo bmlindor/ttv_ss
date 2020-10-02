@@ -1,8 +1,8 @@
 # Julia v1.1
 include("/Users/bethleelindor/work/washington/ttv_project/ttv_ss/TTVFaster/compute_ttv.jl")
 include("/Users/bethleelindor/work/washington/ttv_project/ttv_ss/TTVFaster/ttv_wrapper.jl")
+include("/Users/bethleelindor/work/washington/ttv_project/ttv_ss/TTVFaster/chisquare.jl")
 include("regress.jl")
-include("chisquare.jl")
 using PyPlot
 using DelimitedFiles, JLD2
 using Statistics, DataFitting, Random, Optim, LsqFit
