@@ -19,11 +19,12 @@ nphase = 6
 dpin = 0.0 
 dpout = 2*pi
 ndp = 36
-nsteps = 1000
+nsteps = 3000
 nwalkers = 50
 p3 = 10 .^ range(log10(p3in),stop=log10(p3out),length=np3)
 
-@time sim = sim_times(jd1,jd2,jdsize,true,sigma,false)
-@time fit = fit_moon(file,label,p3in,p3out,np3,nphase,dpin,dpout,ndp,true,sigma)
+# @time sim = sim_times(jd1,jd2,jdsize,true,sigma,false)
+# file = string("INPUTS/tt_data",sigma,"s.txt")
+# @time fit = fit_moon(file,label,p3in,p3out,np3,nphase,dpin,dpout,ndp,true,sigma)
 @load "OUTMOON/moon_fittestparams.jld2" #pbest_dp lprob_dp lprob_best pbest_global ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase dpin dpout phiphase
 @time par_mcmc, lprob_mcmc = MCMC(pbest_global,label,nsteps,nwalkers,nplanet,ntrans,tt0,tt,sigtt,false,true) 

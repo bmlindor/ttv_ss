@@ -2,7 +2,7 @@
 using PyPlot, JLD2
 rc("font", family="serif")
 include("decompose_ttvs.jl")
-@load "OUTMOON/mcmc_resultstest.jld2"
+@load "mcmc_resultstest.jld2"
 @load "OUTMOON/moon_fittestparams.jld2"
 label = "test"
 
@@ -28,7 +28,7 @@ errorbar((ttmodel[ntrans[1]+1:ntrans[1]+ntrans[2]].-pbest_global[8])./365.25,(tt
 ylabel("Earth TTVs (minutes)")
 xlabel("Years Observed (N)")
 name = string("IMAGES/bestdpfit",label,".png")
-savefig(name)
+# savefig(name)
 clf()
 
 # Make plot of best planet 3 period likelihood
@@ -38,7 +38,7 @@ plot(deltaphi,exp.((lprob_dp .-maximum(lprob_dp))))
 xlabel("δϕ of Moon [years]")
 ylabel("Likelihood")
 name = string("IMAGES/bestdplikelihood",label,".png")
-savefig(name)
+# savefig(name)
 clf()
 
 # Make plot of parameters at all MCMC steps
@@ -65,9 +65,12 @@ pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
 #         plot(par_mcmc[j,1:nsteps,i+10])
 #         ylabel(pname[i+10])
 #     end
-for i=1:3
-    figsize=(8,6)
-    subplot(5,1,i)
+    # figsize=(8,6)
+    figure()
+    fig = subplot(3,3)
+    nrows, ncols = 3, 3 
+    fig.
+    fig.   subplot(5,1,i)
     for j=1:nwalkers 
         plot(par_mcmc[j,1:nsteps,i+15])
         ylabel(pname[i+15])
@@ -87,13 +90,13 @@ savefig(name)
 #   savefig(name)
 
 #Make plot of MCMC parameters after burn-in
-figsize=(8,6)
-for i=2:nparam
-  for j=1:i-1
-    scatter(vec(par_mcmc[1:nwalkers,iburn:nsteps,i]),vec(par_mcmc[1:nwalkers,iburn:nsteps,j]))
-    xlabel(pname[i])
-    ylabel(pname[j])
-  end
-end
-name = string("IMAGES/MCMCparams",label,".png")
-savefig(name)
+# figsize=(8,6)
+# for i=2:nparam
+#   for j=1:i-1
+#     scatter(vec(par_mcmc[1:nwalkers,iburn:nsteps,i]),vec(par_mcmc[1:nwalkers,iburn:nsteps,j]))
+#     xlabel(pname[i])
+#     ylabel(pname[j])
+#   end
+# end
+# name = string("IMAGES/MCMCparams",label,".png")
+# savefig(name)
