@@ -1,4 +1,4 @@
-include("/TTVFaster/ttv_nplanet.jl")
+include("TTVFaster/ttv_nplanet.jl")
 
 function decompose_ttvs(nplanet, ntrans, params)
 	jmax = 5
