@@ -270,7 +270,6 @@ function sim_times(jd1::Float64, jd2::Float64, jdsize::Int64,
   # plot_ttvs(sigma)
   # plot_orbits()
 
-  function write_file(jd1, jd2, sigma)
   body = zeros((nt1+nt2))
   body[1:nt1] .= 1.0
   body[nt1+1:nt1+nt2] .= 2.0
@@ -278,12 +277,14 @@ function sim_times(jd1::Float64, jd2::Float64, jdsize::Int64,
   if addnoise
     noise = [noise1;noise2]
     sigtt = [sigtt1;sigtt2]
-    name = string("INPUTS/tt_data",sigma,"s.txt")
+    if EMB
+      name = string("INPUTS/tt_data",sigma,"sEMB.txt")
+    else
+      name = string("INPUTS/tt_data",sigma,"snoEMB.txt")
+    end
     writedlm(name, zip(body, tt0, tt, sigtt))
   else
     writedlm("INPUTS/tt_data.txt", zip(body, tt))
   end
-  end
-  # write_file(jd1, jd2, sigma)
   # return tt1, noise1+tt1, tt2, noise2+tt2
 end

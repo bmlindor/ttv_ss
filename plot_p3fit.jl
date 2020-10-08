@@ -3,7 +3,8 @@ using PyPlot, JLD2
 rc("font", family="serif")
 include("decompose_ttvs.jl")
 @load "OUTP3/p3_fittestparams.jld2" #param_p3 lprob_p3 lprob_best pbest ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase
-@load "OUTP3/mcmc_resultstest.jld2" #par_mcmc, lprob_mcmc, nwalkers, nsteps, accept, iburn
+@load "mcmc_resultstest.jld2"
+# @load "OUTP3/mcmc_resultstest.jld2" #par_mcmc, lprob_mcmc, nwalkers, nsteps, accept, iburn
 # @load "OUTPUTS/moon_fittestparams.jld2"
 label = "test"
 
@@ -28,7 +29,7 @@ errorbar((ttmodel[ntrans[1]+1:ntrans[1]+ntrans[2]].-pbest_global[8])./365.25,(tt
 ylabel("Earth TTVs (minutes)")
 xlabel("Years Observed (N)")
 name = string("IMAGES/best3planetfit",label,".png")
-savefig(name)
+# savefig(name)
 clf()
 
 # Make plot of best planet 3 period likelihood
@@ -38,7 +39,7 @@ plot(p3/365.25,exp.((lprob_p3 .-maximum(lprob_p3))))
 xlabel("Period of planet 3 [years]")
 ylabel("Likelihood")
 name = string("IMAGES/bestp3likelihood",label,".png")
-savefig(name)
+# savefig(name)
 clf()
 
 # Make plot of parameters at all MCMC steps
@@ -47,8 +48,9 @@ clf()
 pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
           "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
           "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)"]
+
+figsize=(9,5)
 for i=1:5
-    figsize=(10,5)
     subplot(5,1,i)
     for j=1:nwalkers 
         plot(par_mcmc[j,1:nsteps,i])
@@ -56,8 +58,31 @@ for i=1:5
     end
     tight_layout()
 end
-name = string("IMAGES/MCMCsteps",label,".png")
-savefig(name)
+name = string("IMAGES/MCMCsteps",label,"p1.png")
+
+figsize=(9,5)
+for i=1:5
+    subplot(5,1,i)
+    for j=1:nwalkers 
+        plot(par_mcmc[j,1:nsteps,i+5])
+        ylabel(pname[i+5])
+    end
+    tight_layout()
+end
+name = string("IMAGES/MCMCsteps",label,"p2.png")
+
+figsize=(9,5)
+for i=1:5
+    subplot(5,1,i)
+    for j=1:nwalkers 
+        plot(par_mcmc[j,1:nsteps,i+10])
+        ylabel(pname[i+10])
+    end
+    tight_layout()
+end
+name = string("IMAGES/MCMCsteps",label,"p3.png")
+clf()
+# savefig(name)
 #   for i=1:nparam
 #     for j=1:nwalkers
 #       plot(vec(par_mcmc[j,1:nsteps,i]))

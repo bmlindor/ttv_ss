@@ -28,7 +28,7 @@ errorbar((ttmodel[ntrans[1]+1:ntrans[1]+ntrans[2]].-pbest_global[8])./365.25,(tt
 ylabel("Earth TTVs (minutes)")
 xlabel("Years Observed (N)")
 name = string("IMAGES/bestdpfit",label,".png")
-# savefig(name)
+savefig(name)
 clf()
 
 # Make plot of best planet 3 period likelihood
@@ -66,11 +66,9 @@ pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
 #         ylabel(pname[i+10])
 #     end
     # figsize=(8,6)
-    figure()
-    fig = subplot(3,3)
-    nrows, ncols = 3, 3 
-    fig.
-    fig.   subplot(5,1,i)
+figsize=(5,3)
+for i=1:3
+    subplot(3,1,i)
     for j=1:nwalkers 
         plot(par_mcmc[j,1:nsteps,i+15])
         ylabel(pname[i+15])
@@ -78,7 +76,7 @@ pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
     # tight_layout()
 end
 name = string("IMAGES/MCMCstepsmoon",label,".png")
-savefig(name)
+# savefig(name)
 #   for i=1:nparam
 #     for j=1:nwalkers
 #       plot(vec(par_mcmc[j,1:nsteps,i]))
