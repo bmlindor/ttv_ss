@@ -66,6 +66,7 @@ pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
 #         ylabel(pname[i+10])
 #     end
     # figsize=(8,6)
+function plot_MCMCsteps()
 figsize=(5,3)
 for i=1:3
     subplot(3,1,i)
@@ -76,7 +77,9 @@ for i=1:3
     # tight_layout()
 end
 name = string("IMAGES/MCMCstepsmoon",label,".png")
-# savefig(name)
+savefig(name)
+clf()
+end
 #   for i=1:nparam
 #     for j=1:nwalkers
 #       plot(vec(par_mcmc[j,1:nsteps,i]))

@@ -23,7 +23,7 @@ nsteps = 1000
 nwalkers = 50
 p3 = 10 .^ range(log10(p3in),stop=log10(p3out),length=np3)
 
-sim = sim_times(jd1,jd2,jdsize,true,sigma)
+@time sim = sim_times(jd1,jd2,jdsize,true,sigma)
 # file = string("INPUTS/tt_data",sigma,"s.txt")
 # @time fit = fit_mysteryplanet3(file,label,p3in,p3out,np3,nphase,true,sigma, true)
 # @load "OUTP3/p3_fittestparams.jld2" #param_p3 lprob_p3 lprob_best pbest ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase
