@@ -48,7 +48,7 @@ clf()
 pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
           "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
           "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)"]
-
+function plot_MCMCsteps()
 figsize=(9,5)
 for i=1:5
     subplot(5,1,i)
@@ -59,7 +59,8 @@ for i=1:5
     tight_layout()
 end
 name = string("IMAGES/MCMCsteps",label,"p1.png")
-
+savefig(name)
+clf()
 figsize=(9,5)
 for i=1:5
     subplot(5,1,i)
@@ -70,7 +71,8 @@ for i=1:5
     tight_layout()
 end
 name = string("IMAGES/MCMCsteps",label,"p2.png")
-
+savefig(name)
+clf()
 figsize=(9,5)
 for i=1:5
     subplot(5,1,i)
@@ -81,17 +83,9 @@ for i=1:5
     tight_layout()
 end
 name = string("IMAGES/MCMCsteps",label,"p3.png")
+savefig(name)
 clf()
-# savefig(name)
-#   for i=1:nparam
-#     for j=1:nwalkers
-#       plot(vec(par_mcmc[j,1:nsteps,i]))
-#     end
-#     xlabel("MCMC step")
-#     ylabel(pname[i])
-#   end
-#   name = string("IMAGES/MCMCsteps",label,".png")
-#   savefig(name)
+end
 
 # Make plot of MCMC parameters after burn-in
 # figsize=(8,6)

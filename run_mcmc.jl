@@ -1,4 +1,9 @@
-include("/Users/bethleelindor/work/washington/ttv_project/ttv_ss/TTVFaster/ttv_wrapper.jl")  
+if !@isdefined(TTVFaster)
+    include("TTVFaster/compute_ttv.jl")
+    include("TTVFaster/ttv_wrapper.jl")
+    include("TTVFaster/chisquare.jl")
+    using Main.TTVFaster
+end
 include("bounds.jl")
 using PyPlot
 using DelimitedFiles, JLD2
