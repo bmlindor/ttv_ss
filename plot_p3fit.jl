@@ -3,9 +3,7 @@ using PyPlot, JLD2
 rc("font", family="serif")
 include("decompose_ttvs.jl")
 @load "OUTP3/p3_fittestparams.jld2" #param_p3 lprob_p3 lprob_best pbest ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase
-@load "mcmc_resultstest.jld2"
-# @load "OUTP3/mcmc_resultstest.jld2" #par_mcmc, lprob_mcmc, nwalkers, nsteps, accept, iburn
-# @load "OUTPUTS/moon_fittestparams.jld2"
+@load "mcmc_resultstest.jld2" #par_mcmc, lprob_mcmc, nwalkers, nsteps, accept, iburn
 label = "test"
 
 pair_ttvs = decompose_ttvs(nplanet, ntrans, pbest_global)
