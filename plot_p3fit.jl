@@ -2,7 +2,7 @@
 using PyPlot, JLD2
 rc("font", family="serif")
 include("decompose_ttvs.jl")
-@load "p3_fittestparams.jld2" #param_p3 lprob_p3 lprob_best pbest ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase
+@load "OUTPUTS/p3_fittry001params.jld2" #param_p3 lprob_p3 lprob_best pbest ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase
 @load "mcmc_resultstry001.jld2" #par_mcmc, lprob_mcmc, nwalkers, nsteps, accept, iburn
 label = "try001"
 
