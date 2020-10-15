@@ -2,8 +2,8 @@
 using PyPlot, JLD2
 rc("font", family="serif")
 include("decompose_ttvs.jl")
-@load "OUTPUTS/p3_fittry001params.jld2" #param_p3 lprob_p3 lprob_best pbest ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase
-@load "mcmc_resultstry001.jld2" #par_mcmc, lprob_mcmc, nwalkers, nsteps, accept, iburn
+@load ("p3_fittry001params.jld2") #param_p3 lprob_p3 lprob_best pbest ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase
+@load ("mcmc_resultstry001.jld2") #par_mcmc, lprob_mcmc, nwalkers, nsteps, accept, iburn
 label = "try001"
 
 pair_ttvs = decompose_ttvs(nplanet, ntrans, pbest_global)
@@ -27,7 +27,7 @@ errorbar((ttmodel[ntrans[1]+1:ntrans[1]+ntrans[2]].-pbest_global[8])./365.25,(tt
 ylabel("Earth TTVs (minutes)")
 xlabel("Years Observed (N)")
 name = string("IMAGES/best3planetfit",label,".png")
-# savefig(name)
+savefig(name)
 clf()
 
 # Make plot of best planet 3 period likelihood
@@ -37,7 +37,7 @@ plot(p3/365.25,exp.((lprob_p3 .-maximum(lprob_p3))))
 xlabel("Period of planet 3 [years]")
 ylabel("Likelihood")
 name = string("IMAGES/bestp3likelihood",label,".png")
-# savefig(name)
+savefig(name)
 clf()
 
 # Make plot of parameters at all MCMC steps
@@ -59,6 +59,7 @@ end
 name = string("IMAGES/MCMCsteps",label,"p1.png")
 savefig(name)
 clf()
+
 figsize=(9,5)
 for i=1:5
     subplot(5,1,i)
@@ -84,7 +85,7 @@ name = string("IMAGES/MCMCsteps",label,"p3.png")
 savefig(name)
 clf()
 end
-
+plot_MCMCsteps()
 # Make plot of MCMC parameters after burn-in
 # figsize=(8,6)
 # for i=2:nparam
