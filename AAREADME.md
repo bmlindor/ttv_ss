@@ -88,7 +88,7 @@ julia ttv_like_planet_b.jl &> ttv_likelihood_planetb_3.0sig.txt &
 TODO:
 -define format for grids and MCMC runs 
 run_types = [extrashort=(4230-4430), short=(2000-5000), medium=(700-10000), wide=(500-18000)]
-grid_types = [extrafine=1000-500, fine=100, medium=10, coarse=2]
+grid_types = [extrafine=1000, fine=100-500, medium=10, coarse=2]
 noise = [10.0, 15.0, 30.0, 45.0, 60.0, 120.0, 240.0]
 walkers = [1000, 10000, 100000, 250000, 500000]
 label 	run_type	grid_type	noise	walkers

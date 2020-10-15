@@ -13,7 +13,6 @@ time2 = collect(pbest_global[8] .+ range(0,stop=ntrans[2]-1,length=ntrans[2]) .*
 deltaphi = range(dpin,stop=dpout,length=ndp)
 nparam=length(pbest_global)
 
-# Make plot of decomposed simulated transit timing variations in minutes for years observed
 figsize=(10,8)
 subplot(211)
 plot((ttmodel[1:ntrans[1]].-pbest_global[3])./365.25,pair_ttvs[1,2,1:ntrans[1]].* (24 * 60),linewidth=1.5)
