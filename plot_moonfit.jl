@@ -6,15 +6,28 @@ include("decompose_ttvs.jl")
 @load "OUTMOON/moon_fittestparams.jld2"
 label = "test"
 
+pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
+            "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
+            "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)", 
+            "tmax sin(phi0)", "tmax cos(phi0)", "deltaphi"]
+
 pair_ttvs = decompose_ttvs(nplanet, ntrans, pbest_global)
+moon_ttvs = moon_ttvs(nplanet, ntrans, pbest_global)
 time1 = collect(pbest_global[3] .+ range(0,stop=ntrans[1]-1,length=ntrans[1]) .* pbest_global[2])
 time2 = collect(pbest_global[8] .+ range(0,stop=ntrans[2]-1,length=ntrans[2]) .* pbest_global[7])
 # p3 = 10 .^ range(log10(p3in),stop=log10(p3out),length=np3)
-deltaphi = range(dpin,stop=dpout,length=ndp)
 nparam=length(pbest_global)
+
+for i=1:ntrans[2]
+    ts = pbest_global[end-2] #tmax sinphi0
+    tc = pbest_global[end-1] #tmax cosphi0
+    deltaphi = pbest_global[end]
+    ttvmoon =  pair_ttvs[2,,i] + ts*cos((i-1)*deltaphi) + tc*sin((i-1)*deltaphi)
+end
 
 figsize=(10,8)
 subplot(211)
+tight_layout()
 plot((ttmodel[1:ntrans[1]].-pbest_global[3])./365.25,pair_ttvs[1,2,1:ntrans[1]].* (24 * 60),linewidth=1.5)
 plot((ttmodel[1:ntrans[1]].-pbest_global[3])./365.25,pair_ttvs[1,3,1:ntrans[1]].* (24 * 60),linewidth=1.5,color=:firebrick)
 errorbar((ttmodel[1:ntrans[1]].-pbest_global[3])./365.25,(tt[1:ntrans[1]].-time1).* (24 * 60), sigtt[1:ntrans[1]].* (24 * 60),color="black",fmt=".")
@@ -43,10 +56,7 @@ clf()
 # Make plot of parameters at all MCMC steps
 #   par_mcmc = zeros(nwalkers,nsteps,nparam)
 #   lprob_mcmc = zeros(nwalkers,nsteps)
-pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
-            "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
-            "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)", 
-            "tmax sin(phi0)", "tmax cos(phi0)", "deltaphi"]
+
 # for i=1:5
 #     figsize=(15,5)
 #     subplot(5,1,i)

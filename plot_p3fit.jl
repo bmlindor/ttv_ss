@@ -86,6 +86,11 @@ savefig(name)
 clf()
 end
 plot_MCMCsteps()
+function plot_dist(value)
+    
+    
+end
+
 # Make plot of MCMC parameters after burn-in
 # figsize=(8,6)
 # for i=2:nparam
