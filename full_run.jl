@@ -16,7 +16,7 @@ p3in = 4230.0
 p3out = 4430.0
 np3 = 10
 nphase = 6
-nsteps = 10000
+nsteps = 100000
 nwalkers = 50
 p3 = 10 .^ range(log10(p3in),stop=log10(p3out),length=np3)
 
