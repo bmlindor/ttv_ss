@@ -2,12 +2,12 @@
 # in eccentricity.  Please cite Agol & Deck (2015) if
 # you make use of this in published research.
 
-module TTVFaster
+# module TTVFaster
 
-# VERSION < v"0.4-dev" && using Docile
+# # VERSION < v"0.4-dev" && using Docile
 
-export Planet_plane_hk, compute_ttv!
-export Planet_plane                   # Deprecated, only exported to make the error message work
+# export Planet_plane_hk, compute_ttv!
+# export Planet_plane                   # Deprecated, only exported to make the error message work
 
 include("ttv_succinct.jl")
 
@@ -151,4 +151,4 @@ function compute_ttv!(jmax::Integer,p1::Planet_plane_hk,p2::Planet_plane_hk,time
   return
 end  # compute_ttv!
 
-end # module
+# end # module
