@@ -10,7 +10,8 @@ using DelimitedFiles,JLD2,Optim,LsqFit,Statistics
 # using PyPlot,Unitful,UnitfulAstro,LinearAlgebra
 
 function fit_mysteryplanet3(filename::String,label::String,
-  p3in::Float64=4000.0,p3out::Float64=4600.0,np3::Int=10,nphase::Int=10,
+  jd1::Float64,jd2::Float64,jdsize::Int64,
+  p3in::Float64,p3out::Float64,np3::Int,nphase::Int,
   addnoise::Bool=false,sigma::Float64=0.0,EMB::Bool=true)
   #=
    To do:
@@ -131,8 +132,10 @@ function fit_mysteryplanet3(filename::String,label::String,
   param_p3 = zeros(nparam,np3)
   lprob_best = -1e100 #global best fit
   pbest = zeros(nparam)
+  # Shifting to simulated observation range to search over period grid
+  offset = (jd1 + jd2)/2 
   for j=1:np3
-    phase = p3[j]*range(0,stop=1,length=nphase) #searches over period of jupiter
+    phase = p3[j]*range(0,stop=1,length=nphase) .+ offset 
     lprob_phase = zeros(nphase)
     lprob_p3[j] = -1e100
     for i=1:nphase #loops over jupiter phases

@@ -18,11 +18,10 @@ np3 = 20
 nphase = 10
 nsteps = 1000
 nwalkers = 50
-p3 = 10 .^ range(log10(p3in),stop=log10(p3out),length=np3)
 
-@time sim = sim_times(jd1,jd2,jdsize,true,sigma,true)
+# @time sim = sim_times(jd1,jd2,jdsize,true,sigma,true)
 file = string("INPUTS/tt_data",sigma,"sEMB.txt")
-@time fit = fit_mysteryplanet3(file,label,p3in,p3out,np3,nphase,true,sigma,true)
+@time fit = fit_mysteryplanet3(file,label,jd1,jd2,jdsize,p3in,p3out,np3,nphase,true,sigma,true)
 # @load "OUTP3/p3_fittestparams.jld2" #param_p3 lprob_p3 lprob_best pbest ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase
 # @time par_mcmc,lprob_mcmc = MCMC(pbest_global,label,nsteps,nwalkers,nplanet,ntrans,tt0,tt,sigtt) #par_mcmc,lprob_mcmc,accept,iburn,steps,nwalkers,nsteps
 

@@ -17,17 +17,16 @@ function decompose_ttvs(nplanet,ntrans,params)
   return pair_ttvs
 end
 
-function moon_ttvs(nplanet,ntrans,params)
-	jmax = 5
-	moon_ttvs = zeros(maximum(ntrans))
-	ttv = ttv_nplanet(2,jmax,ntrans,params[1:18])
-  # We measure transit times,not TTVs,so add back in the linear ephemeris:
+function moon_ttvs(ntrans,params)
+	println(ntrans)
+	ttvs = zeros(ntrans[2])
+   # We measure transit times,not TTVs,so add back in the linear ephemeris:
 	for i=1:ntrans[2]
 		  #tmax = param[end-2]; phi0 = param[end-1]; deltaphi = param[end]
 		  ts = params[end-2] #tmax sinphi0
 		  tc = params[end-1] #tmax cosphi0
 		  deltaphi = params[end]
-		  moon_ttvs = ttv[2,i] + ts*cos((i-1)*deltaphi) + tc*sin((i-1)*deltaphi)
-	end
-	return moon_ttvs
+		  ttvs[i] = ts*cos((i-1)*deltaphi) + tc*sin((i-1)*deltaphi)
+	end 
+	return ttvs
 end

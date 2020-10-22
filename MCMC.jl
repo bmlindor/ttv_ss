@@ -5,7 +5,7 @@ end
 import Main.TTVFaster.ttv_wrapper
 import Main.TTVFaster.chisquare
 include("bounds.jl")
-using DelimitedFiles,JLD2,Optim,LsqFit,Statistics
+using DelimitedFiles,JLD2,Statistics
 # Run a Markov chain:
 function MCMC(param::Array{Float64,1},label::String,
   nsteps::Int64,nwalkers::Int64,nplanet::Int64,ntrans::Array{Int64,1},
@@ -29,7 +29,7 @@ function MCMC(param::Array{Float64,1},label::String,
     errors = [1e-7,1e-5,1e-5,1e-2,1e-2,
       1e-7,1e-5,1e-5,1e-2,1e-2,
       1e-6,1e-1,1e-1,1e-2,1e-2,
-      1e-2,1e-2,1e-5]
+      1e-4,1e-4,1e-3]
     pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
             "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
             "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)",
@@ -70,7 +70,7 @@ function MCMC(param::Array{Float64,1},label::String,
     if !EMB 
       # deltaphi priors:
       # dpmin = 0.0; dpmax = pi # we know it should be ~2.3 but aliasing 
-      dpmin = pi; dpmax = 2*pi
+      dpmin = 0.0; dpmax = pi
       deltaphi = param[18]
       if deltaphi < dpmin || deltaphi > dpmax
         lprior += -Inf
@@ -99,6 +99,7 @@ function MCMC(param::Array{Float64,1},label::String,
         par_trial[nparam+1] = 1e-8 .* abs(randn())
       end
       lprob_trial = calc_lprior(par_trial)
+      # println("Calculated Log Prior: ",lprob_trial)
       if lprob_trial > -Inf
         # model = ttv_wrapper3(tt0,par_trial)# 
         if EMB
