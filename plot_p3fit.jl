@@ -28,7 +28,7 @@ ylabel("Earth TTVs (minutes)")
 xlabel("Years Observed (N)")
 tight_layout()
 name = string("IMAGES/best3planetfit",label,".png")
-savefig(name)
+# savefig(name)
 clf()
 
 # Make plot of best planet 3 period likelihood
@@ -38,7 +38,7 @@ plot(p3/365.25,exp.((lprob_p3 .-maximum(lprob_p3))))
 xlabel("Period of planet 3 [years]")
 ylabel("Likelihood")
 name = string("IMAGES/bestp3likelihood",label,".png")
-savefig(name)
+# savefig(name)
 clf()
 
 # Make plot of parameters at all MCMC steps
@@ -88,7 +88,7 @@ clf()
 end
 plot_MCMCsteps()
 function plot_dist(value)
-
+    plot(p)
     
 end
 

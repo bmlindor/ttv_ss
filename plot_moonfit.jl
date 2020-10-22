@@ -2,9 +2,9 @@
 using PyPlot,JLD2
 rc("font",family="serif")
 include("decompose_ttvs.jl")
-@load "mcmc_resultstest.jld2"
-@load "OUTMOON/moon_fittestparams.jld2"
-label = "test"
+@load ("mcmc_systestresults.jld2")
+@load ("OUTPUTS/moon_fittestparams.jld2")
+label = "mtest"
 
 pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
             "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
@@ -12,13 +12,14 @@ pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
             "tmax sin(phi0)","tmax cos(phi0)","deltaphi"]
 
 pair_ttvs = decompose_ttvs(nplanet,ntrans,pbest_global)
-moon_ttvs = moon_ttvs(nplanet,ntrans,pbest_global)
+moon = moon_ttvs(ntrans,pbest_global)
 time1 = collect(pbest_global[3] .+ range(0,stop=ntrans[1]-1,length=ntrans[1]) .* pbest_global[2])
 time2 = collect(pbest_global[8] .+ range(0,stop=ntrans[2]-1,length=ntrans[2]) .* pbest_global[7])
 p3 = 10 .^ range(log10(p3in),stop=log10(p3out),length=np3)
 deltaphi = range(dpin,stop=dpout,length=ndp)
 nparam=length(pbest_global)
 
+println(moon)
 figsize=(10,8)
 subplot(211)
 plot((ttmodel[1:ntrans[1]].-pbest_global[3])./365.25,pair_ttvs[1,2,1:ntrans[1]].* (24 * 60),linewidth=1.5)
@@ -28,7 +29,7 @@ ylabel("Venus TTVs (minutes)")
 subplot(212)
 plot((ttmodel[ntrans[1]+1:ntrans[1]+ntrans[2]].-pbest_global[8])./365.25,pair_ttvs[2,1,1:ntrans[2]].* (24 * 60),linewidth=1.5,color=:orange)
 plot((ttmodel[ntrans[1]+1:ntrans[1]+ntrans[2]].-pbest_global[8])./365.25,pair_ttvs[2,3,1:ntrans[2]].* (24 * 60),linewidth=1.5,color=:firebrick)
-plot((ttmodel[ntrans[1]+1:ntrans[1]+ntrans[2]].-pbest_global[8])./365.25,moon_ttvs[1:ntrans[2]].* (24 * 60),linewidth=1.5,color=:gray
+plot((ttmodel[ntrans[1]+1:ntrans[1]+ntrans[2]].-pbest_global[8])./365.25,moon.* (24 * 60),linewidth=1.5,color=:gray)
 errorbar((ttmodel[ntrans[1]+1:ntrans[1]+ntrans[2]].-pbest_global[8])./365.25,(tt[ntrans[1]+1:ntrans[1]+ntrans[2]].-time2).* (24 * 60),sigtt[ntrans[1]+1:ntrans[1]+ntrans[2]] .* (24 * 60),color="black",fmt=".")
 # legend(bbox_to_anchor=(1.05,1),loc=2,borderaxespad=0.0)
 ylabel("Earth TTVs (minutes)")
@@ -42,7 +43,7 @@ clf()
 figsize=(8,6)
 plot(deltaphi,exp.((lprob_dp .-maximum(lprob_dp)))) 
 # plot!( -5:8,(-5:8).^2,inset = (1,bbox(0.1,0.0,0.4,0.4)),subplot = 2)
-xlabel("δϕ of Moon [years]")
+xlabel("δϕ of Moon [radians]")
 ylabel("Likelihood")
 name = string("IMAGES/bestdplikelihood",label,".png")
 # savefig(name)
