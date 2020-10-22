@@ -2,9 +2,9 @@
 using PyPlot,JLD2
 rc("font",family="serif")
 include("decompose_ttvs.jl")
-@load ("p3_fittry001params.jld2") #param_p3 lprob_p3 lprob_best pbest ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase
-@load ("mcmc_resultstry001.jld2") #par_mcmc,lprob_mcmc,nwalkers,nsteps,accept,iburn
-label = "try001"
+@load ("OUTPUTS/p3_fittestparams.jld2")#param_p3 lprob_p3 lprob_best pbest ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase
+@load ("mcmc_testingresults.jld2") #par_mcmc,lprob_mcmc,nwalkers,nsteps,accept,iburn
+label = "testing"
 
 pair_ttvs = decompose_ttvs(nplanet,ntrans,pbest_global)
 time1 = collect(pbest_global[3] .+ range(0,stop=ntrans[1]-1,length=ntrans[1]) .* pbest_global[2])
@@ -28,7 +28,7 @@ ylabel("Earth TTVs (minutes)")
 xlabel("Years Observed (N)")
 tight_layout()
 name = string("IMAGES/best3planetfit",label,".png")
-# savefig(name)
+savefig(name)
 clf()
 
 # Make plot of best planet 3 period likelihood
@@ -47,6 +47,7 @@ clf()
 pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
           "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
           "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)"]
+          
 function plot_MCMCsteps()
 figsize=(9,5)
 for i=1:5
@@ -87,10 +88,10 @@ savefig(name)
 clf()
 end
 plot_MCMCsteps()
-function plot_dist(value)
-    plot(p)
+# function plot_dist(value)
+#     plot(p)
     
-end
+# end
 
 # Make plot of MCMC parameters after burn-in
 # figsize=(8,6)

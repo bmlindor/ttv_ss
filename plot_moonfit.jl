@@ -6,11 +6,6 @@ include("decompose_ttvs.jl")
 @load ("OUTPUTS/moon_fittestparams.jld2")
 label = "mtest"
 
-pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
-            "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
-            "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)",
-            "tmax sin(phi0)","tmax cos(phi0)","deltaphi"]
-
 pair_ttvs = decompose_ttvs(nplanet,ntrans,pbest_global)
 moon = moon_ttvs(ntrans,pbest_global)
 time1 = collect(pbest_global[3] .+ range(0,stop=ntrans[1]-1,length=ntrans[1]) .* pbest_global[2])
@@ -49,6 +44,10 @@ name = string("IMAGES/bestdplikelihood",label,".png")
 # savefig(name)
 clf()
 
+pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
+            "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
+            "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)",
+            "tmax sin(phi0)","tmax cos(phi0)","deltaphi"]
 # Make plot of parameters at all MCMC steps
 #   par_mcmc = zeros(nwalkers,nsteps,nparam)
 #   lprob_mcmc = zeros(nwalkers,nsteps)
