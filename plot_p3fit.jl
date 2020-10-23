@@ -28,7 +28,7 @@ ylabel("Earth TTVs (minutes)")
 xlabel("Years Observed (N)")
 tight_layout()
 name = string("IMAGES/best3planetfit",label,".png")
-savefig(name)
+# savefig(name)
 clf()
 
 # Make plot of best planet 3 period likelihood
@@ -44,6 +44,17 @@ clf()
 # Make plot of parameters at all MCMC steps
 #   par_mcmc = zeros(nwalkers,nsteps,nparam)
 #   lprob_mcmc = zeros(nwalkers,nsteps)
+param = ["mu", "P", "t0", "e cos(om)", "e sin(om)"]
+planet = ["venus", "earth", "jupiter"]
+nparam = length(param)*nplanet+1
+state_total = zeros(nparam,nsteps*nwalkers)
+for iparam=1:nparam-1
+    if iparam < nparam
+        pname = string(planet[div(iparam-1,5)+1]," ",param[mod(iparam-1,5)+1])
+    end
+    println(iparam, " ",pname," ")# par_mcmc[:,:,iparam])
+end
+
 pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
           "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
           "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)"]
