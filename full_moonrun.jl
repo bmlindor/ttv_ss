@@ -1,13 +1,13 @@
 # Julia v1.1
 using DelimitedFiles,JLD2
 include("sim_times.jl")
-include("mcmc.jl")
+# include("mcmc.jl")
 include("fit_moon.jl")
 # sig_grid = [10.0,15.0,30.0,45.0,60.0]
 # years = [15,30,50]
 # p3in = 500.0; p3out = 18000.0; np3 = 1000
 # Modify the following variables as necessary:
-label = "test"
+label = "mtry1"
 jd1 = 2.4332825e6
 jd2 = 2.4515445e6
 jdsize = 1000
