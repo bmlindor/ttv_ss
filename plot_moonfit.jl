@@ -14,7 +14,6 @@ p3 = 10 .^ range(log10(p3in),stop=log10(p3out),length=np3)
 deltaphi = range(dpin,stop=dpout,length=ndp)
 nparam=length(pbest_global)
 
-println(moon)
 figsize=(10,8)
 subplot(211)
 plot((ttmodel[1:ntrans[1]].-pbest_global[3])./365.25,pair_ttvs[1,2,1:ntrans[1]].* (24 * 60),linewidth=1.5)

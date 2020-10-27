@@ -1,13 +1,13 @@
 # Julia v1.1
 using DelimitedFiles,JLD2
 include("sim_times.jl")
-include("mcmc.jl")
+# include("mcmc.jl")
 include("fit_mysteryplanet3.jl")
 # sig_grid = [10.0,15.0,30.0,45.0,60.0]
 # years = [15,30,50]
 # p3in = 500.0; p3out = 18000.0; np3 = 1000
 # Modify the following variables as necessary:
-label = "test"
+label = "try001"
 jd1 = 2.4332825e6
 jd2 = 2.4515445e6
 jdsize = 1000
@@ -16,8 +16,8 @@ p3in = 4230.0
 p3out = 4430.0
 np3 = 20
 nphase = 10
-nsteps = 1000
-nwalkers = 50
+# nsteps = 1000
+# nwalkers = 50
 
 # @time sim = sim_times(jd1,jd2,jdsize,true,sigma,true)
 file = string("INPUTS/tt_data",sigma,"sEMB.txt")
