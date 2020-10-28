@@ -8,7 +8,7 @@ to the Earth-Moon system barycenter in kilometers, kilometers per second and
 kilometers per second square at JD= 2451624.5 TDB timescale
 
 For best accuracy the first time argument should be the integer part 
-and the delta the fractional part (step through day)
+and the delta the fractional part (step through day).
 
 Note: For planets without moons, Mercury and Venus, 
 the barycenter location coincides with the body center of mass. 
@@ -79,73 +79,73 @@ julia> @save "OUTPUTS/p3_fit.jld2" param_p3
 julia> @save "evj_mcmc_01_chi.jld2" chi_mcmc
 julia> @save "evj_mcmc_01_par.jld2" par_mcmc
 
-The, I can restore these later:
+Then, I can restore these later:
 julia> using JLD2
 julia> @load "OUTPUTS/p3_fit_test.jld2"
 
 julia ttv_like_planet_b.jl &> ttv_likelihood_planetb_3.0sig.txt &
 
-TODO:
--define format for grids and MCMC runs 
-run_types = [extrashort=(4230-4430), short=(2000-5000), medium=(700-10000), wide=(500-18000)]
-grid_types = [extrafine=1000, fine=100-500, medium=10, coarse=2]
-noise = [10.0, 15.0, 30.0, 45.0, 60.0, 120.0, 240.0]
-walkers = [1000, 10000, 100000, 250000, 500000]
-label 	run_type	grid_type	noise	walkers
-test 	extrashort	coarse		30
-try001	wide	 	xfine		30 exists? yes
-try002	medium		fine		30
-try003	medium		fine
+p3fit range = [small=(4230-4430), medium=(1000-5000)] <!-- large=(500-5000), xlarge=(500-10000) for plotting detection only --> 
+np3 = [fine=100, medium=20, coarse=10] <!-- xfine=1000 -->
+ndp = [fine=72, medium=36, coarse=10] <!-- xfine=120 -->
+steps = [short=(10000), medium=(100000), long=(200000), xlong=(300000)]
+
+noise = [10.0, 15.0, 30.0, 45.0, 60.0, 120.0, 240.0] <!-- which of these are realistic? -->
+years = [15, 30, 50]
+
+label 	p3range  np3   ndp   steps	noise
+try001	small    med   med   med 
+try002	medium	 fine	 fine  med
+try003	medium	 
 
 8/4/2020
 ##########################	Current State	##########################
-0). Updated TTVFaster to be compatible with Julia v1.1
+0). Updated TTVFaster to be compatible with Julia v1
 1). With transit times of Earth & Venus, can infer both of
 their masses, as well as existence of Jupiter first then Moon
 2). Q: What really limits timing precision of Earth & Venus
 about the Sun? (related to Tyler's work)
-3). The masses inferred with sufficient data are good, although
+
+<!-- 3). The masses inferred with sufficient data are good, although
 still a bit more discrepant than I would like:  I need to
-implement an N-body fit.
-
-
-##########################	Next Tasks	##########################
-1). Makes plots of the contributions of individual bodies (including the ones we are neglecting). [ x ]
-2a). Add in the option for Moon. [ x ]
-2b). Fit for Moon deltaphi. [ x ]
-3a). Create slurm file to run multiple grids on hyak.mox [ ]
-3b). See how many observations would be needed (minimum number of years required). [ ]
-3c). See what the necessary precision would be (add noise to simulations). [ ]
-4a). Show models are correct: derived Earth and Venus parameters.
-4b). Make plots of histograms of parameter results from MCMC with correct values. [ ]
-4c). Make plots of orbits with 1-sigma uncertainties overplotted with the correct orbits. [ ]
-4d). Make plots of logL for Jupiter period and Moon deltaphi with correct values at peak. [ ]
-5a). Using TTVFaster for first estimate, do NBody Gradient fit. [ ]
-5b). Compare TTVFaster and NBody Grad fits. [ ]
-5c). Make plots of posterior results of model fit to simulated times. [ ] 
-6). From posteriors, show how well we can measure mean insolation (eccentricity of Earth's orbit). [ ]
-7). Show that model is correct either way (Moon first then Jupiter). [ ]
-
+implement an N-body fit. -->
 
 ##########################	Writing Tasks	##########################
 1). Write up model desctription (as above). [ ]
 2a). Find relevant papers and add them to .bib file [ x ]
 2b). Read and summarize relevant papers [ ]
 
+##########################  Project Tasks ##########################
+<!-- 1). Makes plots of the contributions of individual bodies (including the ones we are neglecting). [ x ]
+2a). Add in the option for Moon. [ x ]
+2b). Fit for Moon deltaphi. [ x ]
+3). Create slurm file to run multiple grids on hyak.mox [ x ] -->
+4). Show models are correct: derived Earth and Venus parameters.
+4b). Make plots of histograms of parameter results from MCMC with correct values. [ ]
+4c). Make plots of orbits with 1-sigma uncertainties overplotted with the correct orbits. [ ]
+4d). Make plots of logL for Jupiter period and Moon deltaphi with correct values at peak. [ ]
+4e). Make plots of posterior results of model fit to simulated times. [ x ] 
+5a). See how many observations would be needed (minimum number of years required). [ ]
+5b). See what the necessary precision would be (vary noise added to simulations). [ ]
+6). From posteriors, show how well we can measure mean insolation (eccentricity of Earth's orbit). [ ]
+7). Show that model is correct either way (Moon first then Jupiter). [ ]
 
-##########################	Optional Tasks	##########################
+<!-- ##########################	Optional Tasks	##########################
 3). Figure out what the actual expected timing precision
 would be (limited by stellar noise -- related to Tyler's work). 
 3a). Could use existing telescope precision info
 5). See if we can detect Mars [ ] or Saturn.
-8). Figure out why the Earth-Moon barycenter offset causes
-bias in measurements (see if this is the case).
+8). Figure out whether the Earth-Moon barycenter offset causes
+bias in measurements and if so, why.
 9a). Figure out how to speed things up so I can do a global
 search, and explore duration & error bar dependence. 
 9b). Do inverse matrix fitting for linear parameters (Jupiter period & Moon deltaphi) to speed things up (might be more robust).
 9c). Maybe make a type to hold the pre-computed Laplace coefficents,
 and pass this to routines, or create a closure for this.
-13a). Make model of actual transit light curves.
+13a). Make model of actual transit light curves (as opposed to just transit times).
 13b). Show how well constrained densities are (for Earth and Venus).
 13c). Show how well constrained densities are for Sun.
+14a). Using TTVFaster for first estimate, do NBody Gradient fit. [ ]
+14b). Compare TTVFaster and NBody Grad fits. [ ] -->
+
 

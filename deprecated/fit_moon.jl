@@ -7,21 +7,13 @@ import Main.TTVFaster.ttv_wrapper
 import Main.TTVFaster.chisquare
 include("regress.jl")
 using DelimitedFiles,JLD2,Optim,LsqFit,Statistics
-# using PyPlot,Unitful,UnitfulAstro,LinearAlgebra
 
-function fit_mysteryplanet3(filename::String,label::String,
+function fit_moon(filename::String,label::String,
   jd1::Float64,jd2::Float64,jdsize::Int64,
   p3in::Float64,p3out::Float64,np3::Int,nphase::Int,
-  addnoise::Bool=false,sigma::Float64=0.0,EMB::Bool=true)
-  #=
-   To do:
-   # generalize to call in any file (with or w/o noise)
-   # change xs to function that accounts for discontinuous data
-   # Initialize a grid of periods & phases of the outer planet,
-       & compute the best-fit at each with an optimizer.
-   # Write a markov chain to compute the best-fit parameters
-       for the 3 planets.
-  =#
+  dpin::Float64,dpout::Float64,ndp::Int,
+  addnoise::Bool=false,sigma::Float64=0.0,EMB::Bool=false)
+
   data1 = readdlm(filename)
   nt1 = sum(data1[:,1] .== 1.0)
   nt2 = sum(data1[:,1] .== 2.0)
@@ -87,18 +79,8 @@ function fit_mysteryplanet3(filename::String,label::String,
   ttv2 = zeros(nt2)
   # Need first call to TTVFaster,without optimizing
   dummy=TTVFaster.compute_ttv!(jmax,p1,p2,time1,time2,ttv1,ttv2) 
-  # function plot_2planetfit(p3in,p3out,sigma)
-  #   clf()
-  #   scatter(time1,tt1.-t1)
-  #   plot(time1,ttv1)
-  #   scatter(time2,tt2.-t2,color="green")
-  #   plot(time2,ttv2)
-  #   name = string("IMAGES/2planetfitp",label,".png")
-  #   savefig(name)
-  # end
 
   # Now,optimize 2-planet fit
-  p3_cur = 11.86*365.25 #jupiter period in days,initial value
   #res = optimize(chisquare2,param,method = :l_bfgs,iterations = 21)
   ntrans = [nt1,nt2]
   Nobs = sum(ntrans)
@@ -111,7 +93,7 @@ function fit_mysteryplanet3(filename::String,label::String,
   param1 = init_param .+ 100.0
   while maximum(abs.(param1 .- init_param)) > 1e-5
     param1 = init_param
-    res = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax),tt0,tt,weight,init_param)
+    res = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,true),tt0,tt,weight,init_param)
     init_param = res.param
     # println("init_param: ",init_param)
     # println("New Initial chi-square: ",chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt))
@@ -127,6 +109,7 @@ function fit_mysteryplanet3(filename::String,label::String,
   #p3 = 11.86*365.25
   # Grid of periods to search over:
   p3 = 10 .^ range(log10(p3in),stop=log10(p3out),length=np3)
+  p3_cur = 11.86*365.25 #jupiter period in days,initial value
   lprob_p3 = zeros(np3)
   nparam = 15
   param_p3 = zeros(nparam,np3)
@@ -167,58 +150,69 @@ function fit_mysteryplanet3(filename::String,label::String,
     println("Period: ",p3[j]," chi: ",lprob_p3[j]," Param: ",vec(param_p3[1:nparam,j]))
   end
   println("Finished 3-planet fit w/ fixed period: ",pbest)
-  
-  # function plot_likelihood(p3in,p3out,sigma)
-  #   clf()
-  #   plot(p3/365.25,exp.((lprob_p3 .-maximum(lprob_p3)))) 
-  #   xlabel("Period of planet 3 [years]")
-  #   ylabel("Likelihood")
-  #   name = string("IMAGES/p3likelihood",label,".png")
-  #   savefig(name)
-  # end
+
+  fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,true),tt0,tt,weight,pbest)
+  pbest_p3 = fit.param
+  ttmodel = ttv_wrapper(tt0,nplanet,ntrans,pbest_p3,jmax,true)
+  lprob_best= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
+  # sigsys2 = 1e-6
+
+  println("Finished global 3-planet fit.")
+  println("Maximum: ",lprob_best," Param: ",pbest_p3)
+
+  # Now,search for Moon:
+  nparam = 18
+  deltaphi_cur = 2.312
+  deltaphi = range(dpin,stop=dpout,length=ndp)
+  lprob_dp = zeros(ndp)
+  param_dp = zeros(nparam,ndp)
+  lprob_best = -1e100 #global best fit
+  pbest_dp = zeros(nparam)
+  for j=1:ndp
+    lprob_dp[j] = -1e100 
+    param_tmp = [0.01,0.01,deltaphi[j]] # lunar params: t_s ,t_c ,deltaphi 
+    param4 = [pbest_p3;param_tmp]
+    deltaphi_cur = deltaphi[j]
+    param1 = param4 .+ 100.0
+    while maximum(abs.(param1 .- param4)) > 1e-5
+      param1 = param4
+      fit = curve_fit((tt0,param4) -> ttv_wrapper(tt0,nplanet,ntrans,param4,jmax,false),tt0,tt,weight,param4)
+      param4 = fit.param 
+    end
+    ttmodel = ttv_wrapper(tt0,nplanet,ntrans,[fit.param[1:17];deltaphi_cur],jmax,false)
+    lprob_dp[j]= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
+    if lprob_dp[j] > lprob_best 
+      lprob_best = lprob_dp[j]
+      pbest_dp = [fit.param[1:17];deltaphi_cur]
+    end
+    # end
+    param_dp[1:nparam,j] = [fit.param[1:17];deltaphi_cur]
+    println("deltaphi: ",deltaphi[j]," chi: ",lprob_dp[j]," Param: ",vec(param_dp[1:nparam,j]))
+  end
+
+  fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,false),tt0,tt,weight,pbest_dp)
+  pbest_global = fit.param
+  ttmodel = ttv_wrapper(tt0,nplanet,ntrans,pbest_global,jmax,false)
+  lprob_best = (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
+  println("Finished lunar fit: ",lprob_best," ",pbest_global)
 
   # Rescale to set minimum chi-square equal to number of degrees of freedom
   #  = number of transits - number of model parameters (15):
-  #ttmodel=ttv_wrapper3(tt0,param3)
-  #res = optimize(chisquare3,param3,method = :l_bfgs,iterations = 21)
-  #  res = optimize(chisquare3,param3,method = :l_bfgs)
-  #  ttmodel=ttv_wrapper3(tt0,param3)
 
-  # fit = curve_fit(ttv_wrapper3,tt0,tt,weight,pbest)
-  fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax),tt0,tt,weight,pbest)
-  # ttmodel=ttv_wrapper3(tt0,pbest)
-  pbest_global = fit.param
-  ttmodel = ttv_wrapper(tt0,nplanet,ntrans,pbest_global,jmax)
-  lprob_best= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
-  sigsys2 = 1e-6
-
-  println("Finished global 3-planet fit.")
-  println("Maximum: ",lprob_best," Param: ",pbest_global)
-
-  # function plot_3planetfit(p3in,p3out,sigma)
-  #   clf()
-  #   scatter(time1,tt1.-t1)
-  #   plot(time1,ttmodel[1:nt1].-t1)
-  #   scatter(time2,tt2.-t2,color="green")
-  #   plot(time2,ttmodel[nt1+1:nt1+nt2].-t2)
-  #   name = string("IMAGES/3planetfitp",label,".png")
-  #   savefig(name)
-  # end
-  # plot_2planetfit(p3in,p3out,sigma);
-  # plot_likelihood(p3in,p3out,sigma);
-  # plot_3planetfit(p3in,p3out,sigma);
   pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
-        "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
-        "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)"]
+            "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
+            "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)",
+            "tmax sin(phi0)","tmax cos(phi0)","deltaphi"]
 
-  results = string("OUTPUTS/p3_fit",label,"results.txt")
+  results = string("OUTPUTS/moon_fit",label,"results.txt")
   open(results,"w") do io
     for i=1:nparam
       println(io,pname[i],": ",pbest_global[i])
     end
   end
-  file = string("OUTPUTS/p3_fit",label,"params.jld2")
-  @save file param_p3 lprob_p3 lprob_best pbest_global ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase
-  # writedlm(results,pbest_global)
-    # return chi_best,pbest
+  file = string("OUTPUTS/moon_fit",label,"params.jld2")
+  @save file pbest_dp lprob_dp lprob_best pbest_global ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase dpin dpout ndp
+  # results = string("OUTPUTS/p3_fit",label,"results.txt")
+  # #writedlm(results,pbest)
+  # return chi_best,pbest_global
 end
