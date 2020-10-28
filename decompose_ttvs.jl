@@ -18,7 +18,6 @@ function decompose_ttvs(nplanet,ntrans,params)
 end
 
 function moon_ttvs(ntrans,params)
-	println(ntrans)
 	ttvs = zeros(ntrans[2])
    # We measure transit times,not TTVs,so add back in the linear ephemeris:
 	for i=1:ntrans[2]
