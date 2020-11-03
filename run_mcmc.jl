@@ -1,5 +1,5 @@
 include("MCMC.jl")
-include("extract_data.jl")
+# include("extract_data.jl")
 # using PyPlot,Unitful,UnitfulAstro,LinearAlgebra
 
 # file1 = "OUTPUTS/p3_fittry001params.jld2"
@@ -8,13 +8,13 @@ include("extract_data.jl")
 # label = "try001"
 # nsteps = 100000
 # nwalkers = 50
-# @time par_mcmc,lprob_mcmc = MCMC(pbest_global,label,nsteps,nwalkers,nplanet,ntrans,tt0,tt,sigtt,true,true) #yes EMB yes sigsys
+# @time lprob_mcmc,par_mcmc = MCMC(pbest_global,label,nsteps,nwalkers,nplanet,ntrans,tt0,tt,sigtt,true,true) #yes EMB yes sigsys
 
-extract_data("OUTPUTS/moon_fittestparams.jld2")
+@load ("OUTPUTS/moon_fitmtestparams.jld2")
 label = "mtry1"
 nsteps = 200000
 nwalkers = 50
-@time par_mcmc,lprob_mcmc = MCMC(pbest_global,label,nsteps,nwalkers,nplanet,ntrans,tt0,tt,sigtt,false,true) #no EMB yes sigsys
+@time lprob_mcmc,par_mcmc = MCMC(pbest_global,label,nsteps,nwalkers,nplanet,ntrans,tt0,tt,sigtt,false,true) #no EMB yes sigsys
 
 # param = [pbest;1e-4^2]
 # nsteps = 1000

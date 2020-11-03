@@ -1,4 +1,3 @@
 .ipynb_checkpoints
 results/
 .jld2
-OUTPUTS/*.jld2
