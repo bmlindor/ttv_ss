@@ -5,7 +5,8 @@ end
 import Main.TTVFaster.ttv_wrapper
 import Main.TTVFaster.chisquare
 include("bounds.jl")
-using DelimitedFiles,JLD2,Statistics
+using DelimitedFiles,JLD2,Statistics,MCMCDiagnostics
+
 # Run a Markov chain:
 function MCMC(param::Array{Float64,1},label::String,
   nsteps::Int64,nwalkers::Int64,nplanet::Int64,ntrans::Array{Int64,1},
@@ -14,26 +15,20 @@ function MCMC(param::Array{Float64,1},label::String,
 
   nparam = length(param)
   jmax = 5
+  errors = [1e-7,1e-5,1e-5,1e-2,1e-2,
+            1e-7,1e-5,1e-5,1e-2,1e-2,
+            1e-6,1e-1,1e-1,1e-2,1e-2]
+  pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
+          "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
+          "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)"]
   if EMB
-    errors = [1e-7,1e-5,1e-5,1e-2,1e-2,
-          1e-7,1e-5,1e-5,1e-2,1e-2,
-          1e-6,1e-1,1e-1,1e-2,1e-2]
-    pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
-        "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
-        "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)"]
+    errors = errors
+    pname = pname
   else
-    # moon_errors = [1e-2,1e-2,1e-5]
-    # moon_name = ["tmax sin(phi0)","tmax cos(phi0)","deltaphi"]
-    # append!(errors,moon_errors)
-    # append!(pname,moon_name)
-    errors = [1e-7,1e-5,1e-5,1e-2,1e-2,
-      1e-7,1e-5,1e-5,1e-2,1e-2,
-      1e-6,1e-1,1e-1,1e-2,1e-2,
-      1e-5,1e-5,1e-5]
-    pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
-            "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
-            "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)",
-            "tmax sin(phi0)","tmax cos(phi0)","deltaphi"]
+    moon_errors = [1e-4,1e-4,1e-5]
+    moon_name = ["tmax sin(phi0)","tmax cos(phi0)","deltaphi"]
+    append!(errors,moon_errors)
+    append!(pname,moon_name)
   end
   # Initialize walkers:
   if use_sigsys
@@ -44,12 +39,12 @@ function MCMC(param::Array{Float64,1},label::String,
     nsize = nparam
   end
 
-  @assert (nwalkers >= 30)  # nwalkers = nparam * 3
+  @assert (nwalkers >= 40)  # nwalkers = nparam * 3
   # Set up arrays to hold the results:
   par_mcmc = zeros(nwalkers,nsteps,nsize)
   lprob_mcmc = zeros(nwalkers,nsteps)
 
-  function calc_lprior(param) #log prior
+  function calc_lprior(param) 
   # We will place a joint prior on eccentricity vector
   # such that each planet has an eccentricity which lies between
   # 0 and emax2,with a gradual decrease from emax1 to emax2:
@@ -63,13 +58,11 @@ function MCMC(param::Array{Float64,1},label::String,
       ecc = sqrt(param[(i-1)*5+4]^2+param[(i-1)*5+5]^2)
       lprior_tmp,dpdx = log_bounds_upper(ecc,emax1,emax2)
       lprior += lprior_tmp
-      # Adding in prior of 1/eccentricity to account for Jacobian
-      # factor of e*cos(omega) and e*sin(omega):
-      lprior += -log(ecc)  # Add this to log prior
+      # Add prior of 1/eccentricity which accounts for Jacobian factor of e*cos(omega) and e*sin(omega):
+      lprior += -log(ecc)  
     end
     if !EMB 
-      # deltaphi priors:
-      # dpmin = 0.0; dpmax = pi # we know it should be ~2.3 but aliasing 
+      # Plase priors on deltaphi and account for aliasing:
       dpmin = 0.0; dpmax = pi
       deltaphi = param[18]
       if deltaphi < dpmin || deltaphi > dpmax
@@ -87,8 +80,6 @@ function MCMC(param::Array{Float64,1},label::String,
   end
 
   Nobs = sum(ntrans) - 2
-
-  # par_trial = copy(param)
   for j=1:nwalkers
   # Select from within uncertainties:
     lprob_trial = -1e100
@@ -122,6 +113,7 @@ function MCMC(param::Array{Float64,1},label::String,
     par_mcmc[j,1,:]=par_trial
     # println("Success: ",par_trial,lprob_trial)
   end
+
   # Initialize scale length & acceptance counter:
   ascale = 2.0
   accept = 0
@@ -152,7 +144,7 @@ function MCMC(param::Array{Float64,1},label::String,
         if use_sigsys
          lprob_trial += (-0.5 * sum((tt-model_trial).^2 ./(sigtt.^2 .+ par_trial[end]) .+ log.(sigtt.^2 .+ par_trial[end])))
         else
-          lprob_trial += log(sum((tt-model_trial).^2 ./sigtt.^2))*(1 - Nobs/2) #mostly useful for grid search
+          lprob_trial += log(sum((tt-model_trial).^2 ./sigtt.^2))*(1 - Nobs/2) 
         end 
       end   
   # Next,determine whether to accept this trial step:
@@ -206,6 +198,17 @@ function MCMC(param::Array{Float64,1},label::String,
   end
 
   println("Burn-in Number (ends): ",iburn)
+
+  # Now,calculate the minimum number of effective samples over all parameters:
+  samplesize = zeros(nparam)
+  for j=1:nwalkers
+    for i=1:nparam
+      samplesize[i] += effective_sample_size(par_mcmc[j,:,i])
+    end
+  end
+  indepsamples = minimum(samplesize)
+  println("Independent Sample Size: ",indepsamples)
+  
   #   clf()
   #   for i=2:nparam
   #     for j=1:i-1
@@ -221,6 +224,6 @@ function MCMC(param::Array{Float64,1},label::String,
   # plot_MCparams(label)
 
   file = string("mcmc_",label,"results.jld2")
-  @save file par_mcmc lprob_mcmc nwalkers nsteps accept iburn
-  return par_mcmc,lprob_mcmc
+  @save file par_mcmc lprob_mcmc param nwalkers nsteps accept iburn indepsamples
+  return lprob_mcmc,par_mcmc #, param, nwalkers, nsteps, accept, iburn, indepsamples
 end

@@ -1,4 +1,4 @@
-using PyPlot,JLD2
+using PyPlot
 rc("font",family="serif")
 include("decompose_ttvs.jl")
 
