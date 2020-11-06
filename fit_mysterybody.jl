@@ -415,7 +415,7 @@ function fit_moon(filename::String,label::String,
     end
   end
   file = string("OUTPUTS/moon_fit",label,"params.jld2")
-  @save file pbest_dp lprob_dp lprob_best pbest_global ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase dpin dpout ndp
+  @save file pbest_p3 pbest_dp lprob_p3 lprob_dp lprob_best pbest_global ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase dpin dpout ndp
   # results = string("OUTPUTS/p3_fit",label,"results.txt")
   # #writedlm(results,pbest)
   return lprob_best,pbest_global
