@@ -2,17 +2,20 @@
 include("sim_times.jl")
 include("fit_mysterybody.jl")
 
-function full_run()
-# Modify the following variables as necessary:
-label = "try001"
 jd1 = 2.4332825e6
 jd2 = 2.4515445e6
 jdsize = 1000
-sigma = 30.0 
 p3in = 4230.0
 p3out = 4430.0
-np3 = 20
+np3 = 30
 nphase = 10
+dpin = 0.0 
+dpout = 2*pi
+ndp = 72
+
+function full_run()
+# Modify the following variables as necessary:
+label = "try001"
 
 # @time sim = sim_times(jd1,jd2,jdsize,true,sigma,true)
 file = string("INPUTS/tt_data",sigma,"sEMB.txt")
@@ -23,17 +26,7 @@ end
 
 function full_moonrun()
 label = ["mtry1","mtry2","mtry3","mtry4","mtry5","mtry6","mtry7"]
-jd1 = 2.4332825e6
-jd2 = 2.4515445e6
-jdsize = 1000
 sigma = [10.0, 15.0, 30.0, 45.0, 60.0, 120.0, 240.0]
-p3in = 4230.0
-p3out = 4430.0
-np3 = 20
-nphase = 10
-dpin = 0.0 
-dpout = 2*pi
-ndp = 72
 
 for i=1:length(sigma)
 	@time sim = sim_times(jd1,jd2,jdsize,true,sigma[i],false)
