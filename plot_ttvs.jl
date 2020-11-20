@@ -2,6 +2,19 @@ using PyPlot
 rc("font",family="serif")
 include("decompose_ttvs.jl")
 
+
+function moon_contribution()
+    fig, ax1 = subplots(figsize=(8,4))
+    plot(ttsim2,moon,linewidth=1.25,linestyle="--",color="purple",label="Moon contribution")
+    ylabel("Earth TTVs [minutes]")
+    xlabel("Years Observed [N]")
+    ax1.minorticks_on()
+    ax1.tick_params(which="major",direction="in",top="true",right="true",length=6)
+    ax1.tick_params(which="minor",direction="in",top="true",right="true",length=2)
+    tight_layout()
+    show()
+end
+
 function plot_ttvs(include_moon::Bool=false)
     pair_ttvs = decompose_ttvs(nplanet,ntrans,pbest_global) .* (24 * 60)
     n1,n2,n3 = ntrans
@@ -18,33 +31,49 @@ function plot_ttvs(include_moon::Bool=false)
     ttv2 = (tt2.-time2).* (24 * 60) 
     sigtt1 = sigtt[1:n1].* (24 * 60)
     sigtt2 = sigtt[n1+1:n1+n2].* (24 * 60)
-    
-    figsize=(10,8)
+    moon = moon_ttvs(ntrans,pbest_global) .* (24 * 60)
+    # fig, ax1 = subplots(figsize=(8,3))
+    fig=figure(figsize=(8,6))
     subplot(211)
-    PyPlot.title("Venus TTVs and their sources")
-    tick_params(direction="in")
-    plot(ttsim1,ttv1,linewidth=1.5,color="grey",label="Total")
-    plot(ttsim1,pair_ttvs[1,3,1:n1],linewidth=1.25,color="firebrick",label="Jupiter")
-    plot(ttsim1,pair_ttvs[1,2,1:n1],linewidth=1.25,label="Earth")
+    ax1=gca()
+    plot(ttsim1,pair_ttvs[1,3,1:n1],linewidth=1.25,color="firebrick",label="Jupiter contribution")
+    plot(ttsim1,pair_ttvs[1,2,1:n1],linewidth=1.25,label="Earth contribution")
+    plot(ttsim1,ttv1,linewidth=1.5,color="grey",label="Total TTVs")
     errorbar(ttsim1,ttv1,sigtt1,fmt=".",color="black")
     ylabel("Venus TTVs [minutes]")
-    subplot(212)
-    tick_params(direction="in")
-    plot(ttsim2,ttv2,linewidth=1.5,color="grey",label="Total")
-    plot(ttsim2,pair_ttvs[2,3,1:n2],linewidth=1.25,color="firebrick",label="Jupiter")
-    plot(ttsim2,pair_ttvs[2,1,1:n2],linewidth=1.25,color="orange",label="Venus")
+    xlabel("Years Observed [N]")
+    ax1.minorticks_on()
+    ax1.tick_params(which="major",direction="in",top="true",right="true",length=6)
+    ax1.tick_params(which="minor",direction="in",top="true",right="true",length=2)
+    ax1.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc="lower left",
+           ncol=2, mode="expand", borderaxespad=0.0)
+    # tight_layout()
+    # show()
+    # savefig("IMAGES/venusttvs.png")
+
+    # fig, ax2 = subplots(figsize=(8,3))
+    subplot(212,sharex=ax1)
+    ax2=gca()
+    plot(ttsim2,pair_ttvs[2,3,1:n2],linewidth=1.25,color="firebrick",label="Jupiter contribution")
+    plot(ttsim2,pair_ttvs[2,1,1:n2],linewidth=1.25,color="orange",label="Venus contribution")
     if include_moon
-        moon = moon_ttvs(ntrans,pbest_global) .* (24 * 60)
-        plot(ttsim2,moon,linewidth=1.25,linestyle="--",color="purple")
+        plot(ttsim2,moon,linewidth=1.25,linestyle="--",color="purple",label="Moon contribution")
         ylabel("Earth TTVs [minutes]")
     else
         ylabel("EMB TTVs [minutes]")
     end
+    plot(ttsim2,ttv2,linewidth=1.5,color="grey",label="Total TTVs")
     errorbar(ttsim2,ttv2,sigtt2,fmt=".",color="black")
     xlabel("Years Observed [N]")
+    ax2.minorticks_on()
+    ax2.tick_params(which="major",direction="in",top="true",right="true",length=6)
+    ax2.tick_params(which="minor",direction="in",top="true",right="true",length=2)
+    ax2.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc="lower left",
+       ncol=2, mode="expand", borderaxespad=0.0)
     tight_layout()
-
+    show()
 #     legend(bbox_to_anchor=(1.05,1),loc=2,borderaxespad=0.0)
-#     savefig("name.eps")
 end
+
+
 

@@ -22,6 +22,7 @@ function sim_times(jd1::Float64,jd2::Float64,jdsize::Int64,
   Random.seed!(seed)
   dt = (jd2 - jd1)/jdsize
   t0 = range(jd1,stop=jd2-1,length = jdsize)
+  nyears = (jd2 - jd1)/365.25 
   # t0 = 2451544.5 - 50*365.25 .+ range(0.5,stop = np0 - 0.5,length = np0)
   # println(t0[1]) #= 2.4332825e6  
 

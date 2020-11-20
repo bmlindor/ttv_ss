@@ -169,8 +169,6 @@ function fit_planet3(filename::String,label::String,
   #   savefig(name)
   # end
 
-  # Rescale to set minimum chi-square equal to number of degrees of freedom
-  #  = number of transits - number of model parameters (15):
   #ttmodel=ttv_wrapper3(tt0,param3)
   #res = optimize(chisquare3,param3,method = :l_bfgs,iterations = 21)
   #  res = optimize(chisquare3,param3,method = :l_bfgs)
@@ -196,9 +194,7 @@ function fit_planet3(filename::String,label::String,
   #   name = string("IMAGES/3planetfitp",label,".png")
   #   savefig(name)
   # end
-  # plot_2planetfit(p3in,p3out,sigma);
-  # plot_likelihood(p3in,p3out,sigma);
-  # plot_3planetfit(p3in,p3out,sigma);
+
   pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
         "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
         "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)"]
@@ -210,7 +206,7 @@ function fit_planet3(filename::String,label::String,
     end
   end
   file = string("OUTPUTS/p3_fit",label,"params.jld2")
-  @save file param_p3 lprob_p3 lprob_best pbest_global ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase
+  @save file param_p3 lprob_p3 lprob_best pbest_global ntrans nplanet jd1 jd2 jdsize tt0 tt ttmodel sigtt p3in p3out np3 nphase
   # writedlm(results,pbest_global)
     return lprob_best,pbest_global
 end
@@ -415,7 +411,7 @@ function fit_moon(filename::String,label::String,
     end
   end
   file = string("OUTPUTS/moon_fit",label,"params.jld2")
-  @save file pbest_p3 pbest_dp lprob_p3 lprob_dp lprob_best pbest_global ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase dpin dpout ndp
+  @save file pbest_p3 pbest_dp lprob_p3 lprob_dp lprob_best pbest_global ntrans nplanet jd1 jd2 jdsize tt0 tt ttmodel sigtt p3in p3out np3 nphase dpin dpout ndp
   # results = string("OUTPUTS/p3_fit",label,"results.txt")
   # #writedlm(results,pbest)
   return lprob_best,pbest_global
