@@ -85,18 +85,24 @@ julia> @load "OUTPUTS/p3_fit_test.jld2"
 
 julia ttv_like_planet_b.jl &> ttv_likelihood_planetb_3.0sig.txt &
 
-p3fit range = [small=(4230-4430), medium=(1000-5000)] <!-- large=(500-5000), xlarge=(500-10000) for plotting detection only --> 
-np3 = [fine=100, medium=20, coarse=10] <!-- xfine=1000 -->
+p3fit range = [small=(4230-4430), medium=(1000-5000)] <!-- large=(500-5000), xlarge=(500-10000) --> 
+np3 = [fine=100, medium=50, coarse=10] <!-- xfine=1000 -->
+nphase = [fine=100, medium=50, coarse=10] <!-- xfine=1000 -->
 ndp = [fine=72, medium=36, coarse=10] <!-- xfine=120 -->
-steps = [short=(10000), medium=(100000), long=(200000), xlong=(300000)]
+ndp = [fine=72, medium=36, coarse=10] <!-- xfine=120 -->
+steps = [short=(10000), med=(100000)<!-- long=(200000) -->
 
 noise = [10.0, 15.0, 30.0, 45.0, 60.0, 120.0, 240.0] <!-- which of these are realistic? -->
 years = [15, 30, 50]
 
 label 	p3range  np3   ndp   steps	noise
-try001	small    med   med   med 
-try002	medium	 fine	 fine  med
-try003	medium	 
+try001	small    med   med   med    ...
+try002	small	   fine	 fine  med    ...
+
+try01	  large    fine   fine   short	 
+try02
+
+mtry1   small   med   fine    short
 
 8/4/2020
 ##########################	Current State	##########################
