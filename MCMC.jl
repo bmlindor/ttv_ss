@@ -8,7 +8,7 @@ include("bounds.jl")
 using DelimitedFiles,JLD2,Statistics,MCMCDiagnostics
 
 # Run a Markov chain:
-function MCMC(param::Array{Float64,1},label::String,
+function MCMC(param::Array{Float64,1},lprob_best::Float64,foutput::String,
   nsteps::Int64,nwalkers::Int64,nplanet::Int64,ntrans::Array{Int64,1},
   tt0::Array{Float64,1},tt::Array{Float64,1},sigtt::Array{Float64,1},
   EMB::Bool,use_sigsys::Bool) 
@@ -223,7 +223,7 @@ function MCMC(param::Array{Float64,1},label::String,
   # plot_MCstep(label)
   # plot_MCparams(label)
 
-  file = string("mcmc_",label,"results.jld2")
+  file = string(foutput,"mcmc.jld2")
   @save file par_mcmc lprob_mcmc param nwalkers nsteps accept iburn indepsamples
   return lprob_mcmc,par_mcmc #, param, nwalkers, nsteps, accept, iburn, indepsamples
 end

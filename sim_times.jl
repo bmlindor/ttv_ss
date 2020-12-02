@@ -2,7 +2,7 @@
 using CALCEPH 
 using DelimitedFiles,JLD2
 using Statistics,DataFitting,Random
-using PyPlot,Unitful,UnitfulAstro,LinearAlgebra
+using Unitful,UnitfulAstro,LinearAlgebra
 if !@isdefined(CGS)
   include("CGS.jl")
   using Main.CGS
