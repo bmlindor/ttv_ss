@@ -1,0 +1,16 @@
+ERROR: LoadError: MethodError: no method matching sim_times(::Float64, ::Float64, ::Int64, ::Bool, ::String, ::Bool)
+Closest candidates are:
+  sim_times(::Float64, ::Float64, ::Int64, ::Bool, !Matched::Float64, ::Bool, !Matched::Int64) at /gscratch/home/blindor/ttv_ss/sim_times.jl:20
+  sim_times(::Float64, ::Float64, ::Int64, ::Bool, !Matched::Float64, ::Bool) at /gscratch/home/blindor/ttv_ss/sim_times.jl:20
+  sim_times(::Float64, ::Float64, ::Int64, ::Bool, !Matched::Float64) at /gscratch/home/blindor/ttv_ss/sim_times.jl:20
+  ...
+Stacktrace:
+ [1] p3_run(::String, ::String) at /gscratch/home/blindor/ttv_ss/bgrun_hyak.jl:26
+ [2] top-level scope at /gscratch/home/blindor/ttv_ss/bgrun_hyak.jl:37
+ [3] include at ./boot.jl:328 [inlined]
+ [4] include_relative(::Module, ::String) at ./loading.jl:1105
+ [5] include(::Module, ::String) at ./Base.jl:31
+ [6] exec_options(::Base.JLOptions) at ./client.jl:287
+ [7] _start() at ./client.jl:460
+in expression starting at /gscratch/home/blindor/ttv_ss/bgrun_hyak.jl:37
+args = ["test", "30.0"]

@@ -1,0 +1,24 @@
+# Julia v1.1
+include("sim_times.jl")
+include("fit_mysterybody.jl")
+include("MCMC.jl")
+using JLD2
+
+jd1 = 2.4332825e6
+jd2 = 2.4515445e6
+jdsize = 1000
+p3in = 500.0
+p3out = 5000.0
+np3 = 1000
+nphase = 1000
+dpin = 0.0 
+dpout = 2*pi
+ndp = 72
+
+function full_run(label,sigma)
+sim_times(jd1,jd2,jdsize,true,sigma,true)
+datafile = string("INPUTS/tt_data",sigma,"sEMB.txt")
+fit_planet3(datafile,label,jd1,jd2,jdsize,p3in,p3out,np3,nphase,true,sigma,true)
+end
+
+
