@@ -149,19 +149,19 @@ function sim_times(jd1::Float64,jd2::Float64,jdsize::Int64,
       JD,ff,i_min,pos,JD_tt = find_transit(body_id,eph,t_start,t_end,n_obs,N)
       push!(times,JD_tt)
     end
-    return times
+    return times,i_min
   end
   P_venus = 225
   P_earth = 365
   P_err = 2
-  tt1 = find_times(2,eph,t0,P_venus,P_err,n_obs,10)
+  tt1,i_min1 = find_times(2,eph,t0,P_venus,P_err,n_obs,10)
   nt1 = length(tt1)
   if EMB
     # Find times of Earth-Moon barycenter transit:
-    tt2 = find_times(3,eph,t0,P_earth,P_err,n_obs,10)
+    tt2,i_min2 = find_times(3,eph,t0,P_earth,P_err,n_obs,10)
   else
     # Find times of Earth transit:
-    tt2 = find_times(399,eph,t0,P_earth,P_err,n_obs,10)
+    tt2,i_min2 = find_times(399,eph,t0,P_earth,P_err,n_obs,10)
   end
   nt2 = length(tt2)
   # Actual transit times:
@@ -286,5 +286,7 @@ function sim_times(jd1::Float64,jd2::Float64,jdsize::Int64,
   else
     writedlm("INPUTS/tt_data.txt",zip(body,tt))
   end
-  # return tt1,noise1+tt1,tt2,noise2+tt2
+  # file = string("sim",sigma,"times.jld2")
+  # @save file pva_sun pva_venus pva_earth n_obs eph
+  return pva_venus, pva_earth, pva_sun, i_min1, i_min2, n_obs
 end

@@ -87,7 +87,7 @@ julia ttv_like_planet_b.jl &> ttv_likelihood_planetb_3.0sig.txt &
 
 p3fit range = [small=(4230-4430), medium=(1000-5000)] <!-- large=(500-5000), xlarge=(500-10000) --> 
 np3 = [fine=100, medium=50, coarse=10] <!-- xfine=1000 -->
-nphase = [fine=100, medium=50, coarse=10] <!-- xfine=1000 -->
+nphase = [fine=72, medium=36, coarse=10] <!-- xfine=1000 -->
 ndp = [fine=72, medium=36, coarse=10] <!-- xfine=120 -->
 steps = [short=(10000), med=(100000)<!-- long=(200000) -->
 
@@ -126,9 +126,9 @@ implement an N-body fit. -->
 2b). Fit for Moon deltaphi. [ x ]
 3). Create slurm file to run multiple grids on hyak.mox [ x ] -->
 4). Show models are correct: derived Earth and Venus parameters.
-4b). Make plots of histograms of parameter results from MCMC with correct values. [ ]
-4c). Make plots of orbits with 1-sigma uncertainties overplotted with the correct orbits. [ ]
-4d). Make plots of logL for Jupiter period and Moon deltaphi with correct values at peak. [ ]
+4b). Make plots of histograms of parameter results from MCMC with correct values. [ x ]
+4c). Make plots of orbits with 1-sigma uncertainties overplotted with the correct orbits. [  ]
+4d). Make plots of logL for Jupiter period and Moon deltaphi with correct values at peak. [ x ]
 4e). Make plots of posterior results of model fit to simulated times. [ x ] 
 5a). See how many observations would be needed (minimum number of years required). [ ]
 5b). See what the necessary precision would be (vary noise added to simulations). [ ]
