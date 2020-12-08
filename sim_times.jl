@@ -149,7 +149,7 @@ function sim_times(jd1::Float64,jd2::Float64,jdsize::Int64,
       JD,ff,i_min,pos,JD_tt = find_transit(body_id,eph,t_start,t_end,n_obs,N)
       push!(times,JD_tt)
     end
-    return times,i_min
+    return times
   end
   P_venus = 225
   P_earth = 365
@@ -158,10 +158,10 @@ function sim_times(jd1::Float64,jd2::Float64,jdsize::Int64,
   nt1 = length(tt1)
   if EMB
     # Find times of Earth-Moon barycenter transit:
-    tt2,i_min2 = find_times(3,eph,t0,P_earth,P_err,n_obs,10)
+    tt2 = find_times(3,eph,t0,P_earth,P_err,n_obs,10)
   else
     # Find times of Earth transit:
-    tt2,i_min2 = find_times(399,eph,t0,P_earth,P_err,n_obs,10)
+    tt2 = find_times(399,eph,t0,P_earth,P_err,n_obs,10)
   end
   nt2 = length(tt2)
   # Actual transit times:
