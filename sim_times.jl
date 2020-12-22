@@ -76,10 +76,10 @@ function sim_times(jd1::Float64,jd2::Float64,jdsize::Int64,
     # Compute functions of position and velocity wrt time:
     function calc_ffs(t)
     pva = compute(eph,JD_0,t,body_id,10,options,2)
+#     println(JD_0)
     x = pva[1:3]; v = pva[4:6]; a = pva[7:9];
     f = dot(x,v) - (dot(x,n_obs))*(dot(v,n_obs))
     Df = dot(v,v) + dot(x,a) - (dot(v,n_obs))^2 - (dot(x,n_obs)*dot(a,n_obs))
-    #Df *= ( 3600 * 24 / 1) # Converts to units of days
     return f,Df,dot(x,n_obs),x
     end
     # Computing minimum sky separation of planet wrt star for all JDs
@@ -147,6 +147,7 @@ function sim_times(jd1::Float64,jd2::Float64,jdsize::Int64,
       t_start = JD_tt+period-period_err
       t_end = JD_tt+period+period_err
       JD,ff,i_min,pos,JD_tt = find_transit(body_id,eph,t_start,t_end,n_obs,N)
+#       println(body_id," ",t_start," ",JD_tt," ",t_end)
       push!(times,JD_tt)
     end
     return times
@@ -154,7 +155,7 @@ function sim_times(jd1::Float64,jd2::Float64,jdsize::Int64,
   P_venus = 225
   P_earth = 365
   P_err = 2
-  tt1,i_min1 = find_times(2,eph,t0,P_venus,P_err,n_obs,10)
+  tt1 = find_times(2,eph,t0,P_venus,P_err,n_obs,10)
   nt1 = length(tt1)
   if EMB
     # Find times of Earth-Moon barycenter transit:
@@ -229,7 +230,6 @@ function sim_times(jd1::Float64,jd2::Float64,jdsize::Int64,
     ylabel("[AU]")
     legend(loc="lower left")
     clf()
-
     test = 365 
     i=1
     JD_venus,ff_venus,i_min_venus,pos_venus,tt_venus = find_transit(2,eph,t0[i],t0[i]+test,n_obs,test)
@@ -288,5 +288,5 @@ function sim_times(jd1::Float64,jd2::Float64,jdsize::Int64,
   end
   # file = string("sim",sigma,"times.jld2")
   # @save file pva_sun pva_venus pva_earth n_obs eph
-  return pva_venus, pva_earth, pva_sun, i_min1, i_min2, n_obs
+  return tt1, tt2, n_obs, pva_sun, pva_venus, pva_earth
 end

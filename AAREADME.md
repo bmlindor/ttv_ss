@@ -89,10 +89,10 @@ p3fit range = [small=(4230-4430), medium=(1000-5000)] <!-- large=(500-5000), xla
 np3 = [fine=100, medium=50, coarse=10] <!-- xfine=1000 -->
 nphase = [fine=72, medium=36, coarse=10] <!-- xfine=1000 -->
 ndp = [fine=72, medium=36, coarse=10] <!-- xfine=120 -->
-steps = [short=(10000), med=(100000)<!-- long=(200000) -->
+steps = [short=(10000), med=(35000), long=(50000)<!-- xlong=(100000) -->
 
-noise = [10.0, 15.0, 30.0, 45.0, 60.0, 120.0, 240.0] <!-- which of these are realistic? -->
-years = [15, 30, 50]
+noise = [15.0, 30.0, 45.0, 60.0, 75.0, 90.0, 105.0, 120.0, 135.0] <!-- which of these are realistic? -->
+years = [4,6,8,10,12,14,16,18,20,24,28,32,36,40]
 
 label 	p3range  np3   ndp   steps	noise
 try001	small    med   med   med    ...
@@ -139,7 +139,7 @@ implement an N-body fit. -->
 3). Figure out what the actual expected timing precision
 would be (limited by stellar noise -- related to Tyler's work). 
 3a). Could use existing telescope precision info
-5). See if we can detect Mars [ ] or Saturn.
+5). See if we can detect Mars [ ] or Saturn. [ ]
 8). Figure out whether the Earth-Moon barycenter offset causes
 bias in measurements and if so, why.
 9a). Figure out how to speed things up so I can do a global
