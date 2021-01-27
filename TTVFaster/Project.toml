@@ -1,0 +1,10 @@
+name = "TTVFaster"
+uuid = "c1055b02-4058-4dee-8446-c036851fdab4"
+authors = ["[bmlindor] <[blindor@uw.edu]>", "[ericagol] <[agol@uw.edu]>"]
+version = "0.5.0"
+
+[deps]
+ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
+
+[compat]
+julia = "1.3"

@@ -2,3 +2,5 @@
 results/
 deprecated/
 .jld2
+transfer/
+NbodyGradient/

@@ -61,7 +61,7 @@ MCMC(param::Array{Float64, 1},label::String,
 
 julia bgrun_40.jl try01 15 &> results/40try01.out &
 julia bgrun_40.jl try02 30 &> results/40try02.out &
-....
+......
 
 p3fit range = [small=(4230-4430), medium=(1000-5000)] <!-- large=(500-5000), xlarge=(500-10000) --> 
 np3 = [fine=100, medium=50, coarse=10] <!-- xfine=1000 -->
@@ -85,15 +85,15 @@ mtry1   small   med   fine    short-->
 0). Updated TTVFaster to be compatible with Julia v1.3
 1). With transit times of Earth & Venus, can infer both of
 their masses, as well as existence of Jupiter first then Moon
-2). Wrote plotting functions for histograms of posterior results, 
-transit timing variations of individual contributions from bodies, 
-and logLikelihoods.
+2). Created plot of transit timing variations of individual contributions from bodies
+3). Wrote plotting functions for histograms of posterior results and logLikelihoods
+
 
 ##########################	Writing Tasks	##########################
 1). Write up model desctription (as above) [  ]
 2). Complete bibliography. [  ]
 2a). Find relevant papers and add them to .bib file [ x ]
-2b). Read and summarize relevant papers [ ]
+2b). Read and summarize relevant papers [  ]
 
 ##########################  Project Tasks ##########################
 1). Makes plots of the contributions of individual bodies (including the ones we are neglecting). [ x ]
@@ -101,7 +101,7 @@ and logLikelihoods.
 2b). Fit for Moon deltaphi. [ x ]
 3). Create slurm file to run multiple grids on hyak.mox. [ x ] 
 3a). Schedule parallel fit and chain runs on hyak.mox. [  ]
-     - running into error where exits prematurely or error in regress.jl assertion
+     - exits prematurely, times out, or returns error in regress.jl assertion
 4). Show models are correct: derived Earth and Venus parameters.
 4b). Make plots of histograms of parameter results from MCMC with correct values. [ x ]
 4c). Make plots of orbits with 1-sigma uncertainties overplotted with the correct orbits. [  ]
@@ -109,9 +109,9 @@ and logLikelihoods.
 4d). Make plots of logL for Jupiter period and Moon deltaphi with correct values at peak. [ x ]
 4e). Make plots of posterior results of model fit to simulated times. [ x ] 
 5). Do background MCMC runs on hyak.mox using slurm scheduler. 
-5a). See how many observations would be needed (minimum number of years required). [ ]
-5b). See what the necessary precision would be (vary noise added to simulations). [ ]
-6). From posteriors, show how well we can measure mean insolation (eccentricity of Earth's orbit). [ ]
+5a). See how many observations would be needed (minimum number of years required). [  ]
+5b). See what the necessary precision would be (vary noise added to simulations). [  ]
+6). From posteriors, show how well we can measure mean insolation (eccentricity of Earth's orbit). [  ]
 
 <!-- 
 3). Q: What really limits timing precision of Earth & Venus

@@ -1,5 +1,5 @@
 if !@isdefined(TTVFaster)
-    include("TTVFaster/TTVFaster.jl")
+    include("TTVFaster/src/TTVFaster.jl")
     using Main.TTVFaster
 end
 import Main.TTVFaster.ttv_wrapper
