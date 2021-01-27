@@ -1,7 +1,7 @@
 """
     TTVFaster
 
-Computes first order eccentricity transit timing variations (TTVs) with respect to the following initial conditions: the planet-star mass ratio [μ], the initial transit time (of the averaged orbit) [t0], the mean orbital period [Per], the eccentricity [e], and the longitude of periastron [ω].
+Computes first order eccentricity transit timing variations (TTVs) with respect to the following initial conditions: the planet-star mass ratio [μ], the initial transit time (of the averaged orbit) [t0], the mean orbital period [Per], the eccentricity [e], and the longitude of periastron [barred ω].
 """
 
 module TTVFaster
