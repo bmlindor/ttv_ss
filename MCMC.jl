@@ -11,7 +11,7 @@ using DelimitedFiles,JLD2,Statistics,MCMCDiagnostics
 function MCMC(param::Array{Float64,1},lprob_best::Float64,foutput::String,
   nsteps::Int64,nwalkers::Int64,nplanet::Int64,ntrans::Array{Int64,1},
   tt0::Array{Float64,1},tt::Array{Float64,1},sigtt::Array{Float64,1},
-  EMB::Bool,use_sigsys::Bool)
+  EMB::Bool,use_sigsys::Bool,sqrte::Bool)
 # function MCMC(param::Array{Float64,1},label::String,
 #   nsteps::Int64,nwalkers::Int64,nplanet::Int64,ntrans::Array{Int64,1},
 #   tt0::Array{Float64,1},tt::Array{Float64,1},sigtt::Array{Float64,1},
@@ -57,14 +57,25 @@ function MCMC(param::Array{Float64,1},lprob_best::Float64,foutput::String,
     # Define -log(prior):
     lprior = 0.0
     # Loop over planets:
-    for i=1:nplanet
+    for iplanet=1:nplanet
       # Place prior on eccentricities:
 #       ecc = sqrt(param[(i-1)*5+4]^2+param[(i-1)*5+5]^2)
-        ecc = param[(i-1)*5+4]^2+param[(i-1)*5+5]^2
+        if sqrte
+            ecc = param[(iplanet-1)*5+4]^2+param[(iplanet-1)*5+5]^2
+        else
+            ecc = sqrt(param[(iplanet-1)*5+4]^2+param[(iplanet-1)*5+5]^2)
+# Add prior of 1/eccentricity which accounts for Jacobian factor of e*cos(omega) and e*sin(omega): 
+            lprior += -log(ecc) 
+        end
       lprior_tmp,dpdx = log_bounds_upper(ecc,emax1,emax2)
       lprior += lprior_tmp
-      # Add prior of 1/eccentricity which accounts for Jacobian factor of e*cos(omega) and e*sin(omega):
-      lprior += -log(ecc)  
+
+    end
+    for iplanet=1:nplanet-1
+  # The periods of the planets should be ordered from least to greatest:
+        if param[(iplanet-1)*5+2] > param[iplanet*5+2]
+           lprior += -Inf
+        end
     end
     if !EMB 
       # Plase priors on deltaphi and account for aliasing:
