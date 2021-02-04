@@ -79,15 +79,6 @@ function fit_planet3(filename::String,label::String,
   ttv2 = zeros(nt2)
   # Need first call to TTVFaster,without optimizing
   dummy=TTVFaster.compute_ttv!(jmax,p1,p2,time1,time2,ttv1,ttv2) 
-  # function plot_2planetfit(p3in,p3out,sigma)
-  #   clf()
-  #   scatter(time1,tt1.-t1)
-  #   plot(time1,ttv1)
-  #   scatter(time2,tt2.-t2,color="green")
-  #   plot(time2,ttv2)
-  #   name = string("IMAGES/2planetfitp",label,".png")
-  #   savefig(name)
-  # end
 
   # Now,optimize 2-planet fit
   p3_cur = 11.86*365.25 #jupiter period in days,initial value
@@ -159,15 +150,6 @@ function fit_planet3(filename::String,label::String,
     println("Period: ",p3[j]," chi: ",lprob_p3[j]," Param: ",vec(param_p3[1:nparam,j]))
   end
   println("Finished 3-planet fit w/ fixed period: ",pbest)
-  
-  # function plot_likelihood(p3in,p3out,sigma)
-  #   clf()
-  #   plot(p3/365.25,exp.((lprob_p3 .-maximum(lprob_p3)))) 
-  #   xlabel("Period of planet 3 [years]")
-  #   ylabel("Likelihood")
-  #   name = string("IMAGES/p3likelihood",label,".png")
-  #   savefig(name)
-  # end
 
   #ttmodel=ttv_wrapper3(tt0,param3)
   #res = optimize(chisquare3,param3,method = :l_bfgs,iterations = 21)
@@ -185,19 +167,10 @@ function fit_planet3(filename::String,label::String,
   println("Finished global 3-planet fit.")
   println("Maximum: ",lprob_best," Param: ",pbest_global)
 
-  # function plot_3planetfit(p3in,p3out,sigma)
-  #   clf()
-  #   scatter(time1,tt1.-t1)
-  #   plot(time1,ttmodel[1:nt1].-t1)
-  #   scatter(time2,tt2.-t2,color="green")
-  #   plot(time2,ttmodel[nt1+1:nt1+nt2].-t2)
-  #   name = string("IMAGES/3planetfitp",label,".png")
-  #   savefig(name)
-  # end
 
-  pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
-        "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
-        "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)"]
+  pname = ["mu_1","P_1","t01","sqrt(e1) cos(om1)","sqrt(e1) sin(om1)",
+        "mu_2","P_2","t02","sqrt(e2) cos(om2)","sqrt(e2) sin(om2)",
+        "mu_3","P_3","t03","sqrt(e3) cos(om3)","sqrt(e3) sin(om3)"]
 
   results = string("OUTPUTS/p3_fit",label,"results.txt")
   open(results,"w") do io
@@ -266,8 +239,8 @@ function fit_moon(filename::String,label::String,
 
   # Okay,now let's do a 2-planet fit:
   # param_names = mass ratio,period,initial transit time,e*cos(omega),e*sin(omega)
-  init_param = [3e-6,per1,t01,0.01,0.01,
-                3e-6,per2,t02,0.01,0.01] 
+  init_param = [3e-6,per1,t01,0.08,-0.03,
+                3e-6,per2,t02,-0.09,0.09] 
   println("Initial parameters: ",init_param)
   #model = ttv_wrapper2(tt0,param)
   # Set up data structure to hold planet properties,passed to TTVFaster
@@ -398,9 +371,9 @@ function fit_moon(filename::String,label::String,
   lprob_best = (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
   println("Finished lunar fit: ",lprob_best," ",pbest_global)
 
-  pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
-            "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
-            "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)",
+  pname = ["mu_1","P_1","t01","sqrt(e1) cos(om1)","sqrt(e1) sin(om1)",
+            "mu_2","P_2","t02","sqrt(e2) cos(om2)","sqrt(e2) sin(om2)",
+            "mu_3","P_3","t03","sqrt(e3) cos(om3)","sqrt(e3) sin(om3)",
             "tmax sin(phi0)","tmax cos(phi0)","deltaphi"]
 
   results = string("OUTPUTS/moon_fit",label,"results.txt")

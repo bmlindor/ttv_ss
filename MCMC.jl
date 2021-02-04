@@ -8,19 +8,23 @@ include("bounds.jl")
 using DelimitedFiles,JLD2,Statistics,MCMCDiagnostics
 
 # Run a Markov chain:
-function MCMC(param::Array{Float64,1},label::String,
+function MCMC(param::Array{Float64,1},lprob_best::Float64,foutput::String,
   nsteps::Int64,nwalkers::Int64,nplanet::Int64,ntrans::Array{Int64,1},
   tt0::Array{Float64,1},tt::Array{Float64,1},sigtt::Array{Float64,1},
-  EMB::Bool,use_sigsys::Bool) 
+  EMB::Bool,use_sigsys::Bool)
+# function MCMC(param::Array{Float64,1},label::String,
+#   nsteps::Int64,nwalkers::Int64,nplanet::Int64,ntrans::Array{Int64,1},
+#   tt0::Array{Float64,1},tt::Array{Float64,1},sigtt::Array{Float64,1},
+#   EMB::Bool,use_sigsys::Bool) 
 
   nparam = length(param)
   jmax = 5
   errors = [1e-7,1e-5,1e-5,1e-2,1e-2,
             1e-7,1e-5,1e-5,1e-2,1e-2,
             1e-6,1e-1,1e-1,1e-2,1e-2]
-  pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
-          "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
-          "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)"]
+  pname = ["mu_1","P_1","t01","sqrt(e1) cos(om1)","sqrt(e1) sin(om1)",
+          "mu_2","P_2","t02","sqrt(e2) cos(om2)","sqrt(e2) sin(om2)",
+          "mu_3","P_3","t03","sqrt(e3) cos(om3)","sqrt(e3) sin(om3)"]
   if EMB
     errors = errors
     pname = pname
@@ -55,7 +59,8 @@ function MCMC(param::Array{Float64,1},label::String,
     # Loop over planets:
     for i=1:nplanet
       # Place prior on eccentricities:
-      ecc = sqrt(param[(i-1)*5+4]^2+param[(i-1)*5+5]^2)
+#       ecc = sqrt(param[(i-1)*5+4]^2+param[(i-1)*5+5]^2)
+        ecc = param[(i-1)*5+4]^2+param[(i-1)*5+5]^2
       lprior_tmp,dpdx = log_bounds_upper(ecc,emax1,emax2)
       lprior += lprior_tmp
       # Add prior of 1/eccentricity which accounts for Jacobian factor of e*cos(omega) and e*sin(omega):
@@ -223,7 +228,7 @@ function MCMC(param::Array{Float64,1},label::String,
   # plot_MCstep(label)
   # plot_MCparams(label)
 
-  file = string("mcmc_",label,"results.jld2")
+  file = string(foutput,"mcmc.jld2")
   @save file par_mcmc lprob_mcmc param nwalkers nsteps accept iburn indepsamples
   return lprob_mcmc,par_mcmc #, param, nwalkers, nsteps, accept, iburn, indepsamples
 end

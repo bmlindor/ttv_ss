@@ -30,8 +30,10 @@ struct Planet_plane_hk{T<:Number} # Parameters of a planet in a plane-parallel s
   period   :: T
   trans0   :: T
   # e times cos or sin of longitude of periastron measured from line of sight, in radians:
-  ecosw    :: T
-  esinw    :: T
+#   ecosw    :: T
+#   esinw    :: T
+  sqrtecosw    :: T
+  sqrtesinw    :: T
 end
 
 # """
@@ -72,18 +74,26 @@ function compute_ttv!(jmax::Integer,p1::Planet_plane_hk,p2::Planet_plane_hk,time
   ttv_succinct!(jmax+1,alpha,f1,f2)  # I need to compute coefficients one higher than jmax
   # Compute TTVs for inner planet (equation 33):
   # Compute since of \pomegas:
-  e1 = sqrt(p1.esinw*p1.esinw + p1.ecosw*p1.ecosw)
-  e2 = sqrt(p2.esinw*p2.esinw + p2.ecosw*p2.ecosw)
-  sin1om=p1.esinw/e1
-  sin2om=p2.esinw/e2
-  cos1om=p1.ecosw/e1
-  cos2om=p2.ecosw/e2
+#   e1 = sqrt(p1.esinw*p1.esinw + p1.ecosw*p1.ecosw)
+#   e2 = sqrt(p2.esinw*p2.esinw + p2.ecosw*p2.ecosw)
+#   sin1om=p1.esinw/e1
+#   sin2om=p2.esinw/e2
+#   cos1om=p1.ecosw/e1
+#   cos2om=p2.ecosw/e2
+  e1 = p1.sqrtesinw*p1.sqrtesinw + p1.sqrtecosw*p1.sqrtecosw
+  e2 = p2.sqrtesinw*p2.sqrtesinw + p2.sqrtecosw*p2.sqrtecosw
+  sin1om=sqrt(p1.sqrtesinw*p1.sqrtesinw /e1)
+  sin2om=sqrt(p2.sqrtesinw*p2.sqrtesinw /e2)
+  cos1om=sqrt(p1.sqrtecosw*p1.sqrtecosw /e1)
+  cos2om=sqrt(p2.sqrtecosw*p2.sqrtecosw /e2)
   # Compute mean motions:
   n1=2pi/p1.period
   n2=2pi/p2.period
   # Compute initial longitudes:
-  lam10=-n1*p1.trans0 + 2*p1.esinw # 2*p1.eccen*sin1om
-  lam20=-n2*p2.trans0 + 2*p2.esinw # 2*p2.eccen*sin2om
+#   lam10=-n1*p1.trans0 + 2*p1.esinw # 2*p1.eccen*sin1om
+#   lam20=-n2*p2.trans0 + 2*p2.esinw # 2*p2.eccen*sin2om
+  lam10=-n1*p1.trans0 + 2*sqrt(p1.sqrtesinw*p1.sqrtesinw /e1)*(p1.sqrtesinw*p1.sqrtesinw + p1.sqrtecosw*p1.sqrtecosw)
+  lam20=-n2*p2.trans0 + 2*sqrt(p2.sqrtesinw*p2.sqrtesinw /e2)*(p2.sqrtesinw*p2.sqrtesinw + p2.sqrtecosw*p2.sqrtecosw)   
   @inbounds for i=1:ntime1
   # Compute the longitudes of the planets at times of transit of planet 1 (equation 49):
     lam11 = n1*time1[i]+lam10
