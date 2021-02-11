@@ -33,9 +33,9 @@ function ttv_nplanet(nplanet::Int64,jmax::Int64,ntrans::Vector{Int64},data::Vect
   for iplanet=1:nplanet-1
     # Create a Planet_plane_hk type for the inner planet:
     if sqrte
-      p1=TTVFaster.Planet_plane(data[(iplanet-1)*5+1],data[(iplanet-1)*5+2],data[(iplanet-1)*5+3],data[(iplanet-1)*5+4],data[(iplanet-1)*5+5])
+      p1=Planet_plane(data[(iplanet-1)*5+1],data[(iplanet-1)*5+2],data[(iplanet-1)*5+3],data[(iplanet-1)*5+4],data[(iplanet-1)*5+5])
     else
-      p1=TTVFaster.Planet_plane_hk(data[(iplanet-1)*5+1],data[(iplanet-1)*5+2],data[(iplanet-1)*5+3],data[(iplanet-1)*5+4],data[(iplanet-1)*5+5])
+      p1=Planet_plane_hk(data[(iplanet-1)*5+1],data[(iplanet-1)*5+2],data[(iplanet-1)*5+3],data[(iplanet-1)*5+4],data[(iplanet-1)*5+5])
     end
     # Create an array of times for the inner planet:
     n1 = ntrans[iplanet]
@@ -44,9 +44,9 @@ function ttv_nplanet(nplanet::Int64,jmax::Int64,ntrans::Vector{Int64},data::Vect
     for jplanet=iplanet+1:nplanet
       # Create a Planet_plane_hk type for the outer planet:
       if sqrte
-        p2=TTVFaster.Planet_plane(data[(jplanet-1)*5+1],data[(jplanet-1)*5+2],data[(jplanet-1)*5+3],data[(jplanet-1)*5+4],data[(jplanet-1)*5+5])
+        p2=Planet_plane(data[(jplanet-1)*5+1],data[(jplanet-1)*5+2],data[(jplanet-1)*5+3],data[(jplanet-1)*5+4],data[(jplanet-1)*5+5])
       else
-        p2=TTVFaster.Planet_plane_hk(data[(jplanet-1)*5+1],data[(jplanet-1)*5+2],data[(jplanet-1)*5+3],data[(jplanet-1)*5+4],data[(jplanet-1)*5+5])
+        p2=Planet_plane_hk(data[(jplanet-1)*5+1],data[(jplanet-1)*5+2],data[(jplanet-1)*5+3],data[(jplanet-1)*5+4],data[(jplanet-1)*5+5])
       end 
       # Create an array of times for the outer planet:
       n2 = ntrans[jplanet]
