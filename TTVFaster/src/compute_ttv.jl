@@ -86,13 +86,15 @@ function compute_ttv!(jmax::Integer,p1::Planet_plane_hk,p2::Planet_plane_hk,time
   if e1==0
     sin1om=0
     cos1om=0
+  else
+    sin1om=p1.esinw/e1
+    cos1om=p1.ecosw/e1
+  end
   if e2==0
     sin2om=0
     cos2om=0
   else
-    sin1om=p1.esinw/e1
     sin2om=p2.esinw/e2
-    cos1om=p1.ecosw/e1
     cos2om=p2.ecosw/e2
   end
   # e1 = p1.sqrtesinw*p1.sqrtesinw + p1.sqrtecosw*p1.sqrtecosw
@@ -176,5 +178,4 @@ function compute_ttv!(jmax::Integer,p1::Planet_plane_hk,p2::Planet_plane_hk,time
   #ttv1,ttv2 are already allocated
   return 
 end  # compute_ttv!
-end
 # end # module
