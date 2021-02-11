@@ -2,6 +2,7 @@
 .ipynb
 results/
 deprecated/
-.jld2
+*.jld2
+*.pdf
 transfer/
 NbodyGradient/
