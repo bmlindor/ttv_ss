@@ -62,8 +62,8 @@ function fit_moon(filename::String,label::String,
 
   # Okay,now let's do a 2-planet fit:
   # param_names = mass ratio,period,initial transit time,e*cos(omega),e*sin(omega)
-  init_param = [3e-6,per1,t01,0.08,-0.03,
-                3e-6,per2,t02,-0.09,0.09] 
+  init_param = [3e-6,per1,t01,0.01,0.01,
+                3e-6,per2,t02,0.01,0.01] 
   println("Initial parameters: ",init_param)
   #model = ttv_wrapper2(tt0,param)
   # Set up data structure to hold planet properties,passed to TTVFaster
@@ -86,13 +86,13 @@ function fit_moon(filename::String,label::String,
   nplanet = 2
   # create initial simplex? need function for this?
   # result = optimize(f0,xcurr,NelderMead(initial_simplex=MySimplexer(),show_trace=true,iterations=1))
-  println("Initial chi-square: ",chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt,jmax,false))
+  println("Initial chi-square: ",chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt,jmax))
   # res = optimize(params -> chisquare(nplanet,ntrans,params,tt,sigtt),init_param) 
   # init_param = res.minimizer
   param1 = init_param .+ 100.0
   while maximum(abs.(param1 .- init_param)) > 1e-5
     param1 = init_param
-    res = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,false,true),tt0,tt,weight,init_param)
+    res = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,true),tt0,tt,weight,init_param)
     init_param = res.param
     # println("init_param: ",init_param)
     # println("New Initial chi-square: ",chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt))
@@ -129,12 +129,12 @@ function fit_moon(filename::String,label::String,
       param1 = param3 .+ 100.0
       while maximum(abs.(param1 .- param3)) > 1e-5
         param1 = param3
-        fit = curve_fit((tt0,param3) -> ttv_wrapper(tt0,nplanet,ntrans,[param3[1:11];p3_cur;param3[12:end]],jmax,false,true),tt0,tt,weight,param3)
+        fit = curve_fit((tt0,param3) -> ttv_wrapper(tt0,nplanet,ntrans,[param3[1:11];p3_cur;param3[12:end]],jmax,true),tt0,tt,weight,param3)
         param3 = fit.param
         # println("init_param: ",param3)
         # println("New Initial chi-square: ",chisquare(tt0,nplanet,ntrans,param3,tt,sigtt,true,p3_cur))
       end
-      ttmodel = ttv_wrapper(tt0,nplanet,ntrans,[param3[1:11];p3_cur;param3[12:end]],jmax,false,true)
+      ttmodel = ttv_wrapper(tt0,nplanet,ntrans,[param3[1:11];p3_cur;param3[12:end]],jmax,true)
       lprob_phase[i]= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
       if lprob_phase[i] > lprob_best # check that best fit for period is better than global best fit
         lprob_best = lprob_phase[i]
@@ -149,9 +149,9 @@ function fit_moon(filename::String,label::String,
   end
   println("Finished 3-planet fit w/ fixed period: ",pbest)
 
-  fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,false,true),tt0,tt,weight,pbest)
+  fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,true),tt0,tt,weight,pbest)
   pbest_p3 = fit.param
-  ttmodel = ttv_wrapper(tt0,nplanet,ntrans,pbest_p3,jmax,false,true)
+  ttmodel = ttv_wrapper(tt0,nplanet,ntrans,pbest_p3,jmax,true)
   lprob_best= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
   # sigsys2 = 1e-6
 
@@ -174,10 +174,10 @@ function fit_moon(filename::String,label::String,
     param1 = param4 .+ 100.0
     while maximum(abs.(param1 .- param4)) > 1e-5
       param1 = param4
-      fit = curve_fit((tt0,param4) -> ttv_wrapper(tt0,nplanet,ntrans,param4,jmax,false,false),tt0,tt,weight,param4)
+      fit = curve_fit((tt0,param4) -> ttv_wrapper(tt0,nplanet,ntrans,param4,jmax,false),tt0,tt,weight,param4)
       param4 = fit.param 
     end
-    ttmodel = ttv_wrapper(tt0,nplanet,ntrans,[fit.param[1:17];deltaphi_cur],jmax,false,false)
+    ttmodel = ttv_wrapper(tt0,nplanet,ntrans,[fit.param[1:17];deltaphi_cur],jmax,false)
     lprob_dp[j]= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
     if lprob_dp[j] > lprob_best 
       lprob_best = lprob_dp[j]
@@ -188,15 +188,15 @@ function fit_moon(filename::String,label::String,
     println("deltaphi: ",deltaphi[j]," chi: ",lprob_dp[j]," Param: ",vec(param_dp[1:nparam,j]))
   end
 
-  fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,false,false),tt0,tt,weight,pbest_dp)
+  fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,false),tt0,tt,weight,pbest_dp)
   pbest_global = fit.param
-  ttmodel = ttv_wrapper(tt0,nplanet,ntrans,pbest_global,jmax,false,false)
+  ttmodel = ttv_wrapper(tt0,nplanet,ntrans,pbest_global,jmax,false)
   lprob_best = (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
   println("Finished lunar fit: ",lprob_best," ",pbest_global)
 
-  pname = ["mu_1","P_1","t01","sqrt(e1) cos(om1)","sqrt(e1) sin(om1)",
-            "mu_2","P_2","t02","sqrt(e2) cos(om2)","sqrt(e2) sin(om2)",
-            "mu_3","P_3","t03","sqrt(e3) cos(om3)","sqrt(e3) sin(om3)",
+  pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
+            "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
+            "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)",
             "tmax sin(phi0)","tmax cos(phi0)","deltaphi"]
 
   results = string("OUTPUTS/moon_fit",label,"results.txt")

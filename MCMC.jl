@@ -8,18 +8,10 @@ include("bounds.jl")
 using DelimitedFiles,JLD2,Statistics,MCMCDiagnostics
 
 # Run a Markov chain:
-function MCMC(param::Array{Float64,1},label::String,
+function MCMC(param::Array{Float64,1},lprob_best::Float64,foutput::String,
   nsteps::Int64,nwalkers::Int64,nplanet::Int64,ntrans::Array{Int64,1},
   tt0::Array{Float64,1},tt::Array{Float64,1},sigtt::Array{Float64,1},
-<<<<<<< HEAD
-  EMB::Bool,use_sigsys::Bool,sqrte::Bool)
-# function MCMC(param::Array{Float64,1},label::String,
-#   nsteps::Int64,nwalkers::Int64,nplanet::Int64,ntrans::Array{Int64,1},
-#   tt0::Array{Float64,1},tt::Array{Float64,1},sigtt::Array{Float64,1},
-#   EMB::Bool,use_sigsys::Bool) 
-=======
   EMB::Bool,use_sigsys::Bool) 
->>>>>>> parent of f3f4be4... new priors
 
   nparam = length(param)
   jmax = 5
@@ -63,26 +55,16 @@ function MCMC(param::Array{Float64,1},label::String,
     # Loop over planets:
     for iplanet=1:nplanet
       # Place prior on eccentricities:
-<<<<<<< HEAD
-#       ecc = sqrt(param[(i-1)*5+4]^2+param[(i-1)*5+5]^2)
-        if sqrte
-            ecc = param[(iplanet-1)*5+4]^2+param[(iplanet-1)*5+5]^2
-        else
-            ecc = sqrt(param[(iplanet-1)*5+4]^2+param[(iplanet-1)*5+5]^2)
-# Add prior of 1/eccentricity which accounts for Jacobian factor of e*cos(omega) and e*sin(omega): 
-            lprior += -log(ecc) 
-        end
-=======
-      ecc = sqrt(param[(i-1)*5+4]^2+param[(i-1)*5+5]^2)
->>>>>>> parent of f3f4be4... new priors
+      ecc = sqrt(param[(iplanet-1)*5+4]^2+param[(iplanet-1)*5+5]^2)
       lprior_tmp,dpdx = log_bounds_upper(ecc,emax1,emax2)
       lprior += lprior_tmp
+      lprior += -log(ecc) 
 
     end
     for iplanet=1:nplanet-1
   # The periods of the planets should be ordered from least to greatest:
         if param[(iplanet-1)*5+2] > param[iplanet*5+2]
-           lprior += -Inf
+          lprior += -Inf
         end
     end
     if !EMB 
@@ -192,20 +174,7 @@ function MCMC(param::Array{Float64,1},label::String,
       accept = 0
     end
   end
-  # function plot_MCstep(label)
-  #   clf()
-  #   subplot(531)
-  #   for i=1:nparam
-  #     for j=1:nwalkers
-  #       plot(vec(par_mcmc[j,1:nsteps,i]))
-  #     end
-  #     xlabel("MCMC step")
-  #     ylabel(pname[i])
-  #   end
-  #   name = string("IMAGES/MCMCsteps",label,".png")
-  #   savefig(name)
-  # end
-    
+
   # Now,determine time of burn-in by calculating first time median is crossed:
   iburn = 0
   for i=1:nsize
@@ -233,21 +202,7 @@ function MCMC(param::Array{Float64,1},label::String,
   indepsamples = minimum(samplesize)
   println("Independent Sample Size: ",indepsamples)
   
-  #   clf()
-  #   for i=2:nparam
-  #     for j=1:i-1
-  #       scatter(vec(par_mcmc[1:nwalkers,iburn:nsteps,i]),vec(par_mcmc[1:nwalkers,iburn:nsteps,j]))
-  #       xlabel(pname[i])
-  #       ylabel(pname[j])
-  #     end
-  #   end
-  #   name = string("IMAGES/MCMCparams",label,".png")
-  #   savefig(name)
-  # end
-  # plot_MCstep(label)
-  # plot_MCparams(label)
-
-  file = string("mcmc_",label,"results.jld2")
+  file = string(foutput,"mcmc.jld2")
   @save file par_mcmc lprob_mcmc param nwalkers nsteps accept iburn indepsamples
   return lprob_mcmc,par_mcmc #, param, nwalkers, nsteps, accept, iburn, indepsamples
 end

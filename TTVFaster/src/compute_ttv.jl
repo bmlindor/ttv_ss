@@ -15,8 +15,8 @@ struct Planet_plane
   mass_ratio :: Float64
   period   :: Float64
   trans0   :: Float64
-  sqrtecosw    :: Float64   # sqrtecosw    :: T
-  sqrtesinw    :: Float64   # sqrtesinw    :: T
+  ecc    :: Float64  
+  omega    :: Float64   
 end
 
 struct Planet_plane_hk{T<:Number} # Parameters of a planet in a plane-parallel system
@@ -28,28 +28,14 @@ struct Planet_plane_hk{T<:Number} # Parameters of a planet in a plane-parallel s
   # e times cos or sin of longitude of periastron measured from line of sight, in radians:
   ecosw    :: T
   esinw    :: T
-<<<<<<< HEAD
 end
 
-function calculate_hk(p1::Planet_plane,p2::Planet_plane)
-  h1=p1.sqrtecosw * sqrt(p1.sqrtecosw^2 + p1.sqrtesinw^2)
-  k1=p1.sqrtesinw * sqrt(p1.sqrtecosw^2 + p1.sqrtesinw^2)
-  h2=p2.sqrtecosw * sqrt(p2.sqrtecosw^2 + p2.sqrtesinw^2)
-  k2=p2.sqrtesinw * sqrt(p2.sqrtecosw^2 + p2.sqrtesinw^2)
-  return h1,k1,h2,k2
-=======
->>>>>>> parent of f3f4be4... new priors
-end
 
 # """
 # # Error message to explain to anyone who tries to use the old version
 # """
 function compute_ttv!(jmax::Integer,p1::Planet_plane,p2::Planet_plane,time1::Vector,time2::Vector,ttv1::Vector,ttv2::Vector)
-  # error("The Planet_plane data structure has been deprecated in favor of Planet_plane_hk")
-  h1,k1,h2,k2 = calculate_hk(p1,p2)
-  p1_hk = Planet_plane_hk(p1.mass_ratio,p1.period,p1.trans0,h1,k1)
-  p2_hk = Planet_plane_hk(p2.mass_ratio,p2.period,p2.trans0,h2,k2)
-  compute_ttv!(jmax,p1_hk,p2_hk,time1,time2,ttv1,ttv2)
+  error("The Planet_plane data structure has been deprecated in favor of Planet_plane_hk")
 end
 
 # """
@@ -86,44 +72,17 @@ function compute_ttv!(jmax::Integer,p1::Planet_plane_hk,p2::Planet_plane_hk,time
   # Compute since of \pomegas:
   e1 = sqrt(p1.esinw*p1.esinw + p1.ecosw*p1.ecosw)
   e2 = sqrt(p2.esinw*p2.esinw + p2.ecosw*p2.ecosw)
-<<<<<<< HEAD
-  if e1==0
-    sin1om=0
-    cos1om=0
-  else
-    sin1om=p1.esinw/e1
-    cos1om=p1.ecosw/e1
-  end
-  if e2==0
-    sin2om=0
-    cos2om=0
-  else
-    sin2om=p2.esinw/e2
-    cos2om=p2.ecosw/e2
-  end
-  # e1 = p1.sqrtesinw*p1.sqrtesinw + p1.sqrtecosw*p1.sqrtecosw
-  # e2 = p2.sqrtesinw*p2.sqrtesinw + p2.sqrtecosw*p2.sqrtecosw
-  # sin1om=p1.sqrtesinw /sqrt(e1)
-  # sin2om=p2.sqrtesinw /sqrt(e2)
-  # cos1om=p1.sqrtecosw /sqrt(e1)
-  # cos2om=p2.sqrtecosw /sqrt(e2)
-=======
   sin1om=p1.esinw/e1
   sin2om=p2.esinw/e2
   cos1om=p1.ecosw/e1
   cos2om=p2.ecosw/e2
->>>>>>> parent of f3f4be4... new priors
+# >>>>>>> parent of f3f4be4... new priors
   # Compute mean motions:
   n1=2pi/p1.period
   n2=2pi/p2.period
   # Compute initial longitudes:
   lam10=-n1*p1.trans0 + 2*p1.esinw # 2*p1.eccen*sin1om
   lam20=-n2*p2.trans0 + 2*p2.esinw # 2*p2.eccen*sin2om
-<<<<<<< HEAD
-  # lam10=-n1*p1.trans0 + 2*p1.sqrtesinw*sqrt(e1)
-  # lam20=-n2*p2.trans0 + 2*p2.sqrtesinw*sqrt(e2)  
-=======
->>>>>>> parent of f3f4be4... new priors
   @inbounds for i=1:ntime1
   # Compute the longitudes of the planets at times of transit of planet 1 (equation 49):
     lam11 = n1*time1[i]+lam10

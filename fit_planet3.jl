@@ -10,7 +10,6 @@ using DelimitedFiles,JLD2,Optim,LsqFit,Statistics
 function fit_planet3(filename::String,label::String,
   jd1::Float64,jd2::Float64,jdsize::Int64,
   p3in::Float64,p3out::Float64,np3::Int,nphase::Int,
-  sqrte::Bool=false,
   addnoise::Bool=false,sigma::Float64=0.0,EMB::Bool=true)
 
   data1 = readdlm(filename)
@@ -87,13 +86,13 @@ function fit_planet3(filename::String,label::String,
   nplanet = 2
   # create initial simplex? need function for this?
   # result = optimize(f0,xcurr,NelderMead(initial_simplex=MySimplexer(),show_trace=true,iterations=1))
-  println("Initial chi-square: ",chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt,jmax,sqrte))
+  println("Initial chi-square: ",chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt,jmax))
   # res = optimize(params -> chisquare(nplanet,ntrans,params,tt,sigtt),init_param) 
   # init_param = res.minimizer
   param1 = init_param .+ 100.0
   while maximum(abs.(param1 .- init_param)) > 1e-5
     param1 = init_param
-    res = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,sqrte),tt0,tt,weight,init_param)
+    res = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax),tt0,tt,weight,init_param)
     init_param = res.param
     # println("init_param: ",init_param)
     # println("New Initial chi-square: ",chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt))
@@ -130,12 +129,12 @@ function fit_planet3(filename::String,label::String,
       param1 = param3 .+ 100.0
       while maximum(abs.(param1 .- param3)) > 1e-5
         param1 = param3
-        fit = curve_fit((tt0,param3) -> ttv_wrapper(tt0,nplanet,ntrans,[param3[1:11];p3_cur;param3[12:end]],jmax,sqrte),tt0,tt,weight,param3)
+        fit = curve_fit((tt0,param3) -> ttv_wrapper(tt0,nplanet,ntrans,[param3[1:11];p3_cur;param3[12:end]],jmax,true),tt0,tt,weight,param3)
         param3 = fit.param
         # println("init_param: ",param3)
         # println("New Initial chi-square: ",chisquare(tt0,nplanet,ntrans,param3,tt,sigtt,true,p3_cur))
       end
-      ttmodel = ttv_wrapper(tt0,nplanet,ntrans,[param3[1:11];p3_cur;param3[12:end]],jmax,sqrte)
+      ttmodel = ttv_wrapper(tt0,nplanet,ntrans,[param3[1:11];p3_cur;param3[12:end]],jmax,true)
       lprob_phase[i]= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
       if lprob_phase[i] > lprob_best # check that best fit for period is better than global best fit
         lprob_best = lprob_phase[i]
@@ -156,10 +155,10 @@ function fit_planet3(filename::String,label::String,
   #  ttmodel=ttv_wrapper3(tt0,param3)
 
   # fit = curve_fit(ttv_wrapper3,tt0,tt,weight,pbest)
-  fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,sqrte),tt0,tt,weight,pbest)
+  fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax),tt0,tt,weight,pbest)
   # ttmodel=ttv_wrapper3(tt0,pbest)
   pbest_global = fit.param
-  ttmodel = ttv_wrapper(tt0,nplanet,ntrans,pbest_global,jmax,sqrte)
+  ttmodel = ttv_wrapper(tt0,nplanet,ntrans,pbest_global,jmax)
   lprob_best= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
   sigsys2 = 1e-6
 
@@ -167,9 +166,9 @@ function fit_planet3(filename::String,label::String,
   println("Maximum: ",lprob_best," Param: ",pbest_global)
 
 
-  pname = ["mu_1","P_1","t01","sqrt(e1) cos(om1)","sqrt(e1) sin(om1)",
-        "mu_2","P_2","t02","sqrt(e2) cos(om2)","sqrt(e2) sin(om2)",
-        "mu_3","P_3","t03","sqrt(e3) cos(om3)","sqrt(e3) sin(om3)"]
+  pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
+        "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
+        "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)"]
 
   results = string("OUTPUTS/p3_fit",label,"results.txt")
   open(results,"w") do io
