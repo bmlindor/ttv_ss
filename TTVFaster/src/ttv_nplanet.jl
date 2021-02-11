@@ -1,7 +1,7 @@
 # Computes TTVs with TTVFaster for N planets with pairwise TTV calculation.
 include("compute_ttv.jl")
 
-function ttv_nplanet(nplanet::Int64,jmax::Int64,ntrans::Vector{Int64},data::Vector)
+function ttv_nplanet(nplanet::Int64,jmax::Int64,ntrans::Vector{Int64},data::Vector,sqrte::Bool)
   # Need at least two planets!
   @assert(nplanet>=2)
   # The ntrans vectors should have length nplanet:
@@ -32,14 +32,22 @@ function ttv_nplanet(nplanet::Int64,jmax::Int64,ntrans::Vector{Int64},data::Vect
   #println("Looping over planets in ttv_nplanet:")
   for iplanet=1:nplanet-1
     # Create a Planet_plane_hk type for the inner planet:
-    p1 = TTVFaster.Planet_plane_hk(data[(iplanet-1)*5+1],data[(iplanet-1)*5+2],data[(iplanet-1)*5+3],data[(iplanet-1)*5+4],data[(iplanet-1)*5+5])
+    if sqrte
+      p1=TTVFaster.Planet_plane(data[(iplanet-1)*5+1],data[(iplanet-1)*5+2],data[(iplanet-1)*5+3],data[(iplanet-1)*5+4],data[(iplanet-1)*5+5])
+    else
+      p1=TTVFaster.Planet_plane_hk(data[(iplanet-1)*5+1],data[(iplanet-1)*5+2],data[(iplanet-1)*5+3],data[(iplanet-1)*5+4],data[(iplanet-1)*5+5])
+    end
     # Create an array of times for the inner planet:
     n1 = ntrans[iplanet]
     time1 = collect(p1.trans0 .+ range(0,stop=n1-1,length=n1) .* p1.period)
     # Loop over outer planets:
     for jplanet=iplanet+1:nplanet
       # Create a Planet_plane_hk type for the outer planet:
-      p2=TTVFaster.Planet_plane_hk(data[(jplanet-1)*5+1],data[(jplanet-1)*5+2],data[(jplanet-1)*5+3],data[(jplanet-1)*5+4],data[(jplanet-1)*5+5])
+      if sqrte
+        p2=TTVFaster.Planet_plane(data[(jplanet-1)*5+1],data[(jplanet-1)*5+2],data[(jplanet-1)*5+3],data[(jplanet-1)*5+4],data[(jplanet-1)*5+5])
+      else
+        p2=TTVFaster.Planet_plane_hk(data[(jplanet-1)*5+1],data[(jplanet-1)*5+2],data[(jplanet-1)*5+3],data[(jplanet-1)*5+4],data[(jplanet-1)*5+5])
+      end 
       # Create an array of times for the outer planet:
       n2 = ntrans[jplanet]
       time2 = collect(p2.trans0 .+ range(0,stop=n2-1,length=n2) .* p2.period)
@@ -61,7 +69,7 @@ function ttv_nplanet(nplanet::Int64,jmax::Int64,ntrans::Vector{Int64},data::Vect
   return ttv
 end
 
-function ttv_wrapper(tt0,nplanet,ntrans,params,jmax,EMB::Bool=true)
+function ttv_wrapper(tt0,nplanet,ntrans,params,jmax,sqrte::Bool=false,EMB::Bool=true)
   # These lines need modification for different choices of parameters:
   if nplanet == 2
     n1,n2 = ntrans
@@ -76,7 +84,7 @@ function ttv_wrapper(tt0,nplanet,ntrans,params,jmax,EMB::Bool=true)
   # end
   # jmax = 5
   # Call ttv_nplanet:
-  ttv = ttv_nplanet(nplanet,jmax,ntrans,params[1:5*nplanet])
+  ttv = ttv_nplanet(nplanet,jmax,ntrans,params[1:5*nplanet],sqrte)
   # We measure transit times,not TTVs,so add back in the linear ephemeris:
   t01 = params[3]
   per1 = params[2]
@@ -103,10 +111,10 @@ function ttv_wrapper(tt0,nplanet,ntrans,params,jmax,EMB::Bool=true)
   return [ttv1;ttv2]
 end
 
-function chisquare(tt0,nplanet,ntrans,params,tt,sigtt,jmax)#,fixp3::Bool = false,p3_cur::Float64 = 0.0)
+function chisquare(tt0,nplanet,ntrans,params,tt,sigtt,jmax,sqrte)#,fixp3::Bool = false,p3_cur::Float64 = 0.0)
   chisq = 0.0
   # println(params,tt[1],sigtt[1])
-  tt_model = ttv_wrapper(tt0,nplanet,ntrans,params,jmax) #,fixp3,p3_cur)
+  tt_model = ttv_wrapper(tt0,nplanet,ntrans,params,jmax,sqrte) #,fixp3,p3_cur)
   for j=1:length(tt)
     chisq += (tt[j]-tt_model[j])^2/sigtt[j]^2
   end

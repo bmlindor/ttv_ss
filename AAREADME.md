@@ -80,6 +80,7 @@ try01	  large    fine   fine   short
 try02
 mtry1   small   med   fine    short-->
 
+
 12/4/2020
 ##########################	Current State	##########################
 0). Updated TTVFaster to be compatible with Julia v1.3

@@ -1,13 +1,11 @@
-# Julia v1.1
 if !@isdefined(TTVFaster)
-    include("TTVFaster/TTVFaster.jl")
+    include("TTVFaster/src/TTVFaster.jl")
     using Main.TTVFaster
 end
 import Main.TTVFaster.ttv_wrapper
 import Main.TTVFaster.chisquare
 include("regress.jl")
 using DelimitedFiles,JLD2,Optim,LsqFit,Statistics
-# using PyPlot,Unitful,UnitfulAstro,LinearAlgebra
 
 function fit_planet3(filename::String,label::String,
   jd1::Float64,jd2::Float64,jdsize::Int64,

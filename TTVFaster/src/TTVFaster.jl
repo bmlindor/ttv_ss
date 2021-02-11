@@ -9,6 +9,7 @@ module TTVFaster
 include("ttv_nplanet.jl")
 
 export Planet_plane_hk, compute_ttv!
-export Planet_plane    # Deprecated, only exported to make the error message work
+export Planet_plane
+# export ttv_nplanet, ttv_wrapper, ttv_chisquare    
 
 end

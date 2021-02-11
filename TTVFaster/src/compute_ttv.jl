@@ -12,15 +12,11 @@
 include("ttv_succinct.jl")
 
 struct Planet_plane
-# Parameters of a planet in a plane-parallel system
-  # Mass ratio of the planet to the star:
   mass_ratio :: Float64
-  # Initial time of transit:
   period   :: Float64
   trans0   :: Float64
-  eccen    :: Float64
-# longitude of periastron measured from line of sight, in radians:
-  omega    :: Float64
+  sqrtecosw    :: Float64   # sqrtecosw    :: T
+  sqrtesinw    :: Float64   # sqrtesinw    :: T
 end
 
 struct Planet_plane_hk{T<:Number} # Parameters of a planet in a plane-parallel system
@@ -30,17 +26,27 @@ struct Planet_plane_hk{T<:Number} # Parameters of a planet in a plane-parallel s
   period   :: T
   trans0   :: T
   # e times cos or sin of longitude of periastron measured from line of sight, in radians:
-#   ecosw    :: T
-#   esinw    :: T
-  sqrtecosw    :: T
-  sqrtesinw    :: T
+  ecosw    :: T
+  esinw    :: T
+end
+
+function calculate_hk(p1::Planet_plane,p2::Planet_plane)
+  h1=p1.sqrtecosw * sqrt(p1.sqrtecosw^2 + p1.sqrtesinw^2)
+  k1=p1.sqrtesinw * sqrt(p1.sqrtecosw^2 + p1.sqrtesinw^2)
+  h2=p2.sqrtecosw * sqrt(p2.sqrtecosw^2 + p2.sqrtesinw^2)
+  k2=p2.sqrtesinw * sqrt(p2.sqrtecosw^2 + p2.sqrtesinw^2)
+  return h1,k1,h2,k2
 end
 
 # """
 # # Error message to explain to anyone who tries to use the old version
 # """
 function compute_ttv!(jmax::Integer,p1::Planet_plane,p2::Planet_plane,time1::Vector,time2::Vector,ttv1::Vector,ttv2::Vector)
-  error("The Planet_plane data structure has been deprecated in favor of Planet_plane_hk")
+  # error("The Planet_plane data structure has been deprecated in favor of Planet_plane_hk")
+  h1,k1,h2,k2 = calculate_hk(p1,p2)
+  p1_hk = Planet_plane_hk(p1.mass_ratio,p1.period,p1.trans0,h1,k1)
+  p2_hk = Planet_plane_hk(p2.mass_ratio,p2.period,p2.trans0,h2,k2)
+  compute_ttv!(jmax,p1_hk,p2_hk,time1,time2,ttv1,ttv2)
 end
 
 # """
@@ -57,6 +63,7 @@ end
 # #   ttv1: TTVs of the inner planet
 # #   ttv2: TTVs of the outer planet
 # """
+
 function compute_ttv!(jmax::Integer,p1::Planet_plane_hk,p2::Planet_plane_hk,time1::Vector,time2::Vector,ttv1::Vector,ttv2::Vector)
 
   # Compute the semi-major axis ratio of the planets:
@@ -74,26 +81,34 @@ function compute_ttv!(jmax::Integer,p1::Planet_plane_hk,p2::Planet_plane_hk,time
   ttv_succinct!(jmax+1,alpha,f1,f2)  # I need to compute coefficients one higher than jmax
   # Compute TTVs for inner planet (equation 33):
   # Compute since of \pomegas:
-#   e1 = sqrt(p1.esinw*p1.esinw + p1.ecosw*p1.ecosw)
-#   e2 = sqrt(p2.esinw*p2.esinw + p2.ecosw*p2.ecosw)
-#   sin1om=p1.esinw/e1
-#   sin2om=p2.esinw/e2
-#   cos1om=p1.ecosw/e1
-#   cos2om=p2.ecosw/e2
-  e1 = p1.sqrtesinw*p1.sqrtesinw + p1.sqrtecosw*p1.sqrtecosw
-  e2 = p2.sqrtesinw*p2.sqrtesinw + p2.sqrtecosw*p2.sqrtecosw
-  sin1om=sqrt(p1.sqrtesinw*p1.sqrtesinw /e1)
-  sin2om=sqrt(p2.sqrtesinw*p2.sqrtesinw /e2)
-  cos1om=sqrt(p1.sqrtecosw*p1.sqrtecosw /e1)
-  cos2om=sqrt(p2.sqrtecosw*p2.sqrtecosw /e2)
+  e1 = sqrt(p1.esinw*p1.esinw + p1.ecosw*p1.ecosw)
+  e2 = sqrt(p2.esinw*p2.esinw + p2.ecosw*p2.ecosw)
+  if e1==0
+    sin1om=0
+    cos1om=0
+  if e2==0
+    sin2om=0
+    cos2om=0
+  else
+    sin1om=p1.esinw/e1
+    sin2om=p2.esinw/e2
+    cos1om=p1.ecosw/e1
+    cos2om=p2.ecosw/e2
+  end
+  # e1 = p1.sqrtesinw*p1.sqrtesinw + p1.sqrtecosw*p1.sqrtecosw
+  # e2 = p2.sqrtesinw*p2.sqrtesinw + p2.sqrtecosw*p2.sqrtecosw
+  # sin1om=p1.sqrtesinw /sqrt(e1)
+  # sin2om=p2.sqrtesinw /sqrt(e2)
+  # cos1om=p1.sqrtecosw /sqrt(e1)
+  # cos2om=p2.sqrtecosw /sqrt(e2)
   # Compute mean motions:
   n1=2pi/p1.period
   n2=2pi/p2.period
   # Compute initial longitudes:
-#   lam10=-n1*p1.trans0 + 2*p1.esinw # 2*p1.eccen*sin1om
-#   lam20=-n2*p2.trans0 + 2*p2.esinw # 2*p2.eccen*sin2om
-  lam10=-n1*p1.trans0 + 2*sqrt(p1.sqrtesinw*p1.sqrtesinw /e1)*(p1.sqrtesinw*p1.sqrtesinw + p1.sqrtecosw*p1.sqrtecosw)
-  lam20=-n2*p2.trans0 + 2*sqrt(p2.sqrtesinw*p2.sqrtesinw /e2)*(p2.sqrtesinw*p2.sqrtesinw + p2.sqrtecosw*p2.sqrtecosw)   
+  lam10=-n1*p1.trans0 + 2*p1.esinw # 2*p1.eccen*sin1om
+  lam20=-n2*p2.trans0 + 2*p2.esinw # 2*p2.eccen*sin2om
+  # lam10=-n1*p1.trans0 + 2*p1.sqrtesinw*sqrt(e1)
+  # lam20=-n2*p2.trans0 + 2*p2.sqrtesinw*sqrt(e2)  
   @inbounds for i=1:ntime1
   # Compute the longitudes of the planets at times of transit of planet 1 (equation 49):
     lam11 = n1*time1[i]+lam10
@@ -157,8 +172,9 @@ function compute_ttv!(jmax::Integer,p1::Planet_plane_hk,p2::Planet_plane_hk,time
   # Multiply by period and mass ratio, and divide by 2*Pi:
     ttv2[i] = ttv2[i]*p2.period*p1.mass_ratio/(2pi)
   end
-  # Finished!
-  return
+  # Finished! 
+  #ttv1,ttv2 are already allocated
+  return 
 end  # compute_ttv!
-
+end
 # end # module
