@@ -23,7 +23,7 @@ function ttv_wrapper(tt0,nplanet,ntrans,params,jmax,EMB::Bool=true)
   end
   t02 = params[8]
   per2 = params[7]
-  ttv2 = collect(range(t02,stop = t02+per2*(n2-1),length = n2))
+  ttv2 = collect(range(t02,stop = t02+per2*(n2-1),length = n2)) #check memory allocation >>>>>>>>>>>>
   for i=1:n2
     if EMB
       ttv2[i] += ttv[2,i]
@@ -36,11 +36,11 @@ function ttv_wrapper(tt0,nplanet,ntrans,params,jmax,EMB::Bool=true)
   end
   # If transit times of additional planets were observable these would need to be added in.
   #println("param2: ",param)
-  return [ttv1;ttv2]
+  return [ttv1;ttv2]  #check memory allocation >>>>>>>>>>>>
 end
 
 function chisquare(tt0,nplanet,ntrans,params,tt,sigtt,jmax)#,fixp3::Bool = false,p3_cur::Float64 = 0.0)
-  chisq = 0.0
+  chisq = 0.0  #check memory allocation >>>>>>>>>>>>
   # println(params,tt[1],sigtt[1])
   tt_model = ttv_wrapper(tt0,nplanet,ntrans,params,jmax) #,fixp3,p3_cur)
   for j=1:length(tt)

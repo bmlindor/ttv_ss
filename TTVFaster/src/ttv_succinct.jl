@@ -14,11 +14,11 @@ function ttv_succinct!(jmax::Integer,alpha::Number,f1::Array{Float64,2},f2::Arra
   # See simple_solution.pdf 7/16/2015
 
   
-  b=zeros(Float64,jmax+2,3)
+  b=zeros(Float64,jmax+2,3)  #check memory allocation >>>>>>>>>>>>
   #println("Computing Laplace Coeffcients: ",alpha)
   for i=0:2
     for j=0:jmax
-      b[j+1,i+1]=laplace_wisdom(1//2,j,i,alpha)/alpha^i
+      b[j+1,i+1]=laplace_wisdom(1//2,j,i,alpha)/alpha^i  #check memory allocation >>>>>>>>>>>>
     end
   end
   #println("Done with Laplace Coeffcients: ",alpha)
@@ -91,7 +91,7 @@ function ttv_succinct!(jmax::Integer,alpha::Number,f1::Array{Float64,2},f2::Arra
   return 
 end
 
-# Computes Taylor series expansion for when period is fixed
+# Computes Taylor series expansion for when period is fixed. code exists somewhere
 function ttv_succinct!(jmax::Integer,alpha::Number,f1::Array{Float64,2},f2::Array{Float64,2},b::Array{Float64,2},alpha0::Number,b0::Array{Float64,2})
 
   # See simple_solution.pdf 7/16/2015

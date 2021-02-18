@@ -12,7 +12,7 @@ function ttv_nplanet(nplanet::Int64,jmax::Int64,ntrans::Vector{Int64},data::Vect
   # of transit times of any planet:
   ntransmax = maximum(ntrans)
   #ttv = zeros(ttv_el_type,nplanet,ntransmax)
-  ttv = zeros(nplanet,ntransmax)
+  ttv = zeros(nplanet,ntransmax) #check memory allocation <<<<<<<<<<<<<<<<<<<
   # Each planet requires 5 elements in data: mass_ratio,period,trans0,ecosw,esinw:
   @assert(length(data)==5*nplanet)
   @assert(jmax>=1)  # Should there be a larger minimum?
