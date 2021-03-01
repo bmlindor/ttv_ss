@@ -5,3 +5,4 @@ deprecated/
 *.pdf
 transfer/
 NbodyGradient/
+INPUTS/*.bsp

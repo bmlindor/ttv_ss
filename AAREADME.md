@@ -6,6 +6,19 @@ https://github.com/chrisvoncsefalvay/learn-julia-the-hard-way/tree/master/_chapt
 
 Julia Data Module:
 https://github.com/JuliaIO/JLD2.jl
+JPL ephemerides: https://ssd.jpl.nasa.gov/?planet_eph_export
+DE430 : Created April 2013; includes librations and 1980 nutation.
+        Referred to the International Celestial Reference Frame version 2.0.
+        Covers JED 2287184.5, (1549 DEC 21) to JED 2688976.5, (2650 JAN 25).
+
+DE440 : Created June 2020; compared to DE430, added about 7 years of new data.
+        Referred to the International Celestial Reference Frame version 3.0.
+        Covers JED 2287184.5, (1549 DEC 31) to JED 2688976.5, (2650 JAN 25)
+
+Note: positions are integrated in astronomical units (AU), fixed AU = 149597870.700 km
+but with polynomials stored in units of kilometers. 
+The integration time units are days of barycentric dynamical time (TDB)
+
 
 CALCEPH: https://github.com/JuliaAstro/CALCEPH.jl
 retrieves the position, velocity and acceleration of Earth (geocenter) relative

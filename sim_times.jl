@@ -11,19 +11,14 @@ include("regress.jl")
 
 function sim_times(jd1::Float64,jd2::Float64,jdsize::Int64,
   addnoise::Bool=false,sigma::Float64=0.0,EMB::Bool=true,seed::Int=42)
-  # To do: output file with arguments in header
-  #       output data frame with header?
-
-  # Initial JD times for days in 100 years
-  # nyear = 100
-  # np0 = 365*nyear 
-  @assert jd1 >= 2414105.0
-  @assert jd2 <= 2488985.0
-  Random.seed!(seed)
+  # To do: output file with arguments in header?
+  nyear = (jd2 - jd1)/365.25 
   dt = (jd2 - jd1)/jdsize
+  # Initial JD times for days in nyear 
+  @assert jd1 >= 2287184.5 #2414105.0
+  @assert jd2 <= 2688976.5 #2488985.0
+  Random.seed!(seed)
   t0 = range(jd1,stop=jd2-1,length = jdsize)
-  nyears = (jd2 - jd1)/365.25 
-  # t0 = 2451544.5 - 50*365.25 .+ range(0.5,stop = np0 - 0.5,length = np0)
   # println(t0[1]) #= 2.4332825e6  
 
   # Make a circle to represent the Sun:
@@ -32,23 +27,22 @@ function sim_times(jd1::Float64,jd2::Float64,jdsize::Int64,
   ysun = CGS.RSUN/CGS.AU * sin.(theta_sun)
 
   # Load ephemerides from data and set units
-  eph = Ephem("INPUTS/planets.dat") ; prefetch(eph)
-  options = useNaifId + unitDay + unitAU
+  eph = Ephem("INPUTS/DE440.bsp") ; prefetch(eph)
+  options = useNaifId+unitKM+unitDay # useNaifId + unitDay + unitAU
+  AU = 149597870.700 #km
 
   # Find observer location required to see transits
-  # pva_sun = zeros(9,np0)
-
   pva_sun = zeros(9,jdsize)
   pva_venus = zeros(9,jdsize)
   pva_earth = zeros(9,jdsize)
   # for i=1:np0
   for i=1:jdsize
-    pva_sun[1:9,i] = compute(eph,t0[i],0.5,10,10,options,2)
-    pva_venus[1:9,i] = compute(eph,t0[i],0.5,2,10,options,2)
+    pva_sun[1:9,i] = compute(eph,t0[i],0.5,10,10,options,2)./AU
+    pva_venus[1:9,i] = compute(eph,t0[i],0.5,2,10,options,2)./AU
     if EMB
-      pva_earth[1:9,i] = compute(eph,t0[i],0.5,3,10,options,2) 
+      pva_earth[1:9,i] = compute(eph,t0[i],0.5,3,10,options,2)./AU 
     else
-      pva_earth[1:9,i] = compute(eph,t0[i],0.5,399,10,options,2)
+      pva_earth[1:9,i] = compute(eph,t0[i],0.5,399,10,options,2)./AU
 #            pva_emb = compute(eph,t0[i],0.5,3,10,options,2)
 #            pva_moon = compute(eph,t0[i],0.5,301,10,options,2)
 #            println("Earth - EMB: ",norm(pva_earth[1:3,i] .- pva_emb[1:3]))
@@ -278,9 +272,9 @@ function sim_times(jd1::Float64,jd2::Float64,jdsize::Int64,
     noise = [noise1;noise2]
     sigtt = [sigtt1;sigtt2]
     if EMB
-      name = string("INPUTS/tt_data",sigma,"sEMB.txt")
+      name = string("INPUTS/tt_data",sigma,"sEMB",nyear,"yr.txt")
     else
-      name = string("INPUTS/tt_data",sigma,"snoEMB.txt")
+      name = string("INPUTS/tt_data",sigma,"snoEMB",nyear,"yr.txt")
     end
     writedlm(name,zip(body,tt0,tt,sigtt))
   else
