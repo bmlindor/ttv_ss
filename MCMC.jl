@@ -63,9 +63,9 @@ function MCMC(param::Array{Float64,1},lprob_best::Float64,foutput::String,
     end
     for iplanet=1:nplanet-1
   # The periods of the planets should be ordered from least to greatest:
-        if param[(iplanet-1)*5+2] > param[iplanet*5+2]
-          lprior += -Inf
-        end
+        # if param[(iplanet-1)*5+2] > param[iplanet*5+2]
+        #   lprior += -Inf
+        # end
     end
     if !EMB 
       # Plase priors on deltaphi and account for aliasing:

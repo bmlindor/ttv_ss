@@ -272,9 +272,9 @@ function sim_times(jd1::Float64,jd2::Float64,jdsize::Int64,
     noise = [noise1;noise2]
     sigtt = [sigtt1;sigtt2]
     if EMB
-      name = string("INPUTS/tt_data",sigma,"sEMB",nyear,"yr.txt")
+      name = string("INPUTS/tt_data",sigma,"sEMB.txt")
     else
-      name = string("INPUTS/tt_data",sigma,"snoEMB",nyear,"yr.txt")
+      name = string("INPUTS/tt_data",sigma,"snoEMB.txt")
     end
     writedlm(name,zip(body,tt0,tt,sigtt))
   else
