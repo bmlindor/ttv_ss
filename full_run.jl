@@ -1,48 +1,85 @@
-# Julia v1.1
+function show_args(args)
+@show args
+end
+
 include("sim_times.jl")
-include("fit_mysterybody.jl")
+include("fit_planet3.jl")
+include("fit_moon.jl")
 include("MCMC.jl")
 
+nwalkers = 50
+nsteps = 1000
+
 jd1 = 2.4332825e6
-jd2 = 2.4515445e6
 jdsize = 1000
-# p3in = 4230.0
-# p3out = 4430.0
-# p3in = 1000.0
-sigma = 30.0
+p3in = 4230.0
+p3out = 4430.0
 # p3in = 500.0
 # p3out = 5000.0
 np3 = 100
-nphase = 100
+nphase = 36
+
 dpin = 0.0 
 dpout = 2*pi
 ndp = 72
 
-nsteps = 10000
-nwalkers = 50
+# p4in = 
+# p4out = 
+# np4 = 100
 
-function full_run()
-# Modify the following variables as necessary:
-label = "try01"
+show_args(ARGS)
+label, runtype = ARGS[1], ARGS[4]
+sigma, nyear = parse(Float64,ARGS[2]),parse(Float64,ARGS[3])
 
-function full_run(label,sigma)
-sim_times(jd1,jd2,jdsize,true,sigma,true)
-datafile = string("INPUTS/tt_data",sigma,"sEMB.txt")
-fit_planet3(datafile,label,jd1,jd2,jdsize,p3in,p3out,np3,nphase,true,sigma,true)
-@load ("OUTPUTS/p3_fittry01params.jld2")
-# @load "OUTP3/p3_fittestparams.jld2" #param_p3 lprob_p3 lprob_best pbest ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase
-@time par_mcmc,lprob_mcmc = MCMC(pbest_global,label,nsteps,nwalkers,nplanet,ntrans,tt0,tt,sigtt) #par_mcmc,lprob_mcmc,accept,iburn,steps,nwalkers,nsteps
+function p3_run(sigma,nyear)
+if runtype=="ppp"
+sim_times(jd1,nyear,jdsize,true,sigma,true)
+datafile = string("INPUTS/tt_",sigma,"sEMB",nyear,"yrs.txt")
+@time fit_planet3(datafile,jd1,nyear,jdsize,p3in,p3out,np3,nphase,true,sigma,true)
+fitfile = string("FITS/p3_fit",sigma,"s",nyear,"yrs.jld2")
+foutput = string("MCMC/p3_mcmc",sigma,"s",nyear,"yrs.jld2")
+f = jldopen(String(fitfile),"r")
+MCMC(foutput,f["pbest_global"],f["lprob_best"],nsteps,nwalkers,f["nplanet"],f["ntrans"],f["tt0"],f["tt"],f["sigtt"],true,true)
+end
 end
 
-function full_moonrun()
-# label = ["mtry1","mtry2","mtry3","mtry4","mtry5","mtry6","mtry7"]
-# sigma = [10.0, 15.0, 30.0, 45.0, 60.0, 120.0, 240.0]
+# function moon_run(label,sigma,nyear) 
+if runtype=="ppmp"
+sim_times(jd1,nyear,jdsize,true,sigma,false)
+datafile = string("INPUTS/tt_",sigma,"snoEMB",nyear,"yrs.txt")
+@time fit_moon(datafile,jd1,nyear,jdsize,p3in,p3out,np3,nphase,dpin,dpout,ndp,true,sigma,false)
+fitfile = string("FITS/moon_fit",sigma,"s",nyear,"yrs.jld2")
+foutput = string("MCMC/moon_mcmc",sigma,"s",nyear,"yrs.jld2")
+f = jldopen(String(fitfile),"r")
+@time MCMC(foutput,f["pbest_global"],f["lprob_best"],nsteps,nwalkers,f["nplanet"],f["ntrans"],f["tt0"],f["tt"],f["sigtt"],true,false)
+# end
+end
 
-for i=1:length(sigma)
-	@time sim = sim_times(jd1,jd2,jdsize,true,sigma[i],false)
-	file = string("INPUTS/tt_data",sigma[i],"snoEMB.txt")
-	@time lprobfit,bestfit = fit_moon(file,label[i],jd1,jd2,jdsize,p3in,p3out,np3,nphase,dpin,dpout,ndp,true,sigma[i],false)
-end
-# @load "OUTPUTS/moon_fittestparams.jld2" #pbest_dp lprob_dp lprob_best pbest_global ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase dpin dpout phiphase
-# @time par_mcmc,lprob_mcmc = MCMC(pbest_global,label,nsteps,nwalkers,nplanet,ntrans,tt0,tt,sigtt,false,true) 
-end
+# @time p3_run(sigma,nyear)
+# @time moon_run(sigma,nyear)
+
+# function p4_run(sigma,nyear)
+# if runtype=="ppp"
+# sim_times(jd1,nyear,jdsize,true,sigma,true)
+# datafile = string("INPUTS/tt_",sigma,"sEMB",nyear,"yrs.txt")
+# @time fit_planet4(datafile,jd1,nyear,jdsize,p3in,p3out,np3,nphase,p4in,p4out,np4,true,sigma,true)
+# fitfile = string("FITS/p4_fit",sigma,"s",nyear,"yrs.jld2")
+# foutput = string("MCMC/p4_mcmc",sigma,"s",nyear,"yrs.jld2")
+# f = jldopen(String(fitfile),"r")
+# MCMC(foutput,f["pbest_global"],f["lprob_best"],nsteps,nwalkers,f["nplanet"],f["ntrans"],f["tt0"],f["tt"],f["sigtt"],true,true)
+# end
+# end
+
+
+# function full_moonrun()
+# # label = ["mtry1","mtry2","mtry3","mtry4","mtry5","mtry6","mtry7"]
+# # sigma = [10.0, 15.0, 30.0, 45.0, 60.0, 120.0, 240.0]
+
+# for i=1:length(sigma)
+# 	@time sim = sim_times(jd1,jd2,jdsize,true,sigma[i],false)
+# 	file = string("INPUTS/tt_data",sigma[i],"snoEMB.txt")
+# 	@time lprobfit,bestfit = fit_moon(file,label[i],jd1,jd2,jdsize,p3in,p3out,np3,nphase,dpin,dpout,ndp,true,sigma[i],false)
+# end
+# # @load "OUTPUTS/moon_fittestparams.jld2" #pbest_dp lprob_dp lprob_best pbest_global ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase dpin dpout phiphase
+# # @time par_mcmc,lprob_mcmc = MCMC(pbest_global,label,nsteps,nwalkers,nplanet,ntrans,tt0,tt,sigtt,false,true) 
+# end

@@ -8,11 +8,12 @@ include("regress.jl")
 using DelimitedFiles,JLD2,Optim,LsqFit,Statistics
 
 function fit_planet4(filename::String,label::String,
-  jd1::Float64,jd2::Float64,jdsize::Int64,
+  jd1::Float64,nyear::Float64,jdsize::Int64,
   p3in::Float64,p3out::Float64,np3::Int,nphase::Int,
   p4in::Float64,p4out::Float64,np4::Int,
-  addnoise::Bool=false,sigma::Float64=0.0,EMB::Bool=false)
-
+  addnoise::Bool=false,sigma::Float64=0.0,EMB::Bool=true)
+  jd2 = nyear*365.25 + jd1
+  
   data1 = readdlm(filename)
   nt1 = sum(data1[:,1] .== 1.0)
   nt2 = sum(data1[:,1] .== 2.0)
@@ -198,26 +199,26 @@ function fit_planet4(filename::String,label::String,
   println("Finished 4-planet fit w/ fixed period: ",pbest)
 
   fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,true),tt0,tt,weight,pbest)
-  pbest_p4 = fit.param
-  ttmodel = ttv_wrapper(tt0,nplanet,ntrans,pbest_p4,jmax,true)
+  pbest_global = fit.param
+  ttmodel = ttv_wrapper(tt0,nplanet,ntrans,pbest_global,jmax,true)
   lprob_best= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
 
   println("Finished global 4-planet fit.")
-  println("Maximum: ",lprob_best," Param: ",pbest_p4)
+  println("Maximum: ",lprob_best," Param: ",pbest_global)
 
   pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
             "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
             "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)",
             "mu_4","P_4","t04","e4 cos(om4)","e4 sin(om4)"]
 
-  # results = string("OUTPUTS/moon_fit",label,"results.txt")
-  # open(results,"w") do io
-  #   for i=1:nparam
-  #     println(io,pname[i],": ",pbest_global[i])
-  #   end
-  # end
-  file = string("OUTPUTS/p4_fit",label,"params.jld2")
-  @save file pbest_p3 pbest_p4 lprob_p3 lprob_p4 lprob_best pbest_global ntrans nplanet jd1 jd2 jdsize tt0 tt ttmodel sigtt p3in p3out np3 nphase p4in p4out np4
+  results = string("OUTPUTS/p4_fit",sigma,"s",nyear,"yrs.txt")
+  open(results,"w") do io
+    for i=1:nparam
+      println(io,pname[i],": ",pbest_global[i])
+    end
+  end
+  fitfile = string("FITS/p4_fit",sigma,"s",nyear,"yrs.jld2")
+  @save fitfile pbest_p3 pbest_p4 lprob_p3 lprob_p4 lprob_best pbest_global ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase p4in p4out np4
   # results = string("OUTPUTS/p3_fit",label,"results.txt")
   # #writedlm(results,pbest)
   return lprob_best,pbest_global

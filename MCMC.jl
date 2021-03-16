@@ -8,10 +8,10 @@ include("bounds.jl")
 using DelimitedFiles,JLD2,Statistics,MCMCDiagnostics
 
 # Run a Markov chain:
-function MCMC(param::Array{Float64,1},lprob_best::Float64,foutput::String,
+function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,
   nsteps::Int64,nwalkers::Int64,nplanet::Int64,ntrans::Array{Int64,1},
   tt0::Array{Float64,1},tt::Array{Float64,1},sigtt::Array{Float64,1},
-  EMB::Bool,use_sigsys::Bool) 
+  use_sigsys::Bool,EMB::Bool) 
 
   nparam = length(param)
   jmax = 5
@@ -96,7 +96,7 @@ function MCMC(param::Array{Float64,1},lprob_best::Float64,foutput::String,
         par_trial[nparam+1] = 1e-8 .* abs(randn())
       end
       lprob_trial = calc_lprior(par_trial)
-      # println("Calculated Log Prior: ",lprob_trial)
+      println("Calculated Log Prior: ",lprob_trial)
       if lprob_trial > -Inf
         # model = ttv_wrapper3(tt0,par_trial)# 
         if EMB
@@ -113,11 +113,11 @@ function MCMC(param::Array{Float64,1},lprob_best::Float64,foutput::String,
           lprob_trial += log(sum((tt-model).^2 ./sigtt.^2))*(1 - Nobs/2) #mostly useful for grid search
         end
       end
-      # println("Trial Log Prob: ",lprob_trial)
+      println("Trial Log Prob: ",lprob_trial)
     end
     lprob_mcmc[j,1]=lprob_trial
     par_mcmc[j,1,:]=par_trial
-    # println("Success: ",par_trial,lprob_trial)
+    println("Success: ",par_trial,lprob_trial)
   end
 
   # Initialize scale length & acceptance counter:
@@ -202,7 +202,7 @@ function MCMC(param::Array{Float64,1},lprob_best::Float64,foutput::String,
   indepsamples = minimum(samplesize)
   println("Independent Sample Size: ",indepsamples)
   
-  file = string(foutput,"mcmc.jld2")
-  @save file par_mcmc lprob_mcmc param nwalkers nsteps accept iburn indepsamples
+  mcmcfile = string(foutput)
+  @save mcmcfile par_mcmc lprob_mcmc param nwalkers nsteps accept iburn indepsamples
   return lprob_mcmc,par_mcmc #, param, nwalkers, nsteps, accept, iburn, indepsamples
 end
