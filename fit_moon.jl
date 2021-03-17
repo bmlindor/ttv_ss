@@ -8,7 +8,7 @@ include("regress.jl")
 using DelimitedFiles,JLD2,Optim,LsqFit,Statistics
 
 function fit_moon(filename::String,
-  jd1::Float64,nyear::Float64,jdsize::Int64,
+  jd1::Float64,nyear::Float64,
   p3in::Float64,p3out::Float64,np3::Int,nphase::Int,
   dpin::Float64,dpout::Float64,ndp::Int, 
   addnoise::Bool=false,sigma::Float64=0.0,EMB::Bool=false)

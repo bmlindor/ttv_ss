@@ -63,17 +63,27 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,
     end
     for iplanet=1:nplanet-1
   # The periods of the planets should be ordered from least to greatest:
-        # if param[(iplanet-1)*5+2] > param[iplanet*5+2]
-        #   lprior += -Inf
-        # end
+        if param[(iplanet-1)*5+2] > param[iplanet*5+2]
+          lprior += -Inf
+        end
     end
     if !EMB 
       # Plase priors on deltaphi and account for aliasing:
       dpmin = 0.0; dpmax = pi
       deltaphi = param[18]
-      if deltaphi < dpmin || deltaphi > dpmax
-        lprior += -Inf
+      while deltaphi < dpmin
+        deltaphi += 2pi
       end
+      while deltaphi > 2pi
+        deltaphi -= 2pi 
+      end
+      if deltaphi > dpmax
+        deltaphi = 2pi - deltaphi
+      end
+
+      # if deltaphi < dpmin || deltaphi > dpmax
+      #   lprior += -Inf
+      # end
     end
     if use_sigsys
       # sigsys priors:
@@ -91,12 +101,12 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,
     lprob_trial = -1e100
   # Only initiate models with reasonable chi-square values:
     while lprob_trial < lprob_best - 1000
-      par_trial[1:nparam] = param + errors .* randn(nparam)
+      par_trial[1:nparam] .= param .+ errors .* randn(nparam) 
       if use_sigsys
         par_trial[nparam+1] = 1e-8 .* abs(randn())
       end
       lprob_trial = calc_lprior(par_trial)
-      println("Calculated Log Prior: ",lprob_trial)
+      # println("Calculated Log Prior: ",lprob_trial)
       if lprob_trial > -Inf
         # model = ttv_wrapper3(tt0,par_trial)# 
         if EMB
@@ -113,11 +123,11 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,
           lprob_trial += log(sum((tt-model).^2 ./sigtt.^2))*(1 - Nobs/2) #mostly useful for grid search
         end
       end
-      println("Trial Log Prob: ",lprob_trial)
+      # println("Trial Log Prob: ",lprob_trial)
     end
     lprob_mcmc[j,1]=lprob_trial
     par_mcmc[j,1,:]=par_trial
-    println("Success: ",par_trial,lprob_trial)
+    # println("Success: ",par_trial,lprob_trial)
   end
 
   # Initialize scale length & acceptance counter:

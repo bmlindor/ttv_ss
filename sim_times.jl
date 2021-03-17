@@ -9,11 +9,12 @@ if !@isdefined(CGS)
 end
 include("regress.jl")
 
-function sim_times(jd1::Float64,nyear::Float64,jdsize::Int64,
+function sim_times(jd1::Float64,nyear::Float64,
   addnoise::Bool=false,sigma::Float64=0.0,EMB::Bool=true,seed::Int=42)
   # To do: output file with arguments in header?
   # nyear = (jd2 - jd1)/365.25 
   jd2 = nyear*365.25 + jd1
+  jdsize = 1000
   dt = (jd2 - jd1)/jdsize
   # Initial JD times for days in nyear 
   @assert jd1 >= 2287184.5 #2414105.0
@@ -22,10 +23,10 @@ function sim_times(jd1::Float64,nyear::Float64,jdsize::Int64,
   t0 = range(jd1,stop=jd2-1,length = jdsize)
   # println(t0[1]) #= 2.4332825e6  
 
-  # Make a circle to represent the Sun:
-  theta_sun = range(0,stop = 2*pi,length = 100)
-  xsun = CGS.RSUN/CGS.AU * cos.(theta_sun)
-  ysun = CGS.RSUN/CGS.AU * sin.(theta_sun)
+  # Make a circle to represent the Sun, for plotting
+  # theta_sun = range(0,stop = 2pi,length = 100)
+  # xsun = CGS.RSUN/CGS.AU * cos.(theta_sun)
+  # ysun = CGS.RSUN/CGS.AU * sin.(theta_sun)
 
   # Load ephemerides from data and set units
   eph = Ephem("INPUTS/DE440.bsp") ; prefetch(eph)

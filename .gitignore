@@ -1,8 +1,8 @@
 .ipynb_checkpoints
 results/
 deprecated/
-*.jld2
-*.pdf
-transfer/
 NbodyGradient/
-INPUTS/*.bsp
+*.bsp
+MCMC/*.jld2
+*.pdf
+*.mem

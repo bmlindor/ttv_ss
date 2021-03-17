@@ -1,5 +1,5 @@
 using PyPlot,Statistics
-rc("font",family="serif")
+rc("font",family="sans-serif")
 
 function corner_plot(xvalue,yvalue,nbins,optx,opty,truex,truey)
 	meanx=mean(xvalue);sigmax=std(xvalue)

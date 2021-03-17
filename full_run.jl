@@ -1,62 +1,65 @@
 function show_args(args)
 @show args
 end
-
 include("sim_times.jl")
 include("fit_planet3.jl")
 include("fit_moon.jl")
 include("MCMC.jl")
-
 nwalkers = 50
-nsteps = 1000
-
+nsteps = 10000
 jd1 = 2.4332825e6
-jdsize = 1000
-p3in = 4230.0
-p3out = 4430.0
-# p3in = 500.0
-# p3out = 5000.0
-np3 = 100
-nphase = 36
-
+# p3in = 4230.0
+# p3out = 4430.0
+p3in = 1000.0
+p3out = 5000.0
+np3 = 100 #100
+nphase = 36 #36
 dpin = 0.0 
-dpout = 2*pi
-ndp = 72
-
+dpout = 2pi
+ndp = 10 #72
 # p4in = 
 # p4out = 
 # np4 = 100
-
 show_args(ARGS)
-label, runtype = ARGS[1], ARGS[4]
+runtype, label = ARGS[1], ARGS[4]
 sigma, nyear = parse(Float64,ARGS[2]),parse(Float64,ARGS[3])
-
-function p3_run(sigma,nyear)
-if runtype=="ppp"
-sim_times(jd1,nyear,jdsize,true,sigma,true)
-datafile = string("INPUTS/tt_",sigma,"sEMB",nyear,"yrs.txt")
-@time fit_planet3(datafile,jd1,nyear,jdsize,p3in,p3out,np3,nphase,true,sigma,true)
-fitfile = string("FITS/p3_fit",sigma,"s",nyear,"yrs.jld2")
-foutput = string("MCMC/p3_mcmc",sigma,"s",nyear,"yrs.jld2")
-f = jldopen(String(fitfile),"r")
-MCMC(foutput,f["pbest_global"],f["lprob_best"],nsteps,nwalkers,f["nplanet"],f["ntrans"],f["tt0"],f["tt"],f["sigtt"],true,true)
+if runtype=="grid" 
+	if label=="ppp"
+		sim_times(jd1,nyear,true,sigma,true)
+		datafile = string("INPUTS/tt_",sigma,"sEMB",nyear,"yrs.txt")
+		@time fit_planet3(datafile,jd1,nyear,p3in,p3out,np3,nphase,true,sigma,true)
+	end
+	if label=="ppmp"
+    sim_times(jd1,nyear,true,sigma,false)
+		datafile = string("INPUTS/tt_",sigma,"snoEMB",nyear,"yrs.txt")
+		@time fit_moon(datafile,jd1,nyear,p3in,p3out,np3,nphase,dpin,dpout,ndp,true,sigma,false)
+	end
 end
+if runtype=="mcmc" 
+	if label=="ppp"
+		fitfile = string("FITS/p3_fit",sigma,"s",nyear,"yrs.jld2")
+		foutput = string("MCMC/p3_mcmc",sigma,"s",nyear,"yrs.jld2")
+		f = jldopen(String(fitfile),"r")
+		MCMC(foutput,f["pbest_global"],f["lprob_best"],nsteps,nwalkers,f["nplanet"],f["ntrans"],f["tt0"],f["tt"],f["sigtt"],true,true)
+	end
+	if label=="ppmp"
+    fitfile = string("FITS/moon_fit",sigma,"s",nyear,"yrs.jld2")
+		foutput = string("MCMC/moon_mcmc",sigma,"s",nyear,"yrs.jld2")
+		f = jldopen(String(fitfile),"r")
+		@time MCMC(foutput,f["pbest_global"],f["lprob_best"],nsteps,nwalkers,f["nplanet"],f["ntrans"],f["tt0"],f["tt"],f["sigtt"],true,false)
+	end 
 end
-
-# function moon_run(label,sigma,nyear) 
-if runtype=="ppmp"
-sim_times(jd1,nyear,jdsize,true,sigma,false)
-datafile = string("INPUTS/tt_",sigma,"snoEMB",nyear,"yrs.txt")
-@time fit_moon(datafile,jd1,nyear,jdsize,p3in,p3out,np3,nphase,dpin,dpout,ndp,true,sigma,false)
-fitfile = string("FITS/moon_fit",sigma,"s",nyear,"yrs.jld2")
-foutput = string("MCMC/moon_mcmc",sigma,"s",nyear,"yrs.jld2")
-f = jldopen(String(fitfile),"r")
-@time MCMC(foutput,f["pbest_global"],f["lprob_best"],nsteps,nwalkers,f["nplanet"],f["ntrans"],f["tt0"],f["tt"],f["sigtt"],true,false)
+# if runtype=="grid" && label=="ppmp"
+# sim_times(jd1,nyear,true,sigma,false)
+# datafile = string("INPUTS/tt_",sigma,"snoEMB",nyear,"yrs.txt")
+# @time fit_moon(datafile,jd1,nyear,p3in,p3out,np3,nphase,dpin,dpout,ndp,true,sigma,false)
 # end
-end
-
-# @time p3_run(sigma,nyear)
-# @time moon_run(sigma,nyear)
+# if runtype=="mcmc" && label=="ppmp"
+# fitfile = string("FITS/moon_fit",sigma,"s",nyear,"yrs.jld2")
+# foutput = string("MCMC/moon_mcmc",sigma,"s",nyear,"yrs.jld2")
+# f = jldopen(String(fitfile),"r")
+# @time MCMC(foutput,f["pbest_global"],f["lprob_best"],nsteps,nwalkers,f["nplanet"],f["ntrans"],f["tt0"],f["tt"],f["sigtt"],true,false)
+# end
 
 # function p4_run(sigma,nyear)
 # if runtype=="ppp"
