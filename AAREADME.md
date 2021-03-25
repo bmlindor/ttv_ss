@@ -72,8 +72,10 @@ MCMC(param::Array{Float64, 1},label::String,
 
 4). Make slurm file and schedule on hyak.mox.
 
-julia bgrun_40.jl try01 15 &> results/40try01.out &
-julia bgrun_40.jl try02 30 &> results/40try02.out &
+runtype, label = ARGS[1], ARGS[4]
+sigma, nyear = parse(Float64,ARGS[2]),parse(Float64,ARGS[3])
+
+julia full_run.jl grid 30.0 40 ppp &> results/run.out &
 ......
 
 p3fit range = [small=(4230-4430), medium=(1000-5000)] <!-- large=(500-5000), xlarge=(500-10000) --> 
@@ -82,9 +84,10 @@ nphase = [medium=36, coarse=10] <!-- fine=72, xfine=108 -->
 ndp = [fine=72, medium=36, coarse=10] <!-- xfine=108 -->
 steps = [short=(10000), med=(35000), long=(50000)
 
-arg1 = ["try01","try02","try03","try04","try05","try06","try07","try08","try09"]
-arg2 = [15, 30, 45, 60, 75, 90, 105, 120, 135] <!-- which of these are realistic? -->
+runtype = [sim, grid, mcmc]
+sigmas = [15, 30, 45, 60, 75, 90, 105, 120, 135] <!-- which of these are realistic? -->
 years = [4,6,8,10,12,14,16,18,20,24,28,32,36,40]
+label = [ppp, ppmp, pppp, etc.]
 
 <!--label 	p3range  np3   ndp   steps	noise
 try001	small    med   med   med    ...

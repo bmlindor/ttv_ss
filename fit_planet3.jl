@@ -107,7 +107,7 @@ println("Finished 2-planet fit: ",init_param)
 # Now,let's add the 3rd planet:
 ntrans = [nt1,nt2,2] #requires at least 2 transits for each planet (even if it doesnt transit)
 nplanet = 3
-#p3 = 11.86*365.25
+
 # Grid of periods to search over:
 p3 = 10 .^ range(log10(p3in),stop=log10(p3out),length=np3)
 lprob_p3 = zeros(np3)
@@ -147,7 +147,7 @@ for j=1:np3
       param_p3[1:nparam,j] =  [fit.param[1:11];p3_cur;fit.param[12:14]]
     end
   end
-  println("Period: ",p3[j]," chi: ",lprob_p3[j]," Param: ",vec(param_p3[1:nparam,j]))
+  println("Period: ",p3[j]," log Prob: ",lprob_p3[j]," Param: ",vec(param_p3[1:nparam,j]))
 end
 println("Finished 3-planet fit w/ fixed period: ",pbest)
 
@@ -162,7 +162,7 @@ fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax),tt0,
 pbest_global = fit.param
 ttmodel = ttv_wrapper(tt0,nplanet,ntrans,pbest_global,jmax)
 lprob_best= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
-sigsys2 = 1e-6
+# sigsys2 = 1e-6
 
 println("Finished global 3-planet fit.")
 println("Maximum: ",lprob_best," Param: ",pbest_global)

@@ -2,7 +2,7 @@ using CALCEPH,PyPlot
 rc("font",family="sans-serif")
 include("sim_times.jl")
 
-function plot_orbits(include_moon::Bool=false)
+function plot_orbits(dimension::Int64,include_moon::Bool=false)
 
 jd1 = 2.4332825e6
 nyear = 40.0
@@ -36,64 +36,59 @@ pva1[1:9,i] = compute(eph,tt1[i],0.5,2,10,options,2)./AU
 	end
 end
 
-function 2D_orbits()
+if dimension==2
 fig = plt.figure(figsize=(6, 6))
 ax1 = fig.add_subplot(211)
-ax1.plot(vec(pva_sun[2,:]),vec(pva_sun[3,:]),label="Sun",color=:yellow,marker="o")
 # ax1.plot(vec(pva_sun[2,:]),vec(pva_sun[3,:]),color=:yellow,marker="o",mec="black")
-ax1.plot(vec(pva_venus[2,:]),vec(pva_venus[3,:]),label="Venus",color=:orange)
-ax1.plot(vec(pva_earth[2,:]),vec(pva_earth[3,:]),label="Earth")
-ax1.plot([0,n_obs[2]*1.1],[0,n_obs[3]*1.1],color=:black)
+ax1.plot(xsun,ysun,color=:yellow,marker="o",ms=5,mec=:gold)
+ax1.plot(vec(pva_venus[2,:]),vec(pva_venus[3,:]),label="Venus",color=:orange,alpha=0.25)
+ax1.plot(vec(pva_earth[2,:]),vec(pva_earth[3,:]),label="Earth",color=:skyblue,alpha=0.5)
+# ax1.plot([0,n_obs[2]*1.1],[0,n_obs[3]*1.1],color=:black)
+ax1.plot(vec(pva1[2,:]),vec(pva1[3,:]),vec(pva1[3,:]),color=:orange,marker="o")
+ax1.plot(vec(pva2[2,:]),vec(pva2[3,:]),vec(pva2[3,:]),color=:skyblue,marker="o")
+# ax1.plot(vec(pva_sun[2,:]),vec(pva_sun[3,:]),label="Sun",color=:yellow,marker="o",ms=10,mec="gold")
 ax1.tick_params(which="major",direction="in",length=6,
     left="false",right="false",top="false",bottom="false",
     labelbottom="false",labeltop="false",labelleft="false",labelright="false")
-xlabel("[AU]")
-ylabel("[AU]")
+# xlabel("y-position [AU]")
+# ylabel("x-position [AU]")
 # legend(loc="lower left")
 
-subplot(212,sharex=ax1)
-ax2=gca()
-ax2.scatter(vec(pva0[2,:]),vec(pva0[3,:]),color=:yellow,marker="o",edgecolors="black")
-# ax2.scatter(pva_venus[1,imin1],pva_venus[2,imin1],label="Venus Transit",color=:orange)
-ax2.plot(vec(pva_venus[1,:]),vec(pva_venus[2,:]),color=:gray)
-ax2.scatter(vec(pva1[1,:]),vec(pva1[2,:]),label="Venus",color=:orange,marker=".")
-# ax2.scatter(pva_earth[1,imin2],pva_earth[2,imin2],label="Earth Transit")
-ax2.plot(vec(pva_earth[1,:]),vec(pva_earth[2,:]),color=:gray)
-ax2.scatter(vec(pva2[1,:]),vec(pva2[2,:]),label="Earth",marker=".")
-ax2.plot([0,n_obs[1]*1.1],[0,n_obs[2]*1.1],"k--")
-ax2.tick_params(which="major",direction="in",
-    left="true",right="false",top="false",bottom="true",
-    labelbottom="true",labeltop="false",labelleft="true",labelright="false")
-ax2.legend()
-xlabel("[AU]")
-ylabel("[AU]")
+# subplot(212,sharex=ax1)
+# ax2=gca()
+# # ax2.scatter(pva_venus[1,imin1],pva_venus[2,imin1],label="Venus Transit",color=:orange)
+# ax2.plot(vec(pva_venus[1,:]),vec(pva_venus[2,:]),color=:gray)
+# ax2.scatter(vec(pva1[1,:]),vec(pva1[2,:]),label="Venus",color=:orange,marker=".")
+# # ax2.scatter(pva_earth[1,imin2],pva_earth[2,imin2],label="Earth Transit")
+# ax2.plot(vec(pva_earth[1,:]),vec(pva_earth[2,:]),color=:gray)
+# ax2.scatter(vec(pva2[1,:]),vec(pva2[2,:]),label="Earth",marker=".")
+# ax2.plot([0,n_obs[1]*1.1],[0,n_obs[2]*1.1],"k--")
+# ax2.scatter(vec(pva0[2,:]),vec(pva0[3,:]),color=:yellow,marker="o",edgecolors="gold")
+# ax2.tick_params(which="major",direction="in",
+#     left="true",right="false",top="false",bottom="true",
+#     labelbottom="true",labeltop="false",labelleft="true",labelright="false")
+# ax2.legend()
+# xlabel("[AU]")
+# ylabel("[AU]")
 # savefig("sim_times.eps")
 end
 
-function 3D_orbits()
+if dimension==3
 fig=figure(figsize=(8,6))
-# PyPlot.scatter3D(1,0,0,color=:black,marker="s")
-# PyPlot.text3D(1.1,0,0,"x")
-# PyPlot.scatter3D(1,0,0,color=:black,marker=">")
-# PyPlot.scatter3D(0,-1.2,0,color=:black,marker="<")
-# PyPlot.scatter3D(0,0,1,color=:black,marker="^")
-# PyPlot.plot3D([0,1*1.5],[0,0*1.5],[0,0*1.5],linewidth=3,color=:gray)
-# PyPlot.plot3D([0,0*1.5],[0,-1*1.5],[0,0*1.5],linewidth=3,color=:gray)
-# PyPlot.plot3D([0,0*1.5],[0,0*1.5],[0,1*1.5],linewidth=3,color=:gray)
 # PyPlot.scatter3D(xsun,ysun,0,marker="o",color=:yellow,ms=20)
 PyPlot.plot3D(vec(pva_venus[1,:]), vec(pva_venus[2,:]), vec(pva_venus[3,:]),color=:orange,label="Venus Orbit",alpha=0.25)
 PyPlot.plot3D(vec(pva_earth[1,:]), vec(pva_earth[2,:]), vec(pva_earth[3,:]),color=:skyblue,label="Earth Orbit",alpha=0.5)
 PyPlot.plot3D([0,n_obs[1]*1.2],[0,n_obs[2]*1.2],[0,n_obs[3]*1.2],linestyle="--",color=:black,alpha=0.5)
-PyPlot.plot3D(vec(pva0[1,:]), vec(pva0[2,:]), vec(pva0[3,:]),color=:yellow,marker="o",ms=20,mec=:gold)
+PyPlot.plot3D(vec(pva0[1,:]), vec(pva0[2,:]), vec(pva0[3,:]),color=:yellow,marker="o",ms=10,mec=:gold)
 PyPlot.plot3D(vec(pva1[1,:]),vec(pva1[2,:]),vec(pva1[3,:]),color=:orange,marker="o")
 PyPlot.plot3D(vec(pva2[1,:]),vec(pva2[2,:]),vec(pva2[3,:]),marker="o")
-# ax.tick_params(which="minor",direction="in",length=2,
-#     left="false",right="false",top="true",bottom="true",
-#     labelbottom="false",labeltop="false",labelleft="false",labelright="false")
+PyPlot.tick_params(which="major",
+    left="false",right="false",top="false",bottom="false",
+    labelbottom="false",labeltop="false",labelleft="false",labelright="false")
 # xlim(-1,1)
 # ylim(-1,1)
-xlabel("x [AU]")
-ylabel("y [AU]")
-zlabel("z [AU]")    
+# xlabel("x [AU]")
+# ylabel("y [AU]")
+# zlabel("z [AU]")    
 end
 end

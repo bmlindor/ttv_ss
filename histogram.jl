@@ -32,7 +32,7 @@ end
 # function plot_hist(param,nbin)
 
 # end
-x = randn(100000)
-xbin,xhist,xbin_square,xhist_square = histogram(x,50)
-plot(xbin,xhist)
-plot(xbin_square,xhist_square)
+# x = randn(100000)
+# xbin,xhist,xbin_square,xhist_square = histogram(x,50)
+# plot(xbin,xhist)
+# plot(xbin_square,xhist_square)
