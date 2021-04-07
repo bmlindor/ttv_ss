@@ -80,7 +80,7 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,
       if deltaphi > dpmax
         deltaphi = 2pi - deltaphi
       end
-
+      param[18] = deltaphi
       # if deltaphi < dpmin || deltaphi > dpmax
       #   lprior += -Inf
       # end

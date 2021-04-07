@@ -146,7 +146,7 @@ function fit_moon(filename::String,
         param_p3[1:nparam,j] =  [fit.param[1:11];p3_cur;fit.param[12:14]]
       end
     end
-    println("Period: ",p3[j]," chi: ",lprob_p3[j]," Param: ",vec(param_p3[1:nparam,j]))
+    println("Period: ",p3[j]," log Prob: ",lprob_p3[j]," Param: ",vec(param_p3[1:nparam,j]))
   end
   println("Finished 3-planet fit w/ fixed period: ",pbest)
 
@@ -209,6 +209,6 @@ function fit_moon(filename::String,
     end
   end
   fitfile = string("FITS/moon_fit",sigma,"s",nyear,"yrs.jld2")
-  @save fitfile pbest_p3 pbest_dp lprob_p3 lprob_dp lprob_best pbest_global ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase dpin dpout ndp
+  @save fitfile pbest_p3 pbest_dp lprob_p3 lprob_dp lprob_best pbest_global ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase dpin dpout ndp 
   return lprob_best,pbest_global
 end

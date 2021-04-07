@@ -80,7 +80,7 @@ julia full_run.jl grid 30.0 40 ppp &> results/run.out &
 
 p3fit range = [small=(4230-4430), medium=(1000-5000)] <!-- large=(500-5000), xlarge=(500-10000) --> 
 np3 = [fine=100, medium=50, coarse=10] <!-- xfine=1000 -->
-nphase = [medium=36, coarse=10] <!-- fine=72, xfine=108 -->
+nphase = [fine=36, medium=10, coarse=2] <!-- xfine=72 -->
 ndp = [fine=72, medium=36, coarse=10] <!-- xfine=108 -->
 steps = [short=(10000), med=(35000), long=(50000)
 

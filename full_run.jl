@@ -8,15 +8,13 @@ include("MCMC.jl")
 nwalkers = 50
 nsteps = 3000 #10000
 jd1 = 2.4332825e6
-# p3in = 4230.0
-# p3out = 4430.0
-p3in = 4163.8
-p3out = 4419.5
-np3 = 10 #100
-nphase = 2 #36
-dpin = 0.0 
-dpout = 2pi
-ndp = 10 #72
+p3in = 500.0 #4163.8
+p3out = 5000.0 #4419.5
+np3 = 250 #100
+nphase = 36 #36
+dpin = 0.0 #0.0
+dpout = 2pi #2pi
+ndp = 72 #72
 # p4in = 
 # p4out = 
 # np4 = 100
@@ -39,7 +37,7 @@ if label=="ppp"
 end
 
 if label=="ppmp"
-	  sim_times(jd1,nyear,true,sigma,false)
+	  # sim_times(jd1,nyear,true,sigma,false)
   if runtype=="grid"
 		datafile = string("INPUTS/tt_",sigma,"snoEMB",nyear,"yrs.txt")
 		@time fit_moon(datafile,jd1,nyear,p3in,p3out,np3,nphase,dpin,dpout,ndp,true,sigma,false) 

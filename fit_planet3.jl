@@ -157,10 +157,10 @@ println("Finished 3-planet fit w/ fixed period: ",pbest)
 #  ttmodel=ttv_wrapper3(tt0,param3)
 
 # fit = curve_fit(ttv_wrapper3,tt0,tt,weight,pbest)
-fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax),tt0,tt,weight,pbest)
+fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,true),tt0,tt,weight,pbest)
 # ttmodel=ttv_wrapper3(tt0,pbest)
 pbest_global = fit.param
-ttmodel = ttv_wrapper(tt0,nplanet,ntrans,pbest_global,jmax)
+ttmodel = ttv_wrapper(tt0,nplanet,ntrans,pbest_global,jmax,true)
 lprob_best= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
 # sigsys2 = 1e-6
 
@@ -178,7 +178,7 @@ open(results,"w") do io
   end
 end
 fitfile = string("FITS/p3_fit",sigma,"s",nyear,"yrs.jld2")
-@save fitfile param_p3 lprob_p3 lprob_best pbest_global ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase
+@save fitfile pbest lprob_p3 lprob_best pbest_global ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase
 # writedlm(results,pbest_global)
 return lprob_best,pbest_global
 end
