@@ -1,6 +1,7 @@
 function show_args(args)
 @show args
 end
+using Profile
 include("sim_times.jl")
 include("fit_planet3.jl")
 include("fit_moon.jl")
@@ -8,13 +9,13 @@ include("MCMC.jl")
 nwalkers = 50
 nsteps = 3000 #10000
 jd1 = 2.4332825e6
-p3in = 500.0 #4163.8
-p3out = 5000.0 #4419.5
-np3 = 250 #100
-nphase = 36 #36
-dpin = 0.0 #0.0
-dpout = 2pi #2pi
-ndp = 72 #72
+p3in = 4163.8
+p3out = 4419.5
+np3 = 10#250 #100
+nphase = 6 #36
+dpin = 2.28 #0.0
+dpout = 2.34 #2pi
+ndp = 180 #72
 # p4in = 
 # p4out = 
 # np4 = 100
@@ -42,7 +43,7 @@ if label=="ppmp"
 		datafile = string("INPUTS/tt_",sigma,"snoEMB",nyear,"yrs.txt")
 		@time fit_moon(datafile,jd1,nyear,p3in,p3out,np3,nphase,dpin,dpout,ndp,true,sigma,false) 
 	elseif runtype=="mcmc"  
-    fitfile = string("FITS/moon_fit",sigma,"s",nyear,"yrs.jld2")
+    fitfile = string("FITS/moon_widefit",sigma,"s",nyear,"yrs.jld2")
 		foutput = string("MCMC/moon_mcmc",sigma,"s",nyear,"yrs.jld2")
 		m = jldopen(String(fitfile),"r")
 		@time MCMC(foutput,m["pbest_global"],m["lprob_best"],nsteps,nwalkers,m["nplanet"],m["ntrans"],m["tt0"],m["tt"],m["sigtt"],true,false)	     

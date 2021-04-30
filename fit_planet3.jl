@@ -14,7 +14,7 @@ addnoise::Bool=false,sigma::Float64=0.0,EMB::Bool=true)
 
 jd2 = nyear*365.25 + jd1
 
-data1 = readdlm(filename)
+data1 = readdlm(filename,Float64)
 nt1 = sum(data1[:,1] .== 1.0)
 nt2 = sum(data1[:,1] .== 2.0)
 tt1 = vec(data1[1:nt1,3])

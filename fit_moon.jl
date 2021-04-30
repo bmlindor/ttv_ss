@@ -208,7 +208,7 @@ function fit_moon(filename::String,
       println(io,pname[i],": ",pbest_global[i])
     end
   end
-  fitfile = string("FITS/moon_fit",sigma,"s",nyear,"yrs.jld2")
+  fitfile = string("FITS/moon_widefit",sigma,"s",nyear,"yrs.jld2")
   @save fitfile pbest_p3 pbest_dp lprob_p3 lprob_dp lprob_best pbest_global ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase dpin dpout ndp 
   return lprob_best,pbest_global
 end

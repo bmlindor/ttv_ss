@@ -9,16 +9,16 @@ u(gamma::T,c1::T,c2::T) where {T<:Number}= ((3+gamma*gamma)*c1+2*gamma*c2)/(gamm
 # m=+/-1
 v(z::T,d1::T,d2::T,m::Integer) where {T<:Number}= ((m*(1-z*z)+6*z)*d1+(2+z*z)*d2)/(z*(1-z*z)*(z+m)*(z+2*m))
 
-function ttv_succinct!(jmax::Integer,alpha::Number,f1::Array{Float64,2},f2::Array{Float64,2})
+function ttv_succinct!(jmax::Integer,alpha::T,f1::Array{T,2},f2::Array{T,2}) where T<:Real
 
   # See simple_solution.pdf 7/16/2015
 
   
-  b=zeros(Float64,jmax+2,3)  #check memory allocation >>>>>>>>>>>>
+  b=zeros(T,jmax+2,3)  #check memory allocation >>>>>>>>>>>>
   #println("Computing Laplace Coeffcients: ",alpha)
   for i=0:2
     for j=0:jmax
-      b[j+1,i+1]=laplace_wisdom(1//2,j,i,alpha)/alpha^i  #check memory allocation >>>>>>>>>>>>
+      b[j+1,i+1]=laplace_wisdom(1//2,j,i,alpha)/alpha^i  
     end
   end
   #println("Done with Laplace Coeffcients: ",alpha)

@@ -1,7 +1,7 @@
 # Computes TTVs with TTVFaster for N planets with pairwise TTV calculation.
 include("compute_ttv.jl")
 
-function ttv_nplanet(nplanet::Int64,jmax::Int64,ntrans::Vector{Int64},data::Vector)
+function ttv_nplanet(nplanet::Int64,jmax::Int64,ntrans::Vector{Int64},data::Vector{T}) where T<:Real
   # Need at least two planets!
   @assert(nplanet>=2)
   # The ntrans vectors should have length nplanet:
@@ -12,7 +12,7 @@ function ttv_nplanet(nplanet::Int64,jmax::Int64,ntrans::Vector{Int64},data::Vect
   # of transit times of any planet:
   ntransmax = maximum(ntrans)
   #ttv = zeros(ttv_el_type,nplanet,ntransmax)
-  ttv = zeros(nplanet,ntransmax) #check memory allocation <<<<<<<<<<<<<<<<<<<
+  ttv = zeros(T,nplanet,ntransmax) #check memory allocation <<<<<<<<<<<<<<<<<<<
   # Each planet requires 5 elements in data: mass_ratio,period,trans0,ecosw,esinw:
   @assert(length(data)==5*nplanet)
   @assert(jmax>=1)  # Should there be a larger minimum?
@@ -22,7 +22,9 @@ function ttv_nplanet(nplanet::Int64,jmax::Int64,ntrans::Vector{Int64},data::Vect
   end
   for iplanet=1:nplanet-1
   # The periods of the planets should be ordered from least to greatest:
-    @assert(data[(iplanet-1)*5+2] < data[iplanet*5+2])
+    if (data[(iplanet-1)*5+2] >= data[iplanet*5+2])
+      return ttv
+    end
   end
   # Set up planets planar-planet types for all of the planets:
   #planet = Array{Planet_plane_hk}(nplanet)
@@ -44,8 +46,8 @@ function ttv_nplanet(nplanet::Int64,jmax::Int64,ntrans::Vector{Int64},data::Vect
       n2 = ntrans[jplanet]
       time2 = collect(p2.trans0 .+ range(0,stop=n2-1,length=n2) .* p2.period)
       # Define arrays to hold the TTVs:
-      ttv1=zeros(ttv_el_type,n1)
-      ttv2=zeros(ttv_el_type,n2)
+      ttv1=zeros(T,n1)
+      ttv2=zeros(T,n2)
       # Call the compute_ttv code which implements equation (33) from Agol & Deck (2016):
       #    println("Calling compute_ttv")
       compute_ttv!(jmax,p1,p2,time1,time2,ttv1,ttv2)

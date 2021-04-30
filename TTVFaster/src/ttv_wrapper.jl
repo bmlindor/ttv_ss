@@ -1,5 +1,5 @@
 include("ttv_nplanet.jl")
-function ttv_wrapper(tt0,nplanet,ntrans,params,jmax,EMB::Bool=true)
+function ttv_wrapper(tt0,nplanet::Int64,ntrans::Vector{Int64},params::Vector{T},jmax::Integer,EMB::Bool=true) where T<:Real
   # These lines need modification for different choices of parameters:
   if nplanet == 2
     n1,n2 = ntrans

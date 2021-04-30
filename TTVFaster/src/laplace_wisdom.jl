@@ -9,18 +9,18 @@
 #   by series summation */
 #/* Code due to Jack Wisdom */
 """
-function laplace_wisdom(s::Rational,i::Integer,j::Integer,a::Number)
+function laplace_wisdom(s::Rational,i::Integer,j::Integer,a::T) where T<:Real
 # function laplace_wisdom,s,i,j,a  IDL
 # double laplace(double s, int i, int j, double a);  c
 
 ##define LAPLACE_EPS 1.0e-12
-  global LAPLACE_EPS = convert(eltype(a),1.0e-12)
+  LAPLACE_EPS = convert(T,1.0e-12)
 
   #if (i lt 0) then i = -i
   i=abs(i)
 
   if j <= i     #/* compute first term in sum */
-    factor4 = one(a)
+    factor4 = one(T)
     for k=0:j-1
       factor4 *= i - k
     end
@@ -28,8 +28,8 @@ function laplace_wisdom(s::Rational,i::Integer,j::Integer,a::Number)
     q0 = 0
   else
     q0 = fld(j + 1 - i,2) #largest integer less than or equal to x/y
-    lap_coef_sum = zero(a)
-    factor4 = one(a)
+    lap_coef_sum = zero(T)
+    factor4 = one(T)
   end
 
   #  /* compute factors for terms in lap_coef_sum */
@@ -53,7 +53,7 @@ function laplace_wisdom(s::Rational,i::Integer,j::Integer,a::Number)
   #  /* sum series */
 
   while  (term*factor4) > LAPLACE_EPS
-    factor4 = one(a)
+    factor4 = one(T)
     for k=0:j-1
       factor4 *= (2*q + i - k)
     end

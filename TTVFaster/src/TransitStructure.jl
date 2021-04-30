@@ -1,0 +1,52 @@
+"""
+    Transit_Struct
+Structure to hold arrays and other quantities for computing transit. 
+# Members
+- `r::T`: radius ratio
+- `b::T`: impact parameter
+- `u_n::Array{T,1}`: limb-darkening coefficients
+- `n::Int64`: number of limb-darkening coefficients
+- `n_max::Int64`: maximum number of terms in M_n
+- `g_n::Array{T,1}`: Green's basis coefficients
+- `sn::Array{T,1}`: Green's basis terms
+- `Mn::Array{T,1}`: integral over ``(k^2-\\sin^2(\\phi))^{m/2}``
+- `Nn::Array{T,1}`: integral over ``(k^2-\\sin^2(\\phi))^{m/2}\\sin^2(\\phi)``
+- `grad::Bool`: `true` for gradient; `false` for no gradient
+- `s2_grad::Array{T,1}`: gradient of ``s2`` with respect to ``(r,b)`` - this is ``S_1 = s_2`` from starry
+- `dsndr::Array{T,1}`: derivatives of Green's basis with respect to ``r``
+- `dsndb::Array{T,1}`: derivatives of Green's basis with respect to ``b``
+- `dgdu::Array{T,2}`: derivatives ``g_n`` with respect to ``u_n``
+- `dfdrb::Array{T,1}`: derivative of flux with respect to `r,b`
+- `dfdg::Array{T,1}`: derivative of flux with respect to ``g_n``
+- `dfdu::Array{T,1}`: derivative of flux with respect to `u_n`
+- `jmax::Int64`: maximum number of terms in series expansions of ``I_v`` and ``J_v``
+- `Mn_coeff::Array{T,3}`: coefficients for series expansion of ``M_n``
+- `Nn_coeff::Array{T,2}`: coefficients for series expansion of ``N_n``
+- `ninv::Array{T,1}`: inverse of the integers ``n``
+- `k2::T`: ``k^2 = (1-(r-b)^2)/(4br)``
+- `k::T`: ``k = \\sqrt{k^2}``
+- `kc::T`: ``k_c = \\sqrt{1-k^2}`` (unless ``k > 1``, then it is ``\\sqrt{1-1/k^2}``)
+- `kck::T`: ``k_c k``
+- `kap0::T`: ``\\kappa = \\sin^{-1}(k)`` (``=\\kappa_0`` in M&A)
+- `pimkap1::T`: ``\\pi-\\kappa_1``
+- `sqarea::T`: ``(1-(b-r)^2)((b+r)^2-1)``
+- `kite_area2::T`: ``2A_{kite}``
+- `Eofk::T`: ``E(k^2)`` is complete elliptic integral of first kind
+- `Em1mKdm::T`: ``(E(m)-(1-m)K(m))/m`` is complete elliptic integral with ``m=k^2``
+- `onembmr2:: T`: ``1-(b-r)^2``
+- `onembpr2:: T`: ``1-(b+r)^2``
+- `onembmr2inv::T`: ``1/(1-(b-r)^2)``
+- `onemr2mb2::T`: ``1-r^2-b^2``
+- `sqonembmr2::T`: ``\\sqrt{1-(b-r)^2}``
+- `fourbr::T`: ``4br``
+- `sqbr::T`: ``\\sqrt{br}``
+- `sqbrinv::T`: ``1/\\sqrt{br}``
+- `fourbrinv::T`: ``1/(4br)``
+- `k2inv::T`: ``1/k^2``
+- `kc2::T`: ``1-k^2`` (or ``1-1/k^2`` if ``k > 1``)
+- `sqrt1mr2:: T`: ``\\sqrt{1-r^2}``
+- `den::T`: ``1/(g_1 + 2/3 g_2)``
+- `third::T`: ``1/3``
+- `twothird:: T`: ``2/3``
+- `sqr1mr::T`: ``\\sqrt{r(1-r)}`` if ``r < 1``
+"""
