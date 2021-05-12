@@ -24,7 +24,7 @@ runtype, label = ARGS[1], ARGS[4]
 sigma, nyear = parse(Float64,ARGS[2]),parse(Float64,ARGS[3])
 
 if label=="ppp"
-	# sim_times(jd1,nyear,true,sigma,true) 
+	sim_times(jd1,nyear,true,sigma,true) 
 	if runtype=="grid"
 		datafile = string("INPUTS/tt_",sigma,"sEMB",nyear,"yrs.txt")
 		@time fit_planet3(datafile,jd1,nyear,p3in,p3out,np3,nphase,true,sigma,true)
@@ -38,7 +38,7 @@ if label=="ppp"
 end
 
 if label=="ppmp"
-	  # sim_times(jd1,nyear,true,sigma,false)
+	  sim_times(jd1,nyear,true,sigma,false)
   if runtype=="grid"
 		datafile = string("INPUTS/tt_",sigma,"snoEMB",nyear,"yrs.txt")
 		@time fit_moon(datafile,jd1,nyear,p3in,p3out,np3,nphase,dpin,dpout,ndp,true,sigma,false) 

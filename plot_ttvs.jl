@@ -12,7 +12,7 @@ function moon_contribution()
   show()
 end
 
-function plot_ttvs(jldfit,include_moon::Bool=false,jldfit2::JLD2.JLDFile{JLD2.MmapIO}=jldopen("FITS/moon_fit30.0s40.0yrs.jld2","r"))
+function plot_ttvs(jldfit,include_moon::Bool=false)
 
   tt,tt0,sigtt,ttmodel = jldfit["tt"],jldfit["tt0"],jldfit["sigtt"],jldfit["ttmodel"]
   pbest_global = jldfit["pbest_global"]
@@ -35,7 +35,7 @@ function plot_ttvs(jldfit,include_moon::Bool=false,jldfit2::JLD2.JLDFile{JLD2.Mm
  
   # fig, ax1 = subplots(figsize=(8,3))
   if include_moon
-  	fig=figure(figsize=(8,8))
+  	fig=figure(figsize=(7,7))
     subplot(311)
   else
   	fig=figure(figsize=(7,5))
@@ -79,9 +79,9 @@ function plot_ttvs(jldfit,include_moon::Bool=false,jldfit2::JLD2.JLDFile{JLD2.Mm
   show()
 #     legend(bbox_to_anchor=(1.05,1),loc=2,borderaxespad=0.0)
   if include_moon
-	tt,tt0,sigtt,ttmodel = jldfit2["tt"],jldfit2["tt0"],jldfit2["sigtt"],jldfit2["ttmodel"]
-	pbest_global = jldfit2["pbest_global"]
-	nplanet,ntrans = jldfit2["nplanet"],jldfit2["ntrans"]
+	tt,tt0,sigtt,ttmodel = jldfit["tt"],jldfit["tt0"],jldfit["sigtt"],jldfit["ttmodel"]
+	pbest_global = jldfit["pbest_global"]
+	nplanet,ntrans = jldfit["nplanet"],jldfit["ntrans"]
 	pair_ttvs = decompose_ttvs(nplanet,ntrans,pbest_global) .* (24 * 60)
 	n1,n2,n3 = ntrans
 	mu1,P1,t01,ecos1,esin1 = pbest_global[1:5]

@@ -15,7 +15,7 @@ function sim_times(jd1::Float64,nyear::Float64,
   # nyear = (jd2 - jd1)/365.25 
   jd2 = nyear*365.25 + jd1
   jdsize = 1000
-  dt = (jd2 - jd1)/jdsize
+  # dt = (jd2 - jd1)/jdsize
   # Initial JD times for days in nyear 
   @assert jd1 >= 2287184.5 #2414105.0
   @assert jd2 <= 2688976.5 #2488985.0
