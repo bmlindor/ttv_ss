@@ -12,7 +12,7 @@ function moon_contribution()
   show()
 end
 
-function plot_ttvs(jldfit,include_moon::Bool=false)
+function plot_ttvs(jldfit,noise,include_moon::Bool=false)
 
   tt,tt0,sigtt,ttmodel = jldfit["tt"],jldfit["tt0"],jldfit["sigtt"],jldfit["ttmodel"]
   pbest_global = jldfit["pbest_global"]
@@ -32,7 +32,7 @@ function plot_ttvs(jldfit,include_moon::Bool=false)
   ttv2 = (tt2.-time2).* (24 * 60) 
   sigtt1 = sigtt[1:n1].* (24 * 60)
   sigtt2 = sigtt[n1+1:n1+n2].* (24 * 60)
- 
+  println("Simulated with σ= ",noise," seconds")
   # fig, ax1 = subplots(figsize=(8,3))
   if include_moon
   	fig=figure(figsize=(7,7))
@@ -41,8 +41,10 @@ function plot_ttvs(jldfit,include_moon::Bool=false)
   	fig=figure(figsize=(7,5))
     subplot(211)
   end
+
   ax1=gca()
-  plot(ttsim1,ttv1,linewidth=1.25,color="grey",label="Total variations")
+  # plot(ttsim1,ttv1,linewidth=1.25,color="grey",label="Obs variations")
+  plot(ttsim1,pair_ttvs[1,3,1:n1]+pair_ttvs[1,2,1:n1],linewidth=1.25,color="grey",label="Total variations")
   plot(ttsim1,pair_ttvs[1,3,1:n1],color="firebrick",label="Jupiter contribution")
   plot(ttsim1,pair_ttvs[1,2,1:n1],label="Earth contribution")
   errorbar(ttsim1,ttv1,sigtt1,fmt=".",color="black",mec="black",mfc="white")
@@ -65,7 +67,7 @@ function plot_ttvs(jldfit,include_moon::Bool=false)
     subplot(212,sharex=ax1)
   end
   ax2=gca()
-  plot(ttsim2,ttv2,linewidth=1.25,color="grey",label="Total variations")
+  plot(ttsim2,pair_ttvs[2,3,1:n2]+pair_ttvs[2,1,1:n2],linewidth=1.25,color="grey",label="Total variations")
   plot(ttsim2,pair_ttvs[2,3,1:n2],color="firebrick",label="Jupiter contribution")
   plot(ttsim2,pair_ttvs[2,1,1:n2],color="orange",label="Venus contribution")
   ylabel("EMB TTVs [minutes]")
@@ -95,7 +97,7 @@ function plot_ttvs(jldfit,include_moon::Bool=false)
   	moon = moon_ttvs(ntrans,pbest_global) .* (24 * 60)
     subplot(313,sharex=ax1)
     ax3=gca()
-    plot(ttsim2,ttv2,linewidth=1.25,color="grey",label="Total variations")
+    plot(ttsim2,pair_ttvs[2,3,1:n2]+pair_ttvs[2,1,1:n2]+moon,linewidth=1.25,color="grey",label="Total variations")
     plot(ttsim2,pair_ttvs[2,3,1:n2],color="firebrick",label="Jupiter contribution")
     plot(ttsim2,pair_ttvs[2,1,1:n2],color="orange",label="Venus contribution")
     plot(ttsim2,moon,linestyle="--",color="purple",label="Moon contribution")

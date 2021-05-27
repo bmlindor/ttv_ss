@@ -1,4 +1,5 @@
 using PyPlot,Statistics
+include("CGS.jl")
 rc("font",family="sans-serif")
 
 function corner_plot(xvalue,yvalue,nbins,optx,opty,truex,truey)
@@ -128,30 +129,61 @@ function corner_moon(x1,x2,x3,nbins,
 end
 
 
-function corner_planet(x1,x2,x3,x4,nbins,
-    truex1,truex2,truex3,truex4,pname)
-#     mu_1,P_1,t01,e1cosw1,e1sinw1,
-# mu_2,P_2,t02,e2cosw2,e2sinw2,
-# mu_3,P_3,t03,e3cosw3,e3sinw3,
-# tmaxsinphi0,tmaxcosphi0,deltaphi = f["pbest_global"]
-#     if np=1
+function corner_planet(jldmc,noise,nbins,pname)
+    # x1,x2,x3,x4,nbins,
+    # truex1,truex2,truex3,truex4,pname)
+    par_mcmc = jldmc["par_mcmc"]
+    lprob_mcmc = jldmc["lprob_mcmc"]
+    param = jldmc["param"]
+    iburn = jldmc["iburn"]
+    nwalkers = jldmc["nwalkers"]
+    nsteps = jldmc["nsteps"]
+    println("Simulated with σ= ",noise," seconds")
+    calc_deg(value) = value * 180/pi
+    calc_evec1(e,omega) = e* cos(omega-77)
+    calc_evec2(e,omega) = e* sin(omega-77)
+
     if string(pname) == "venus"
         offset = 224.7007
+        x1=vec(par_mcmc[11:20,iburn:nsteps,1]).* CGS.MSUN/CGS.MEARTH
+        x2=vec(par_mcmc[11:20,iburn:nsteps,4])#.*sqrt.(vec(par_mcmc[11:20,iburn:nsteps,4]).^2 .+ vec(par_mcmc[11:20,iburn:nsteps,5]).^2)
+        x3=vec(par_mcmc[11:20,iburn:nsteps,5])#.*sqrt.(vec(par_mcmc[11:20,iburn:nsteps,4]).^2 .+ vec(par_mcmc[11:20,iburn:nsteps,5]).^2)
+        x4=vec(par_mcmc[11:20,iburn:nsteps,2])./365.25
+        truex1=0.815
+        truex2=calc_evec1(0.006,131)
+        truex3=calc_evec2(0.006,131)
+        truex4=224.7007992./365.25
     elseif string(pname) == "earth"
         offset = 365.2554
-    else 
+        x1=vec(par_mcmc[:,1:nsteps,6]).* CGS.MSUN/CGS.MEARTH
+        x2=vec(par_mcmc[:,1:nsteps,9])#.*sqrt.(vec(par_mcmc[:,1:nsteps,9]).^2 .+ vec(par_mcmc[:,1:nsteps,10]).^2)
+        x3=vec(par_mcmc[:,1:nsteps,10])#.*sqrt.(vec(par_mcmc[:,1:nsteps,9]).^2 .+ vec(par_mcmc[:,1:nsteps,10]).^2)
+        x4=vec(par_mcmc[:,1:nsteps,7])./365.25
+        truex1=1
+        truex2=calc_evec1(0.0167,102.4)
+        truex3=calc_evec2(0.0167,102.4)
+        truex4=365.2564./365.25
+    elseif string(pname) == "jup"
         offset = 0.0
+        x1=vec(par_mcmc[:,1:nsteps,11]).* CGS.MSUN/CGS.MEARTH
+        x2=vec(par_mcmc[:,1:nsteps,14])#.*sqrt.(vec(par_mcmc[:,1:nsteps,14]).^2 .+ vec(par_mcmc[:,1:nsteps,15]).^2)
+        x3=vec(par_mcmc[:,1:nsteps,15])#.*sqrt.(vec(par_mcmc[:,1:nsteps,14]).^2 .+ vec(par_mcmc[:,1:nsteps,15]).^2)
+        x4=vec(par_mcmc[:,1:nsteps,12])
+        truex1=318
+        truex2=calc_evec1(0.048,14.75)
+        truex3=calc_evec2(0.048,14.75)
+        truex4=4332.82012875
     end
-#     println(truex4-offset)
+    println("P-off",truex4-offset)
 # 	meanx=mean(xvalue);sigmax=std(xvalue)
 # 	meany=mean(yvalue);sigmay=std(yvalue)
-
+    println(truex2,"<-ecos & esin->",truex3)
 	fig=figure(figsize=(8,8))
 	subplots_adjust(hspace=0.05,wspace=0.05)
 	subplot(4,4,1)
     ax1=gca()
-    ax1.axvline(truex4-offset,linestyle="-",color="black")
-	ax1.hist(x4.-offset,bins=nbins,histtype="step",density="true",color="black")
+    ax1.axvline(truex4,linestyle="-",color="black")
+	ax1.hist(x4,bins=nbins,histtype="step",density="true",color="black")
 	ax1.minorticks_on()
 	ax1.tick_params(which="major",direction="in",length=5,
 	    left="false",right="false",top="true",bottom="true",
@@ -162,7 +194,7 @@ function corner_planet(x1,x2,x3,x4,nbins,
 
     subplot(4,4,5,sharex=ax1)
     ax5=gca()
-    ax5.hist2d(x4.-offset,x3,bins=nbins,cmin=1)
+    ax5.hist2d(x4,x3,bins=nbins,cmin=1)
     ylabel(L"$e \sin \varpi $")
     ax5.minorticks_on()
     ax5.tick_params(which="major",direction="in",top="true",right="true",length=5
@@ -184,7 +216,7 @@ function corner_planet(x1,x2,x3,x4,nbins,
     
     subplot(4,4,9,sharex=ax1)
     ax9=gca()
-    ax9.hist2d(x4.-offset,x2,bins=nbins,cmin=1)
+    ax9.hist2d(x4,x2,bins=nbins,cmin=1)
     ylabel(L"$e \cos \varpi $")
     ax9.minorticks_on()
     ax9.tick_params(which="major",direction="in",top="true",right="true",length=5
@@ -215,8 +247,8 @@ function corner_planet(x1,x2,x3,x4,nbins,
     
     subplot(4,4,13,sharex=ax1)
     ax13=gca()
-    ax13.hist2d(x4.-offset,x1,bins=nbins,cmin=1)
-    xlabel(L"$Per - P_{offset}$ [days]")
+    ax13.hist2d(x4,x1,bins=nbins,cmin=1)
+    xlabel(L"$Per [years]")
     ylabel(L"Mass [$M_{\oplus}$]")
     ax13.minorticks_on()
     ax13.tick_params(which="major",direction="in",top="true",right="true",length=5

@@ -11,11 +11,11 @@ nsteps = 10000 #10000
 jd1 = 2.4332825e6
 p3in = 4163.8
 p3out = 4419.5
-np3 = 200 #250 #100
+np3 = 200 #100
 nphase = 36 #36
 dpin = 2.28 #0.0
 dpout = 2.34 #2pi
-ndp = 180 #72
+ndp = 72 #180 #72
 # p4in = 
 # p4out = 
 # np4 = 100
@@ -53,7 +53,7 @@ if label=="ppmp"
 			@time fit_moon(datafile,jd1,nyear,p3in,p3out,np3,nphase,dpin,dpout,ndp,true,sigma,false)   
 	  end
 	  function run_mcmc()
-		  fitfile = string("FITS/moon_widefit",sigma,"s",nyear,"yrs.jld2")
+		  fitfile = string("FITS/moon_fit",sigma,"s",nyear,"yrs.jld2")
 			foutput = string("MCMC/moon_mcmc",sigma,"s",nyear,"yrs.jld2")
 			m = jldopen(String(fitfile),"r")
 			@time MCMC(foutput,m["pbest_global"],m["lprob_best"],nsteps,nwalkers,m["nplanet"],m["ntrans"],m["tt0"],m["tt"],m["sigtt"],true,false)	  
