@@ -86,7 +86,9 @@ steps = [short=(10000), med=(35000), long=(50000)
 
 runtype = [sim, grid, mcmc]
 sigmas = [15, 30, 45, 60, 75, 90, 105, 120, 135] <!-- which of these are realistic? -->
+30, 60, 90, 120, 180
 years = [4,6,8,10,12,14,16,18,20,24,28,32,36,40]
+10, 20, 30, 40
 label = [ppp, ppmp, pppp, etc.]
 
 <!--label 	p3range  np3   ndp   steps	noise
