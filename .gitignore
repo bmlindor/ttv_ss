@@ -4,5 +4,7 @@ deprecated/
 NbodyGradient/
 *.bsp
 MCMC/*.jld2
+*.jld2
+*/*.jld2
 *.pdf
 *.mem
