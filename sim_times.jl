@@ -136,7 +136,7 @@ function sim_times(jd1::Float64,nyear::Float64,
     t_final = t0[end]
     i=1
     # initializes & finds first transit time
-    JD,ff,i_min,pos,JD_tt = find_transit(body_id,eph,t0[i],t0[i]+period,n_obs,1000)
+    JD,ff,i_min,pos,JD_tt = find_transit(body_id,eph,t0[i],t0[i]+period,n_obs,1000) #why did we use 1000 here?
     push!(times,JD_tt)
     # Find subsequent transit times by shifting time frame by 1 planetary period
     while JD_tt < t_final

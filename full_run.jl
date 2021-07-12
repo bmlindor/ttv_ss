@@ -6,27 +6,43 @@ include("sim_times.jl")
 include("fit_planet3.jl")
 include("fit_moon.jl")
 include("MCMC.jl")
-nwalkers = 50
-nsteps = 10000 #10000
-jd1 = 2.4332825e6
-p3in = 4163.8
-p3out = 4419.5
-np3 = 200 #100
-nphase = 36 #36
-dpin = 2.28 #0.0
-dpout = 2.34 #2pi
-ndp = 72 #180 #72
-# p4in = 
-# p4out = 
-# np4 = 100
+
 show_args(ARGS)
 runtype, label = ARGS[1], ARGS[4]
 sigma, nyear = parse(Float64,ARGS[2]),parse(Float64,ARGS[3])
 
+# Initialize variables and fixed values
+jd1 = 2.4332825e6
+np3,nphase,ndp = 200,36,72 #100,36,180 
+p3in,p3out,dpin,dpout = zeros(4)
+nwalkers,nsteps = 50,0
+# Change search grids to accomodate for wider distributions when time spans are shorter
+if nyear==40
+	p3in,p3out=11.4*365.25,12.1*365.25
+	dpin,dpout=2.25,2.37
+	nsteps=10000
+end
+if nyear==30
+	p3in,p3out=10.8*365.25,12.3*365.25
+	dpin,dpout=2.2,2.38
+	nsteps=10000
+end
+if nyear==20
+	p3in,p3out=10.6*365.25,14.2*365.25 
+	dpin,dpout=2.1,2.52
+	nsteps=50000
+end
+if nyear==10
+	p3in,p3out=10*365.25,15*365.25 
+	nsteps=30000
+end
+
+# Planet 3 detection and characterization routine
 if label=="ppp"
-	sim_times(jd1,nyear,true,sigma,true) 
-	function grid_run()
+	#sim_times(jd1,nyear,true,sigma,true) 
+	function grid_run(p3in,p3out,np3,nphase)
 		datafile = string("INPUTS/tt_",sigma,"sEMB",nyear,"yrs.txt")
+		# fileout = string("FITS/p3_wide")
 		@time fit_planet3(datafile,jd1,nyear,p3in,p3out,np3,nphase,true,sigma,true)
 	end
 	function run_mcmc()
@@ -36,19 +52,21 @@ if label=="ppp"
 		@time MCMC(foutput,p["pbest_global"],p["lprob_best"],nsteps,nwalkers,p["nplanet"],p["ntrans"],p["tt0"],p["tt"],p["sigtt"],true,true)	
 	end    
 	if runtype=="grid"
-		grid_run()
+		grid_run(p3in,p3out,np3,nphase)
 	elseif runtype=="mcmc"
 		run_mcmc()
 	elseif runtype=="full"
-		grid_run()
+		grid_run(p3in,p3out,np3,nphase)
 		run_mcmc()
+	elseif runtype=="wide"
+		grid_run(1000.0,5000.0,100,36)
 	end
-    
 end
 
+# Moon detection and characterization routine
 if label=="ppmp"
 	  sim_times(jd1,nyear,true,sigma,false)
-	  function grid_run()
+	  function grid_run(p3in,p3out,np3,nphase,dpin,dpout,ndp)
 		  datafile = string("INPUTS/tt_",sigma,"snoEMB",nyear,"yrs.txt")
 			@time fit_moon(datafile,jd1,nyear,p3in,p3out,np3,nphase,dpin,dpout,ndp,true,sigma,false)   
 	  end
@@ -59,12 +77,14 @@ if label=="ppmp"
 			@time MCMC(foutput,m["pbest_global"],m["lprob_best"],nsteps,nwalkers,m["nplanet"],m["ntrans"],m["tt0"],m["tt"],m["sigtt"],true,false)	  
 	  end
   if runtype=="grid"
-  	grid_run()
+  	grid_run(p3in,p3out,np3,nphase,dpin,dpout,ndp)
 	elseif runtype=="mcmc"  
    	run_mcmc()
-   elseif runtype=="full"
-   	grid_run()
+  elseif runtype=="full"
+   	grid_run(p3in,p3out,np3,nphase,dpin,dpout,ndp)
    	run_mcmc()
+  elseif runtype=="wide"
+		grid_run(1000.0,5000.0,100,36,0.0,2pi,180)
   end  
 end
 

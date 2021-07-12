@@ -54,8 +54,18 @@ function corner_plot(xvalue,yvalue,nbins,optx,opty,truex,truey)
 	show()
 end
 
-function corner_moon(x1,x2,x3,nbins,
-    truex1,truex2,truex3,pname)
+function corner_moon(x1,x2,x3,nbins)
+    par_mcmc = jldmc["par_mcmc"]
+    lprob_mcmc = jldmc["lprob_mcmc"]
+    param = jldmc["param"]
+    iburn = jldmc["iburn"]
+    nwalkers = jldmc["nwalkers"]
+    nsteps = jldmc["nsteps"]
+    println("Simulated with σ= ",noise," seconds")
+    calc_deg(value) = value * 180/pi
+    calc_evec1(e,omega) = e* cos(omega-77)
+    calc_evec2(e,omega) = e* sin(omega-77)
+    #truex1,truex2,truex3,pname)
     
     fig=figure(figsize=(8,8))
 	subplots_adjust(hspace=0.05,wspace=0.05)
@@ -145,10 +155,10 @@ function corner_planet(jldmc,noise,nbins,pname)
 
     if string(pname) == "venus"
         offset = 224.7007
-        x1=vec(par_mcmc[11:20,iburn:nsteps,1]).* CGS.MSUN/CGS.MEARTH
-        x2=vec(par_mcmc[11:20,iburn:nsteps,4])#.*sqrt.(vec(par_mcmc[11:20,iburn:nsteps,4]).^2 .+ vec(par_mcmc[11:20,iburn:nsteps,5]).^2)
-        x3=vec(par_mcmc[11:20,iburn:nsteps,5])#.*sqrt.(vec(par_mcmc[11:20,iburn:nsteps,4]).^2 .+ vec(par_mcmc[11:20,iburn:nsteps,5]).^2)
-        x4=vec(par_mcmc[11:20,iburn:nsteps,2])./365.25
+        x1=vec(par_mcmc[11:20,1:nsteps,1]).* CGS.MSUN/CGS.MEARTH
+        x2=vec(par_mcmc[11:20,1:nsteps,4])#.*sqrt.(vec(par_mcmc[11:20,iburn:nsteps,4]).^2 .+ vec(par_mcmc[11:20,iburn:nsteps,5]).^2)
+        x3=vec(par_mcmc[11:20,1:nsteps,5])#.*sqrt.(vec(par_mcmc[11:20,iburn:nsteps,4]).^2 .+ vec(par_mcmc[11:20,iburn:nsteps,5]).^2)
+        x4=vec(par_mcmc[11:20,1:nsteps,2])./365.25
         truex1=0.815
         truex2=calc_evec1(0.006,131)
         truex3=calc_evec2(0.006,131)
@@ -248,7 +258,7 @@ function corner_planet(jldmc,noise,nbins,pname)
     subplot(4,4,13,sharex=ax1)
     ax13=gca()
     ax13.hist2d(x4,x1,bins=nbins,cmin=1)
-    xlabel(L"$Per [years]")
+    xlabel(L"$Per-P_{offset}$ [years]")
     ylabel(L"Mass [$M_{\oplus}$]")
     ax13.minorticks_on()
     ax13.tick_params(which="major",direction="in",top="true",right="true",length=5

@@ -14,11 +14,12 @@ function plot_likelihood(jldfit,mcmc,include_moon::Bool=false)
 	xgrid = (10 .^ range(log10(jldfit["p3in"]),stop=log10(jldfit["p3out"]),length=jldfit["np3"])) /365.25
 	xprob = exp.((jldfit["lprob_p3"] .-maximum(jldfit["lprob_p3"])))
 	truex = 11.862615
-	lim = 11.4,12.1
+	
 	bfvalue = jldfit["pbest_global"][12] /365.25
 	param = vec(mcmc["par_mcmc"][:,mcmc["iburn"]:end,12])/365.25
 	xbin,xhist,xbin_square,hist_square=histogram(param,50)
 	label="Period Search Grid [years]"
+	lim = jldfit["p3in"]/365.25,jldfit["p3out"]/365.25
 	color="firebrick"
 
 	fig = plt.figure(figsize=(8,6))
@@ -44,18 +45,19 @@ function plot_likelihood(jldfit,mcmc,include_moon::Bool=false)
     # savefig("IMAGES/p3likelihood.png")
 if include_moon
 		clf()
-	wide = jldopen("FITS/moon_oldfit30.0s40.0yrs.jld2","r") 
+	wide = jldopen("FITS/moon_widefit30.0s40.0yrs.jld2","r") 
 	grid_wide = range(wide["dpin"],stop=wide["dpout"],length=wide["ndp"])
 	lprob_wide = exp.((wide["lprob_dp"] .-maximum(jldfit["lprob_dp"])))
 	
 	xgrid = range(jldfit["dpin"],stop=jldfit["dpout"],length=jldfit["ndp"])
 	xprob = exp.((jldfit["lprob_dp"] .-maximum(jldfit["lprob_dp"])))
 	truex = 2.31221
-	lim = 2.28,2.34
+	
 	bfvalue = jldfit["pbest_global"][18]
 	param = vec(mcmc["par_mcmc"][:,mcmc["iburn"]:end,18])
-	xbin,xhist,xbin_square,hist_square=histogram(param,50)
+	xbin,xhist,xbin_square,hist_square=histogram(param,75)
 	label="Phase Offset Search Grid [radians]"
+	lim = jldfit["dpin"],jldfit["dpout"]
 	color="purple"
 
   fig = plt.figure(figsize=(8,6))
@@ -74,7 +76,7 @@ if include_moon
   # ax2.axvline(bfvalue,linestyle="--",color="black")
   ax4.plot(xgrid,xprob,color=color)
   ax4.plot(xbin_square,hist_square./maximum(hist_square),color=color,linewidth=2,alpha=0.5)
-  xlim(lim)
+  xlim(2.2,2.38)
   ax4.minorticks_on()
   ax4.tick_params(which="both",direction="in",left="false",labelleft="false",
   	right="true",labelright="true")
