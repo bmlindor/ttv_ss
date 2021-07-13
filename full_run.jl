@@ -32,14 +32,19 @@ if nyear==20
 	dpin,dpout=2.1,2.52
 	nsteps=50000
 end
+if nyear==15
+	p3in,p3out=10.6*365.25,14.2*365.25 
+	dpin,dpout=2.1,2.52
+	nsteps=50000
+end
 if nyear==10
 	p3in,p3out=10*365.25,15*365.25 
-	nsteps=30000
+	nsteps=50000
 end
 
 # Planet 3 detection and characterization routine
 if label=="ppp"
-	#sim_times(jd1,nyear,true,sigma,true) 
+	# sim_times(jd1,nyear,true,sigma,true) 
 	function grid_run(p3in,p3out,np3,nphase)
 		datafile = string("INPUTS/tt_",sigma,"sEMB",nyear,"yrs.txt")
 		# fileout = string("FITS/p3_wide")
