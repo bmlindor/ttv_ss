@@ -17,7 +17,7 @@ function plot_likelihood(jldfit,mcmc,include_moon::Bool=false)
 	
 	bfvalue = jldfit["pbest_global"][12] /365.25
 	param = vec(mcmc["par_mcmc"][:,mcmc["iburn"]:end,12])/365.25
-	xbin,xhist,xbin_square,hist_square=histogram(param,50)
+	xbin,xhist,xbin_square,hist_square=histogram(param,200)
 	label="Period Search Grid [years]"
 	lim = jldfit["p3in"]/365.25,jldfit["p3out"]/365.25
 	color="firebrick"

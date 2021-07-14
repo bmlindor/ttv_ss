@@ -1,10 +1,11 @@
 .ipynb_checkpoints
-results/
+#results/
 deprecated/
 NbodyGradient/
 *.bsp
-MCMC/*.jld2
+*/*.bsp
 *.jld2
 */*.jld2
 *.pdf
 *.mem
+TTVFaster/src/*.mem

@@ -100,7 +100,7 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,
   # Select from within uncertainties:
     lprob_trial = -1e100
   # Only initiate models with reasonable chi-square values:
-    while lprob_trial < lprob_best - 1000
+    while lprob_trial < lprob_best - 1000 #since logProb, maybe 1000 is too large
       par_trial[1:nparam] .= param .+ errors .* randn(nparam) 
       if use_sigsys
         par_trial[nparam+1] = 1e-8 .* abs(randn())
@@ -164,7 +164,7 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,
         end 
       end   
   # Next,determine whether to accept this trial step:
-      alp = z^(nsize-1)*exp((lprob_trial - lprob_mcmc[j,i-1]))
+      alp = z^(nsize-1)*exp((lprob_trial - lprob_mcmc[j,i-1])) #prob ratio between current trial and previous prob
       if rand() < 0.0001
         println("Step: ",i," Walker: ",j," Trial Log Prob: " ,lprob_trial," Prob: ",alp," Frac: ",accept/(mod(i-1,1000)*nwalkers+j))
       end

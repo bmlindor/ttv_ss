@@ -78,17 +78,17 @@ function plot_trace(mcmc)
   indepsamples = mcmc["indepsamples"]
 # exp.((wide["lprob_p3"] .-maximum(p_33["lprob_p3"]))),12
   figsize=(8,6)
-  # subplot(2,1,1)
+  subplot(2,1,1)
   for j=1:nwalkers
-    plot(par_mcmc[j,1:nsteps,12])#,exp.(lprob_mcmc[j,1:nsteps]) .- maximum(lprob_mcmc[j,1:nsteps]))
+    plot(par_mcmc[j,iburn:nsteps,11])#,exp.(lprob_mcmc[j,1:nsteps]) .- maximum(lprob_mcmc[j,1:nsteps]))
     ylabel(L"$Period$")
   end
-  # subplot(2,1,2)
-  #   for j=1:nwalkers
-  #   plot(lprob_mcmc[j,1:nsteps])  
-  #   ylabel(L"$logProb$")
-  #   xlim(0,10)
-  # end
+  subplot(2,1,2)
+    for j=1:nwalkers
+    plot(lprob_mcmc[j,iburn:nsteps])  
+    ylabel(L"$logProb$")
+    # xlim(0,10)
+  end
 end 
 # Make plot of MCMC parameters after burn-in
 function plot_parameters(xvalue,yvalue)
