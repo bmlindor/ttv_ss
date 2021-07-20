@@ -8,7 +8,7 @@ if !@isdefined(CGS)
   using Main.CGS
 end
 include("regress.jl")
-
+# Simulate solar system orbits from ephemerides
 function sim_times(jd1::Float64,nyear::Float64,
   addnoise::Bool=false,sigma::Float64=0.0,EMB::Bool=true,seed::Int=42)
   # To do: output file with arguments in header?

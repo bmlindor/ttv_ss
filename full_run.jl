@@ -6,11 +6,9 @@ include("sim_times.jl")
 include("fit_planet3.jl")
 include("fit_moon.jl")
 include("MCMC.jl")
-
 show_args(ARGS)
 runtype, label = ARGS[1], ARGS[4]
 sigma, nyear = parse(Float64,ARGS[2]),parse(Float64,ARGS[3])
-
 # Initialize variables and fixed values
 jd1 = 2.4332825e6
 np3,nphase,ndp = 200,36,72 #100,36,180 
@@ -25,23 +23,22 @@ end
 if nyear==30
 	p3in,p3out=10.8*365.25,12.3*365.25
 	dpin,dpout=2.2,2.38
-	nsteps=10000
+	nsteps=50000
 end
-if nyear==20
+if nyear==20 || nyear==25
 	p3in,p3out=10.6*365.25,14.2*365.25 
 	dpin,dpout=2.1,2.52
 	nsteps=50000
 end
-if nyear==15
+if nyear<=15
 	p3in,p3out=10.6*365.25,14.2*365.25 
 	dpin,dpout=2.1,2.52
 	nsteps=50000
 end
-if nyear==10
-	p3in,p3out=10*365.25,15*365.25 
-	nsteps=50000
-end
-
+# if nyear==10
+# 	p3in,p3out=10*365.25,15*365.25 
+# 	nsteps=50000
+# end
 # Planet 3 detection and characterization routine
 if label=="ppp"
 	sim_times(jd1,nyear,true,sigma,true) 
@@ -64,7 +61,7 @@ if label=="ppp"
 		grid_run(p3in,p3out,np3,nphase)
 		run_mcmc()
 	elseif runtype=="wide"
-		grid_run(1000.0,5000.0,100,36)
+		grid_run(1000.0,5500.0,100,36)
 	end
 end
 

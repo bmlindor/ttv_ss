@@ -3,52 +3,68 @@ using PyPlot
 function plot_emcee(mcmc,pname,include_moon::Bool=false)
     #par_mcmc lprob_mcmc param nwalkers nsteps accept iburn indepsamples
   par_mcmc= mcmc["par_mcmc"]
+  lprob_mcmc = mcmc["lprob_mcmc"]
   nwalkers = mcmc["nwalkers"]
   nsteps = mcmc["nsteps"]
   accept = mcmc["accept"]
   iburn = mcmc["iburn"]
   indepsamples = mcmc["indepsamples"]
 
-  parname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
-    "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
-    "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)"]
+  parname = [L"$μ_1$ [$M_{⋆}$]",L"$P_1$ [days]",L"$t_{0,1}$",L"$e_1 cos(ω_1)$",L"$e_1 sin(ω_1)$",
+    L"$μ_2$ [$M_{⋆}$]",L"$P_2$ [days]",L"$t_{0,2}$",L"$e_2 cos(ω_2)$",L"$e_2 sin(ω_2)$",
+    L"$μ_3$ [$M_{⋆}$]",L"$P_3$ [days]",L"$t_{0,3}$",L"$e_3 cos(ω_3)$",L"$e_3 sin(ω_3)$"]
 
   if string(pname) == "venus"
-    figsize=(9,5)
+    figsize=(8,6)
     for i=1:5
-      subplot(5,1,i)
-      for j=1:nwalkers 
-      plot(par_mcmc[j,1:nsteps,i])
-      ylabel(parname[i])
-      end
-      tight_layout()
+    subplot(3,2,i)
+    for j=1:nwalkers 
+    plot(par_mcmc[j,iburn:nsteps,i])
+    ylabel(parname[i])
     end
+    end
+    subplot(3,2,6)
+    for j=1:nwalkers
+      plot(lprob_mcmc[j,iburn:nsteps])  
+      ylabel(L"$log_{10} Prob$")
+    end
+    tight_layout()
     name = string("IMAGES/MCMCstepsp1.png")
     # savefig(name)
     @show()
   elseif string(pname) == "earth"
-    figsize=(9,5)
+    figsize=(8,6)
     for i=1:5
-      subplot(5,1,i)
-      for j=1:nwalkers 
-      plot(par_mcmc[j,1:nsteps,i+5])
-      ylabel(parname[i+5])
-      end
-      tight_layout()
+    subplot(3,2,i)
+    for j=1:nwalkers 
+    plot(par_mcmc[j,iburn:nsteps,i+5])
+    ylabel(parname[i+5])
     end
+    end
+    subplot(3,2,6)
+    for j=1:nwalkers
+      plot(lprob_mcmc[j,iburn:nsteps])  
+      ylabel(L"$log_{10} Prob$")
+    end
+    tight_layout()
     name = string("IMAGES/MCMCstepsp2.png")
     # savefig(name)
     @show()
-  elseif string(pname) == "jup"
-    figsize=(9,5)
+  elseif string(pname) == "jupiter"
+    figsize=(8,6)
     for i=1:5
-      subplot(5,1,i)
-      for j=1:nwalkers 
-      plot(par_mcmc[j,1:nsteps,i+10])
-      ylabel(parname[i+10])
-      end
-      tight_layout()
+    subplot(3,2,i)
+    for j=1:nwalkers 
+    plot(par_mcmc[j,iburn:nsteps,i+10])
+    ylabel(parname[i+10])
     end
+    end
+    subplot(3,2,6)
+    for j=1:nwalkers
+      plot(lprob_mcmc[j,iburn:nsteps])  
+      ylabel(L"$log_{10} Prob$")
+    end
+    tight_layout()
     name = string("IMAGES/MCMCstepsp3.png")
     # savefig(name)
     @show()
@@ -80,7 +96,7 @@ function plot_trace(mcmc)
   figsize=(8,6)
   subplot(2,1,1)
   for j=1:nwalkers
-    plot(par_mcmc[j,iburn:nsteps,11])#,exp.(lprob_mcmc[j,1:nsteps]) .- maximum(lprob_mcmc[j,1:nsteps]))
+    plot(par_mcmc[j,iburn:nsteps,12])#,exp.(lprob_mcmc[j,1:nsteps]) .- maximum(lprob_mcmc[j,1:nsteps]))
     ylabel(L"$Period$")
   end
   subplot(2,1,2)
