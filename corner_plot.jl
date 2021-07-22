@@ -57,12 +57,12 @@ function corner_moon(jldmc,nbins)
   param = jldmc["param"]
   iburn = jldmc["iburn"]
   nwalkers,nsteps = jldmc["nwalkers"],jldmc["nsteps"]
-  x1=vec(par_mcmc[11:20,1:nsteps,16])
-  x2=vec(par_mcmc[11:20,1:nsteps,17])
-  x3=vec(par_mcmc[11:20,1:nsteps,17]).*57.2957795
-  truex1=0.00001
-  truex2=0.00001
-  truex3=2.3122.*57.2957795
+  x1=vec(par_mcmc[:,iburn:nsteps,16])
+  x2=vec(par_mcmc[:,iburn:nsteps,17])
+  x3=vec(par_mcmc[:,iburn:nsteps,18])#.*57.2957795
+  truex1=0.01
+  truex2=0.01
+  truex3=2.3122#.*57.2957795
 
   fig=figure(figsize=(8,8))
   subplots_adjust(hspace=0.05,wspace=0.05)
@@ -103,7 +103,7 @@ function corner_moon(jldmc,nbins)
   subplot(3,3,7,sharex=ax1)
   ax7=gca()
   ax7.hist2d(x3,x1,bins=nbins,cmin=1)
-  xlabel(L"$\Delta \phi [deg]$")
+  xlabel(L"$\Delta \phi [rad]$")
   ylabel(L"$t_{max} \sin{\phi_0}$")
   ax7.minorticks_on()
   ax7.tick_params(which="major",direction="in",top="true",right="true",length=5,

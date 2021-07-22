@@ -30,7 +30,7 @@ function plot_likelihood(jldfit,mcmc,nbins,include_moon::Bool=false)
 	color="firebrick"
 	println("Simulated with σ= ",sigtt[1]*3600*24," second noise")
 
-	fig = plt.figure(figsize=(8,6))
+	fig = plt.figure()
   ax1 = gca()
 	# ax1.axvline(pbest_global_wide[12] /365.25,linestyle="--",color="black",label="Best Fit Value")
 	ax1.axvline(truex,linestyle="--",color="black",label=string(truex))
@@ -68,7 +68,7 @@ if include_moon
 	lim = jldfit["dpin"],jldfit["dpout"]
 	color="purple"
 	# println(grid_wide[end-31:end])
-  fig = plt.figure(figsize=(8,6))
+  fig = plt.figure()
   ax3 = gca()
 	ax3.axvline(truex,linestyle="--",color="black",label=string(truex))
 	grid = [grid_wide[1:end-50];avg(grid_wide[end-49],xgrid[1]);xgrid;grid_wide[end-30:end]]

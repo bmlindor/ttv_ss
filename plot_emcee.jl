@@ -9,13 +9,12 @@ function plot_emcee(mcmc,pname,include_moon::Bool=false)
   accept = mcmc["accept"]
   iburn = mcmc["iburn"]
   indepsamples = mcmc["indepsamples"]
-
   parname = [L"$μ_1$ [$M_{⋆}$]",L"$P_1$ [days]",L"$t_{0,1}$",L"$e_1 cos(ω_1)$",L"$e_1 sin(ω_1)$",
     L"$μ_2$ [$M_{⋆}$]",L"$P_2$ [days]",L"$t_{0,2}$",L"$e_2 cos(ω_2)$",L"$e_2 sin(ω_2)$",
-    L"$μ_3$ [$M_{⋆}$]",L"$P_3$ [days]",L"$t_{0,3}$",L"$e_3 cos(ω_3)$",L"$e_3 sin(ω_3)$"]
-
+    L"$μ_3$ [$M_{⋆}$]",L"$P_3$ [days]",L"$t_{0,3}$",L"$e_3 cos(ω_3)$",L"$e_3 sin(ω_3)$",
+    L"$t_{max} sin(ϕ_0)$",L"$t_{max} cos(ϕ_0)$",L"$Δϕ$ [rad]"]
+    figsize=()
   if string(pname) == "venus"
-    figsize=(8,6)
     for i=1:5
     subplot(3,2,i)
     for j=1:nwalkers 
@@ -28,12 +27,9 @@ function plot_emcee(mcmc,pname,include_moon::Bool=false)
       plot(lprob_mcmc[j,iburn:nsteps])  
       ylabel(L"$log_{10} Prob$")
     end
-    tight_layout()
     name = string("IMAGES/MCMCstepsp1.png")
-    # savefig(name)
     @show()
   elseif string(pname) == "earth"
-    figsize=(8,6)
     for i=1:5
     subplot(3,2,i)
     for j=1:nwalkers 
@@ -46,12 +42,9 @@ function plot_emcee(mcmc,pname,include_moon::Bool=false)
       plot(lprob_mcmc[j,iburn:nsteps])  
       ylabel(L"$log_{10} Prob$")
     end
-    tight_layout()
     name = string("IMAGES/MCMCstepsp2.png")
-    # savefig(name)
     @show()
   elseif string(pname) == "jupiter"
-    figsize=(8,6)
     for i=1:5
     subplot(3,2,i)
     for j=1:nwalkers 
@@ -64,24 +57,25 @@ function plot_emcee(mcmc,pname,include_moon::Bool=false)
       plot(lprob_mcmc[j,iburn:nsteps])  
       ylabel(L"$log_{10} Prob$")
     end
-    tight_layout()
     name = string("IMAGES/MCMCstepsp3.png")
-    # savefig(name)
     @show()
-  end
-  if include_moon
-    figsize=(5,3)
+  elseif string(pname) == "moon"
     for i=1:3
-    subplot(3,1,i)
+    subplot(2,2,i)
     for j=1:nwalkers 
     plot(par_mcmc[j,1:nsteps,i+15])
     ylabel(parname[i+15])
     end
-    # tight_layout()
+    end
+    subplot(2,2,4)
+      for j=1:nwalkers
+      plot(lprob_mcmc[j,iburn:nsteps])  
+      ylabel(L"$log_{10} Prob$")
     end
     name = string("IMAGES/MCMCstepsmoon.png")
-    # savefig(name)
   end
+  tight_layout()
+  # savefig(name)
 end
 
 function plot_trace(mcmc)
@@ -96,8 +90,8 @@ function plot_trace(mcmc)
   figsize=(8,6)
   subplot(2,1,1)
   for j=1:nwalkers
-    plot(par_mcmc[j,iburn:nsteps,12])#,exp.(lprob_mcmc[j,1:nsteps]) .- maximum(lprob_mcmc[j,1:nsteps]))
-    ylabel(L"$Period$")
+    plot(par_mcmc[j,iburn:nsteps,18])#,exp.(lprob_mcmc[j,1:nsteps]) .- maximum(lprob_mcmc[j,1:nsteps]))
+    ylabel(L"$δϕ$")
   end
   subplot(2,1,2)
     for j=1:nwalkers

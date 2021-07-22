@@ -30,15 +30,15 @@ if nyear==20 || nyear==25
 	dpin,dpout=2.1,2.52
 	nsteps=50000
 end
-if nyear<=15
+if nyear==15
 	p3in,p3out=10.6*365.25,14.2*365.25 
 	dpin,dpout=2.1,2.52
 	nsteps=50000
 end
-# if nyear==10
-# 	p3in,p3out=10*365.25,15*365.25 
-# 	nsteps=50000
-# end
+if nyear==10
+	p3in,p3out=10*365.25,15*365.25 
+	nsteps=50000
+end
 # Planet 3 detection and characterization routine
 if label=="ppp"
 	sim_times(jd1,nyear,true,sigma,true) 
