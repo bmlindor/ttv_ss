@@ -8,7 +8,7 @@ include("regress.jl")
 using DelimitedFiles,JLD2,Optim,LsqFit,Statistics
 
 function fit_planet4(filename::String,label::String,
-  jd1::Float64,nyear::Float64,jdsize::Int64,
+  jd1::Float64,nyear::Float64,
   p3in::Float64,p3out::Float64,np3::Int,nphase::Int,
   p4in::Float64,p4out::Float64,np4::Int,
   addnoise::Bool=false,sigma::Float64=0.0,EMB::Bool=true)
@@ -121,7 +121,7 @@ function fit_planet4(filename::String,label::String,
     lprob_phase = zeros(nphase)
     lprob_p3[j] = -1e100
     for i=1:nphase #loops over Jupiter phases
-      param_tmp = [1e-3,phase[i],0.01,0.01] # Jupiter params: mass ratio,phase,ecosw,esinw
+      param_tmp = [log10(1e-3),phase[i],0.01,0.01] # Jupiter params: mass ratio,phase,ecosw,esinw
       param3 = [init_param;param_tmp] #concatenate 2 planet model to 3 planet model params
       p3_cur = p3[j] #sets jupiter period to global value
       # fit = curve_fit(ttv_wrapper_fixp3,tt0,tt,weight,param3) #optimizes fit w/ 3 planet model
@@ -130,12 +130,12 @@ function fit_planet4(filename::String,label::String,
       param1 = param3 .+ 100.0
       while maximum(abs.(param1 .- param3)) > 1e-5
         param1 = param3
-        fit = curve_fit((tt0,param3) -> ttv_wrapper(tt0,nplanet,ntrans,[param3[1:11];p3_cur;param3[12:end]],jmax,true),tt0,tt,weight,param3)
+        fit = curve_fit((tt0,param3) -> ttv_wrapper(tt0,nplanet,ntrans,[param3[1:10];10^param3[11];p3_cur;param3[12:end]],jmax,true),tt0,tt,weight,param3)
         param3 = fit.param
         # println("init_param: ",param3)
         # println("New Initial chi-square: ",chisquare(tt0,nplanet,ntrans,param3,tt,sigtt,true,p3_cur))
       end
-      ttmodel = ttv_wrapper(tt0,nplanet,ntrans,[param3[1:11];p3_cur;param3[12:end]],jmax,true)
+      ttmodel = ttv_wrapper(tt0,nplanet,ntrans,[param3[1:10];10^param3[11];p3_cur;param3[12:end]],jmax,true)
       lprob_phase[i]= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
       if lprob_phase[i] > lprob_best # check that best fit for period is better than global best fit
         lprob_best = lprob_phase[i]
@@ -143,7 +143,7 @@ function fit_planet4(filename::String,label::String,
       end
       if lprob_phase[i] > lprob_p3[j] # checks best fit over all phases of Jupiter for this particular period
         lprob_p3[j] = lprob_phase[i]
-        param_p3[1:nparam,j] =  [fit.param[1:11];p3_cur;fit.param[12:14]]
+        param_p3[1:nparam,j] =  [fit.param[1:10];10^fit.param[11];p3_cur;fit.param[12:14]]
       end
     end
     println("Period: ",p3[j]," chi: ",lprob_p3[j]," Param: ",vec(param_p3[1:nparam,j]))
