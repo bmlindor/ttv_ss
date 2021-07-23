@@ -7,7 +7,7 @@ import Main.TTVFaster.chisquare
 include("regress.jl")
 using DelimitedFiles,JLD2,Optim,LsqFit,Statistics
 
-function fit_planet4(filename::String,label::String,
+function fit_planet4(filename::String,
   jd1::Float64,nyear::Float64,
   p3in::Float64,p3out::Float64,np3::Int,nphase::Int,
   p4in::Float64,p4out::Float64,np4::Int,
