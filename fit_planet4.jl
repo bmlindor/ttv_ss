@@ -178,6 +178,7 @@ function fit_planet4(filename::String,
       param_tmp = [1e-7,phase[i],0.01,0.01]
       param4 = [pbest_p3[1:10];param_tmp;pbest_p3[11:15]]   # Mars' period is shorter than Jupiter's, so need to keep sorted for now
       p4_cur = p4[j]
+      param1 = param4 .+ 100.0
       while maximum(abs.(param1 .- param4)) > 1e-5
         param1 = param4
         fit = curve_fit((tt0,param4) -> ttv_wrapper(tt0,nplanet,ntrans,[param4[1:11];p4_cur;param4[12:end]],jmax,true),tt0,tt,weight,param4)
@@ -218,7 +219,7 @@ function fit_planet4(filename::String,
     end
   end
   fitfile = string("FITS/p4_fit",sigma,"s",nyear,"yrs.jld2")
-  @save fitfile pbest_p3 pbest_p4 lprob_p3 lprob_p4 lprob_best pbest_global ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase p4in p4out np4
+  @save fitfile pbest_p3 pbest lprob_p3 lprob_p4 lprob_best pbest_global ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase p4in p4out np4
   # results = string("OUTPUTS/p3_fit",label,"results.txt")
   # #writedlm(results,pbest)
   return lprob_best,pbest_global

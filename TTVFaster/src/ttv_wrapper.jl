@@ -7,6 +7,9 @@ function ttv_wrapper(tt0,nplanet::Int64,ntrans::Vector{Int64},params::Vector{T},
   if nplanet == 3
     n1,n2,n3 = ntrans
   end
+  if nplanet == 4
+    n1,n2,n3,n4 = ntrans
+  end
   # if nplanet == 3 && fixp3
   #     param = [params[1:11];p3_cur;params[12:end]]
   # else 

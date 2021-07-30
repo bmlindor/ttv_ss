@@ -12,7 +12,7 @@ runtype, label = ARGS[1], ARGS[4]
 sigma, nyear = parse(Float64,ARGS[2]),parse(Float64,ARGS[3])
 # Initialize variables and fixed values
 jd1 = 2.4332825e6
-np3,nphase,ndp = 200,36,72 #100,36,180 
+np3,nphase,ndp = 200,36,72 #wide: 100,36,180 
 p3in,p3out,dpin,dpout = zeros(4)
 p4in,p4out,np4= 1.5*365.25,5*365.25,100
 nwalkers,nsteps = 50,0
