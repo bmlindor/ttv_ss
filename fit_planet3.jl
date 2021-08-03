@@ -13,7 +13,6 @@ p3in::Float64,p3out::Float64,np3::Int,nphase::Int,
 addnoise::Bool=false,sigma::Float64=0.0,EMB::Bool=true)
 
 jd2 = nyear*365.25 + jd1
-
 data1 = readdlm(filename,Float64)
 nt1 = sum(data1[:,1] .== 1.0)
 nt2 = sum(data1[:,1] .== 2.0)
@@ -44,13 +43,10 @@ end
 
 p1est = median(tt1[2:end] - tt1[1:end-1])
 p2est = median(tt2[2:end] - tt2[1:end-1])
-
 coeff1,covcoeff1 = find_coeffs(tt1,p1est,sigtt1)
 coeff2,covcoeff2 = find_coeffs(tt2,p2est,sigtt2)
-
 sigtt=[sigtt1;sigtt2] 
 # @assert (sigtt[1] .* (24 * 3600) .= sigma)
-
 t01 = coeff1[1]; per1 = coeff1[2]
 t02 = coeff2[1]; per2 = coeff2[2]
 t1  = collect(t01 .+ per1 .* range(0,stop=nt1-1,length=nt1)) #best fit linear transit times w/o ttvs
@@ -81,20 +77,19 @@ ttv2 = zeros(nt2)
 dummy=TTVFaster.compute_ttv!(jmax,p1,p2,time1,time2,ttv1,ttv2) 
 
 # Now,optimize 2-planet fit
-p3_cur = 11.86*365.25 #jupiter period in days,initial value
 #res = optimize(chisquare2,param,method = :l_bfgs,iterations = 21)
 ntrans = [nt1,nt2]
 Nobs = sum(ntrans)
 nplanet = 2
 # create initial simplex? need function for this?
 # result = optimize(f0,xcurr,NelderMead(initial_simplex=MySimplexer(),show_trace=true,iterations=1))
-println("Initial chi-square: ",chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt,jmax))
+println("Initial chi-square: ",chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt,jmax,EMB))
 # res = optimize(params -> chisquare(nplanet,ntrans,params,tt,sigtt),init_param) 
 # init_param = res.minimizer
 param1 = init_param .+ 100.0
 while maximum(abs.(param1 .- init_param)) > 1e-5
   param1 = init_param
-  res = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax),tt0,tt,weight,init_param)
+  res = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,EMB),tt0,tt,weight,init_param)
   init_param = res.param
   # println("init_param: ",init_param)
   # println("New Initial chi-square: ",chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt))
@@ -103,15 +98,16 @@ end
 # init_param = res.minimizer
 # fit2 = curve_fit(ttv_wrapper2,tt0,tt,weight,param; show_trace=true)
 println("Finished 2-planet fit: ",init_param)
+println("New p2 chi-square: ",chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt,jmax,EMB))
 
 # Now,let's add the 3rd planet:
 ntrans = [nt1,nt2,2] #requires at least 2 transits for each planet (even if it doesnt transit)
 nplanet = 3
-
+nparam = 15
 # Grid of periods to search over:
 p3 = 10 .^ range(log10(p3in),stop=log10(p3out),length=np3)
 lprob_p3 = zeros(np3)
-nparam = 15
+p3_cur = 11.86*365.25 #jupiter period in days,initial value
 param_p3 = zeros(nparam,np3)
 lprob_best = -1e100 #global best fit
 pbest = zeros(nparam)
@@ -122,7 +118,8 @@ for j=1:np3
   lprob_phase = zeros(nphase)
   lprob_p3[j] = -1e100
   for i=1:nphase #loops over jupiter phases
-    param_tmp = [log10(1e-3),phase[i],0.01,0.01] # jupiter params: mass ratio,phase,ecosw,esinw
+   # p3 param_names: mass ratio,phase,ecosw,esinw
+    param_tmp = [log10(1e-3),phase[i],0.01,0.01] 
     param3 = [init_param;param_tmp] #concatenate 2 planet model to 3 planet model params
     p3_cur = p3[j] #sets jupiter period to global value
     # fit = curve_fit(ttv_wrapper_fixp3,tt0,tt,weight,param3) #optimizes fit w/ 3 planet model
@@ -131,12 +128,12 @@ for j=1:np3
     param1 = param3 .+ 100.0
     while maximum(abs.(param1 .- param3)) > 1e-5
       param1 = param3
-      fit = curve_fit((tt0,param3) -> ttv_wrapper(tt0,nplanet,ntrans,[param3[1:10];10^param3[11];p3_cur;param3[12:end]],jmax,true),tt0,tt,weight,param3)
+      fit = curve_fit((tt0,param3) -> ttv_wrapper(tt0,nplanet,ntrans,[param3[1:10];10^param3[11];p3_cur;param3[12:end]],jmax,EMB),tt0,tt,weight,param3)
       param3 = fit.param
       # println("init_param: ",param3)
       # println("New Initial chi-square: ",chisquare(tt0,nplanet,ntrans,param3,tt,sigtt,true,p3_cur))
     end
-    ttmodel = ttv_wrapper(tt0,nplanet,ntrans,[param3[1:10];10^param3[11];p3_cur;param3[12:end]],jmax,true)
+    ttmodel = ttv_wrapper(tt0,nplanet,ntrans,[param3[1:10];10^param3[11];p3_cur;param3[12:end]],jmax,EMB)
     lprob_phase[i]= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
     if lprob_phase[i] > lprob_best # check that best fit for period is better than global best fit
       lprob_best = lprob_phase[i]
@@ -151,34 +148,30 @@ for j=1:np3
 end
 println("Finished 3-planet fit w/ fixed period: ",pbest)
 
-#ttmodel=ttv_wrapper3(tt0,param3)
-#res = optimize(chisquare3,param3,method = :l_bfgs,iterations = 21)
-#  res = optimize(chisquare3,param3,method = :l_bfgs)
-#  ttmodel=ttv_wrapper3(tt0,param3)
-
-# fit = curve_fit(ttv_wrapper3,tt0,tt,weight,pbest)
-fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,true),tt0,tt,weight,pbest)
-# ttmodel=ttv_wrapper3(tt0,pbest)
-pbest_global = fit.param
-ttmodel = ttv_wrapper(tt0,nplanet,ntrans,pbest_global,jmax,true)
-lprob_best= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
-# sigsys2 = 1e-6
-
-println("Finished global 3-planet fit.")
-println("Maximum: ",lprob_best," Param: ",pbest_global)
-
-pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
-      "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
-      "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)"]
-
-results = string("OUTPUTS/p3_fit",sigma,"s",nyear,"yrs.txt")
-open(results,"w") do io
-  for i=1:nparam
-    println(io,pname[i],": ",pbest_global[i])
+  #ttmodel=ttv_wrapper3(tt0,param3)
+  #res = optimize(chisquare3,param3,method = :l_bfgs,iterations = 21)
+  #  res = optimize(chisquare3,param3,method = :l_bfgs)
+  #  ttmodel=ttv_wrapper3(tt0,param3)
+  # fit = curve_fit(ttv_wrapper3,tt0,tt,weight,pbest)
+  fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,EMB),tt0,tt,weight,pbest)
+  # ttmodel=ttv_wrapper3(tt0,pbest)
+  pbest_global = fit.param
+  ttmodel = ttv_wrapper(tt0,nplanet,ntrans,pbest_global,jmax,EMB)
+  lprob_best= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
+  println("Finished global 3-planet fit.")
+  println("New p3 chi-square: ",chisquare(tt0,nplanet,ntrans,pbest_p3,tt,sigtt,jmax,EMB))
+  println("Maximum: ",lprob_best," Param: ",pbest_global)
+    # Create files
+  pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
+            "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
+            "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)"]
+  results = string("OUTPUTS/p3_fit",sigma,"s",nyear,"yrs.txt")
+  open(results,"w") do io
+    for i=1:nparam
+      println(io,pname[i],": ",pbest_global[i]) # writedlm(results,pbest_global)
+    end
   end
-end
-fitfile = string("FITS/p3_fit",sigma,"s",nyear,"yrs.jld2")
-@save fitfile pbest lprob_p3 lprob_best pbest_global ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase
-# writedlm(results,pbest_global)
-return lprob_best,pbest_global
+  fitfile = string("FITS/p3_fit",sigma,"s",nyear,"yrs.jld2")
+  @save fitfile pbest lprob_p3 lprob_best pbest_global ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase
+  return lprob_best,pbest_global
 end

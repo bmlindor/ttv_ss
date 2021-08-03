@@ -42,10 +42,10 @@ function ttv_wrapper(tt0,nplanet::Int64,ntrans::Vector{Int64},params::Vector{T},
   return [ttv1;ttv2]  #check memory allocation >>>>>>>>>>>>
 end
 
-function chisquare(tt0,nplanet,ntrans,params,tt,sigtt,jmax)#,fixp3::Bool = false,p3_cur::Float64 = 0.0)
+function chisquare(tt0,nplanet,ntrans,params,tt,sigtt,jmax,EMB)#,fixp3::Bool = false,p3_cur::Float64 = 0.0)
   chisq = 0.0  #check memory allocation >>>>>>>>>>>>
   # println(params,tt[1],sigtt[1])
-  tt_model = ttv_wrapper(tt0,nplanet,ntrans,params,jmax) #,fixp3,p3_cur)
+  tt_model = ttv_wrapper(tt0,nplanet,ntrans,params,jmax,EMB) #,fixp3,p3_cur)
   for j=1:length(tt)
     chisq += (tt[j]-tt_model[j])^2/sigtt[j]^2
   end

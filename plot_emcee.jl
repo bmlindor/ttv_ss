@@ -40,7 +40,7 @@ function plot_emcee(mcmc,pname,include_moon::Bool=false)
     subplot(3,2,6)
     for j=1:nwalkers
       plot(lprob_mcmc[j,iburn:nsteps])  
-      ylabel(L"$log_{10} Prob$")
+      ylabel(L"$logProb$")
     end
     name = string("IMAGES/MCMCstepsp2.png")
     @show()
@@ -55,7 +55,7 @@ function plot_emcee(mcmc,pname,include_moon::Bool=false)
     subplot(3,2,6)
     for j=1:nwalkers
       plot(lprob_mcmc[j,iburn:nsteps])  
-      ylabel(L"$log_{10} Prob$")
+      ylabel(L"$logProb$")
     end
     name = string("IMAGES/MCMCstepsp3.png")
     @show()
@@ -70,7 +70,7 @@ function plot_emcee(mcmc,pname,include_moon::Bool=false)
     subplot(2,2,4)
       for j=1:nwalkers
       plot(lprob_mcmc[j,iburn:nsteps])  
-      ylabel(L"$log_{10} Prob$")
+      ylabel(L"$logProb$")
     end
     name = string("IMAGES/MCMCstepsmoon.png")
   end

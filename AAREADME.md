@@ -141,8 +141,9 @@ Q). Wrong signs for evectors?
     (eccentricity of Earth's orbit). 
 7). See which scenario best fits simulated data [ ]
 7a). Create tables for parameters. [  ]
-7b). Rule out four planet fit instead of moon
-8). Condense results to 1 equation fit (how much of X to get Y uncertainty). [  ]
+8). Add in 4th planet. [  ]
+8a). Rule out four planet fit instead of moon
+10). Condense results to 1 equation fit (how much of X to get Y uncertainty). [  ]
 <!-- 
 3). Q: What really limits timing precision of Earth & Venus
 about the Sun? (related to Tyler's work)
