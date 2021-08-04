@@ -1,20 +1,14 @@
 include("ttv_nplanet.jl")
-function ttv_wrapper(tt0,nplanet::Int64,ntrans::Vector{Int64},params::Vector{T},jmax::Integer,EMB::Bool=true) where T<:Real
+function ttv_wrapper(tt0,nplanet::Int64,ntrans::Vector{Int64},params::Vector{T},jmax::Integer,EMB::Bool) where T<:Real
   # These lines need modification for different choices of parameters:
   if nplanet == 2
     n1,n2 = ntrans
-  end
-  if nplanet == 3
+  elseif nplanet == 3
     n1,n2,n3 = ntrans
-  end
-  if nplanet == 4
+  elseif nplanet == 4
     n1,n2,n3,n4 = ntrans
   end
-  # if nplanet == 3 && fixp3
-  #     param = [params[1:11];p3_cur;params[12:end]]
-  # else 
-  #     param = params
-  # end
+
   # Call ttv_nplanet:
   ttv = ttv_nplanet(nplanet,jmax,ntrans,params[1:5*nplanet])
   # We measure transit times,not TTVs,so add back in the linear ephemeris:

@@ -1,0 +1,60 @@
+
+signal (2): Interrupt: 2
+in expression starting at /Users/bethleelindor/work/washington/ttv_project/ttv_ss/full_run.jl:70
+divgcd at ./int.jl:0
++ at ./rational.jl:257
++ at ./promotion.jl:311 [inlined]
+laplace_wisdom at /Users/bethleelindor/work/washington/ttv_project/ttv_ss/TTVFaster/src/laplace_wisdom.jl:62
+ttv_succinct! at /Users/bethleelindor/work/washington/ttv_project/ttv_ss/TTVFaster/src/ttv_succinct.jl:21
+compute_ttv! at /Users/bethleelindor/work/washington/ttv_project/ttv_ss/TTVFaster/src/compute_ttv.jl:70
+ttv_nplanet at /Users/bethleelindor/work/washington/ttv_project/ttv_ss/TTVFaster/src/ttv_nplanet.jl:53
+ttv_wrapper at /Users/bethleelindor/work/washington/ttv_project/ttv_ss/TTVFaster/src/ttv_wrapper.jl:19
+#31 at /Users/bethleelindor/work/washington/ttv_project/ttv_ss/fit_moon.jl:96
+#32 at /Users/bethleelindor/.julia/packages/LsqFit/LeVh7/src/curve_fit.jl:146
+ff! at /Users/bethleelindor/.julia/packages/NLSolversBase/QPnui/src/objective_types/inplace_factory.jl:11 [inlined]
+#finite_difference_jacobian!#43 at /Users/bethleelindor/.julia/packages/FiniteDiff/blirf/src/jacobians.jl:406
+finite_difference_jacobian! at /Users/bethleelindor/.julia/packages/FiniteDiff/blirf/src/jacobians.jl:334 [inlined]
+finite_difference_jacobian! at /Users/bethleelindor/.julia/packages/FiniteDiff/blirf/src/jacobians.jl:334 [inlined]
+fj_finitediff! at /Users/bethleelindor/.julia/packages/NLSolversBase/QPnui/src/objective_types/oncedifferentiable.jl:139 [inlined]
+j_finitediff! at /Users/bethleelindor/.julia/packages/NLSolversBase/QPnui/src/objective_types/oncedifferentiable.jl:144
+jacobian!! at /Users/bethleelindor/.julia/packages/NLSolversBase/QPnui/src/interface.jl:142
+jacobian!! at /Users/bethleelindor/.julia/packages/NLSolversBase/QPnui/src/interface.jl:140 [inlined]
+jacobian! at /Users/bethleelindor/.julia/packages/NLSolversBase/QPnui/src/interface.jl:135 [inlined]
+#levenberg_marquardt#10 at /Users/bethleelindor/.julia/packages/LsqFit/LeVh7/src/levenberg_marquardt.jl:100
+levenberg_marquardt at /Users/bethleelindor/.julia/packages/LsqFit/LeVh7/src/levenberg_marquardt.jl:42 [inlined]
+#lmfit#15 at /Users/bethleelindor/.julia/packages/LsqFit/LeVh7/src/curve_fit.jl:68
+lmfit at /Users/bethleelindor/.julia/packages/LsqFit/LeVh7/src/curve_fit.jl:68 [inlined]
+#lmfit#14 at /Users/bethleelindor/.julia/packages/LsqFit/LeVh7/src/curve_fit.jl:64
+lmfit at /Users/bethleelindor/.julia/packages/LsqFit/LeVh7/src/curve_fit.jl:61 [inlined]
+#curve_fit#30 at /Users/bethleelindor/.julia/packages/LsqFit/LeVh7/src/curve_fit.jl:147
+unknown function (ip: 0x14b23e64a)
+curve_fit at /Users/bethleelindor/.julia/packages/LsqFit/LeVh7/src/curve_fit.jl:137
+fit_moon at /Users/bethleelindor/work/washington/ttv_project/ttv_ss/fit_moon.jl:96
+grid_run at ./util.jl:155
+unknown function (ip: 0x14b218863)
+jl_apply at /Users/bethleelindor/julia/src/./julia.h:1631 [inlined]
+do_call at /Users/bethleelindor/julia/src/interpreter.c:328
+eval_stmt_value at /Users/bethleelindor/julia/src/interpreter.c:368 [inlined]
+eval_body at /Users/bethleelindor/julia/src/interpreter.c:764
+jl_interpret_toplevel_thunk_callback at /Users/bethleelindor/julia/src/interpreter.c:888
+unknown function (ip: 0xfffffffffffffffe)
+unknown function (ip: 0x1134bfb8f)
+unknown function (ip: 0x1a)
+jl_interpret_toplevel_thunk at /Users/bethleelindor/julia/src/interpreter.c:897
+jl_toplevel_eval_flex at /Users/bethleelindor/julia/src/toplevel.c:814
+jl_parse_eval_all at /Users/bethleelindor/julia/src/ast.c:873
+jl_load at /Users/bethleelindor/julia/src/toplevel.c:878 [inlined]
+jl_load_ at /Users/bethleelindor/julia/src/toplevel.c:885
+include at ./boot.jl:328 [inlined]
+include_relative at ./loading.jl:1105
+include at ./Base.jl:31
+exec_options at ./client.jl:287
+_start at ./client.jl:460
+jfptr__start_2084 at /Users/bethleelindor/julia/usr/lib/julia/sys.dylib (unknown line)
+true_main at /Users/bethleelindor/julia/julia (unknown line)
+main at /Users/bethleelindor/julia/julia (unknown line)
+unknown function (ip: 0xffffffffffffffff)
+Allocations: 104945694 (Pool: 104924712; Big: 20982); GC: 97
+args = ["full", "30.0", "20", "ppmp"]
+Initial parameters: [3.0e-6, 224.70078764380233, 2.4335037686355244e6, 0.01, 0.01, 3.0e-6, 365.25633379803037, 2.433624408663217e6, 0.01, 0.01]
+Initial chi-square: 672.2597508626533

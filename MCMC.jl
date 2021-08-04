@@ -38,7 +38,6 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,
     par_trial = param[1:end]
     nsize = nparam
   end
-
   @assert (nwalkers >= 40)  # nwalkers = nparam * 3
   # Set up arrays to hold the results:
   par_mcmc = zeros(nwalkers,nsteps,nsize)
@@ -59,7 +58,6 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,
       lprior_tmp,dpdx = log_bounds_upper(ecc,emax1,emax2)
       lprior += lprior_tmp
       lprior += -log(ecc) 
-
     end
     for iplanet=1:nplanet-1
   # The periods of the planets should be ordered from least to greatest:
@@ -109,11 +107,11 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,
       # println("Calculated Log Prior: ",lprob_trial)
       if lprob_trial > -Inf
         # model = ttv_wrapper3(tt0,par_trial)# 
-        if EMB
-          model = ttv_wrapper(tt0,nplanet,ntrans,par_trial[1:nparam],jmax,true)
-        else 
-          model = ttv_wrapper(tt0,nplanet,ntrans,par_trial[1:nparam],jmax,false)
-        end
+        # if EMB
+        #   model = ttv_wrapper(tt0,nplanet,ntrans,par_trial[1:nparam],jmax,true)
+        # else 
+          model = ttv_wrapper(tt0,nplanet,ntrans,par_trial[1:nparam],jmax,EMB)
+        # end
         # println(length(tt)," ",length(model))
         if use_sigsys
           # ll = (-0.5 * sum((tt-model).^2 ./(sigtt.^2 .+ sigsys.^2) .+ log.(sigtt.^2 .+ sigsys.^2)))
@@ -148,11 +146,11 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,
       # model_trial =ttv_wrapper3(tt0,par_trial)
       lprob_trial = calc_lprior(par_trial)  
       if lprob_trial > -Inf
-        if EMB
-          model_trial = ttv_wrapper(tt0,nplanet,ntrans,par_trial[1:nparam],jmax,true)
-        else 
-          model_trial = ttv_wrapper(tt0,nplanet,ntrans,par_trial[1:nparam],jmax,false)
-        end
+        # if EMB
+        #   model_trial = ttv_wrapper(tt0,nplanet,ntrans,par_trial[1:nparam],jmax,true)
+        # else 
+          model_trial = ttv_wrapper(tt0,nplanet,ntrans,par_trial[1:nparam],jmax,EMB)
+        # end
         # model_trial = ttv_wrapper(tt0,nplanet,ntrans,par_trial[1:nparam],false)
         # ll = -.5 *sum((tt-model_trial).^2 ./(sigtt.^2 .+ par_trial[end]) .+ log.(sigtt.^2 .+ par_trial[end]))
         # ll =  log(sum((tt-model_trial).^2 ./sigtt.^2))
@@ -184,7 +182,7 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,
       accept = 0
     end
   end
-
+  
   # Now,determine time of burn-in by calculating first time median is crossed:
   iburn = 0
   for i=1:nsize
@@ -199,7 +197,6 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,
       end
     end
   end
-
   println("Burn-in Number (ends): ",iburn)
 
   # Now,calculate the minimum number of effective samples over all parameters:

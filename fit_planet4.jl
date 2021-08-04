@@ -83,13 +83,13 @@ function fit_planet4(filename::String,
   nplanet = 2
   # create initial simplex? need function for this?
   # result = optimize(f0,xcurr,NelderMead(initial_simplex=MySimplexer(),show_trace=true,iterations=1))
-  println("Initial chi-square: ",chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt,jmax))
+  println("Initial chi-square: ",chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt,jmax,true))
   # res = optimize(params -> chisquare(nplanet,ntrans,params,tt,sigtt),init_param) 
   # init_param = res.minimizer
   param1 = init_param .+ 100.0
   while maximum(abs.(param1 .- init_param)) > 1e-5
     param1 = init_param
-    res = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,EMB),tt0,tt,weight,init_param)
+    res = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,true),tt0,tt,weight,init_param)
     init_param = res.param
     # println("init_param: ",init_param)
     # println("New Initial chi-square: ",chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt))
@@ -98,7 +98,7 @@ function fit_planet4(filename::String,
   # init_param = res.minimizer
   # fit2 = curve_fit(ttv_wrapper2,tt0,tt,weight,param; show_trace=true)
   println("Finished 2-planet fit: ",init_param)
-  println("New p2 chi-square: ",chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt,jmax,EMB))
+  println("New p2 chi-square: ",chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt,jmax,true))
 
   # Now,let's add the 3rd planet:
   ntrans = [nt1,nt2,2] 
@@ -128,12 +128,12 @@ function fit_planet4(filename::String,
       param1 = param3 .+ 100.0
       while maximum(abs.(param1 .- param3)) > 1e-5
         param1 = param3
-        fit = curve_fit((tt0,param3) -> ttv_wrapper(tt0,nplanet,ntrans,[param3[1:10];10^param3[11];p3_cur;param3[12:end]],jmax,EMB),tt0,tt,weight,param3)
+        fit = curve_fit((tt0,param3) -> ttv_wrapper(tt0,nplanet,ntrans,[param3[1:10];10^param3[11];p3_cur;param3[12:end]],jmax,true),tt0,tt,weight,param3)
         param3 = fit.param
         # println("init_param: ",param3)
         # println("New Initial chi-square: ",chisquare(tt0,nplanet,ntrans,param3,tt,sigtt,true,p3_cur))
       end
-      ttmodel = ttv_wrapper(tt0,nplanet,ntrans,[param3[1:10];10^param3[11];p3_cur;param3[12:end]],jmax,EMB)
+      ttmodel = ttv_wrapper(tt0,nplanet,ntrans,[param3[1:10];10^param3[11];p3_cur;param3[12:end]],jmax,true)
       lprob_phase[i]= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
       if lprob_phase[i] > lprob_best # check that best fit for period is better than global best fit
         lprob_best = lprob_phase[i]
@@ -148,12 +148,12 @@ function fit_planet4(filename::String,
   end
   println("Finished 3-planet fit w/ fixed period: ",pbest)
 
-  fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,EMB),tt0,tt,weight,pbest)
+  fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,true),tt0,tt,weight,pbest)
   pbest_p3 = fit.param
-  ttmodel = ttv_wrapper(tt0,nplanet,ntrans,pbest_p3,jmax,EMB)
+  ttmodel = ttv_wrapper(tt0,nplanet,ntrans,pbest_p3,jmax,true)
   lprob_best= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
   println("Finished global 3-planet fit.")
-  println("New p3 chi-square: ",chisquare(tt0,nplanet,ntrans,pbest_p3,tt,sigtt,jmax,EMB))
+  println("New p3 chi-square: ",chisquare(tt0,nplanet,ntrans,pbest_p3,tt,sigtt,jmax,true))
   println("Maximum: ",lprob_best," Param: ",pbest_p3)
 
   # Now,add a 4th planet:
@@ -180,10 +180,10 @@ function fit_planet4(filename::String,
       param1 = param4 .+ 100.0
       while maximum(abs.(param1 .- param4)) > 1e-5
         param1 = param4
-        fit = curve_fit((tt0,param4) -> ttv_wrapper(tt0,nplanet,ntrans,[param4[1:11];p4_cur;param4[12:end]],jmax,EMB),tt0,tt,weight,param4)
+        fit = curve_fit((tt0,param4) -> ttv_wrapper(tt0,nplanet,ntrans,[param4[1:11];p4_cur;param4[12:end]],jmax,true),tt0,tt,weight,param4)
         param4 = fit.param 
       end
-      ttmodel=ttv_wrapper(tt0,nplanet,ntrans,[param4[1:11];p4_cur;param4[12:end]],jmax,EMB)
+      ttmodel=ttv_wrapper(tt0,nplanet,ntrans,[param4[1:11];p4_cur;param4[12:end]],jmax,true)
       lprob_phase[i]= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
       if lprob_phase[i] > lprob_best
         lprob_best = lprob_phase[i]
@@ -198,12 +198,12 @@ function fit_planet4(filename::String,
   end
   println("Finished 4-planet fit w/ fixed period: ",pbest)
 
-  fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,EMB),tt0,tt,weight,pbest)
+  fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,true),tt0,tt,weight,pbest)
   pbest_global = fit.param
-  ttmodel = ttv_wrapper(tt0,nplanet,ntrans,pbest_global,jmax,EMB)
+  ttmodel = ttv_wrapper(tt0,nplanet,ntrans,pbest_global,jmax,true)
   lprob_best= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
   println("Finished global 4-planet fit.")
-  println("New p4 chi-square: ",chisquare(tt0,nplanet,ntrans,pbest_p3,tt,sigtt,jmax,EMB))
+  println("New p4 chi-square: ",chisquare(tt0,nplanet,ntrans,pbest_global,tt,sigtt,jmax,true))
   println("Maximum: ",lprob_best," Param: ",pbest_global)
   # Create files
   pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",

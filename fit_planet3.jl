@@ -159,7 +159,7 @@ println("Finished 3-planet fit w/ fixed period: ",pbest)
   ttmodel = ttv_wrapper(tt0,nplanet,ntrans,pbest_global,jmax,EMB)
   lprob_best= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
   println("Finished global 3-planet fit.")
-  println("New p3 chi-square: ",chisquare(tt0,nplanet,ntrans,pbest_p3,tt,sigtt,jmax,EMB))
+  println("New p3 chi-square: ",chisquare(tt0,nplanet,ntrans,pbest_global,tt,sigtt,jmax,EMB))
   println("Maximum: ",lprob_best," Param: ",pbest_global)
     # Create files
   pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
