@@ -14,7 +14,7 @@ sigma, nyear = parse(Float64,ARGS[2]),parse(Float64,ARGS[3])
 jd1 = 2.4332825e6
 np3,nphase,ndp = 200,36,72 #wide: 100,36,180 
 p3in,p3out,dpin,dpout = zeros(4)
-p4in,p4out,np4= 1.5*365.25,5*365.25,100
+p4in,p4out,np4= 1.5*365.25,5*365.25,200
 nwalkers,nsteps = 50,0
 # Change search grids to accomodate for wider distributions when time spans are shorter
 if nyear==40
@@ -68,7 +68,7 @@ if label=="ppp"
 end
 # Moon detection and characterization routine
 if label=="ppmp"
-	  sim_times(jd1,nyear,true,sigma,false)
+	  # sim_times(jd1,nyear,true,sigma,false)
 	  function grid_run(p3in,p3out,np3,nphase,dpin,dpout,ndp)
 		  datafile = string("INPUTS/tt_",sigma,"snoEMB",nyear,"yrs.txt")
 			@time fit_moon(datafile,jd1,nyear,p3in,p3out,np3,nphase,dpin,dpout,ndp,true,sigma,false)   
@@ -92,16 +92,16 @@ if label=="ppmp"
 end
 # Planet 4 detection and characterization routine
 if label=="pppp"
-	sim_times(jd1,nyear,true,sigma,true)
+	# sim_times(jd1,nyear,true,sigma,true)
 	function grid_run(p3in,p3out,np3,nphase,p4in,p4out,np4)
 		datafile = string("INPUTS/tt_",sigma,"sEMB",nyear,"yrs.txt")
-		@time fit_planet4(datafile,jd1,nyear,p3in,p3out,np3,nphase,p4in,p4out,np4,true,sigma,true)
+		@time fit_planet4(datafile,jd1,nyear,p3in,p3out,np3,nphase,p4in,p4out,np4,true,sigma,false)
 	end
 	function run_mcmc()
 		fitfile = string("FITS/p4_fit",sigma,"s",nyear,"yrs.jld2")
 		foutput = string("MCMC/p4_mcmc",sigma,"s",nyear,"yrs.jld2")
 		p = jldopen(String(fitfile),"r")
-		@time MCMC(foutput,p["pbest_global"],p["lprob_best"],nsteps,nwalkers,p["nplanet"],p["ntrans"],p["tt0"],p["tt"],p["sigtt"],true,true)		
+		@time MCMC(foutput,p["pbest_global"],p["lprob_best"],nsteps,nwalkers,p["nplanet"],p["ntrans"],p["tt0"],p["tt"],p["sigtt"],true,false)		
 	end
 	if runtype=="grid"
 		grid_run(p3in,p3out,np3,nphase,p4in,p4out,np4)
