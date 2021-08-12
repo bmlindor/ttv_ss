@@ -191,7 +191,7 @@ function fit_moon(filename::String,
   ttmodel = ttv_wrapper(tt0,nplanet,ntrans,pbest_global,jmax,false)
   lprob_best = (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
   println("Finished lunar fit.")
-  println("New lunar chi-square: ",chisquare(tt0,nplanet,ntrans,pbest_p3,tt,sigtt,jmax,false))
+  println("New lunar chi-square: ",chisquare(tt0,nplanet,ntrans,pbest_global,tt,sigtt,jmax,false))
   println("Maximum: ",lprob_best," Param: ",pbest_global)
   # Create files
   pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
