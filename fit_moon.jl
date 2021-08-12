@@ -98,7 +98,7 @@ function fit_moon(filename::String,
   # init_param = res.minimizer
   # fit2 = curve_fit(ttv_wrapper2,tt0,tt,weight,param; show_trace=true)
   println("Finished 2-planet fit: ",init_param)
-  println("New p2 chi-square: ",chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt,jmax,true))
+  println("New 2-planet chi-square: ",chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt,jmax,true))
 
   # Now,let's add the 3rd planet:
   ntrans = [nt1,nt2,2]
@@ -110,7 +110,7 @@ function fit_moon(filename::String,
   lprob_p3 = zeros(np3)
   param_p3 = zeros(nparam,np3)
   lprob_best = -1e100 
-  pbest = zeros(nparam)
+  p3best = zeros(nparam)
   # Shifting to simulated observation range to search over period grid
   offset = (jd1 + jd2)/2 
   for j=1:np3
@@ -137,25 +137,26 @@ function fit_moon(filename::String,
       lprob_phase[i]= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
       if lprob_phase[i] > lprob_best 
         lprob_best = lprob_phase[i]
-        pbest = [fit.param[1:10];10^fit.param[11];p3_cur;fit.param[12:14]]
+        p3best = [fit.param[1:10];10^fit.param[11];p3_cur;fit.param[12:14]]
       end
       if lprob_phase[i] > lprob_p3[j] 
         lprob_p3[j] = lprob_phase[i]
         param_p3[1:nparam,j] =  [fit.param[1:10];10^fit.param[11];p3_cur;fit.param[12:14]]
       end
     end
-    println("Period: ",p3[j]," log Prob: ",lprob_p3[j]," Param: ",vec(param_p3[1:nparam,j]))
+    # println("Period: ",p3[j]," log Prob: ",lprob_p3[j]," Param: ",vec(param_p3[1:nparam,j]))
   end
-  println("Finished 3-planet fit w/ fixed period: ",pbest)
+  println("Finished 3-planet fit w/ fixed period: ",p3best)
 
-  fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,true),tt0,tt,weight,pbest)
-  pbest_p3 = fit.param
-  ttmodel = ttv_wrapper(tt0,nplanet,ntrans,pbest_p3,jmax,true)
-  lprob_best= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
+  fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,true),tt0,tt,weight,p3best)
+  best_p3 = fit.param
+  ttmodel = ttv_wrapper(tt0,nplanet,ntrans,best_p3,jmax,true)
+  lprob_best_p3= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
   println("Finished global 3-planet fit.")
-  println("New p3 chi-square: ",chisquare(tt0,nplanet,ntrans,pbest_p3,tt,sigtt,jmax,true))
-  println("Maximum: ",lprob_best," Param: ",pbest_p3)
+  println("New 3-planet chi-square: ",chisquare(tt0,nplanet,ntrans,best_p3,tt,sigtt,jmax,true))
+  println("Maximum: ",lprob_best_p3," Param: ",best_p3)
 
+ 
   # Now,search for Moon:
   nparam = 18
   deltaphi_cur = 2.312
@@ -163,48 +164,100 @@ function fit_moon(filename::String,
   lprob_dp = zeros(ndp)
   param_dp = zeros(nparam,ndp)
   lprob_best = -1e100 
-  pbest_dp = zeros(nparam)
+  dpbest = zeros(nparam)
   for j=1:ndp
     lprob_dp[j] = -1e100 
     # lunar params: t_s ,t_c ,deltaphi 
     param_tmp = [0.01,0.01,deltaphi[j]] 
-    param4 = [pbest_p3;param_tmp]
+    param5 = [best_p3;param_tmp]
     deltaphi_cur = deltaphi[j]
-    param1 = param4 .+ 100.0
-    while maximum(abs.(param1 .- param4)) > 1e-5
-      param1 = param4
-      fit = curve_fit((tt0,param4) -> ttv_wrapper(tt0,nplanet,ntrans,param4,jmax,false),tt0,tt,weight,param4)
-      param4 = fit.param 
+    param1 = param5 .+ 100.0
+    while maximum(abs.(param1 .- param5)) > 1e-5
+      param1 = param5
+      fit = curve_fit((tt0,param5) -> ttv_wrapper(tt0,nplanet,ntrans,param5,jmax,false),tt0,tt,weight,param5)
+      param5 = fit.param 
     end
     ttmodel = ttv_wrapper(tt0,nplanet,ntrans,[fit.param[1:17];deltaphi_cur],jmax,false)
     lprob_dp[j]= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
     if lprob_dp[j] > lprob_best 
       lprob_best = lprob_dp[j]
-      pbest_dp = [fit.param[1:17];deltaphi_cur]
+      dpbest = [fit.param[1:17];deltaphi_cur]
     end
     param_dp[1:nparam,j] = [fit.param[1:17];deltaphi_cur]
-    println("deltaphi: ",deltaphi[j]," log Prob: ",lprob_dp[j]," Param: ",vec(param_dp[1:nparam,j]))
+    # println("deltaphi: ",deltaphi[j]," log Prob: ",lprob_dp[j]," Param: ",vec(param_dp[1:nparam,j]))
   end
 
-  fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,false),tt0,tt,weight,pbest_dp)
-  pbest_global = fit.param
-  ttmodel = ttv_wrapper(tt0,nplanet,ntrans,pbest_global,jmax,false)
-  lprob_best = (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
-  println("Finished lunar fit.")
-  println("New lunar chi-square: ",chisquare(tt0,nplanet,ntrans,pbest_global,tt,sigtt,jmax,false))
-  println("Maximum: ",lprob_best," Param: ",pbest_global)
+  fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,false),tt0,tt,weight,dpbest)
+  best_dp = fit.param
+  ttmodel = ttv_wrapper(tt0,nplanet,ntrans,best_dp,jmax,false)
+  lprob_best_dp = (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
+  println("Finished lunar search.")
+  println("3-planet lunar chi-square: ",chisquare(tt0,nplanet,ntrans,best_dp,tt,sigtt,jmax,false))
+  println("Maximum: ",lprob_best_dp," Param: ",best_dp)
+
+ # Now,add a 4th planet:
+  ntrans = [nt1,nt2,2,2] #requires at least 2 transits for each planet (even if it doesnt transit)
+  nplanet = 4
+  nparam = 20
+  # Grid of periods to search over:
+  p4 = 10 .^ range(log10(p4in),stop=log10(p4out),length=np4)
+  p4_cur =  1.88*365.25 
+  lprob_p4 = zeros(np4)
+  param_p4 = zeros(nparam,np4)
+  lprob_best = -1e100 
+  p4best = zeros(nparam)
+  for j=1:np4
+    phase = p4[j]*range(0,stop=1,length=nphase) .+ offset 
+    lprob_phase = zeros(nphase) 
+    lprob_p4[j] = -1e100
+    for i=1:nphase
+     # p4 param_names: mass ratio,phase,ecosw,esinw; uses same nphase as p3
+      param_tmp = [1e-7,phase[i],0.01,0.01]
+      # Mars' period is shorter than Jupiter's, so need to keep sorted for now
+      param4 = [best_p3[1:10];param_tmp;best_p3[11:15]]   
+      p4_cur = p4[j]
+      param1 = param4 .+ 100.0
+      while maximum(abs.(param1 .- param4)) > 1e-5
+        param1 = param4
+        fit = curve_fit((tt0,param4) -> ttv_wrapper(tt0,nplanet,ntrans,[param4[1:11];p4_cur;param4[12:end]],jmax,true),tt0,tt,weight,param4)
+        param4 = fit.param 
+      end
+      ttmodel=ttv_wrapper(tt0,nplanet,ntrans,[param4[1:11];p4_cur;param4[12:end]],jmax,true)
+      lprob_phase[i]= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
+      if lprob_phase[i] > lprob_best
+        lprob_best = lprob_phase[i]
+        p4best = [fit.param[1:11];p4_cur;fit.param[12:end]]
+      end
+      if lprob_phase[i] > lprob_p4[j] 
+        lprob_p4[j] = lprob_phase[i]
+        param_p4[1:nparam,j] =  [fit.param[1:11];p4_cur;fit.param[12:end]]
+      end
+    end
+    # println("Period: ",p4[j]," log Prob: ",lprob_p4[j]," Param: ",vec(param_p4[1:nparam,j]))
+  end
+  println("Finished 4-planet fit w/ fixed period: ",p4best)
+
+  fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,true),tt0,tt,weight,p4best)
+  best_p4 = fit.param
+  ttmodel = ttv_wrapper(tt0,nplanet,ntrans,best_p4,jmax,true)
+  lprob_best_p4= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
+  println("Finished global 4-planet fit.")
+  println("New 4-planet chi-square: ",chisquare(tt0,nplanet,ntrans,best_p4,tt,sigtt,jmax,true))
+  println("Maximum: ",lprob_best_p4," Param: ",best_p4)
+
   # Create files
   pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
             "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
             "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)",
+            "mu_4","P_4","t04","e4 cos(om4)","e4 sin(om4)",
             "tmax sin(phi0)","tmax cos(phi0)","deltaphi"]
-  results = string("OUTPUTS/moon_fit",sigma,"s",nyear,"yrs.txt")
+  results = string("OUTPUTS/p4_fit",sigma,"s",nyear,"yrs.txt")
   open(results,"w") do io
     for i=1:nparam
       println(io,pname[i],": ",pbest_global[i])
     end
   end
   fitfile = string("FITS/moon_fit",sigma,"s",nyear,"yrs.jld2")
-  @save fitfile pbest_p3 pbest_dp lprob_p3 lprob_dp lprob_best pbest_global ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase dpin dpout ndp 
+  @save fitfile best_p3 lprob_best_p3 best_dp lprob_best_dp best_p4 lprob_best_p4 ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase dpin dpout ndp p4in p4out np4
   return lprob_best,pbest_global
 end
