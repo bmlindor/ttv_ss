@@ -4,7 +4,7 @@ end
 using Profile
 include("sim_times.jl")
 include("fit_planet3.jl")
-include("fit_planet4.jl")
+# include("fit_planet4.jl")
 include("fit_moon.jl")
 include("MCMC.jl")
 show_args(ARGS)
@@ -12,10 +12,10 @@ runtype, label = ARGS[1], ARGS[4]
 sigma, nyear = parse(Float64,ARGS[2]),parse(Float64,ARGS[3])
 # Initialize variables and fixed values
 jd1 = 2.4332825e6
-np3,nphase,ndp = 10,36,12 #wide: 100,36,180 
+np3,nphase,ndp = 200,36,180 #wide: 100,36,180 
 p3in,p3out,dpin,dpout = zeros(4)
 p4in,p4out,np4= 1.5*365.25,5*365.25,10
-nwalkers,nsteps = 50,0
+nwalkers,nsteps = 50,50000
 # Change search grids to accomodate for wider distributions when time spans are shorter
 if nyear==40
 	p3in,p3out=11.4*365.25,12.1*365.25
@@ -76,7 +76,7 @@ if label=="ppmp"
 		  fitfile = string("FITS/moon_fit",sigma,"s",nyear,"yrs.jld2")
 			foutput = string("MCMC/moon_mcmc",sigma,"s",nyear,"yrs.jld2")
 			m = jldopen(String(fitfile),"r")
-			@time MCMC(foutput,m["pbest_global"],m["lprob_best"],nsteps,nwalkers,m["nplanet"],m["ntrans"],m["tt0"],m["tt"],m["sigtt"],true,false)	  
+			@time MCMC(foutput,m["best_dp"],m["lprob_best_dp"],nsteps,nwalkers,3,m["ntrans"][1:3],m["tt0"],m["tt"],m["sigtt"],true,false)	  
 	  end
   if runtype=="grid"
   	grid_run(p3in,p3out,np3,nphase,dpin,dpout,ndp)
@@ -91,24 +91,25 @@ if label=="ppmp"
 end
 # Planet 4 detection and characterization routine
 if label=="pppp"
-	# sim_times(jd1,nyear,true,sigma,true)
-	function grid_run(p3in,p3out,np3,nphase,p4in,p4out,np4)
+	function grid_run(p4in,p4out,np4)
 		datafile = string("INPUTS/tt_",sigma,"snoEMB",nyear,"yrs.txt")
-		@time fit_planet4(datafile,jd1,nyear,p3in,p3out,np3,nphase,p4in,p4out,np4,true,sigma,false)
+		@time fit_planet4(sigma,nyear,p4in,p4out,np4)
+		# fit_planet4(datafile,jd1,nyear,p3in,p3out,np3,nphase,p4in,p4out,np4,true,sigma,false)
 	end
-	function run_mcmc()
-		fitfile = string("FITS/p4_fit",sigma,"s",nyear,"yrs.jld2")
-		foutput = string("MCMC/p4_mcmc",sigma,"s",nyear,"yrs.jld2")
-		p = jldopen(String(fitfile),"r")
-		@time MCMC(foutput,p["pbest_global"],p["lprob_best"],nsteps,nwalkers,p["nplanet"],p["ntrans"],p["tt0"],p["tt"],p["sigtt"],true,false)		
-	end
+	# function run_mcmc()
+	# 	fitfile = string("FITS/p4_fit",sigma,"s",nyear,"yrs.jld2")
+	# 	foutput = string("MCMC/p4_mcmc",sigma,"s",nyear,"yrs.jld2")
+	# 	p = jldopen(String(fitfile),"r")
+	# 	@time MCMC(foutput,p["pbest_global"],p["lprob_best"],nsteps,nwalkers,p["nplanet"],p["ntrans"],p["tt0"],p["tt"],p["sigtt"],true,false)		
+	# end
 	if runtype=="grid"
-		grid_run(p3in,p3out,np3,nphase,p4in,p4out,np4)
+		grid_run(p4in,p4out,np4)
 	elseif runtype=="mcmc"
-		run_mcmc()
-	elseif runtype=="full"
-		grid_run(p3in,p3out,np3,nphase,p4in,p4out,np4)
-		run_mcmc()
+	# 	run_mcmc()
+	# elseif runtype=="full"
+	# 	grid_run(p3in,p3out,np3,nphase,p4in,p4out,np4)
+	# 	run_mcmc()
+	println("Stop!")
 	end	
 end
 

@@ -11,7 +11,7 @@ function fit_moon(filename::String,
   jd1::Float64,nyear::Float64,
   p3in::Float64,p3out::Float64,np3::Int,nphase::Int,
   dpin::Float64,dpout::Float64,ndp::Int, 
-  addnoise::Bool=false,sigma::Float64=0.0,EMB::Bool=false)
+  addnoise::Bool=false,sigma::Float64=0.0,p4::Bool=false)
   jd2 = nyear*365.25 + jd1
   data1 = readdlm(filename)
   nt1 = sum(data1[:,1] .== 1.0)
@@ -195,6 +195,37 @@ function fit_moon(filename::String,
   println("3-planet lunar chi-square: ",chisquare(tt0,nplanet,ntrans,best_dp,tt,sigtt,jmax,false))
   println("Maximum: ",lprob_best_dp," Param: ",best_dp)
 
+  # Create files
+  # pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
+  #           "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
+  #           "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)",
+  #           # "mu_4","P_4","t04","e4 cos(om4)","e4 sin(om4)",
+  #           "tmax sin(phi0)","tmax cos(phi0)","deltaphi"]
+  # results = string("OUTPUTS/moon_fit",sigma,"s",nyear,"yrs.txt")
+  # open(results,"w") do io
+  #   for i=1:nparam
+  #     println(io,pname[i],": ",best_dp[i])
+  #   end
+  # end
+  fitfile = string("FITS/moon_fit",sigma,"s",nyear,"yrs.jld2")
+  @save fitfile best_p3 lprob_best_p3 best_dp lprob_best_dp ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase dpin dpout ndp # p4in p4out np4 best_p4 lprob_best_p4 
+  return lprob_best_dp, best_dp 
+end
+
+function fit_planet4(sigma,nyear,p4in,p4out,np4)
+  fitfile = string("FITS/moon_fit",sigma,"s",nyear,"yrs.jld2")
+  m = jldopen(String(fitfile),"r")
+  tt0,tt,ttmodel,sigtt=m["tt0"],m["tt"],m["ttmodel"],m["sigtt"]
+  nt1,nt2 = m["ntrans"][1],m["ntrans"][2]
+  jd1 = 2.4332825e6
+  jd2 = nyear*365.25 + jd1
+  offset = (jd1 + jd2)/2 
+  weight = ones(nt1+nt2)./ sigtt.^2 #assigns each data point stat weight d.t. noise = 1/σ^2
+  nphase=m["nphase"]
+  jmax=5
+  best_p3,lprob_best_p3=m["best_p3"],m["lprob_best_p3"]
+  Nobs = sum([nt1,nt2])
+  # best_p3 lprob_best_p3 best_dp lprob_best_dp ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase dpin dpout ndp
  # Now,add a 4th planet:
   ntrans = [nt1,nt2,2,2] #requires at least 2 transits for each planet (even if it doesnt transit)
   nplanet = 4
@@ -233,7 +264,7 @@ function fit_moon(filename::String,
         param_p4[1:nparam,j] =  [fit.param[1:11];p4_cur;fit.param[12:end]]
       end
     end
-    # println("Period: ",p4[j]," log Prob: ",lprob_p4[j]," Param: ",vec(param_p4[1:nparam,j]))
+    println("Period: ",p4[j]," log Prob: ",lprob_p4[j]," Param: ",vec(param_p4[1:nparam,j]))
   end
   println("Finished 4-planet fit w/ fixed period: ",p4best)
 
@@ -244,20 +275,8 @@ function fit_moon(filename::String,
   println("Finished global 4-planet fit.")
   println("New 4-planet chi-square: ",chisquare(tt0,nplanet,ntrans,best_p4,tt,sigtt,jmax,true))
   println("Maximum: ",lprob_best_p4," Param: ",best_p4)
-
-  # Create files
-  pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
-            "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
-            "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)",
-            "mu_4","P_4","t04","e4 cos(om4)","e4 sin(om4)",
-            "tmax sin(phi0)","tmax cos(phi0)","deltaphi"]
-  results = string("OUTPUTS/p4_fit",sigma,"s",nyear,"yrs.txt")
-  open(results,"w") do io
-    for i=1:nparam
-      println(io,pname[i],": ",pbest_global[i])
-    end
-  end
-  fitfile = string("FITS/moon_fit",sigma,"s",nyear,"yrs.jld2")
-  @save fitfile best_p3 lprob_best_p3 best_dp lprob_best_dp best_p4 lprob_best_p4 ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase dpin dpout ndp p4in p4out np4
-  return lprob_best,pbest_global
+  
+  fitfile = string("FITS/p4_fit",sigma,"s",nyear,"yrs.jld2")
+  @save fitfile best_p3 lprob_best_p3 best_p4 lprob_best_p4 ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase p4in p4out np4
+  return lprob_best_p4,best_p4
 end
