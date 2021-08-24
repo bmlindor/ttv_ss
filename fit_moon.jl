@@ -225,7 +225,6 @@ function fit_planet4(sigma,nyear,p4in,p4out,np4)
   jmax=5
   best_p3,lprob_best_p3=m["best_p3"],m["lprob_best_p3"]
   Nobs = sum([nt1,nt2])
-  # best_p3 lprob_best_p3 best_dp lprob_best_dp ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase dpin dpout ndp
  # Now,add a 4th planet:
   ntrans = [nt1,nt2,2,2] #requires at least 2 transits for each planet (even if it doesnt transit)
   nplanet = 4

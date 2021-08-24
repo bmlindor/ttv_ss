@@ -12,7 +12,8 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,
   nsteps::Int64,nwalkers::Int64,nplanet::Int64,ntrans::Array{Int64,1},
   tt0::Array{Float64,1},tt::Array{Float64,1},sigtt::Array{Float64,1},
   use_sigsys::Bool,EMB::Bool) 
-
+  println("Parameters from fit: ",param)
+  println("Maximum log Prob from fit: ",lprob_best)
   nparam = length(param)
   jmax = 5
   errors = [1e-7,1e-5,1e-5,1e-2,1e-2,
@@ -21,19 +22,17 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,
   pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
           "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
           "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)"]
-  if EMB
+  if nplanet==3
     errors = errors
     pname = pname
   elseif nplanet==4
-    errors = [1e-7,1e-5,1e-5,1e-2,1e-2,
-              1e-7,1e-5,1e-5,1e-2,1e-2,
-              1e-7,1e-5,1e-5,1e-2,1e-2,
-              1e-6,1e-1,1e-1,1e-2,1e-2]
-    pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
-          "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
-          "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)",
-          "mu_4","P_4","t04","e4 cos(om4)","e4 sin(om4)"]
-  else
+    errors = [errors[1:10];1e-7;1e-5;1e-5;1e-2;1e-2;errors[11:end]]
+    pname = [pname[1:end];"mu_4";"P_4";"t04";"e4 cos(om4)";"e4 sin(om4)"]
+  elseif nplanet==2
+    errors=errors[1:10]
+    pname=pname[1:10]
+  end
+  if nparam>16
     moon_errors = [1e-4,1e-4,1e-5]
     moon_name = ["tmax sin(phi0)","tmax cos(phi0)","deltaphi"]
     append!(errors,moon_errors)
@@ -74,7 +73,7 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,
           lprior += -Inf
         end
     end
-    if !EMB 
+    if nparam>16
       # Plase priors on deltaphi and account for aliasing:
       dpmin = 0.0; dpmax = pi
       deltaphi = param[18]
