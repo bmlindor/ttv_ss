@@ -2,6 +2,7 @@
 #results/
 deprecated/
 NbodyGradient/
+#OUTPUTS/
 *.bsp
 */*.bsp
 *.jld2

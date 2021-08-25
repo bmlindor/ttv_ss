@@ -45,7 +45,11 @@ end
 	# datafile = string("INPUTS/tt_",sigma,"sEMB",nyear,"yrs.txt") and EMB==true
 	# @time fit_planet3(datafile,jd1,nyear,p3in,p3out,np3,nphase,true,sigma,true)
 
-# sim_times(jd1,nyear,true,sigma,false)
+function simfit()
+	sim_times(jd1,nyear,true,sigma,false)
+	datafile = string("INPUTS/tt_",sigma,"snoEMB",nyear,"yrs.txt")
+	@time fit_moon(datafile,jd1,nyear,p3in,p3out,np3,nphase,dpin,dpout,ndp,true,sigma,false)   
+end
 # Fit V + E transit times and perform 3-planet grid search
 function grid_run(p3in,p3out,np3,nphase,dpin,dpout,ndp)
   datafile = string("INPUTS/tt_",sigma,"snoEMB",nyear,"yrs.txt")
@@ -54,9 +58,9 @@ end
 fitfile = string("FITS/moon_fit",sigma,"s",nyear,"yrs.jld2")
 # Run 3-planet markov chain
 function p3_mcmc()
-foutput = string("MCMC/p3_mcmc",sigma,"s",nyear,"yrs.jld2")
-p = jldopen(String(fitfile),"r")
-@time MCMC(foutput,p["best_p3"],p["lprob_best_p3"],nsteps,nwalkers,3,p["ntrans"][1:3],p["tt0"],p["tt"],p["sigtt"],true,true)	
+	foutput = string("MCMC/p3_mcmc",sigma,"s",nyear,"yrs.jld2")
+	p = jldopen(String(fitfile),"r")
+	@time MCMC(foutput,p["best_p3"],p["lprob_best_p3"],nsteps,nwalkers,3,p["ntrans"][1:3],p["tt0"],p["tt"],p["sigtt"],true,true)	
 end 
 # Run lunar markov chain
 function moon_mcmc()
@@ -64,20 +68,34 @@ function moon_mcmc()
 	m = jldopen(String(fitfile),"r")
 	@time MCMC(foutput,m["best_dp"],m["lprob_best_dp"],nsteps,nwalkers,3,m["ntrans"][1:3],m["tt0"],m["tt"],m["sigtt"],true,false)	  
 end
-
-if runtype=="mcmc" && label=="ppmp"
+# Run 4-planet markov chain
+function p4_mcmc()
+	fitfile = string("FITS/p4_fit",sigma,"s",nyear,"yrs.jld2")
+	foutput = string("MCMC/p4_mcmc",sigma,"s",nyear,"yrs.jld2")
+	p = jldopen(String(fitfile),"r")
+	@time MCMC(foutput,p["best_p4"],p["lprob_best_p4"],nsteps,nwalkers,4,p["ntrans"][1:4],p["tt0"],p["tt"],p["sigtt"],true,true)
+end
+if runtype=="sim" && label=="ppmp"
+	# sim_times(jd1,nyear,true,sigma,false)
+	simfit()
+elseif runtype=="mcmc" && label=="ppmp"
 	moon_mcmc()
 elseif runtype=="mcmc" && label=="ppp"
 	p3_mcmc()
+elseif runtype=="mcmc" && label=="pppp"
+	p4_mcmc()
 elseif runtype=="grid" && label=="ppmp"
  	grid_run(p3in,p3out,np3,nphase,dpin,dpout,ndp)
-elseif runtype=="grid" && label=="pppp" # Planet 4 detection routine
+elseif runtype=="grid" && label=="pppp" 
 	@time fit_planet4(sigma,nyear,p4in,p4out,np4)
 elseif runtype=="full" && label=="ppmp" 
  	grid_run(p3in,p3out,np3,nphase,dpin,dpout,ndp)
  	moon_mcmc()
+elseif runtype=="full" && label=="pppp"
+	@time fit_planet4(sigma,nyear,p4in,p4out,np4)
+	p4_mcmc()
 else
-	println("No routine available with that runtype or label.")
+	println("No routine available with that runtype and/or label.")
   # elseif runtype=="wide"
 		# grid_run(1000.0,5000.0,100,36,0.0,2pi,180)
 end
@@ -85,7 +103,6 @@ end
 # function full_moonrun()
 # # label = ["mtry1","mtry2","mtry3","mtry4","mtry5","mtry6","mtry7"]
 # # sigma = [10.0, 15.0, 30.0, 45.0, 60.0, 120.0, 240.0]
-
 # for i=1:length(sigma)
 # 	@time sim = sim_times(jd1,jd2,jdsize,true,sigma[i],false)
 # 	file = string("INPUTS/tt_data",sigma[i],"snoEMB.txt")

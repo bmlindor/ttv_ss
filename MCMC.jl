@@ -11,7 +11,7 @@ using DelimitedFiles,JLD2,Statistics,MCMCDiagnostics
 function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,
   nsteps::Int64,nwalkers::Int64,nplanet::Int64,ntrans::Array{Int64,1},
   tt0::Array{Float64,1},tt::Array{Float64,1},sigtt::Array{Float64,1},
-  use_sigsys::Bool,EMB::Bool) 
+  use_sigsys::Bool,EM::Bool) 
   println("Parameters from fit: ",param)
   println("Maximum log Prob from fit: ",lprob_best)
   nparam = length(param)
@@ -114,12 +114,7 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,
       lprob_trial = calc_lprior(par_trial)
       # println("Calculated Log Prior: ",lprob_trial)
       if lprob_trial > -Inf
-        # model = ttv_wrapper3(tt0,par_trial)# 
-        # if EMB
-        #   model = ttv_wrapper(tt0,nplanet,ntrans,par_trial[1:nparam],jmax,true)
-        # else 
-          model = ttv_wrapper(tt0,nplanet,ntrans,par_trial[1:nparam],jmax,EMB)
-        # end
+        model = ttv_wrapper(tt0,nplanet,ntrans,par_trial[1:nparam],jmax,EM)
         # println(length(tt)," ",length(model))
         if use_sigsys
           # ll = (-0.5 * sum((tt-model).^2 ./(sigtt.^2 .+ sigsys.^2) .+ log.(sigtt.^2 .+ sigsys.^2)))
@@ -154,11 +149,7 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,
       # model_trial =ttv_wrapper3(tt0,par_trial)
       lprob_trial = calc_lprior(par_trial)  
       if lprob_trial > -Inf
-        # if EMB
-        #   model_trial = ttv_wrapper(tt0,nplanet,ntrans,par_trial[1:nparam],jmax,true)
-        # else 
-          model_trial = ttv_wrapper(tt0,nplanet,ntrans,par_trial[1:nparam],jmax,EMB)
-        # end
+          model_trial = ttv_wrapper(tt0,nplanet,ntrans,par_trial[1:nparam],jmax,EM)
         # model_trial = ttv_wrapper(tt0,nplanet,ntrans,par_trial[1:nparam],false)
         # ll = -.5 *sum((tt-model_trial).^2 ./(sigtt.^2 .+ par_trial[end]) .+ log.(sigtt.^2 .+ par_trial[end]))
         # ll =  log(sum((tt-model_trial).^2 ./sigtt.^2))
