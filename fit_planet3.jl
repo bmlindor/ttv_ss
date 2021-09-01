@@ -170,7 +170,6 @@ function fit_planet3(filename::String,
   #   for i=1:nparam
   #     println(io,pname[i],": ",pbest_global[i]) # writedlm(results,pbest_global)
   #   end
-  end
   fitfile = string("FITS/p3_fit",sigma,"s",nyear,"yrs.jld2")
   @save fitfile p3best lprob_p3 lprob_best_p3 best_p3 ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase
   return lprob_best_p3,best_p3

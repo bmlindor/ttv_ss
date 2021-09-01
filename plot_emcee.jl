@@ -1,4 +1,4 @@
-using PyPlot
+using PyPlot,Statistics,JLD2
 
 function plot_emcee(mcmc,pname,include_moon::Bool=false)
     #par_mcmc lprob_mcmc param nwalkers nsteps accept iburn indepsamples

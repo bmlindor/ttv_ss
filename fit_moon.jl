@@ -11,7 +11,7 @@ function fit_moon(filename::String,
   jd1::Float64,nyear::Float64,
   p3in::Float64,p3out::Float64,np3::Int,nphase::Int,
   dpin::Float64,dpout::Float64,ndp::Int, 
-  addnoise::Bool=false,sigma::Float64=0.0,p4::Bool=false)
+  addnoise::Bool=false,sigma::Float64=0.0,wide::Bool=false)
   jd2 = nyear*365.25 + jd1
   data1 = readdlm(filename)
   nt1 = sum(data1[:,1] .== 1.0)
@@ -144,7 +144,7 @@ function fit_moon(filename::String,
         param_p3[1:nparam,j] =  [fit.param[1:10];10^fit.param[11];p3_cur;fit.param[12:14]]
       end
     end
-    # println("Period: ",p3[j]," log Prob: ",lprob_p3[j]," Param: ",vec(param_p3[1:nparam,j]))
+    println("Period: ",p3[j]," log Prob: ",lprob_p3[j]," Param: ",vec(param_p3[1:nparam,j]))
   end
   println("Finished 3-planet fit w/ fixed period: ",p3best)
 
@@ -207,7 +207,11 @@ function fit_moon(filename::String,
   #     println(io,pname[i],": ",best_dp[i])
   #   end
   # end
-  fitfile = string("FITS/moon_fit",sigma,"s",nyear,"yrs.jld2")
+  if wide
+    fitfile = string("FITS/wide_fit",sigma,"s",nyear,"yrs.jld2")
+  else
+    fitfile = string("FITS/moon_fit",sigma,"s",nyear,"yrs.jld2")
+  end
   @save fitfile best_p3 lprob_best_p3 best_dp lprob_best_dp ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase dpin dpout ndp # p4in p4out np4 best_p4 lprob_best_p4 
   return lprob_best_dp, best_dp 
 end

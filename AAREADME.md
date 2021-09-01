@@ -33,40 +33,49 @@ NaifID:
 
 1). Simulate transit times from JPLEphemeris. Add noise option to data.
 
-sim_times has multiple methods with the following arguments
-sim_times(jd1::Float64, jd2::Float64, jdsize::Int64, 
-    addnoise::Bool=false, sigma::Float64=0.0, EMB::Bool=true, seed::Int=42)
+sim_times(jd1::Float64,nyear::Float64,
+  addnoise::Bool=false,sigma::Float64=0.0,EMB::Bool=true,seed::Int=42)
 
 2a). Carry out a linear fit to the transit times. 
 
 2b). Call ttv_nplanet.jl from wrapper then compute the chi-square 
 of the fit. Carry out an initial fit of the 2 inner planets
 
+ttv_nplanet(nplanet::Int64,jmax::Int64,ntrans::Vector{Int64},data::Vector{T}) where T<:Real
+ttv_wrapper(tt0,nplanet::Int64,ntrans::Vector{Int64},params::Vector{T},jmax::Integer,EM::Bool) 
+
 2c). Then add in the third planet. Initialize a grid of periods & 
 phases of the outer planet, compute the best-fit at each.
 Optimize the fit to the two sets of transit times by varying all of the
 other parameters. 
-
 Note: This assumes 2 transits for Jupiter because transits are required for TTVFaster
-
 Show that likelihood curve peaks at period of Jupiter.
 Note: the third planet can't be too close to the transiting planets.
 
 fit_planet3(filename::String,
     jd1::Float64,nyear::Float64,
     p3in::Float64,p3out::Float64,np3::Int,nphase::Int,
-    addnoise::Bool=false,sigma::Float64=0.0,EMB::Bool=true)
+    addnoise::Bool=false,sigma::Float64=0.0,EM::Bool=true)
 
-3).  Taking the minimum chi-square, run a markov chain with
-all 3 planets.  Assuming the host star has the same mass
-as the Sun, which 3 planets did you detect?  What are their
-masses and eccentricities (as well as uncertainties on these
+2d). Search for moon. Initialize a grid of moon phases & compute the best-fit at each.
+Optimize the fit to the two sets of transit times by varying all of the
+other parameters. 
+fit_moon(filename::String,
+  jd1::Float64,nyear::Float64,
+  p3in::Float64,p3out::Float64,np3::Int,nphase::Int,
+  dpin::Float64,dpout::Float64,ndp::Int, 
+  addnoise::Bool=false,sigma::Float64=0.0,wide::Bool=false)
+
+3).  Taking the minimum chi-square, or the maximum log-Probability,
+run a markov chain with all 3 planets.  
+-Assuming the host star has the same mass as the Sun, which 3 planets did you detect?  
+-What are their masses and eccentricities (as well as uncertainties on these
 quantities)?
 
  MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,
     nsteps::Int64,nwalkers::Int64,nplanet::Int64,ntrans::Array{Int64,1},
     tt0::Array{Float64,1},tt::Array{Float64,1},sigtt::Array{Float64,1},
-    use_sigsys::Bool,EMB::Bool) 
+    use_sigsys::Bool,EM::Bool) 
 
 4). Experiment with different runs to find which best show routine use.
     Run routine for range of sigmas and nyears.
@@ -77,8 +86,8 @@ np3 = [fine=200, medium=100, coarse=10] <!-- xfine=1000 -->
 nphase = [fine=36, medium=10, coarse=2] <!-- xfine=72 -->
 ndp = [fine=72, medium=36, coarse=10] <!-- xfine=108 -->
 steps = [short=(1000), med=(10000), long=(50000)]
-sigmas = [15, 30, 45, 60, 75, 90, 105, 120, 135] <!-- which of these are realistic? -->
-years = [4,6,8,10,12,14,16,18,20,24,28,32,36,40] <!-- how often to check results? -->
+sigmas = [10, 30, 45, 60, 75, 90, 105, 120, 135] <!-- which of these are realistic? -->
+years = [10, 12, 15, 18, 20, 23, 25, 28, 30, 40] <!-- how often to check results? -->
 label = [ppp, ppmp, pppp, etc.]
 runtype = [sim, grid, mcmc, wide]
 
@@ -102,14 +111,11 @@ their masses, as well as existence of Jupiter first then Moon
 4). Once t_maxsinphi and t_maxcosphi are approx 0, no constrain on deltaphi
     Correlation betweem deltaphi and t_maxsinphi --> posterior broader than likelihood
 
-Q). Degenaracy b/w Jupiter and Moon?
-    tail on Jupiter period with moon
-    if you don't have enough time spans
-Q). P-M_p degeneracy
-    tail on Jupiter distributions
-    assymetry for ecosw and esinw
-Q). Wrong signs for evectors?
-    not first time this has been found
+Q). Degenaracy b/w Jupiter and Moon? <--tail on Jupiter period with moon
+        if you don't have enough time spans
+Q). P-M_p degeneracy? <--tail on Jupiter distributions
+        assymetry for ecosw and esinw
+Q). Wrong signs for evectors? <-- not first time this has been found
 
 
 ##########################	Writing Tasks	##########################
@@ -141,17 +147,15 @@ Q). Wrong signs for evectors?
     (eccentricity of Earth's orbit). 
 7). See which scenario best fits simulated data [ ]
 7a). Create tables for parameters. [  ]
-8). Add in 4th planet. [  ]
+8). Add in 4th planet. Fit for best params [ x ]
 8a). Rule out four planet fit instead of moon
-10). Condense results to 1 equation fit (how much of X to get Y uncertainty). [  ]
+
+10). Condense results to 1 equation fit (ex. how much of X to get Y uncertainty). [  ]
 <!-- 
 3). Q: What really limits timing precision of Earth & Venus
 about the Sun? (related to Tyler's work)
 4). The masses inferred with sufficient data are good, although
-still a bit more discrepant than I would like:  I need to
-implement an N-body fit. 
--->
-<!-- 
+still a bit more discrepant than I would like. need to implement an N-body fit?
 ##########################	Optional Tasks	##########################
 3). Figure out what the actual expected timing precision
 would be (limited by stellar noise -- related to Tyler's work). 
