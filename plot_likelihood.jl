@@ -95,26 +95,33 @@ end
 function plot_likelihood(sigma,nyear,nbins,include_moon::Bool)
 	fitfile = string("FITS/moon_fit",sigma,"s",nyear,"yrs.jld2")
 	f = jldopen(String(fitfile),"r")
-	
 	mcfile = string("MCMC/p3_mcmc",sigma,"s",nyear,"yrs.jld2")
 	m = jldopen(String(mcfile),"r")
-	xgrid = (10 .^ range(log10(f["p3in"]),stop=log10(f["p3out"]),length=f["np3"])) /365.25
-	xprob = exp.((f["lprob_best_p3"] .-maximum(f["lprob_best_p3"])))
+	wide = jldopen("FITS/wide_fit30.0s30.0yrs.jld2","r")
+	grid_wide = (10 .^ range(log10(wide["p3in"]),stop=log10(wide["p3out"]),length=wide["np3"])) ./365.25
+	lprob_wide = exp.((wide["lprob_p3"] .-maximum(wide["lprob_p3"])))
+	pbest_global_wide = wide["best_p3"]
+
+	xgrid = (10 .^ range(log10(f["p3in"]),stop=log10(f["p3out"]),length=f["np3"])) ./365.25
+	xprob = exp.((f["lprob_p3"] .-maximum(f["lprob_p3"])))
+
+	grid = [grid_wide[1:end-22];avg(grid_wide[end-21],xgrid[1]);xgrid]#;grid_wide[end-1:end]]
+	prob = [lprob_wide[1:end-22];avg(lprob_wide[end-21],xprob[1]);xprob]#;lprob_wide[end-1:end]]
+	println("Simulated with σ= ",sigma," second noise, for ",nyear," observation years.")
 	truex = 11.862615
 	ncol = 12
 	bfvalue = f["best_p3"][ncol] /365.25	
-	param = vec(m["par_mcmc"][:,m["iburn"]:end,ncol])/365.25
+	param = vec(m["par_mcmc"][:,m["iburn"]:end,ncol])./365.25
+	xbin,xhist,xbin_square,hist_square=histogram(param,nbins)
 	label="Period Search Grid [years]"
 	lim = f["p3in"]/365.25,f["p3out"]/365.25
 	color="firebrick"
 	fig = plt.figure()
   ax1 = gca()
-	# ax1.axvline(pbest_global_wide[12] /365.25,linestyle="--",color="black",label="Best Fit Value")
+	# ax1.axvline(pbest_global_wide[ncol] /365.25,linestyle="--",color="black",label="Best Fit Value")
 	ax1.axvline(truex,linestyle="--",color="black",label=string(truex))
-	# grid = [grid_wide[1:end-22];avg(grid_wide[end-21],xgrid[1]);xgrid]#;grid_wide[end-1:end]]
-	# prob = [lprob_wide[1:end-22];avg(lprob_wide[end-21],xprob[1]);xprob]#;lprob_wide[end-1:end]]
-	ax1.plot(xgrid,xprob,color=color) 
-	# ax1.plot(xgrid,xprob,color=color)
+	ax1.plot(grid,prob,color="red",".") 
+	ax1.plot(xgrid,xprob,color="blue")
 	ax1.legend()
 	xlabel(label)
 	ylabel("Probability")
@@ -163,7 +170,6 @@ function plot_likelihood(sigma,nyear,nbins,include_moon::Bool)
 	  		right="true",labelright="true")
 	end
 
-	xbin,xhist,xbin_square,hist_square=histogram(param,nbins)
-	println("Simulated with σ= ",sigma," second noise, for ",nyear," observation years.")
+
 
 end

@@ -199,21 +199,22 @@ function fit_moon(filename::String,
   # pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
   #           "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
   #           "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)",
-  #           # "mu_4","P_4","t04","e4 cos(om4)","e4 sin(om4)",
   #           "tmax sin(phi0)","tmax cos(phi0)","deltaphi"]
   # results = string("OUTPUTS/moon_fit",sigma,"s",nyear,"yrs.txt")
   # open(results,"w") do io
-  #   for i=1:nparam
-  #     println(io,pname[i],": ",best_dp[i])
-  #   end
+  # for i=1:15
+  #   println(io,pname[i],": ",best_p3[i])
+  # end
+  # for i=1:18
+  #   println(io,pname[i],": ",best_dp[i])
   # end
   if wide
     fitfile = string("FITS/wide_fit",sigma,"s",nyear,"yrs.jld2")
   else
     fitfile = string("FITS/moon_fit",sigma,"s",nyear,"yrs.jld2")
   end
-  @save fitfile best_p3 lprob_best_p3 best_dp lprob_best_dp ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase dpin dpout ndp # p4in p4out np4 best_p4 lprob_best_p4 
-  return lprob_best_dp, best_dp 
+  @save fitfile p3 lprob_p3 best_p3 lprob_best_p3 deltaphi lprob_dp best_dp lprob_best_dp ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase dpin dpout ndp 
+  return best_p3,best_dp
 end
 # If the 3-planet fit already exists, can just do 4-planet search
 function fit_planet4(sigma,nyear,p4in,p4out,np4)
@@ -227,6 +228,7 @@ function fit_planet4(sigma,nyear,p4in,p4out,np4)
   weight = ones(nt1+nt2)./ sigtt.^2 #assigns each data point stat weight d.t. noise = 1/σ^2
   nphase=m["nphase"]
   jmax=5
+  p3,lprob_p3=m["p3"],m["lprob_p3"]
   best_p3,lprob_best_p3=m["best_p3"],m["lprob_best_p3"]
   Nobs = sum([nt1,nt2])
 
@@ -281,8 +283,8 @@ function fit_planet4(sigma,nyear,p4in,p4out,np4)
   println("Maximum: ",lprob_best_p4," Param: ",best_p4)
   
   fitfile = string("FITS/p4_fit",sigma,"s",nyear,"yrs.jld2")
-  @save fitfile best_p3 lprob_best_p3 best_p4 lprob_best_p4 ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase p4in p4out np4
-  return lprob_best_p4,best_p4
+  @save fitfile p3 lprob_p3 best_p3 lprob_best_p3 p4 lprob_p4 best_p4 lprob_best_p4 ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase p4in p4out np4
+  return best_p3,best_p4 
 end
 # If the 3-planet fit already exists, can just do moon search
 function fit_moon(sigma,nyear,dpin,dpout,ndp)
@@ -337,6 +339,6 @@ function fit_moon(sigma,nyear,dpin,dpout,ndp)
   println("3-planet lunar chi-square: ",chisquare(tt0,nplanet,ntrans,best_dp,tt,sigtt,jmax,false))
   println("Maximum: ",lprob_best_dp," Param: ",best_dp)
   fitfile = string("FITS/moon_fit",sigma,"s",nyear,"yrs.jld2")
-  @save fitfile best_p3 lprob_best_p3 best_dp lprob_best_dp ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase dpin dpout ndp # p4in p4out np4 best_p4 lprob_best_p4 
-  return lprob_best_dp, best_dp 
+  @save fitfile p3 lprob_p3 best_p3 lprob_best_p3 deltaphi lprob_dp best_dp lprob_best_dp ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase dpin dpout ndp 
+  return best_p3,best_dp
 end

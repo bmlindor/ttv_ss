@@ -86,7 +86,7 @@ elseif runtype=="full" && label=="pppp"
 	@time fit_planet4(sigma,nyear,p4in,p4out,np4)
 	p4_mcmc()
 elseif runtype=="wide" && label=="ppmp"
-	grid_run(3*365.25,15*365.25,100,36,0.0,2pi,180,true)
+	grid_run(3*365.25,15*365.25,200,36,0.0,2pi,180,true)
 else
 	println("No routine available with that runtype and/or label.")
 end
