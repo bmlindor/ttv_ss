@@ -1,0 +1,255 @@
+
+signal (15): Terminated: 15
+in expression starting at /Users/bethleelindor/work/washington/ttv_project/ttv_ss/full_run.jl:70
+obviously_disjoint at /Users/bethleelindor/julia/src/subtype.c:316
+jl_type_intersection_env_s at /Users/bethleelindor/julia/src/subtype.c:3149
+jl_typemap_intersection_node_visitor at /Users/bethleelindor/julia/src/typemap.c:484
+jl_typemap_intersection_visitor at /Users/bethleelindor/julia/src/typemap.c:572
+ml_matches at /Users/bethleelindor/julia/src/gf.c:2706
+jl_matching_methods at /Users/bethleelindor/julia/src/gf.c:1803
+abstract_call_gf_by_type at ./reflection.jl:838
+abstract_call at ./compiler/abstractinterpretation.jl:850
+abstract_call at ./compiler/abstractinterpretation.jl:636
+abstract_eval_call at ./compiler/abstractinterpretation.jl:879
+abstract_eval at ./compiler/abstractinterpretation.jl:949
+typeinf_local at ./compiler/abstractinterpretation.jl:1208
+typeinf_nocycle at ./compiler/abstractinterpretation.jl:1264
+typeinf at ./compiler/typeinfer.jl:12
+typeinf_edge at ./compiler/typeinfer.jl:488
+abstract_call_method at ./compiler/abstractinterpretation.jl:396
+abstract_call_gf_by_type at ./compiler/abstractinterpretation.jl:93
+abstract_call at ./compiler/abstractinterpretation.jl:850
+abstract_call at ./compiler/abstractinterpretation.jl:636
+abstract_eval_call at ./compiler/abstractinterpretation.jl:879
+abstract_eval at ./compiler/abstractinterpretation.jl:949
+typeinf_local at ./compiler/abstractinterpretation.jl:1208
+typeinf_nocycle at ./compiler/abstractinterpretation.jl:1264
+typeinf at ./compiler/typeinfer.jl:12
+typeinf_edge at ./compiler/typeinfer.jl:488
+abstract_call_method at ./compiler/abstractinterpretation.jl:396
+abstract_call_gf_by_type at ./compiler/abstractinterpretation.jl:93
+abstract_call at ./compiler/abstractinterpretation.jl:850
+abstract_call at ./compiler/abstractinterpretation.jl:636
+abstract_eval_call at ./compiler/abstractinterpretation.jl:879
+abstract_eval at ./compiler/abstractinterpretation.jl:949
+typeinf_local at ./compiler/abstractinterpretation.jl:1208
+typeinf_nocycle at ./compiler/abstractinterpretation.jl:1264
+typeinf at ./compiler/typeinfer.jl:12
+typeinf_edge at ./compiler/typeinfer.jl:488
+abstract_call_method at ./compiler/abstractinterpretation.jl:396
+abstract_call_gf_by_type at ./compiler/abstractinterpretation.jl:93
+abstract_call at ./compiler/abstractinterpretation.jl:850
+abstract_call at ./compiler/abstractinterpretation.jl:636
+abstract_eval_call at ./compiler/abstractinterpretation.jl:879
+abstract_eval at ./compiler/abstractinterpretation.jl:949
+typeinf_local at ./compiler/abstractinterpretation.jl:1208
+typeinf_nocycle at ./compiler/abstractinterpretation.jl:1264
+typeinf at ./compiler/typeinfer.jl:12
+typeinf_edge at ./compiler/typeinfer.jl:488
+abstract_call_method at ./compiler/abstractinterpretation.jl:396
+abstract_call_gf_by_type at ./compiler/abstractinterpretation.jl:93
+abstract_call at ./compiler/abstractinterpretation.jl:850
+abstract_call at ./compiler/abstractinterpretation.jl:636
+abstract_eval_call at ./compiler/abstractinterpretation.jl:879
+abstract_eval at ./compiler/abstractinterpretation.jl:949
+typeinf_local at ./compiler/abstractinterpretation.jl:1208
+typeinf_nocycle at ./compiler/abstractinterpretation.jl:1264
+typeinf at ./compiler/typeinfer.jl:12
+typeinf_edge at ./compiler/typeinfer.jl:488
+abstract_call_method at ./compiler/abstractinterpretation.jl:396
+abstract_call_gf_by_type at ./compiler/abstractinterpretation.jl:93
+abstract_call at ./compiler/abstractinterpretation.jl:850
+abstract_call at ./compiler/abstractinterpretation.jl:636
+abstract_eval_call at ./compiler/abstractinterpretation.jl:879
+abstract_eval at ./compiler/abstractinterpretation.jl:949
+typeinf_local at ./compiler/abstractinterpretation.jl:1208
+typeinf_nocycle at ./compiler/abstractinterpretation.jl:1264
+typeinf at ./compiler/typeinfer.jl:12
+typeinf_edge at ./compiler/typeinfer.jl:488
+abstract_call_method at ./compiler/abstractinterpretation.jl:396
+abstract_call_gf_by_type at ./compiler/abstractinterpretation.jl:93
+abstract_call at ./compiler/abstractinterpretation.jl:850
+abstract_call at ./compiler/abstractinterpretation.jl:636
+abstract_eval_call at ./compiler/abstractinterpretation.jl:879
+abstract_eval at ./compiler/abstractinterpretation.jl:949
+typeinf_local at ./compiler/abstractinterpretation.jl:1208
+typeinf_nocycle at ./compiler/abstractinterpretation.jl:1264
+typeinf at ./compiler/typeinfer.jl:12
+typeinf_edge at ./compiler/typeinfer.jl:488
+abstract_call_method at ./compiler/abstractinterpretation.jl:396
+abstract_call_gf_by_type at ./compiler/abstractinterpretation.jl:93
+abstract_call at ./compiler/abstractinterpretation.jl:850
+abstract_call at ./compiler/abstractinterpretation.jl:636
+abstract_eval_call at ./compiler/abstractinterpretation.jl:879
+abstract_eval at ./compiler/abstractinterpretation.jl:949
+typeinf_local at ./compiler/abstractinterpretation.jl:1208
+typeinf_nocycle at ./compiler/abstractinterpretation.jl:1264
+typeinf at ./compiler/typeinfer.jl:12
+typeinf_edge at ./compiler/typeinfer.jl:488
+abstract_call_method at ./compiler/abstractinterpretation.jl:396
+abstract_call_gf_by_type at ./compiler/abstractinterpretation.jl:93
+abstract_call at ./compiler/abstractinterpretation.jl:850
+abstract_call at ./compiler/abstractinterpretation.jl:636
+abstract_eval_call at ./compiler/abstractinterpretation.jl:879
+abstract_eval at ./compiler/abstractinterpretation.jl:949
+typeinf_local at ./compiler/abstractinterpretation.jl:1208
+typeinf_nocycle at ./compiler/abstractinterpretation.jl:1264
+typeinf at ./compiler/typeinfer.jl:12
+typeinf_edge at ./compiler/typeinfer.jl:488
+abstract_call_method at ./compiler/abstractinterpretation.jl:396
+abstract_call_gf_by_type at ./compiler/abstractinterpretation.jl:93
+abstract_call at ./compiler/abstractinterpretation.jl:850
+abstract_call at ./compiler/abstractinterpretation.jl:636
+abstract_eval_call at ./compiler/abstractinterpretation.jl:879
+abstract_eval at ./compiler/abstractinterpretation.jl:949
+typeinf_local at ./compiler/abstractinterpretation.jl:1208
+typeinf_nocycle at ./compiler/abstractinterpretation.jl:1264
+typeinf at ./compiler/typeinfer.jl:12
+typeinf_edge at ./compiler/typeinfer.jl:488
+abstract_call_method at ./compiler/abstractinterpretation.jl:396
+abstract_call_gf_by_type at ./compiler/abstractinterpretation.jl:93
+abstract_call at ./compiler/abstractinterpretation.jl:850
+abstract_call at ./compiler/abstractinterpretation.jl:636
+abstract_eval_call at ./compiler/abstractinterpretation.jl:879
+abstract_eval at ./compiler/abstractinterpretation.jl:949
+typeinf_local at ./compiler/abstractinterpretation.jl:1208
+typeinf_nocycle at ./compiler/abstractinterpretation.jl:1264
+typeinf at ./compiler/typeinfer.jl:12
+typeinf_edge at ./compiler/typeinfer.jl:488
+abstract_call_method at ./compiler/abstractinterpretation.jl:396
+abstract_call_gf_by_type at ./compiler/abstractinterpretation.jl:93
+abstract_call at ./compiler/abstractinterpretation.jl:850
+abstract_call at ./compiler/abstractinterpretation.jl:636
+abstract_eval_call at ./compiler/abstractinterpretation.jl:879
+abstract_eval at ./compiler/abstractinterpretation.jl:949
+typeinf_local at ./compiler/abstractinterpretation.jl:1208
+typeinf_nocycle at ./compiler/abstractinterpretation.jl:1264
+typeinf at ./compiler/typeinfer.jl:12
+typeinf_edge at ./compiler/typeinfer.jl:488
+abstract_call_method at ./compiler/abstractinterpretation.jl:396
+abstract_call_gf_by_type at ./compiler/abstractinterpretation.jl:93
+abstract_call at ./compiler/abstractinterpretation.jl:850
+abstract_call at ./compiler/abstractinterpretation.jl:636
+abstract_eval_call at ./compiler/abstractinterpretation.jl:879
+abstract_eval at ./compiler/abstractinterpretation.jl:949
+typeinf_local at ./compiler/abstractinterpretation.jl:1208
+typeinf_nocycle at ./compiler/abstractinterpretation.jl:1264
+typeinf at ./compiler/typeinfer.jl:12
+typeinf_edge at ./compiler/typeinfer.jl:488
+abstract_call_method at ./compiler/abstractinterpretation.jl:396
+abstract_call_gf_by_type at ./compiler/abstractinterpretation.jl:93
+abstract_call at ./compiler/abstractinterpretation.jl:850
+abstract_call at ./compiler/abstractinterpretation.jl:636
+abstract_eval_call at ./compiler/abstractinterpretation.jl:879
+abstract_eval at ./compiler/abstractinterpretation.jl:949
+typeinf_local at ./compiler/abstractinterpretation.jl:1208
+typeinf_nocycle at ./compiler/abstractinterpretation.jl:1264
+typeinf at ./compiler/typeinfer.jl:12
+typeinf_edge at ./compiler/typeinfer.jl:488
+abstract_call_method at ./compiler/abstractinterpretation.jl:396
+abstract_call_gf_by_type at ./compiler/abstractinterpretation.jl:93
+abstract_call at ./compiler/abstractinterpretation.jl:850
+abstract_call at ./compiler/abstractinterpretation.jl:636
+abstract_eval_call at ./compiler/abstractinterpretation.jl:879
+abstract_eval at ./compiler/abstractinterpretation.jl:949
+typeinf_local at ./compiler/abstractinterpretation.jl:1208
+typeinf_nocycle at ./compiler/abstractinterpretation.jl:1264
+typeinf at ./compiler/typeinfer.jl:12
+typeinf_edge at ./compiler/typeinfer.jl:488
+abstract_call_method at ./compiler/abstractinterpretation.jl:396
+abstract_call_gf_by_type at ./compiler/abstractinterpretation.jl:93
+abstract_call at ./compiler/abstractinterpretation.jl:850
+abstract_call at ./compiler/abstractinterpretation.jl:636
+abstract_eval_call at ./compiler/abstractinterpretation.jl:879
+abstract_eval at ./compiler/abstractinterpretation.jl:949
+typeinf_local at ./compiler/abstractinterpretation.jl:1194
+typeinf_nocycle at ./compiler/abstractinterpretation.jl:1264
+typeinf at ./compiler/typeinfer.jl:12
+typeinf_edge at ./compiler/typeinfer.jl:488
+abstract_call_method at ./compiler/abstractinterpretation.jl:396
+abstract_call_gf_by_type at ./compiler/abstractinterpretation.jl:93
+abstract_call at ./compiler/abstractinterpretation.jl:850
+abstract_call at ./compiler/abstractinterpretation.jl:636
+abstract_eval_call at ./compiler/abstractinterpretation.jl:879
+abstract_eval at ./compiler/abstractinterpretation.jl:949
+typeinf_local at ./compiler/abstractinterpretation.jl:1194
+typeinf_nocycle at ./compiler/abstractinterpretation.jl:1264
+typeinf at ./compiler/typeinfer.jl:12
+typeinf_edge at ./compiler/typeinfer.jl:488
+abstract_call_method at ./compiler/abstractinterpretation.jl:396
+abstract_call_gf_by_type at ./compiler/abstractinterpretation.jl:93
+abstract_call at ./compiler/abstractinterpretation.jl:850
+abstract_call at ./compiler/abstractinterpretation.jl:636
+abstract_eval_call at ./compiler/abstractinterpretation.jl:879
+abstract_eval at ./compiler/abstractinterpretation.jl:949
+typeinf_local at ./compiler/abstractinterpretation.jl:1194
+typeinf_nocycle at ./compiler/abstractinterpretation.jl:1264
+typeinf at ./compiler/typeinfer.jl:12
+typeinf_edge at ./compiler/typeinfer.jl:488
+abstract_call_method at ./compiler/abstractinterpretation.jl:396
+abstract_call_gf_by_type at ./compiler/abstractinterpretation.jl:93
+abstract_call at ./compiler/abstractinterpretation.jl:850
+abstract_call at ./compiler/abstractinterpretation.jl:636
+abstract_eval_call at ./compiler/abstractinterpretation.jl:879
+abstract_eval at ./compiler/abstractinterpretation.jl:949
+typeinf_local at ./compiler/abstractinterpretation.jl:1208
+typeinf_nocycle at ./compiler/abstractinterpretation.jl:1264
+typeinf at ./compiler/typeinfer.jl:12
+typeinf_edge at ./compiler/typeinfer.jl:488
+abstract_call_method at ./compiler/abstractinterpretation.jl:396
+abstract_call_gf_by_type at ./compiler/abstractinterpretation.jl:93
+abstract_call at ./compiler/abstractinterpretation.jl:850
+abstract_call at ./compiler/abstractinterpretation.jl:636
+abstract_eval_call at ./compiler/abstractinterpretation.jl:879
+abstract_eval at ./compiler/abstractinterpretation.jl:949
+typeinf_local at ./compiler/abstractinterpretation.jl:1208
+typeinf_nocycle at ./compiler/abstractinterpretation.jl:1264
+typeinf at ./compiler/typeinfer.jl:12
+typeinf_edge at ./compiler/typeinfer.jl:488
+abstract_call_method at ./compiler/abstractinterpretation.jl:396
+abstract_call_gf_by_type at ./compiler/abstractinterpretation.jl:93
+abstract_call at ./compiler/abstractinterpretation.jl:850
+abstract_call at ./compiler/abstractinterpretation.jl:636
+abstract_eval_call at ./compiler/abstractinterpretation.jl:879
+abstract_eval at ./compiler/abstractinterpretation.jl:949
+typeinf_local at ./compiler/abstractinterpretation.jl:1208
+typeinf_nocycle at ./compiler/abstractinterpretation.jl:1264
+typeinf at ./compiler/typeinfer.jl:12
+typeinf_ext at ./compiler/typeinfer.jl:574
+typeinf_ext at ./compiler/typeinfer.jl:605
+jfptr_typeinf_ext_1 at /Users/bethleelindor/julia/usr/lib/julia/sys.dylib (unknown line)
+_jl_invoke at /Users/bethleelindor/julia/src/gf.c:2135 [inlined]
+jl_apply_generic at /Users/bethleelindor/julia/src/gf.c:2305 [inlined]
+jl_apply at /Users/bethleelindor/julia/src/./julia.h:1631 [inlined]
+jl_type_infer at /Users/bethleelindor/julia/src/gf.c:209
+jl_compile_method_internal at /Users/bethleelindor/julia/src/gf.c:1879
+_jl_invoke at /Users/bethleelindor/julia/src/gf.c:2140 [inlined]
+jl_apply_generic at /Users/bethleelindor/julia/src/gf.c:2305
+jl_apply at /Users/bethleelindor/julia/src/./julia.h:1631 [inlined]
+do_call at /Users/bethleelindor/julia/src/interpreter.c:328
+eval_body at /Users/bethleelindor/julia/src/interpreter.c:641
+jl_interpret_toplevel_thunk_callback at /Users/bethleelindor/julia/src/interpreter.c:888
+unknown function (ip: 0xfffffffffffffffe)
+unknown function (ip: 0x116fa518f)
+unknown function (ip: 0x37)
+jl_interpret_toplevel_thunk at /Users/bethleelindor/julia/src/interpreter.c:897
+jl_toplevel_eval_flex at /Users/bethleelindor/julia/src/toplevel.c:814
+jl_parse_eval_all at /Users/bethleelindor/julia/src/ast.c:873
+jl_load at /Users/bethleelindor/julia/src/toplevel.c:878 [inlined]
+jl_load_ at /Users/bethleelindor/julia/src/toplevel.c:885
+include at ./boot.jl:328 [inlined]
+include_relative at ./loading.jl:1105
+include at ./Base.jl:31
+exec_options at ./client.jl:287
+_start at ./client.jl:460
+jfptr__start_2084 at /Users/bethleelindor/julia/usr/lib/julia/sys.dylib (unknown line)
+true_main at /Users/bethleelindor/julia/julia (unknown line)
+main at /Users/bethleelindor/julia/julia (unknown line)
+unknown function (ip: 0xffffffffffffffff)
+Allocations: 94468727 (Pool: 94450195; Big: 18532); GC: 90
+
+signal (15): Terminated: 15
+in expression starting at /Users/bethleelindor/work/washington/ttv_project/ttv_ss/full_run.jl:70
+jl_printf at /Users/bethleelindor/julia/usr/lib/libjulia.1.3.dylib (unknown line)
+unknown function (ip: 0xffffffffffffffff)
+Allocations: 94468727 (Pool: 94450195; Big: 18532); GC: 90

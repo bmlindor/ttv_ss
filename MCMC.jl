@@ -32,7 +32,7 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,
     errors=errors[1:10]
     pname=pname[1:10]
   end
-  if nparam>16
+  if nparam==18
     moon_errors = [1e-4,1e-4,1e-5]
     moon_name = ["tmax sin(phi0)","tmax cos(phi0)","deltaphi"]
     append!(errors,moon_errors)

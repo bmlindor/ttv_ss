@@ -5,24 +5,24 @@ avg(x,y) = (x + y)/2
 gaussian(x,mu,sig)=exp.(-((x .- mu).^2) ./ (2 * sig^.2))
 # Create a plot of likelihood/probability of values in grid
 function plot_likelihood(jldfit,mcmc,nbins,include_moon::Bool=false)
-	# tt,tt0,sigtt,ttmodel = jldfit["tt"],jldfit["tt0"],jldfit["sigtt"],jldfit["ttmodel"]
-	# # pbest_global = jldfit["pbest_global"]
-	# nplanet,ntrans = jldfit["nplanet"],jldfit["ntrans"]
-	# par_mcmc = mcmc["par_mcmc"]
-	# lprob_mcmc = mcmc["lprob_mcmc"]
-	# param = mcmc["param"]
-	# iburn = mcmc["iburn"]
-	# nwalkers = mcmc["nwalkers"]
-	# nsteps = mcmc["nsteps"]
+	tt,tt0,sigtt,ttmodel = jldfit["tt"],jldfit["tt0"],jldfit["sigtt"],jldfit["ttmodel"]
+	# pbest_global = jldfit["pbest_global"]
+	nplanet,ntrans = jldfit["nplanet"],jldfit["ntrans"]
+	par_mcmc = mcmc["par_mcmc"]
+	lprob_mcmc = mcmc["lprob_mcmc"]
+	param = mcmc["param"]
+	iburn = mcmc["iburn"]
+	nwalkers = mcmc["nwalkers"]
+	nsteps = mcmc["nsteps"]
 
-	# wide = jldopen("FITS/p3_widefit30.0s30.0yrs.jld2","r")
-	# grid_wide = (10 .^ range(log10(wide["p3in"]),stop=log10(wide["p3out"]),length=wide["np3"])) /365.25
-	# lprob_wide = exp.((wide["lprob_best_p3"] .-maximum(jldfit["lprob_best_p3"])))
-	# pbest_global_wide = wide["best_p3"]
+	wide = jldopen("FITS/p3_widefit30.0s30.0yrs.jld2","r")
+	grid_wide = (10 .^ range(log10(wide["p3in"]),stop=log10(wide["p3out"]),length=wide["np3"])) /365.25
+	lprob_wide = exp.((wide["lprob_best_p3"] .-maximum(jldfit["lprob_best_p3"])))
+	pbest_global_wide = wide["best_p3"]
 	xgrid = (10 .^ range(log10(jldfit["p3in"]),stop=log10(jldfit["p3out"]),length=jldfit["np3"])) /365.25
-	xprob = exp.((jldfit["lprob_best_p3"] .-maximum(jldfit["lprob_best_p3"])))
+	xprob = exp.((jldfit["lprob_p3"] .-maximum(jldfit["lprob_p3"])))
 	truex = 11.862615
-	bfvalue = jldfit["best_p3"][12] /365.25
+	bfvalue = jldfit["pbest_global"][12] /365.25
 	param = vec(mcmc["par_mcmc"][:,mcmc["iburn"]:end,12])/365.25
 	xbin,xhist,xbin_square,hist_square=histogram(param,nbins)
 	label="Period Search Grid [years]"
@@ -97,7 +97,7 @@ function plot_likelihood(sigma,nyear,nbins,include_moon::Bool)
 	f = jldopen(String(fitfile),"r")
 	mcfile = string("MCMC/p3_mcmc",sigma,"s",nyear,"yrs.jld2")
 	m = jldopen(String(mcfile),"r")
-	wide = jldopen("FITS/wide_fit30.0s30.0yrs.jld2","r")
+	# wide = jldopen("FITS/wide_fit30.0s30.0yrs.jld2","r")
 	grid_wide = (10 .^ range(log10(wide["p3in"]),stop=log10(wide["p3out"]),length=wide["np3"])) ./365.25
 	lprob_wide = exp.((wide["lprob_p3"] .-maximum(wide["lprob_p3"])))
 	pbest_global_wide = wide["best_p3"]
@@ -105,8 +105,8 @@ function plot_likelihood(sigma,nyear,nbins,include_moon::Bool)
 	xgrid = (10 .^ range(log10(f["p3in"]),stop=log10(f["p3out"]),length=f["np3"])) ./365.25
 	xprob = exp.((f["lprob_p3"] .-maximum(f["lprob_p3"])))
 
-	grid = [grid_wide[1:end-22];avg(grid_wide[end-21],xgrid[1]);xgrid]#;grid_wide[end-1:end]]
-	prob = [lprob_wide[1:end-22];avg(lprob_wide[end-21],xprob[1]);xprob]#;lprob_wide[end-1:end]]
+	# grid = [grid_wide[1:155];xgrid;grid_wide[198:end]]
+	# prob = [lprob_wide[1:155];xprob;lprob_wide[198:end]]
 	println("Simulated with σ= ",sigma," second noise, for ",nyear," observation years.")
 	truex = 11.862615
 	ncol = 12
@@ -120,8 +120,9 @@ function plot_likelihood(sigma,nyear,nbins,include_moon::Bool)
   ax1 = gca()
 	# ax1.axvline(pbest_global_wide[ncol] /365.25,linestyle="--",color="black",label="Best Fit Value")
 	ax1.axvline(truex,linestyle="--",color="black",label=string(truex))
-	ax1.plot(grid,prob,color="red",".") 
-	ax1.plot(xgrid,xprob,color="blue")
+	# ax1.plot(grid,prob,color="black") 
+	ax1.plot(xgrid,xprob,color=color)
+	xlim(minimum(grid_wide),14)
 	ax1.legend()
 	xlabel(label)
 	ylabel("Probability")

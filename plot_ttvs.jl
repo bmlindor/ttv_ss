@@ -4,7 +4,7 @@ include("decompose_ttvs.jl")
 # Create plot of observed TTVs vs model fit
 function plot_ttvs(jldfit,include_moon::Bool=false)
   tt,tt0,sigtt,ttmodel = jldfit["tt"],jldfit["tt0"],jldfit["sigtt"],jldfit["ttmodel"]
-  pbest_global = jldfit["pbest_global"]
+  pbest_global = jldfit["lprob_best_p3"]
   nplanet,ntrans = jldfit["nplanet"],jldfit["ntrans"]
   pair_ttvs = decompose_ttvs(nplanet,ntrans,pbest_global) .* (24 * 60)
   n1,n2 = ntrans[1],ntrans[2]
@@ -61,7 +61,7 @@ function plot_ttvs(jldfit,include_moon::Bool=false)
   if include_moon
     jldfit2=jldopen("FITS/moon_fit30.0s30.0yrs.jld2","r")
     tt,tt0,sigtt,ttmodel = jldfit2["tt"],jldfit2["tt0"],jldfit2["sigtt"],jldfit2["ttmodel"]
-    pbest_global = jldfit2["pbest_global"]
+    pbest_global = jldfit2["lprob_best_dp"]
     nplanet,ntrans = jldfit2["nplanet"],jldfit2["ntrans"]
     pair_ttvs = decompose_ttvs(nplanet,ntrans,pbest_global) .* (24 * 60)
     n1,n2 = ntrans[1],ntrans[2]
@@ -91,6 +91,6 @@ function plot_ttvs(jldfit,include_moon::Bool=false)
         ncol=3,mode="expand",borderaxespad=0.0)
   end
   tight_layout()
-  savefig("IMAGES/ttvs.eps")
+  # savefig("IMAGES/ttvs.eps")
   show()
 end

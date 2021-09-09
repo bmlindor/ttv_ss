@@ -36,18 +36,18 @@ elseif nyear<12
 	p3in,p3out=10*365.25,15*365.25 
 	nsteps=100000
 end
-# For planet 3 search routine with EMB simulations, use datafile=string("INPUTS/tt_",sigma,"sEMB",nyear,"yrs.txt") and EMB==true.
+# From EMB simulations, use datafile=string("INPUTS/tt_",sigma,"sEMB",nyear,"yrs.txt") and EMB==true.
 datafile=string("INPUTS/tt_",sigma,"snoEMB",nyear,"yrs.txt")
 p3file=string("FITS/moon_fit",sigma,"s",nyear,"yrs.jld2")
 p4file=string("FITS/p4_fit",sigma,"s",nyear,"yrs.jld2")
 # Simulate orbits, create datafile, and perform 3-planet grid search
 function simfit()
 	sim_times(jd1,nyear,true,sigma,false)
-	@time fit_moon(datafile,jd1,nyear,p3in,p3out,np3,nphase,dpin,dpout,ndp,true,sigma,false)   
+	@time fit_moon(datafile,jd1,sigma,nyear,p3in,p3out,np3,nphase,dpin,dpout,ndp,true,false)   
 end
 # Perform 3-planet grid search, given width flag
 function grid_run(p3in,p3out,np3,nphase,dpin,dpout,ndp,wide::Bool)
-	@time fit_moon(datafile,jd1,nyear,p3in,p3out,np3,nphase,dpin,dpout,ndp,true,sigma,wide)   
+	@time fit_moon(datafile,jd1,sigma,nyear,p3in,p3out,np3,nphase,dpin,dpout,ndp,true,wide)   
 end
 # Run 3-planet markov chain
 function p3_mcmc()
@@ -78,18 +78,20 @@ elseif runtype=="mcmc" && label=="pppp"
 elseif runtype=="grid" && label=="ppmp"
  	grid_run(p3in,p3out,np3,nphase,dpin,dpout,ndp,false)
 elseif runtype=="grid" && label=="pppp" 
-	@time fit_planet4(sigma,nyear,p4in,p4out,np4)
+	@time fit_planet4(jd1,sigma,nyear,p4in,p4out,np4,nphase)
 elseif runtype=="full" && label=="ppmp" 
  	grid_run(p3in,p3out,np3,nphase,dpin,dpout,ndp)
  	moon_mcmc()
 elseif runtype=="full" && label=="pppp"
-	@time fit_planet4(sigma,nyear,p4in,p4out,np4)
+	@time fit_planet4(jd1,sigma,nyear,p4in,p4out,np4,nphase)
 	p4_mcmc()
 elseif runtype=="wide" && label=="ppmp"
 	grid_run(3*365.25,15*365.25,200,36,0.0,2pi,180,true)
 else
 	println("No routine available with that runtype and/or label.")
 end
+	# @time fit_planet4(2.4332825e6,sigma,nyear,1.5*365.25,5*365.25,100)
+	# @time fit_moon(datafile,2.4332825e6,sigma,nyear,10.6*365.25,14.2*365.25,100,36,2.1,2.52,80,true,false)   
 
 # function full_moonrun()
 # # label=["mtry1","mtry2","mtry3","mtry4","mtry5","mtry6","mtry7"]
