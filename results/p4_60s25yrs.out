@@ -1,0 +1,7 @@
+
+signal (15): Terminated: 15
+in expression starting at /Users/bethleelindor/work/washington/ttv_project/ttv_ss/full_run.jl:70
+swtch_pri at /usr/lib/system/libsystem_kernel.dylib (unknown line)
+unknown function (ip: 0xffffffffffffffff)
+Allocations: 1635116249 (Pool: 1634532830; Big: 583419); GC: 4617
+args = ["full", "60.0", "25", "pppp"]

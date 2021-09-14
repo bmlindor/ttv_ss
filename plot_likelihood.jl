@@ -93,36 +93,33 @@ end
 end
 
 function plot_likelihood(sigma,nyear,nbins,include_moon::Bool)
-	fitfile = string("FITS/moon_fit",sigma,"s",nyear,"yrs.jld2")
-	f = jldopen(String(fitfile),"r")
-	mcfile = string("MCMC/p3_mcmc",sigma,"s",nyear,"yrs.jld2")
-	m = jldopen(String(mcfile),"r")
-	# wide = jldopen("FITS/wide_fit30.0s30.0yrs.jld2","r")
-	grid_wide = (10 .^ range(log10(wide["p3in"]),stop=log10(wide["p3out"]),length=wide["np3"])) ./365.25
+	wide = jldopen("FITS/wide2_fit30.0s30.0yrs.jld2","r")
+	grid_wide = wide["p3"]./365.25
 	lprob_wide = exp.((wide["lprob_p3"] .-maximum(wide["lprob_p3"])))
-	pbest_global_wide = wide["best_p3"]
-
-	xgrid = (10 .^ range(log10(f["p3in"]),stop=log10(f["p3out"]),length=f["np3"])) ./365.25
-	xprob = exp.((f["lprob_p3"] .-maximum(f["lprob_p3"])))
-
-	# grid = [grid_wide[1:155];xgrid;grid_wide[198:end]]
-	# prob = [lprob_wide[1:155];xprob;lprob_wide[198:end]]
+	EMBfile = string("FITS/fromEMB/p3_fit",sigma,"s",nyear,"yrs.jld2")
+	EMBfit = jldopen(String(EMBfile),"r")
+	mcfile = string("MCMC/fromEMB/p3_mcmc",sigma,"s",nyear,"yrs.jld2")
+	m = jldopen(String(mcfile),"r")
+	xgrid = EMBfit["p3"]./365.25
+	xprob = exp.((EMBfit["lprob_p3"] .-maximum(EMBfit["lprob_p3"])))
+	grid = [grid_wide[1:155];xgrid;grid_wide[198:end]]
+	prob = [lprob_wide[1:155];xprob;lprob_wide[198:end]]
 	println("Simulated with σ= ",sigma," second noise, for ",nyear," observation years.")
 	truex = 11.862615
 	ncol = 12
-	bfvalue = f["best_p3"][ncol] /365.25	
+	bfvalue = EMBfit["best_p3"][ncol] /365.25	
 	param = vec(m["par_mcmc"][:,m["iburn"]:end,ncol])./365.25
 	xbin,xhist,xbin_square,hist_square=histogram(param,nbins)
 	label="Period Search Grid [years]"
-	lim = f["p3in"]/365.25,f["p3out"]/365.25
+	lim = EMBfit["p3in"]/365.25,EMBfit["p3out"]/365.25
 	color="firebrick"
 	fig = plt.figure()
   ax1 = gca()
 	# ax1.axvline(pbest_global_wide[ncol] /365.25,linestyle="--",color="black",label="Best Fit Value")
 	ax1.axvline(truex,linestyle="--",color="black",label=string(truex))
-	# ax1.plot(grid,prob,color="black") 
-	ax1.plot(xgrid,xprob,color=color)
-	xlim(minimum(grid_wide),14)
+	ax1.plot(grid,prob,color=color) 
+	# ax1.plot(xgrid,xprob,color=color)
+	# xlim(minimum(grid_wide),14)
 	ax1.legend()
 	xlabel(label)
 	ylabel("Probability")
@@ -139,23 +136,27 @@ function plot_likelihood(sigma,nyear,nbins,include_moon::Bool)
 	if include_moon
 		mcfile = string("MCMC/moon_mcmc",sigma,"s",nyear,"yrs.jld2")
 		m = jldopen(String(mcfile),"r")
+		fitfile = string("FITS/moon_fit",sigma,"s",nyear,"yrs.jld2")
+		f = jldopen(String(fitfile),"r")
 		xgrid = range(f["dpin"],stop=f["dpout"],length=f["ndp"])
-		xprob = exp.((f["lprob_best_dp"] .-maximum(f["lprob_best_dp"])))
+		xprob = exp.((f["lprob_dp"] .-maximum(f["lprob_dp"])))
+		grid_wide = range(wide["dpin"],stop=wide["dpout"],length=wide["ndp"])
+		lprob_wide = exp.((wide["lprob_dp"] .-maximum(wide["lprob_dp"])))
+		grid = [grid_wide[1:155];xgrid;grid_wide[198:end]]
+		prob = [lprob_wide[1:155];xprob;lprob_wide[198:end]]
 		truex = 2.31221
 		ncol = 18
 		bfvalue = f["best_dp"][ncol]
 		param = vec(m["par_mcmc"][:,m["iburn"]:end,ncol])
+		xbin,xhist,xbin_square,hist_square=histogram(param,nbins)
 		label="Phase Offset Search Grid [radians]"
 		lim = f["dpin"],f["dpout"]
 		color="purple"
 		fig = plt.figure()
 	  ax3 = gca()
 		ax3.axvline(truex,linestyle="--",color="black",label=string(truex))
-		# grid = [grid_wide[1:end-50];avg(grid_wide[end-49],xgrid[1]);xgrid;grid_wide[end-30:end]]
-		# prob = [lprob_wide[1:end-50];avg(lprob_wide[end-49],xprob[1]);xprob;lprob_wide[end-30:end]]
-		ax3.plot(xgrid,xprob,color=color) 
-		# ax3.plot(grid_wide,lprob_wide,color=color) 
-		# ax3.plot(xbin_square,hist_square./maximum(hist_square),color=color,linewidth=2,alpha=0.5)
+		# ax3.plot(grid,prob,color=color) 
+		ax3.plot(grid_wide,lprob_wide,color=color) 
 		ax3.legend()
 		xlabel(label)
 		ylabel("Probability")
@@ -170,7 +171,4 @@ function plot_likelihood(sigma,nyear,nbins,include_moon::Bool)
 	  ax4.tick_params(which="both",direction="in",left="false",labelleft="false",
 	  		right="true",labelright="true")
 	end
-
-
-
 end

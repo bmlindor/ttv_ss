@@ -1,0 +1,57 @@
+
+signal (15): Terminated: 15
+in expression starting at /Users/bethleelindor/work/washington/ttv_project/ttv_ss/full_run.jl:70
+page_pfl_beg at /Users/bethleelindor/julia/src/./gc.h:391 [inlined]
+sweep_page at /Users/bethleelindor/julia/src/gc.c:1191 [inlined]
+sweep_pool_page at /Users/bethleelindor/julia/src/gc.c:1277 [inlined]
+sweep_pool_pagetable0 at /Users/bethleelindor/julia/src/gc.c:1297 [inlined]
+sweep_pool_pagetable1 at /Users/bethleelindor/julia/src/gc.c:1317 [inlined]
+sweep_pool_pagetable at /Users/bethleelindor/julia/src/gc.c:1347 [inlined]
+gc_sweep_pool at /Users/bethleelindor/julia/src/gc.c:1422
+_jl_gc_collect at /Users/bethleelindor/julia/src/gc.c:2814
+jl_gc_collect at /Users/bethleelindor/julia/src/gc.c:2903
+maybe_collect at /Users/bethleelindor/julia/src/gc.c:781 [inlined]
+jl_gc_pool_alloc at /Users/bethleelindor/julia/src/gc.c:1096
+broadcasted at ./broadcast.jl:1237
+#32 at /Users/bethleelindor/.julia/packages/LsqFit/LeVh7/src/curve_fit.jl:146
+ff! at /Users/bethleelindor/.julia/packages/NLSolversBase/QPnui/src/objective_types/inplace_factory.jl:11
+#finite_difference_jacobian!#43 at /Users/bethleelindor/.julia/packages/FiniteDiff/blirf/src/jacobians.jl:408
+finite_difference_jacobian! at /Users/bethleelindor/.julia/packages/FiniteDiff/blirf/src/jacobians.jl:334 [inlined]
+finite_difference_jacobian! at /Users/bethleelindor/.julia/packages/FiniteDiff/blirf/src/jacobians.jl:334 [inlined]
+fj_finitediff! at /Users/bethleelindor/.julia/packages/NLSolversBase/QPnui/src/objective_types/oncedifferentiable.jl:139 [inlined]
+j_finitediff! at /Users/bethleelindor/.julia/packages/NLSolversBase/QPnui/src/objective_types/oncedifferentiable.jl:144
+jacobian!! at /Users/bethleelindor/.julia/packages/NLSolversBase/QPnui/src/interface.jl:142
+jacobian!! at /Users/bethleelindor/.julia/packages/NLSolversBase/QPnui/src/interface.jl:140 [inlined]
+jacobian! at /Users/bethleelindor/.julia/packages/NLSolversBase/QPnui/src/interface.jl:135 [inlined]
+#lmfit#15 at /Users/bethleelindor/.julia/packages/LsqFit/LeVh7/src/curve_fit.jl:70
+lmfit at /Users/bethleelindor/.julia/packages/LsqFit/LeVh7/src/curve_fit.jl:68
+#lmfit#14 at /Users/bethleelindor/.julia/packages/LsqFit/LeVh7/src/curve_fit.jl:64
+lmfit at /Users/bethleelindor/.julia/packages/LsqFit/LeVh7/src/curve_fit.jl:61 [inlined]
+#curve_fit#30 at /Users/bethleelindor/.julia/packages/LsqFit/LeVh7/src/curve_fit.jl:147
+unknown function (ip: 0x14e3a789a)
+curve_fit at /Users/bethleelindor/.julia/packages/LsqFit/LeVh7/src/curve_fit.jl:137
+fit_planet4 at /Users/bethleelindor/work/washington/ttv_project/ttv_ss/fit_moon.jl:255
+unknown function (ip: 0x1155a2de1)
+jl_apply at /Users/bethleelindor/julia/src/./julia.h:1631 [inlined]
+do_call at /Users/bethleelindor/julia/src/interpreter.c:328
+eval_body at /Users/bethleelindor/julia/src/interpreter.c:641
+jl_interpret_toplevel_thunk_callback at /Users/bethleelindor/julia/src/interpreter.c:888
+unknown function (ip: 0xfffffffffffffffe)
+unknown function (ip: 0x12800e40f)
+unknown function (ip: 0x55)
+jl_interpret_toplevel_thunk at /Users/bethleelindor/julia/src/interpreter.c:897
+jl_toplevel_eval_flex at /Users/bethleelindor/julia/src/toplevel.c:814
+jl_parse_eval_all at /Users/bethleelindor/julia/src/ast.c:873
+jl_load at /Users/bethleelindor/julia/src/toplevel.c:878 [inlined]
+jl_load_ at /Users/bethleelindor/julia/src/toplevel.c:885
+include at ./boot.jl:328 [inlined]
+include_relative at ./loading.jl:1105
+include at ./Base.jl:31
+exec_options at ./client.jl:287
+_start at ./client.jl:460
+jfptr__start_2084 at /Users/bethleelindor/julia/usr/lib/julia/sys.dylib (unknown line)
+true_main at /Users/bethleelindor/julia/julia (unknown line)
+main at /Users/bethleelindor/julia/julia (unknown line)
+unknown function (ip: 0xffffffffffffffff)
+Allocations: 20113849184 (Pool: 20106406545; Big: 7442639); GC: 59006
+args = ["full", "60.0", "25", "pppp"]

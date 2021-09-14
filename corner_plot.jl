@@ -135,11 +135,19 @@ function corner_moon(jldmc,nbins)
   show()
 end
 # Create a corner plot for posterior distributions of planet parameters
-function corner_planet(jldmc,nbins,pl_name) 
-  par_mcmc,lprob_mcmc = jldmc["par_mcmc"],jldmc["lprob_mcmc"]
-  param = jldmc["param"]
-  iburn = jldmc["iburn"]
-  nwalkers,nsteps = jldmc["nwalkers"],jldmc["nsteps"]
+function corner_planet(sigma,nyear,nbins,pl_name,include_moon::Bool=false) 
+    mcfile = string("MCMC/fromEMB/p3_mcmc",sigma,"s",nyear,"yrs.jld2")
+    if include_moon
+      mcfile = string("MCMC/moon_mcmc",sigma,"s",nyear,"yrs.jld2")
+    end
+    m = jldopen(String(mcfile),"r")
+  par_mcmc= m["par_mcmc"]
+  lprob_mcmc = m["lprob_mcmc"]
+  nwalkers = m["nwalkers"]
+  nsteps = m["nsteps"]
+  accept = m["accept"]
+  iburn = m["iburn"]
+  indepsamples = m["indepsamples"]
   # True values based on "PlanetaryBodyData.pdf" (source?)
   if string(pl_name) == "venus"
     offset = 224.70

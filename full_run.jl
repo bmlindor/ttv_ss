@@ -80,7 +80,7 @@ elseif runtype=="grid" && label=="ppmp"
 elseif runtype=="grid" && label=="pppp" 
 	@time fit_planet4(jd1,sigma,nyear,p4in,p4out,np4,nphase)
 elseif runtype=="full" && label=="ppmp" 
- 	grid_run(p3in,p3out,np3,nphase,dpin,dpout,ndp)
+ 	grid_run(p3in,p3out,np3,nphase,dpin,dpout,ndp,false)
  	moon_mcmc()
 elseif runtype=="full" && label=="pppp"
 	@time fit_planet4(jd1,sigma,nyear,p4in,p4out,np4,nphase)

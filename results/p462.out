@@ -1,0 +1,35 @@
+
+signal (15): Terminated: 15
+in expression starting at /Users/bethleelindor/work/washington/ttv_project/ttv_ss/full_run.jl:70
+< at ./float.jl:458 [inlined]
+> at ./operators.jl:294 [inlined]
+calc_lprior at /Users/bethleelindor/work/washington/ttv_project/ttv_ss/MCMC.jl:83
+MCMC at /Users/bethleelindor/work/washington/ttv_project/ttv_ss/MCMC.jl:114
+p4_mcmc at ./util.jl:155
+unknown function (ip: 0x1489a970c)
+jl_apply at /Users/bethleelindor/julia/src/./julia.h:1631 [inlined]
+do_call at /Users/bethleelindor/julia/src/interpreter.c:328
+eval_stmt_value at /Users/bethleelindor/julia/src/interpreter.c:368 [inlined]
+eval_body at /Users/bethleelindor/julia/src/interpreter.c:764
+jl_interpret_toplevel_thunk_callback at /Users/bethleelindor/julia/src/interpreter.c:888
+unknown function (ip: 0xfffffffffffffffe)
+unknown function (ip: 0x10db1f80f)
+unknown function (ip: 0x25)
+jl_interpret_toplevel_thunk at /Users/bethleelindor/julia/src/interpreter.c:897
+jl_toplevel_eval_flex at /Users/bethleelindor/julia/src/toplevel.c:814
+jl_parse_eval_all at /Users/bethleelindor/julia/src/ast.c:873
+jl_load at /Users/bethleelindor/julia/src/toplevel.c:878 [inlined]
+jl_load_ at /Users/bethleelindor/julia/src/toplevel.c:885
+include at ./boot.jl:328 [inlined]
+include_relative at ./loading.jl:1105
+include at ./Base.jl:31
+exec_options at ./client.jl:287
+_start at ./client.jl:460
+jfptr__start_2084 at /Users/bethleelindor/julia/usr/lib/julia/sys.dylib (unknown line)
+true_main at /Users/bethleelindor/julia/julia (unknown line)
+main at /Users/bethleelindor/julia/julia (unknown line)
+unknown function (ip: 0xffffffffffffffff)
+Allocations: 418730429 (Pool: 418715737; Big: 14692); GC: 404
+args = ["mcmc", "60.0", "20", "pppp"]
+Parameters from fit: [5.204482232520325e-6, 224.70079785654866, 2.4335037683795257e6, 0.0020621015978966144, -0.014600463985436055, 2.6432886994057647e-6, 365.25638183004145, 2.4336244083639784e6, 0.014188567087567168, -0.008852467500711208, 4.980976994397462e-7, 869.7299459267546, 2.4379794047381626e6, 1.0905884935629855, 1.1396739745202973, 0.004814331869565687, 7336.934008402639, 2.4411961650091074e6, 0.07918263176825341, 0.000580015980687485]
+Maximum log Prob from fit: -98.7939116249645

@@ -75,8 +75,8 @@ elseif runtype=="mcmc" && label=="ppp"
 	p3_mcmc()
 elseif runtype=="mcmc" && label=="pppp"
 	p4_mcmc()
-# elseif runtype=="grid" && label=="ppmp"
-#  	grid_run(p3in,p3out,np3,nphase,dpin,dpout,ndp,false)
+elseif runtype=="grid" && label=="ppp"
+ 	grid_run(p3in,p3out,np3,nphase)
 elseif runtype=="grid" && label=="pppp" 
 	@time fit_planet4(jd1,sigma,nyear,p4in,p4out,np4,nphase)
 elseif runtype=="full" && label=="ppp" 

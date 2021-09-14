@@ -279,6 +279,6 @@ function fit_planet4(jd1,sigma,nyear,p4in,p4out,np4,nphase)
   println("Maximum: ",lprob_best_p4," Param: ",best_p4)
   
   fitfile = string("FITS/p4_fit",sigma,"s",nyear,"yrs.jld2")
-  @save fitfile p3 lprob_p3 best_p3 lprob_best_p3 p4 lprob_p4 best_p4 lprob_best_p4 ntrans nplanet tt0 tt ttmodel sigtt
+  @save fitfile p3 lprob_p3 best_p3 lprob_best_p3 p4 lprob_p4 best_p4 lprob_best_p4 ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase p4in p4out np4
   return best_p3,best_p4 
 end

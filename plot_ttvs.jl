@@ -1,10 +1,10 @@
-using PyPlot,Statistics,JLD2
+using PyPlot,Statistics,JLD2,DelimitedFiles
 rc("font",family="sans-serif")
 include("decompose_ttvs.jl")
 # Create plot of observed TTVs vs model fit
 function plot_ttvs(jldfit,include_moon::Bool=false)
   tt,tt0,sigtt,ttmodel = jldfit["tt"],jldfit["tt0"],jldfit["sigtt"],jldfit["ttmodel"]
-  pbest_global = jldfit["lprob_best_p3"]
+  pbest_global = jldfit["best_p3"]
   nplanet,ntrans = jldfit["nplanet"],jldfit["ntrans"]
   pair_ttvs = decompose_ttvs(nplanet,ntrans,pbest_global) .* (24 * 60)
   n1,n2 = ntrans[1],ntrans[2]
@@ -61,7 +61,8 @@ function plot_ttvs(jldfit,include_moon::Bool=false)
   if include_moon
     jldfit2=jldopen("FITS/moon_fit30.0s30.0yrs.jld2","r")
     tt,tt0,sigtt,ttmodel = jldfit2["tt"],jldfit2["tt0"],jldfit2["sigtt"],jldfit2["ttmodel"]
-    pbest_global = jldfit2["lprob_best_dp"]
+    pbest_global = jldfit2["best_dp"]
+
     nplanet,ntrans = jldfit2["nplanet"],jldfit2["ntrans"]
     pair_ttvs = decompose_ttvs(nplanet,ntrans,pbest_global) .* (24 * 60)
     n1,n2 = ntrans[1],ntrans[2]
@@ -93,4 +94,28 @@ function plot_ttvs(jldfit,include_moon::Bool=false)
   tight_layout()
   # savefig("IMAGES/ttvs.eps")
   show()
+end
+
+function plot_ttvs(sigma,nyear)
+  EMBfile = string("FITS/fromEMB/p3_fit",sigma,"s",nyear,"yrs.jld2")
+  EMBfit = jldopen(String(EMBfile),"r")
+  fitfile = string("FITS/moon_fit",sigma,"s",nyear,"yrs.jld2")
+  f = jldopen(String(fitfile),"r")
+  name = string("INPUTS/tt_",sigma,"snoEMB",nyear,"yrs.txt")
+  name = string("INPUTS/tt_",sigma,"sEMB",nyear,"yrs.txt")
+  tt,tt0,sigtt,ttmodel = jldfit["tt"],jldfit["tt0"],jldfit["sigtt"],jldfit["ttmodel"]
+  pbest_global = jldfit["lprob_best_p3"]
+  nplanet,ntrans = jldfit["nplanet"],jldfit["ntrans"]
+  pair_ttvs = decompose_ttvs(nplanet,ntrans,pbest_global) .* (24 * 60)
+  n1,n2 = ntrans[1],ntrans[2]
+  mu1,P1,t01,ecos1,esin1 = pbest_global[1:5]
+  mu2,P2,t02,ecos2,esin2 = pbest_global[6:10]
+  mu3,P3,t03,ecos3,esin3 = pbest_global[11:15]
+  time1 = collect(t01 .+ range(0,stop=n1-1,length=n1) .* P1)
+  time2 = collect(t02 .+ range(0,stop=n2-1,length=n2) .* P2)
+  tt1,tt2 = tt[1:n1],tt[n1+1:n1+n2]
+  ttsim1,ttsim2 = (ttmodel[1:n1].-t01)./365.25,(ttmodel[n1+1:n1+n2].-t02)./365.25 #in years
+  ttv1,ttv2 = (tt1.-time1).* (24 * 60),(tt2.-time2).* (24 * 60) #in minutes
+  sigtt1,sigtt2 = sigtt[1:n1].* (24 * 60),sigtt[n1+1:n1+n2].* (24 * 60) #in minutes
+
 end
