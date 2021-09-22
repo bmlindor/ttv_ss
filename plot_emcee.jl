@@ -106,10 +106,11 @@ function plot_trace(sigma,nyear,include_moon::Bool)
   end
 end 
 
-function plot_emcee(sigma,nyear,pname,include_moon::Bool=false)
-    mcfile = string("MCMC/fromEMB/p3_mcmc",sigma,"s",nyear,"yrs.jld2")
-    if include_moon
-      mcfile = string("MCMC/moon_mcmc",sigma,"s",nyear,"yrs.jld2")
+function plot_emcee(sigma,nyear,sim,model,include_moon::Bool=false)
+  if String(sim)=="EMB"
+    mcfile = string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+  else
+    mcfile = string("MCMC/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
     end
     m = jldopen(String(mcfile),"r")
   par_mcmc= m["par_mcmc"]
@@ -121,55 +122,54 @@ function plot_emcee(sigma,nyear,pname,include_moon::Bool=false)
   indepsamples = m["indepsamples"]
   parname = [L"$μ_1$ [$M_{⋆}$]",L"$P_1$ [days]",L"$t_{0,1}$",L"$e_1 cos(ω_1)$",L"$e_1 sin(ω_1)$",
     L"$μ_2$ [$M_{⋆}$]",L"$P_2$ [days]",L"$t_{0,2}$",L"$e_2 cos(ω_2)$",L"$e_2 sin(ω_2)$",
-    L"$μ_3$ [$M_{⋆}$]",L"$P_3$ [days]",L"$t_{0,3}$",L"$e_3 cos(ω_3)$",L"$e_3 sin(ω_3)$",
+    L"$μ_3$ [$M_{⋆}$]",L"$P_3$ [days]",L"$t_{0,3}$",L"$e_3 cos(ω_3)$",L"$e_3 sin(ω_3)$",L"$σ_{sys}^2$ [days]",
     L"$t_{max} sin(ϕ_0)$",L"$t_{max} cos(ϕ_0)$",L"$Δϕ$ [rad]"]
-    figsize=()
-  if string(pname) == "venus"
+  figure()
+  # if string(pname) == "venus"
     for i=1:5
-    subplot(3,2,i)
+    ax1=subplot(3,2,i)
     for j=1:nwalkers 
-    plot(par_mcmc[j,iburn:nsteps,i])
-    ylabel(parname[i])
+    ax1.plot(par_mcmc[j,iburn:nsteps,i])
+    ax1.set_ylabel(parname[i])
     end
     end
-    subplot(3,2,6)
-    for j=1:nwalkers
-      plot(lprob_mcmc[j,iburn:nsteps])  
-      ylabel(L"$log_{10} Prob$")
-    end
-    name = string("IMAGES/MCMCstepsp1.png")
-    @show()
-  elseif string(pname) == "earth"
+    tight_layout()
+    # subplot(3,2,6)
+    # for j=1:nwalkers
+    #   plot(lprob_mcmc[j,iburn:nsteps])  
+    #   ylabel(L"$log_{10} Prob$")
+    # end
+    # name = string("IMAGES/MCMCstepsp1.png")
+    # @show()
+  # elseif string(pname) == "earth"
+      figure()
     for i=1:5
-    subplot(3,2,i)
+    ax2=subplot(3,2,i)
     for j=1:nwalkers 
-    plot(par_mcmc[j,iburn:nsteps,i+5])
-    ylabel(parname[i+5])
+    ax2.plot(par_mcmc[j,iburn:nsteps,i+5])
+    ax2.set_ylabel(parname[i+5])
     end
     end
-    subplot(3,2,6)
-    for j=1:nwalkers
-      plot(lprob_mcmc[j,iburn:nsteps])  
-      ylabel(L"$logProb$")
-    end
-    name = string("IMAGES/MCMCstepsp2.png")
-    @show()
-  elseif string(pname) == "jupiter"
-    for i=1:5
-    subplot(3,2,i)
+    tight_layout()
+  #   name = string("IMAGES/MCMCstepsp2.png")
+  #   @show()
+    figure()
+  # # elseif string(pname) == "jupiter"
+    for i=1:6
+    ax3=subplot(3,2,i)
     for j=1:nwalkers 
-    plot(par_mcmc[j,iburn:nsteps,i+10])
-    ylabel(parname[i+10])
+    ax3.plot(par_mcmc[j,iburn:nsteps,i+10])
+    ax3.set_ylabel(parname[i+10])
     end
     end
-    subplot(3,2,6)
-    for j=1:nwalkers
-      plot(lprob_mcmc[j,iburn:nsteps])  
-      ylabel(L"$logProb$")
-    end
-    name = string("IMAGES/MCMCstepsp3.png")
-    @show()
-  elseif string(pname) == "moon"
+  #   # subplot(3,2,6)
+  #   # for j=1:nwalkers
+  #   #   plot(lprob_mcmc[j,iburn:nsteps])  
+  #   #   ylabel(L"$logProb$")
+  #   # end
+  #   name = string("IMAGES/MCMCstepsp3.png")
+  #   @show()
+   if include_moon
     for i=1:3
     subplot(2,2,i)
     for j=1:nwalkers 
@@ -182,7 +182,7 @@ function plot_emcee(sigma,nyear,pname,include_moon::Bool=false)
       plot(lprob_mcmc[j,iburn:nsteps])  
       ylabel(L"$logProb$")
     end
-    name = string("IMAGES/MCMCstepsmoon.png")
+  #   name = string("IMAGES/MCMCstepsmoon.png")
   end
   tight_layout()
   # savefig(name)

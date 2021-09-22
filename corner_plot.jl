@@ -52,18 +52,7 @@ function corner_plot(xvalue,yvalue,nbins,optx,opty,truex,truey)
 end
 
 # Create a corner plot for posterior distributions of moon parameters
-function corner_moon(jldmc,nbins) 
-  par_mcmc,lprob_mcmc = jldmc["par_mcmc"],jldmc["lprob_mcmc"]
-  param = jldmc["param"]
-  iburn = jldmc["iburn"]
-  nwalkers,nsteps = jldmc["nwalkers"],jldmc["nsteps"]
-  x1=vec(par_mcmc[:,iburn:nsteps,16])
-  x2=vec(par_mcmc[:,iburn:nsteps,17])
-  x3=vec(par_mcmc[:,iburn:nsteps,18])#.*57.2957795
-  truex1=0.01
-  truex2=0.01
-  truex3=2.3122#.*57.2957795
-
+function corner(x1,x2,x3,truex1,truex2,truex3,nbins)
   fig=figure(figsize=(8,8))
   subplots_adjust(hspace=0.05,wspace=0.05)
   subplot(3,3,1)
@@ -134,74 +123,21 @@ function corner_moon(jldmc,nbins)
       labelleft="false",labelbottom="true")
   show()
 end
-# Create a corner plot for posterior distributions of planet parameters
-function corner_planet(sigma,nyear,nbins,pl_name,include_moon::Bool=false) 
-    mcfile = string("MCMC/fromEMB/p3_mcmc",sigma,"s",nyear,"yrs.jld2")
-    if include_moon
-      mcfile = string("MCMC/moon_mcmc",sigma,"s",nyear,"yrs.jld2")
-    end
-    m = jldopen(String(mcfile),"r")
-  par_mcmc= m["par_mcmc"]
-  lprob_mcmc = m["lprob_mcmc"]
-  nwalkers = m["nwalkers"]
-  nsteps = m["nsteps"]
-  accept = m["accept"]
-  iburn = m["iburn"]
-  indepsamples = m["indepsamples"]
-  # True values based on "PlanetaryBodyData.pdf" (source?)
-  if string(pl_name) == "venus"
-    offset = 224.70
-    x1=vec(par_mcmc[:,iburn:nsteps,1]).* CGS.MSUN/CGS.MEARTH
-    x2=vec(par_mcmc[:,iburn:nsteps,4])#.*sqrt.(vec(par_mcmc[11:20,iburn:nsteps,4]).^2 .+ vec(par_mcmc[11:20,iburn:nsteps,5]).^2)
-    x3=vec(par_mcmc[:,iburn:nsteps,5])#.*sqrt.(vec(par_mcmc[11:20,iburn:nsteps,4]).^2 .+ vec(par_mcmc[11:20,iburn:nsteps,5]).^2)
-    x4=vec(par_mcmc[:,iburn:nsteps,2]).-offset
-    truex1=0.815
-    truex2=calc_evec1(0.006,131)
-    truex3=calc_evec2(0.006,131)
-    truex4=224.7007992.-offset
-    lim=0.00076,0.00081
-    label=L"Per $- 224.7$ [days]"
-  elseif string(pl_name) == "earth"
-    offset = 365.25
-    x1=vec(par_mcmc[:,iburn:nsteps,6]).* CGS.MSUN/CGS.MEARTH
-    x2=vec(par_mcmc[:,iburn:nsteps,9])#.*sqrt.(vec(par_mcmc[:,1:nsteps,9]).^2 .+ vec(par_mcmc[:,1:nsteps,10]).^2)
-    x3=vec(par_mcmc[:,iburn:nsteps,10])#.*sqrt.(vec(par_mcmc[:,1:nsteps,9]).^2 .+ vec(par_mcmc[:,1:nsteps,10]).^2)
-    x4=vec(par_mcmc[:,iburn:nsteps,7]).-offset
-    truex1=1
-    truex2=calc_evec1(0.0167,102.4)
-    truex3=calc_evec2(0.0167,102.4)
-    truex4=365.2564-offset
-    lim=0.0064,0.00652
-    label=L"Per $- 365.25$ [days]"
-  elseif string(pl_name) == "jupiter"
-    offset = 0.0
-    x1=vec(par_mcmc[:,iburn:nsteps,11]).* CGS.MSUN/CGS.MEARTH
-    x2=vec(par_mcmc[:,iburn:nsteps,14])#.*sqrt.(vec(par_mcmc[:,1:nsteps,14]).^2 .+ vec(par_mcmc[:,1:nsteps,15]).^2)
-    x3=vec(par_mcmc[:,iburn:nsteps,15])#.*sqrt.(vec(par_mcmc[:,1:nsteps,14]).^2 .+ vec(par_mcmc[:,1:nsteps,15]).^2)
-    x4=vec(par_mcmc[:,iburn:nsteps,12])
-    truex1=318
-    truex2=calc_evec1(0.048,14.75)
-    truex3=calc_evec2(0.048,14.75)
-    truex4=4332.82012875
-    lim=minimum(x4),maximum(x4)
-    label="Per [days]"
-  end
-  println("P_mean= ",mean(x4))
-  println(truex2," <- ecosω & esinω -> ",truex3)
 
-	fig=figure(figsize=(9,9))
-	subplots_adjust(hspace=0.09,wspace=0.09)
-	subplot(4,4,1)
+function corner(x1,x2,x3,x4,truex1,truex2,truex3,truex4,nbins,lim,label)
+  fig=figure(figsize=(9,9))
+  subplots_adjust(hspace=0.09,wspace=0.09)
+  subplot(4,4,1)
   ax1=gca()
   ax1.axvline(truex4,linestyle="-",color="black")
-	ax1.hist(x4,bins=nbins,histtype="step",density="true",color="black")
-	ax1.minorticks_on()
-	ax1.tick_params(which="major",direction="in",length=5,
-	    left="false",right="false",top="true",bottom="true",
-	    labelbottom="false",labeltop="false",labelleft="false",labelright="false")
-	ax1.tick_params(which="minor",direction="in",length=2,
-	    left="false",right="false",top="true",bottom="true",
-	    labelbottom="false",labeltop="false",labelleft="false",labelright="false")
+  ax1.hist(x4,bins=nbins,histtype="step",density="true",color="black")
+  ax1.minorticks_on()
+  ax1.tick_params(which="major",direction="in",length=5,
+      left="false",right="false",top="true",bottom="true",
+      labelbottom="false",labeltop="false",labelleft="false",labelright="false")
+  ax1.tick_params(which="minor",direction="in",length=2,
+      left="false",right="false",top="true",bottom="true",
+      labelbottom="false",labeltop="false",labelleft="false",labelright="false")
 
   subplot(4,4,5,sharex=ax1)
   ax5=gca()
@@ -300,5 +236,70 @@ function corner_planet(sigma,nyear,nbins,pl_name,include_moon::Bool=false)
   ax16.tick_params(which="minor",direction="in",length=2,
       left="false",right="false",top="true",bottom="true",
       labelbottom="false",labeltop="false",labelleft="false",labelright="false")
-	show()
+end
+# Create a corner plot for posterior distributions of planet parameters
+function corner_planet(sigma,nyear,sim,model,nbins,include_moon::Bool=false) 
+  if String(sim)=="EMB"
+    mcfile = string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+  else
+    mcfile = string("MCMC/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+    end
+    m = jldopen(String(mcfile),"r")
+  par_mcmc= m["par_mcmc"]
+  lprob_mcmc = m["lprob_mcmc"]
+  nwalkers = m["nwalkers"]
+  nsteps = m["nsteps"]
+  accept = m["accept"]
+  iburn = m["iburn"]
+  indepsamples = m["indepsamples"]
+  # True values based on "PlanetaryBodyData.pdf" (source?)
+  # if string(pl_name) == "venus"
+    offset = 224.70
+    x1=vec(par_mcmc[:,iburn:nsteps,1]).* CGS.MSUN/CGS.MEARTH
+    x2=vec(par_mcmc[:,iburn:nsteps,4])#.*sqrt.(vec(par_mcmc[11:20,iburn:nsteps,4]).^2 .+ vec(par_mcmc[11:20,iburn:nsteps,5]).^2)
+    x3=vec(par_mcmc[:,iburn:nsteps,5])#.*sqrt.(vec(par_mcmc[11:20,iburn:nsteps,4]).^2 .+ vec(par_mcmc[11:20,iburn:nsteps,5]).^2)
+    x4=vec(par_mcmc[:,iburn:nsteps,2]).-offset
+    truex1=0.815
+    truex2=calc_evec1(0.006,131)
+    truex3=calc_evec2(0.006,131)
+    truex4=224.7007992.-offset
+    lim=0.00076,0.00081
+    label=L"Per $- 224.7$ [days]"
+    corner(x1,x2,x3,x4,truex1,truex2,truex3,truex4,nbins,lim,label)
+  # elseif string(pl_name) == "earth"
+    offset = 365.25
+    x1=vec(par_mcmc[:,iburn:nsteps,6]).* CGS.MSUN/CGS.MEARTH
+    x2=vec(par_mcmc[:,iburn:nsteps,9])#.*sqrt.(vec(par_mcmc[:,1:nsteps,9]).^2 .+ vec(par_mcmc[:,1:nsteps,10]).^2)
+    x3=vec(par_mcmc[:,iburn:nsteps,10])#.*sqrt.(vec(par_mcmc[:,1:nsteps,9]).^2 .+ vec(par_mcmc[:,1:nsteps,10]).^2)
+    x4=vec(par_mcmc[:,iburn:nsteps,7]).-offset
+    truex1=1
+    truex2=calc_evec1(0.0167,102.4)
+    truex3=calc_evec2(0.0167,102.4)
+    truex4=365.2564-offset #365.256355
+    lim=0.0064,0.00652
+    label=L"Per $- 365.25$ [days]"
+    corner(x1,x2,x3,x4,truex1,truex2,truex3,truex4,nbins,lim,label)
+  # elseif string(pl_name) == "jupiter"
+    offset = 0.0
+    x1=vec(par_mcmc[:,iburn:nsteps,11]).* CGS.MSUN/CGS.MEARTH
+    x2=vec(par_mcmc[:,iburn:nsteps,14])#.*sqrt.(vec(par_mcmc[:,1:nsteps,14]).^2 .+ vec(par_mcmc[:,1:nsteps,15]).^2)
+    x3=vec(par_mcmc[:,iburn:nsteps,15])#.*sqrt.(vec(par_mcmc[:,1:nsteps,14]).^2 .+ vec(par_mcmc[:,1:nsteps,15]).^2)
+    x4=vec(par_mcmc[:,iburn:nsteps,12])
+    truex1=318
+    truex2=calc_evec1(0.048,14.75)
+    truex3=calc_evec2(0.048,14.75)
+    truex4=4332.82012875
+    lim=minimum(x4),maximum(x4)
+    label="Per [days]"
+  corner(x1,x2,x3,x4,truex1,truex2,truex3,truex4,nbins,lim,label)
+  if include_moon
+  x1=vec(par_mcmc[:,iburn:nsteps,16])
+  x2=vec(par_mcmc[:,iburn:nsteps,17])
+  x3=vec(par_mcmc[:,iburn:nsteps,18])#.*57.2957795
+  truex1=0.01
+  truex2=0.01
+  truex3=2.3122#.*57.2957795
+  corner(x1,x2,x3,truex1,truex2,truex3,nbins)
+  end
+  show()
 end
