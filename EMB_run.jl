@@ -55,11 +55,12 @@ function p3_mcmc()
 	@time MCMC(foutput,p["best_p3"],p["lprob_best_p3"],nsteps,nwalkers,3,p["ntrans"][1:3],p["tt0"],p["tt"],p["sigtt"],true,true)	
 end 
 # Run lunar markov chain
-# function moon_mcmc()
-# 	foutput=string("MCMC/moon_mcmc",sigma,"s",nyear,"yrs.jld2")
-# 	m=jldopen(String(p3file),"r")
-# 	@time MCMC(foutput,m["best_dp"],m["lprob_best_dp"],nsteps,nwalkers,3,m["ntrans"][1:3],m["tt0"],m["tt"],m["sigtt"],true,false)	  
-# end
+function moon_mcmc()
+	foutput=string("MCMC/fromEMB/moon_mcmc",sigma,"s",nyear,"yrs.jld2")
+	mfile = string("FITS/fromEMB/moon_fit",sigma,"s",nyear,"yrs.jld2")
+	m=jldopen(String(mfile),"r")
+	@time MCMC(foutput,m["best_dp"],m["lprob_best_dp"],nsteps,nwalkers,3,m["ntrans"][1:3],m["tt0"],m["tt"],m["sigtt"],true,false)	  
+end
 # Run 4-planet markov chain
 function p4_mcmc()
 	foutput=string("MCMC/fromEMB/p4_mcmc",sigma,"s",nyear,"yrs.jld2")
@@ -69,19 +70,24 @@ function p4_mcmc()
 end
 if runtype=="sim" && label=="ppp"
 	simfit()
-# elseif runtype=="mcmc" && label=="ppmp"
-# 	moon_mcmc()
 elseif runtype=="mcmc" && label=="ppp"
 	p3_mcmc()
+elseif runtype=="mcmc" && label=="ppmp"
+	moon_mcmc()
 elseif runtype=="mcmc" && label=="pppp"
 	p4_mcmc()
 elseif runtype=="grid" && label=="ppp"
  	grid_run(p3in,p3out,np3,nphase)
+ elseif runtype=="grid" && label=="ppmp"
+ 	@time fit_moon(jd1,sigma,nyear,dpin,dpout,ndp)
 elseif runtype=="grid" && label=="pppp" 
 	@time fit_planet4(jd1,sigma,nyear,p4in,p4out,np4,nphase)
 elseif runtype=="full" && label=="ppp" 
  	grid_run(p3in,p3out,np3,nphase)
  	p3_mcmc()
+elseif runtype=="full" && label=="ppmp" 
+ 	fit_moon(jd1,sigma,nyear,dpin,dpout,ndp)
+ 	moon_mcmc()
 elseif runtype=="full" && label=="pppp"
 	@time fit_planet4(jd1,sigma,nyear,p4in,p4out,np4,nphase)
 	p4_mcmc()
