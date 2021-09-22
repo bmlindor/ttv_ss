@@ -19,7 +19,7 @@ struct Planet_plane
   omega    :: Float64   
 end
 
-struct Planet_plane_hk{T<:Number} # Parameters of a planet in a plane-parallel system
+struct Planet_plane_hk{T<:Real} # Parameters of a planet in a plane-parallel system
   # Mass ratio of the planet to the star:
   mass_ratio :: T
   # Initial time of transit:
@@ -53,7 +53,7 @@ end
 # #   ttv2: TTVs of the outer planet
 # """
 
-function compute_ttv!(jmax::Integer,p1::Planet_plane_hk,p2::Planet_plane_hk,time1::Vector,time2::Vector,ttv1::Vector,ttv2::Vector)
+function compute_ttv!(jmax::Integer,p1::Planet_plane_hk{T},p2::Planet_plane_hk{T},time1::Vector{T},time2::Vector{T},ttv1::Vector{T},ttv2::Vector{T}) where T<:Real
 
   # Compute the semi-major axis ratio of the planets:
   # println(p1.period,p2.period)
@@ -62,10 +62,10 @@ function compute_ttv!(jmax::Integer,p1::Planet_plane_hk,p2::Planet_plane_hk,time
   @assert(alpha < 1)
   @assert(alpha > 0)
   # Number of times:
-  global ntime1 = length(time1)
-  global ntime2 = length(time2)
-  f1=zeros(jmax+2,5)  #check memory allocation >>>>>>>>>>>>
-  f2=zeros(jmax+2,5)  #check memory allocation >>>>>>>>>>>>
+   ntime1 = length(time1)
+   ntime2 = length(time2)
+  f1=zeros(T,jmax+2,5)  #check memory allocation >>>>>>>>>>>>
+  f2=zeros(T,jmax+2,5)  #check memory allocation >>>>>>>>>>>>
   # Compute the coefficients:
   ttv_succinct!(jmax+1,alpha,f1,f2)  # I need to compute coefficients one higher than jmax
   # Compute TTVs for inner planet (equation 33):
@@ -76,7 +76,7 @@ function compute_ttv!(jmax::Integer,p1::Planet_plane_hk,p2::Planet_plane_hk,time
   sin2om=p2.esinw/e2
   cos1om=p1.ecosw/e1
   cos2om=p2.ecosw/e2
-# >>>>>>> parent of f3f4be4... new priors
+
   # Compute mean motions:
   n1=2pi/p1.period
   n2=2pi/p2.period
@@ -96,9 +96,9 @@ function compute_ttv!(jmax::Integer,p1::Planet_plane_hk,p2::Planet_plane_hk,time
     coslam1om1=coslam11*cos1om + sinlam11*sin1om
     sinlam1om2=sinlam11*cos2om - coslam11*sin2om
     coslam1om2=coslam11*cos2om + sinlam11*sin2om
-    ttv1[i]=zero(p1.period) #0.0
-    sinjm1psi1=zero(p1.period) #0.0
-    cosjm1psi1=one(p1.period) #1.0
+    ttv1[i]=zero(T) #0.0
+    sinjm1psi1=zero(T) #0.0
+    cosjm1psi1=one(T) #1.0
   # Sum over j:
     for j=1:jmax
       sinjpsi1=sinjm1psi1*cospsi1 + cosjm1psi1*sinpsi1

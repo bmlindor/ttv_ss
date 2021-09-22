@@ -13,7 +13,7 @@ function fit_planet3(filename::String,label::String,
   jd1::Float64,jd2::Float64,jdsize::Int64,
   p3in::Float64,p3out::Float64,np3::Int,nphase::Int,
   sqrte::Bool=false,
-  addnoise::Bool=false,sigma::Float64=0.0,EMB::Bool=true)
+  addnoise::Bool=false,sigma::Float64=0.0,EM::Bool=true)
 
   data1 = readdlm(filename)
   nt1 = sum(data1[:,1] .== 1.0)
@@ -218,7 +218,7 @@ function fit_moon(filename::String,label::String,
   jd1::Float64,jd2::Float64,jdsize::Int64,
   p3in::Float64,p3out::Float64,np3::Int,nphase::Int,
   dpin::Float64,dpout::Float64,ndp::Int,
-  addnoise::Bool=false,sigma::Float64=0.0,EMB::Bool=false)
+  addnoise::Bool=false,sigma::Float64=0.0,EM::Bool=false)
 
   data1 = readdlm(filename)
   nt1 = sum(data1[:,1] .== 1.0)
@@ -423,7 +423,7 @@ function fit_planet4(filename::String,label::String,
   jd1::Float64,jd2::Float64,jdsize::Int64,
   p3in::Float64,p3out::Float64,np3::Int,nphase::Int,
   p4in::Float64,p4out::Float64,np4::Int,
-  addnoise::Bool=false,sigma::Float64=0.0,EMB::Bool=false)
+  addnoise::Bool=false,sigma::Float64=0.0,EM::Bool=false)
 
   data1 = readdlm(filename)
   nt1 = sum(data1[:,1] .== 1.0)

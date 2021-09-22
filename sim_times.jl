@@ -8,12 +8,14 @@ if !@isdefined(CGS)
   using Main.CGS
 end
 include("regress.jl")
-
-function sim_times(jd1::Float64,jd2::Float64,jdsize::Int64,
+# Simulate solar system orbits from ephemerides
+function sim_times(jd1::Float64,nyear::Float64,
   addnoise::Bool=false,sigma::Float64=0.0,EMB::Bool=true,seed::Int=42)
   # To do: output file with arguments in header?
-  nyear = (jd2 - jd1)/365.25 
-  dt = (jd2 - jd1)/jdsize
+  # nyear = (jd2 - jd1)/365.25 
+  jd2 = nyear*365.25 + jd1
+  jdsize = 1000
+  # dt = (jd2 - jd1)/jdsize
   # Initial JD times for days in nyear 
   @assert jd1 >= 2287184.5 #2414105.0
   @assert jd2 <= 2688976.5 #2488985.0
@@ -21,10 +23,10 @@ function sim_times(jd1::Float64,jd2::Float64,jdsize::Int64,
   t0 = range(jd1,stop=jd2-1,length = jdsize)
   # println(t0[1]) #= 2.4332825e6  
 
-  # Make a circle to represent the Sun:
-  theta_sun = range(0,stop = 2*pi,length = 100)
-  xsun = CGS.RSUN/CGS.AU * cos.(theta_sun)
-  ysun = CGS.RSUN/CGS.AU * sin.(theta_sun)
+  # Make a circle to represent the Sun, for plotting
+  # theta_sun = range(0,stop = 2pi,length = 100)
+  # xsun = CGS.RSUN/CGS.AU * cos.(theta_sun)
+  # ysun = CGS.RSUN/CGS.AU * sin.(theta_sun)
 
   # Load ephemerides from data and set units
   eph = Ephem("INPUTS/DE440.bsp") ; prefetch(eph)
@@ -134,7 +136,7 @@ function sim_times(jd1::Float64,jd2::Float64,jdsize::Int64,
     t_final = t0[end]
     i=1
     # initializes & finds first transit time
-    JD,ff,i_min,pos,JD_tt = find_transit(body_id,eph,t0[i],t0[i]+period,n_obs,1000)
+    JD,ff,i_min,pos,JD_tt = find_transit(body_id,eph,t0[i],t0[i]+period,n_obs,1000) #why did we use 1000 here?
     push!(times,JD_tt)
     # Find subsequent transit times by shifting time frame by 1 planetary period
     while JD_tt < t_final
@@ -272,9 +274,9 @@ function sim_times(jd1::Float64,jd2::Float64,jdsize::Int64,
     noise = [noise1;noise2]
     sigtt = [sigtt1;sigtt2]
     if EMB
-      name = string("INPUTS/tt_data",sigma,"sEMB.txt")
+      name = string("INPUTS/tt_",sigma,"sEMB",nyear,"yrs.txt")
     else
-      name = string("INPUTS/tt_data",sigma,"snoEMB.txt")
+      name = string("INPUTS/tt_",sigma,"snoEMB",nyear,"yrs.txt")
     end
     writedlm(name,zip(body,tt0,tt,sigtt))
   else

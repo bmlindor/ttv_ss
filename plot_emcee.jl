@@ -1,58 +1,203 @@
-using PyPlot
+using PyPlot,Statistics,JLD2
 
-function plot_emcee(include_moon::Bool=false)
-    figsize=(9,5)
+function plot_emcee(mcmc,pname,include_moon::Bool=false)
+    #par_mcmc lprob_mcmc param nwalkers nsteps accept iburn indepsamples
+  par_mcmc= mcmc["par_mcmc"]
+  lprob_mcmc = mcmc["lprob_mcmc"]
+  nwalkers = mcmc["nwalkers"]
+  nsteps = mcmc["nsteps"]
+  accept = mcmc["accept"]
+  iburn = mcmc["iburn"]
+  indepsamples = mcmc["indepsamples"]
+  parname = [L"$μ_1$ [$M_{⋆}$]",L"$P_1$ [days]",L"$t_{0,1}$",L"$e_1 cos(ω_1)$",L"$e_1 sin(ω_1)$",
+    L"$μ_2$ [$M_{⋆}$]",L"$P_2$ [days]",L"$t_{0,2}$",L"$e_2 cos(ω_2)$",L"$e_2 sin(ω_2)$",
+    L"$μ_3$ [$M_{⋆}$]",L"$P_3$ [days]",L"$t_{0,3}$",L"$e_3 cos(ω_3)$",L"$e_3 sin(ω_3)$",
+    L"$t_{max} sin(ϕ_0)$",L"$t_{max} cos(ϕ_0)$",L"$Δϕ$ [rad]"]
+    figsize=()
+  if string(pname) == "venus"
     for i=1:5
-    subplot(5,1,i)
+    subplot(3,2,i)
     for j=1:nwalkers 
-    plot(par_mcmc[j,1:nsteps,i])
-    ylabel(pname[i])
+    plot(par_mcmc[j,iburn:nsteps,i])
+    ylabel(parname[i])
     end
-    tight_layout()
+    end
+    subplot(3,2,6)
+    for j=1:nwalkers
+      plot(lprob_mcmc[j,iburn:nsteps])  
+      ylabel(L"$log_{10} Prob$")
     end
     name = string("IMAGES/MCMCstepsp1.png")
-    # savefig(name)
-    clf()
-    figsize=(9,5)
+    @show()
+  elseif string(pname) == "earth"
     for i=1:5
-    subplot(5,1,i)
+    subplot(3,2,i)
     for j=1:nwalkers 
-    plot(par_mcmc[j,1:nsteps,i+5])
-    ylabel(pname[i+5])
+    plot(par_mcmc[j,iburn:nsteps,i+5])
+    ylabel(parname[i+5])
     end
-    tight_layout()
+    end
+    subplot(3,2,6)
+    for j=1:nwalkers
+      plot(lprob_mcmc[j,iburn:nsteps])  
+      ylabel(L"$logProb$")
     end
     name = string("IMAGES/MCMCstepsp2.png")
-    # savefig(name)
-    clf()
-    figsize=(9,5)
+    @show()
+  elseif string(pname) == "jupiter"
     for i=1:5
-    subplot(5,1,i)
+    subplot(3,2,i)
     for j=1:nwalkers 
-    plot(par_mcmc[j,1:nsteps,i+10])
-    ylabel(pname[i+10])
+    plot(par_mcmc[j,iburn:nsteps,i+10])
+    ylabel(parname[i+10])
     end
-    tight_layout()
+    end
+    subplot(3,2,6)
+    for j=1:nwalkers
+      plot(lprob_mcmc[j,iburn:nsteps])  
+      ylabel(L"$logProb$")
     end
     name = string("IMAGES/MCMCstepsp3.png")
-    # savefig(name)
-    clf()
-    if include_moon
-        figsize=(5,3)
-        for i=1:3
-        subplot(3,1,i)
-        for j=1:nwalkers 
-        plot(par_mcmc[j,1:nsteps,i+15])
-        ylabel(pname[i+15])
-        end
-        # tight_layout()
-        end
-        name = string("IMAGES/MCMCstepsmoon.png")
-        # savefig(name)
+    @show()
+  elseif string(pname) == "moon"
+    for i=1:3
+    subplot(2,2,i)
+    for j=1:nwalkers 
+    plot(par_mcmc[j,1:nsteps,i+15])
+    ylabel(parname[i+15])
     end
+    end
+    subplot(2,2,4)
+      for j=1:nwalkers
+      plot(lprob_mcmc[j,iburn:nsteps])  
+      ylabel(L"$logProb$")
+    end
+    name = string("IMAGES/MCMCstepsmoon.png")
+  end
+  tight_layout()
+  # savefig(name)
 end
+
+function plot_trace(sigma,nyear,include_moon::Bool)
+    mcfile = string("MCMC/fromEMB/p3_mcmc",sigma,"s",nyear,"yrs.jld2")
+    if include_moon
+      mcfile = string("MCMC/moon_mcmc",sigma,"s",nyear,"yrs.jld2")
+    end
+    m = jldopen(String(mcfile),"r")
+  par_mcmc= m["par_mcmc"]
+  lprob_mcmc = m["lprob_mcmc"]
+  nwalkers = m["nwalkers"]
+  nsteps = m["nsteps"]
+  accept = m["accept"]
+  iburn = m["iburn"]
+  indepsamples = m["indepsamples"]
+# exp.((wide["lprob_p3"] .-maximum(p_33["lprob_p3"]))),12
+  figsize=(8,6)
+  subplot(2,1,1)
+  for j=1:nwalkers
+    plot(par_mcmc[j,iburn:nsteps,18])#,exp.(lprob_mcmc[j,1:nsteps]) .- maximum(lprob_mcmc[j,1:nsteps]))
+    ylabel(L"$δϕ$")
+  end
+  subplot(2,1,2)
+    for j=1:nwalkers
+    plot(lprob_mcmc[j,iburn:nsteps])  
+    ylabel(L"$logProb$")
+    # xlim(0,10)
+  end
+end 
+
+function plot_emcee(sigma,nyear,sim,model,include_moon::Bool=false)
+  if String(sim)=="EMB"
+    mcfile = string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+  else
+    mcfile = string("MCMC/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+    end
+    m = jldopen(String(mcfile),"r")
+  par_mcmc= m["par_mcmc"]
+  lprob_mcmc = m["lprob_mcmc"]
+  nwalkers = m["nwalkers"]
+  nsteps = m["nsteps"]
+  accept = m["accept"]
+  iburn = m["iburn"]
+  indepsamples = m["indepsamples"]
+  parname = [L"$μ_1$ [$M_{⋆}$]",L"$P_1$ [days]",L"$t_{0,1}$",L"$e_1 cos(ω_1)$",L"$e_1 sin(ω_1)$",
+    L"$μ_2$ [$M_{⋆}$]",L"$P_2$ [days]",L"$t_{0,2}$",L"$e_2 cos(ω_2)$",L"$e_2 sin(ω_2)$",
+    L"$μ_3$ [$M_{⋆}$]",L"$P_3$ [days]",L"$t_{0,3}$",L"$e_3 cos(ω_3)$",L"$e_3 sin(ω_3)$",L"$σ_{sys}^2$ [days]",
+    L"$t_{max} sin(ϕ_0)$",L"$t_{max} cos(ϕ_0)$",L"$Δϕ$ [rad]"]
+  figure()
+  # if string(pname) == "venus"
+    for i=1:5
+    ax1=subplot(3,2,i)
+    for j=1:nwalkers 
+    ax1.plot(par_mcmc[j,iburn:nsteps,i])
+    ax1.set_ylabel(parname[i])
+    end
+    end
+    tight_layout()
+    # subplot(3,2,6)
+    # for j=1:nwalkers
+    #   plot(lprob_mcmc[j,iburn:nsteps])  
+    #   ylabel(L"$log_{10} Prob$")
+    # end
+    # name = string("IMAGES/MCMCstepsp1.png")
+    # @show()
+  # elseif string(pname) == "earth"
+      figure()
+    for i=1:5
+    ax2=subplot(3,2,i)
+    for j=1:nwalkers 
+    ax2.plot(par_mcmc[j,iburn:nsteps,i+5])
+    ax2.set_ylabel(parname[i+5])
+    end
+    end
+    tight_layout()
+  #   name = string("IMAGES/MCMCstepsp2.png")
+  #   @show()
+    figure()
+  # # elseif string(pname) == "jupiter"
+    for i=1:6
+    ax3=subplot(3,2,i)
+    for j=1:nwalkers 
+    ax3.plot(par_mcmc[j,iburn:nsteps,i+10])
+    ax3.set_ylabel(parname[i+10])
+    end
+    end
+  #   # subplot(3,2,6)
+  #   # for j=1:nwalkers
+  #   #   plot(lprob_mcmc[j,iburn:nsteps])  
+  #   #   ylabel(L"$logProb$")
+  #   # end
+  #   name = string("IMAGES/MCMCstepsp3.png")
+  #   @show()
+   if include_moon
+    for i=1:3
+    subplot(2,2,i)
+    for j=1:nwalkers 
+    plot(par_mcmc[j,1:nsteps,i+15])
+    ylabel(parname[i+15])
+    end
+    end
+    subplot(2,2,4)
+      for j=1:nwalkers
+      plot(lprob_mcmc[j,iburn:nsteps])  
+      ylabel(L"$logProb$")
+    end
+  #   name = string("IMAGES/MCMCstepsmoon.png")
+  end
+  tight_layout()
+  # savefig(name)
+end
+
 # Make plot of MCMC parameters after burn-in
 function plot_parameters(xvalue,yvalue)
+  par_mcmc= mcmc["par_mcmc"]
+  nwalkers = mcmc["nwalkers"]
+  nsteps = mcmc["nsteps"]
+  accept = mcmc["accept"]
+  iburn = mcmc["iburn"]
+  indepsamples = mcmc["indepsamples"]
+
+
 
 # figsize=(8,6)
 # for i=2:nparam

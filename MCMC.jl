@@ -8,11 +8,12 @@ include("bounds.jl")
 using DelimitedFiles,JLD2,Statistics,MCMCDiagnostics
 
 # Run a Markov chain:
-function MCMC(param::Array{Float64,1},lprob_best::Float64,foutput::String,
+function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,
   nsteps::Int64,nwalkers::Int64,nplanet::Int64,ntrans::Array{Int64,1},
   tt0::Array{Float64,1},tt::Array{Float64,1},sigtt::Array{Float64,1},
-  EMB::Bool,use_sigsys::Bool) 
-
+  use_sigsys::Bool,EM::Bool) 
+  println("Parameters from fit: ",param)
+  println("Maximum log Prob from fit: ",lprob_best)
   nparam = length(param)
   jmax = 5
   errors = [1e-7,1e-5,1e-5,1e-2,1e-2,
@@ -21,10 +22,17 @@ function MCMC(param::Array{Float64,1},lprob_best::Float64,foutput::String,
   pname = ["mu_1","P_1","t01","e1 cos(om1)","e1 sin(om1)",
           "mu_2","P_2","t02","e2 cos(om2)","e2 sin(om2)",
           "mu_3","P_3","t03","e3 cos(om3)","e3 sin(om3)"]
-  if EMB
+  if nplanet==3
     errors = errors
     pname = pname
-  else
+  elseif nplanet==4
+    errors = [errors[1:10];1e-7;1e-5;1e-5;1e-2;1e-2;errors[11:end]]
+    pname = [pname[1:end];"mu_4";"P_4";"t04";"e4 cos(om4)";"e4 sin(om4)"]
+  elseif nplanet==2
+    errors=errors[1:10]
+    pname=pname[1:10]
+  end
+  if nparam==18
     moon_errors = [1e-4,1e-4,1e-5]
     moon_name = ["tmax sin(phi0)","tmax cos(phi0)","deltaphi"]
     append!(errors,moon_errors)
@@ -38,7 +46,6 @@ function MCMC(param::Array{Float64,1},lprob_best::Float64,foutput::String,
     par_trial = param[1:end]
     nsize = nparam
   end
-
   @assert (nwalkers >= 40)  # nwalkers = nparam * 3
   # Set up arrays to hold the results:
   par_mcmc = zeros(nwalkers,nsteps,nsize)
@@ -59,21 +66,30 @@ function MCMC(param::Array{Float64,1},lprob_best::Float64,foutput::String,
       lprior_tmp,dpdx = log_bounds_upper(ecc,emax1,emax2)
       lprior += lprior_tmp
       lprior += -log(ecc) 
-
     end
     for iplanet=1:nplanet-1
   # The periods of the planets should be ordered from least to greatest:
-        # if param[(iplanet-1)*5+2] > param[iplanet*5+2]
-        #   lprior += -Inf
-        # end
+        if param[(iplanet-1)*5+2] > param[iplanet*5+2]
+          lprior += -Inf
+        end
     end
-    if !EMB 
+    if nparam>16
       # Plase priors on deltaphi and account for aliasing:
       dpmin = 0.0; dpmax = pi
       deltaphi = param[18]
-      if deltaphi < dpmin || deltaphi > dpmax
-        lprior += -Inf
+      while deltaphi < dpmin
+        deltaphi += 2pi
       end
+      while deltaphi > 2pi
+        deltaphi -= 2pi 
+      end
+      if deltaphi > dpmax
+        deltaphi = 2pi - deltaphi
+      end
+      param[18] = deltaphi
+      # if deltaphi < dpmin || deltaphi > dpmax
+      #   lprior += -Inf
+      # end
     end
     if use_sigsys
       # sigsys priors:
@@ -90,20 +106,15 @@ function MCMC(param::Array{Float64,1},lprob_best::Float64,foutput::String,
   # Select from within uncertainties:
     lprob_trial = -1e100
   # Only initiate models with reasonable chi-square values:
-    while lprob_trial < lprob_best - 1000
-      par_trial[1:nparam] = param + errors .* randn(nparam)
+    while lprob_trial < lprob_best - 1000 #since logProb, maybe 1000 is too large
+      par_trial[1:nparam] .= param .+ errors .* randn(nparam) 
       if use_sigsys
         par_trial[nparam+1] = 1e-8 .* abs(randn())
       end
       lprob_trial = calc_lprior(par_trial)
       # println("Calculated Log Prior: ",lprob_trial)
       if lprob_trial > -Inf
-        # model = ttv_wrapper3(tt0,par_trial)# 
-        if EMB
-          model = ttv_wrapper(tt0,nplanet,ntrans,par_trial[1:nparam],jmax,true)
-        else 
-          model = ttv_wrapper(tt0,nplanet,ntrans,par_trial[1:nparam],jmax,false)
-        end
+        model = ttv_wrapper(tt0,nplanet,ntrans,par_trial[1:nparam],jmax,EM)
         # println(length(tt)," ",length(model))
         if use_sigsys
           # ll = (-0.5 * sum((tt-model).^2 ./(sigtt.^2 .+ sigsys.^2) .+ log.(sigtt.^2 .+ sigsys.^2)))
@@ -138,11 +149,7 @@ function MCMC(param::Array{Float64,1},lprob_best::Float64,foutput::String,
       # model_trial =ttv_wrapper3(tt0,par_trial)
       lprob_trial = calc_lprior(par_trial)  
       if lprob_trial > -Inf
-        if EMB
-          model_trial = ttv_wrapper(tt0,nplanet,ntrans,par_trial[1:nparam],jmax,true)
-        else 
-          model_trial = ttv_wrapper(tt0,nplanet,ntrans,par_trial[1:nparam],jmax,false)
-        end
+          model_trial = ttv_wrapper(tt0,nplanet,ntrans,par_trial[1:nparam],jmax,EM)
         # model_trial = ttv_wrapper(tt0,nplanet,ntrans,par_trial[1:nparam],false)
         # ll = -.5 *sum((tt-model_trial).^2 ./(sigtt.^2 .+ par_trial[end]) .+ log.(sigtt.^2 .+ par_trial[end]))
         # ll =  log(sum((tt-model_trial).^2 ./sigtt.^2))
@@ -154,7 +161,7 @@ function MCMC(param::Array{Float64,1},lprob_best::Float64,foutput::String,
         end 
       end   
   # Next,determine whether to accept this trial step:
-      alp = z^(nsize-1)*exp((lprob_trial - lprob_mcmc[j,i-1]))
+      alp = z^(nsize-1)*exp((lprob_trial - lprob_mcmc[j,i-1])) #prob ratio between current trial and previous prob
       if rand() < 0.0001
         println("Step: ",i," Walker: ",j," Trial Log Prob: " ,lprob_trial," Prob: ",alp," Frac: ",accept/(mod(i-1,1000)*nwalkers+j))
       end
@@ -189,7 +196,6 @@ function MCMC(param::Array{Float64,1},lprob_best::Float64,foutput::String,
       end
     end
   end
-
   println("Burn-in Number (ends): ",iburn)
 
   # Now,calculate the minimum number of effective samples over all parameters:
@@ -202,7 +208,7 @@ function MCMC(param::Array{Float64,1},lprob_best::Float64,foutput::String,
   indepsamples = minimum(samplesize)
   println("Independent Sample Size: ",indepsamples)
   
-  file = string(foutput,"mcmc.jld2")
-  @save file par_mcmc lprob_mcmc param nwalkers nsteps accept iburn indepsamples
+  mcmcfile = string(foutput)
+  @save mcmcfile par_mcmc lprob_mcmc param nwalkers nsteps accept iburn indepsamples
   return lprob_mcmc,par_mcmc #, param, nwalkers, nsteps, accept, iburn, indepsamples
 end
