@@ -335,7 +335,7 @@ function corner_plot(sigma,nyear,sim,model,nbins,include_moon::Bool=false)
     x3=vec(par_mcmc[:,iburn:nsteps,18])#.*57.2957795
     tmax=calc_tmax(CGS.AU,CGS.AMOON*CGS.AU,CGS.MEARTH,CGS.MMOON,365.256355) #0.0018
     truex2=0.01
-    truex3=2.3122#.*57.2957795
+    truex3=2.31586#.*57.2957795
     title=string("IMAGES/corners/",sim,model,"Moon-",sigma,"secs",nyear,"yrs.png")
     # corner(x1,x2,x3,truex1,truex2,truex3,nbins)
     # savefig(title)
