@@ -132,7 +132,7 @@ function plot_trace(sigma,nyear,sim,model,include_moon::Bool=false)
 end 
 
 function plot_emcee(sigma,nyear,sim,model,include_moon::Bool=false)
-  if String(sim)=="EMB" && isfile(string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jl"))
+  if String(sim)=="EMB" && isfile(string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
     mcfile = string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
   elseif isfile(string("MCMC/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
     mcfile = string("MCMC/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
@@ -162,7 +162,7 @@ function plot_emcee(sigma,nyear,sim,model,include_moon::Bool=false)
   end
   tight_layout()
   title=string("IMAGES/traces/",sim,model,"Venus-",sigma,"secs",nyear,"yrs.png")
-  # savefig(title)
+  savefig(title)
   clf()
   figure(figsize=(8,6))
   for i=1:5
@@ -174,7 +174,7 @@ function plot_emcee(sigma,nyear,sim,model,include_moon::Bool=false)
   end
   tight_layout()
   title=string("IMAGES/traces/",sim,model,"Earth-",sigma,"secs",nyear,"yrs.png")
-  # savefig(title)
+  savefig(title)
   clf()
   if String(model)=="p4"
     figure(figsize=(8,6))
@@ -187,7 +187,7 @@ function plot_emcee(sigma,nyear,sim,model,include_moon::Bool=false)
     end
     tight_layout()
     title=string("IMAGES/traces/",sim,model,"Mars-",sigma,"secs",nyear,"yrs.png")
-    # savefig(title)
+    savefig(title)
     clf()
     figure(figsize=(8,6))
     for i=1:5
@@ -204,7 +204,7 @@ function plot_emcee(sigma,nyear,sim,model,include_moon::Bool=false)
     end
     tight_layout()
     title=string("IMAGES/traces/",sim,model,"Jupiter-",sigma,"secs",nyear,"yrs.png")
-    # savefig(title)
+    savefig(title)
     clf()
   else
     figure(figsize=(8,6))
@@ -222,7 +222,7 @@ function plot_emcee(sigma,nyear,sim,model,include_moon::Bool=false)
     end
     tight_layout()
     title=string("IMAGES/traces/",sim,model,"Jupiter-",sigma,"secs",nyear,"yrs.png")
-    # savefig(title)
+    savefig(title)
     clf()
   end
   if include_moon
@@ -246,24 +246,12 @@ function plot_emcee(sigma,nyear,sim,model,include_moon::Bool=false)
   end
 end
 
-# Make plot of MCMC parameters after burn-in
-function plot_parameters(xvalue,yvalue)
-  par_mcmc= mcmc["par_mcmc"]
-  nwalkers = mcmc["nwalkers"]
-  nsteps = mcmc["nsteps"]
-  accept = mcmc["accept"]
-  iburn = mcmc["iburn"]
-  indepsamples = mcmc["indepsamples"]
-
-
-
-# figsize=(8,6)
-# for i=2:nparam
-#   for j=1:i-1
-#     scatter(vec(par_mcmc[1:nwalkers,iburn:nsteps,i]),vec(par_mcmc[1:nwalkers,iburn:nsteps,j]))
-#     xlabel(pname[i])
-#     ylabel(pname[j])
-#   end
-# end
-# name = string("IMAGES/MCMCparams",label,".png")
-end
+# # figsize=(8,6)
+# # for i=2:nparam
+# #   for j=1:i-1
+# #     scatter(vec(par_mcmc[1:nwalkers,iburn:nsteps,i]),vec(par_mcmc[1:nwalkers,iburn:nsteps,j]))
+# #     xlabel(pname[i])
+# #     ylabel(pname[j])
+# #   end
+# # end
+# # name = string("IMAGES/MCMCparams",label,".png")

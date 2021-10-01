@@ -4,7 +4,7 @@ rc("font",family="sans-serif")
 calc_deg(value) = value * 180/pi
 calc_evec1(e,omega) = e* cos(omega-77)
 calc_evec2(e,omega) = e* sin(omega-77)
-# calc_tmax(phi,deltaphi) = 
+calc_tmax(a_p,a_s,m_p,m_s,P_p) = (a_s*m_s*P_p) / (2*pi*a_p*(m_s+m_p)) 
 # Basic corner plot for posterior distributions of x vs y parameters
 function corner(x1,x2,truex1,truex2,nbins)
 	meanx=mean(x1);sigmax=std(x1)
@@ -15,9 +15,9 @@ function corner(x1,x2,truex1,truex2,nbins)
 	subplot(221)
 	ax2=gca()
 	ax2.hist(x1,bins=nbins,histtype="step",density="true",color="black")
-	axvline(meanx-sigmax,color="grey",alpha=0.5,label=L"$1\sigma$ Limit")
-	axvline(meanx+sigmax,color="grey",alpha=0.5) 
-	axvline(truex1,linestyle="--",color="black",label="True Value")
+	# axvline(meanx-sigmax,color="grey",alpha=0.5,label=L"$1\sigma$ Limit")
+	# axvline(meanx+sigmax,color="grey",alpha=0.5) 
+	axvline(truex1,linestyle="-",color="black",label="True Value")
 	ax2.minorticks_on()
 	ax2.tick_params(which="major",direction="in",length=6,
 	    left="false",right="false",top="true",bottom="true",
@@ -30,9 +30,9 @@ function corner(x1,x2,truex1,truex2,nbins)
 	subplot(224)
 	ax3=gca()
 	ax3.hist(x1,bins=nbins,histtype="step",density="true",color="black",orientation="horizontal")
-	axhline(meany-sigmay,color="grey",alpha=0.5)
-	axhline(meany+sigmay,color="grey",alpha=0.5)
-	axhline(truex2,linestyle="--",color="black")
+	# axhline(meany-sigmay,color="grey",alpha=0.5)
+	# axhline(meany+sigmay,color="grey",alpha=0.5)
+	axhline(truex2,linestyle="-",color="black")
 	ax3.minorticks_on()
 	ax3.tick_params(which="major",direction="in",length=6,
 	    left="true",right="true",top="false",bottom="false",
@@ -44,8 +44,8 @@ function corner(x1,x2,truex1,truex2,nbins)
 	subplot(223,sharex=ax2,sharey=ax3)
 	ax1=gca()
 	ax1.hist2d(x1,x2,bins=nbins,cmin=1)
-  axvline(truex1,linestyle="--",color="black")
-  axhline(truex2,linestyle="--",color="black")
+  # axvline(truex1,linestyle="-",color="black")
+  # axhline(truex2,linestyle="-",color="black")
 	ax1.axis([minimum(x1),maximum(x1),minimum(x2),maximum(x2)])
 	ax1.tick_params(which="major",direction="in",top="true",right="true",length=6)
 	ax1.tick_params(which="minor",direction="in",top="true",right="true",length=2)
@@ -79,7 +79,7 @@ function corner(x1,x2,x3,truex1,truex2,truex3,nbins)
   subplot(3,3,5)
   ax5=gca()
   ax5.hist(x2,bins=nbins,histtype="step",density="true",color="black")
-  #     ax5.axvline(truex2,linestyle="-",color="black")
+  ax5.axvline(truex2,linestyle="-",color="black")
   ax5.minorticks_on()
   ax5.tick_params(which="major",direction="in",length=5,
       left="false",right="false",top="true",bottom="true",
@@ -113,12 +113,12 @@ function corner(x1,x2,x3,truex1,truex2,truex3,nbins)
   ax9=gca()
   ax9.hist(x1,bins=nbins,histtype="step",density="true",color="black")
   xlabel(L"$t_{max} \sin{\phi_0}$")
-  #     ax9.axvline(truex1,linestyle="-",color="black")
+  ax9.axvline(truex1,linestyle="-",color="black")
   #     ylabel(L"$e \cos \varpi $")
   ax9.minorticks_on()
-  ax9.tick_params(which="major",direction="in",top="true",right="false",length=5,
+  ax9.tick_params(which="major",direction="in",top="true",left="false",right="false",length=5,
       labelleft="false",labelbottom="true")
-  ax9.tick_params(which="minor",direction="in",top="true",right="false",length=2,
+  ax9.tick_params(which="minor",direction="in",top="true",left="false",right="false",length=2,
       labelleft="false",labelbottom="true")
   tight_layout()
 end
@@ -238,7 +238,7 @@ function corner(x1,x2,x3,x4,truex1,truex2,truex3,truex4,nbins,lim,label)
 end
 # Create a corner plot for posterior distributions of planet parameters
 function corner_plot(sigma,nyear,sim,model,nbins,include_moon::Bool=false) 
-  if String(sim)=="EMB"  && isfile(string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jl"))
+  if String(sim)=="EMB"  && isfile(string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
     mcfile = string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
   elseif isfile(string("MCMC/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
     mcfile = string("MCMC/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
@@ -330,15 +330,15 @@ function corner_plot(sigma,nyear,sim,model,nbins,include_moon::Bool=false)
     clf()
   end
   if include_moon
-    x1=vec(par_mcmc[:,iburn:nsteps,16])
+    x1=sqrt.(vec(par_mcmc[:,iburn:nsteps,16]).^2 .+ vec(par_mcmc[:,iburn:nsteps,17]).^2)
     x2=vec(par_mcmc[:,iburn:nsteps,17])
     x3=vec(par_mcmc[:,iburn:nsteps,18])#.*57.2957795
-    truex1=0.01
+    tmax=calc_tmax(CGS.AU,CGS.AMOON*CGS.AU,CGS.MEARTH,CGS.MMOON,365.256355) #0.0018
     truex2=0.01
     truex3=2.3122#.*57.2957795
     title=string("IMAGES/corners/",sim,model,"Moon-",sigma,"secs",nyear,"yrs.png")
-    corner(x1,x2,x3,truex1,truex2,truex3,nbins)
-    savefig(title)
-    clf()
+    # corner(x1,x2,x3,truex1,truex2,truex3,nbins)
+    # savefig(title)
+    show()
   end
 end
