@@ -6,12 +6,47 @@ calc_evec1(e,omega) = e* cos(omega-77)
 calc_evec2(e,omega) = e* sin(omega-77)
 calc_tmax(a_p,a_s,m_p,m_s,P_p) = (a_s*m_s*P_p) / (2*pi*a_p*(m_s+m_p)) 
 # Basic corner plot for posterior distributions of x vs y parameters
+function corner(x1,x2,nbins)
+  fig=figure(figsize=(5,5))
+  subplots_adjust(hspace=0.05,wspace=0.05)
+  subplot(221)
+  ax2=gca()
+  ax2.hist(x1,bins=nbins,histtype="step",density="true",color="black")
+  ax2.minorticks_on()
+  ax2.tick_params(which="major",direction="in",length=6,
+      left="false",right="false",top="true",bottom="true",
+      labelbottom="false",labeltop="false",labelleft="false",labelright="false")
+  ax2.tick_params(which="minor",direction="in",length=2,
+      left="false",right="false",top="true",bottom="true",
+      labelbottom="false",labeltop="false",labelleft="false",labelright="false")
+
+  subplot(224)
+  ax3=gca()
+  ax3.hist(x2,bins=nbins,histtype="step",density="true",color="black",orientation="horizontal")
+  ax3.minorticks_on()
+  ax3.tick_params(which="major",direction="in",length=6,
+      left="true",right="true",top="false",bottom="false",
+      labelbottom="false",labeltop="false",labelleft="false",labelright="false")
+  ax3.tick_params(which="minor",direction="in",length=2,
+      left="true",right="true",top="false",bottom="false",
+      labelbottom="false",labeltop="false",labelleft="false",labelright="false")
+
+  subplot(223,sharex=ax2,sharey=ax3)
+  ax1=gca()
+  ax1.hist2d(x1,x2,bins=nbins,cmin=1)
+  xlabel(L"$t_{max} \sin{\phi_0}$")
+  ylabel(L"$t_{max} \cos{\phi_0}$")
+  ax1.axis([minimum(x1),maximum(x1),minimum(x2),maximum(x2)])
+  ax1.tick_params(which="major",direction="in",top="true",right="true",length=6)
+  ax1.tick_params(which="minor",direction="in",top="true",right="true",length=2)
+  tight_layout()
+end
 function corner(x1,x2,truex1,truex2,nbins)
 	meanx=mean(x1);sigmax=std(x1)
 	meany=mean(x2);sigmay=std(x2)
 
-	fig=figure(figsize=(6,6))
-	subplots_adjust(hspace=0.02,wspace=0.02)
+	fig=figure(figsize=(5,5))
+	subplots_adjust(hspace=0.05,wspace=0.05)
 	subplot(221)
 	ax2=gca()
 	ax2.hist(x1,bins=nbins,histtype="step",density="true",color="black")
@@ -25,11 +60,11 @@ function corner(x1,x2,truex1,truex2,nbins)
 	ax2.tick_params(which="minor",direction="in",length=2,
 	    left="false",right="false",top="true",bottom="true",
 	    labelbottom="false",labeltop="false",labelleft="false",labelright="false")
-	ax2.legend(bbox_to_anchor=(1.05,1),loc=2,borderaxespad=0.0)
+	# ax2.legend(bbox_to_anchor=(1.05,1),loc=2,borderaxespad=0.0)
 
 	subplot(224)
 	ax3=gca()
-	ax3.hist(x1,bins=nbins,histtype="step",density="true",color="black",orientation="horizontal")
+	ax3.hist(x2,bins=nbins,histtype="step",density="true",color="black",orientation="horizontal")
 	# axhline(meany-sigmay,color="grey",alpha=0.5)
 	# axhline(meany+sigmay,color="grey",alpha=0.5)
 	axhline(truex2,linestyle="-",color="black")
@@ -44,12 +79,79 @@ function corner(x1,x2,truex1,truex2,nbins)
 	subplot(223,sharex=ax2,sharey=ax3)
 	ax1=gca()
 	ax1.hist2d(x1,x2,bins=nbins,cmin=1)
-  # axvline(truex1,linestyle="-",color="black")
-  # axhline(truex2,linestyle="-",color="black")
+  xlabel(L"$t_{max}$ [days]")
+  ylabel(L"$\Delta \phi$ [rad]")
 	ax1.axis([minimum(x1),maximum(x1),minimum(x2),maximum(x2)])
 	ax1.tick_params(which="major",direction="in",top="true",right="true",length=6)
 	ax1.tick_params(which="minor",direction="in",top="true",right="true",length=2)
 	tight_layout()
+end
+function corner(x1,x2,x3,nbins)
+  fig=figure(figsize=(8,8))
+  subplots_adjust(hspace=0.05,wspace=0.05)
+  subplot(3,3,1)
+  ax1=gca()
+  ax1.hist(x3,bins=nbins,histtype="step",density="true",color="black")
+  ax1.minorticks_on()
+  ax1.tick_params(which="major",direction="in",length=5,
+      left="false",right="false",top="true",bottom="true",
+      labelbottom="false",labeltop="false",labelleft="false",labelright="false")
+  ax1.tick_params(which="minor",direction="in",length=2,
+      left="false",right="false",top="true",bottom="true",
+      labelbottom="false",labeltop="false",labelleft="false",labelright="false")
+
+  subplot(3,3,4,sharex=ax1)
+  ax4=gca()
+  ax4.hist2d(x3,x2,bins=nbins,cmin=1)
+  ylabel(L"$t_{max} \cos{\phi_0}$")
+  ax4.minorticks_on()
+  ax4.tick_params(which="major",direction="in",top="true",right="true",length=5,
+      labelleft="true",labelbottom="false")
+  ax4.tick_params(which="minor",direction="in",top="true",right="true",length=2,
+      labelleft="true",labelbottom="false")
+
+  subplot(3,3,5)
+  ax5=gca()
+  ax5.hist(x2,bins=nbins,histtype="step",density="true",color="black")
+  ax5.minorticks_on()
+  ax5.tick_params(which="major",direction="in",length=5,
+      left="false",right="false",top="true",bottom="true",
+      labelbottom="false",labeltop="false",labelleft="false",labelright="false")
+  ax5.tick_params(which="minor",direction="in",length=2,
+      left="false",right="false",top="true",bottom="true",
+      labelbottom="false",labeltop="false",labelleft="false",labelright="false")
+
+  subplot(3,3,7,sharex=ax1)
+  ax7=gca()
+  ax7.hist2d(x3,x1,bins=nbins,cmin=1)
+  xlabel(L"$\Delta \phi [rad]$")
+  ylabel(L"$t_{max} \sin{\phi_0}$")
+  ax7.minorticks_on()
+  ax7.tick_params(which="major",direction="in",top="true",right="true",length=5,
+      labelleft="true",labelbottom="true")
+  ax7.tick_params(which="minor",direction="in",top="true",right="true",length=2,
+      labelleft="true",labelbottom="true")
+
+  subplot(3,3,8,sharex=ax5)
+  ax8=gca()
+  ax8.hist2d(x2,x1,bins=nbins,cmin=1)
+  xlabel(L"$t_{max} \cos{\phi_0}$")
+  ax8.minorticks_on()
+  ax8.tick_params(which="major",direction="in",top="true",right="true",length=5,
+      labelleft="false",labelbottom="true")
+  ax8.tick_params(which="minor",direction="in",top="true",right="true",length=2,
+      labelleft="false",labelbottom="true")
+
+  subplot(3,3,9)
+  ax9=gca()
+  ax9.hist(x1,bins=nbins,histtype="step",density="true",color="black")
+  xlabel(L"$t_{max} \sin{\phi_0}$")
+  ax9.minorticks_on()
+  ax9.tick_params(which="major",direction="in",top="true",left="false",right="false",length=5,
+      labelleft="false",labelbottom="true")
+  ax9.tick_params(which="minor",direction="in",top="true",left="false",right="false",length=2,
+      labelleft="false",labelbottom="true")
+  tight_layout()
 end
 function corner(x1,x2,x3,truex1,truex2,truex3,nbins)
   fig=figure(figsize=(8,8))
@@ -266,8 +368,8 @@ function corner_plot(sigma,nyear,sim,model,nbins,include_moon::Bool=false)
   lim=0.00076,0.00081
   label=L"Per $- 224.7$ [days]"
   title=string("IMAGES/corners/",sim,model,"Venus-",sigma,"secs",nyear,"yrs.png")
-  corner(m1,ec1,es1,p1,truem1,trueec1,truees1,truep1,nbins,lim,label)
-  savefig(title)
+  # corner(m1,ec1,es1,p1,truem1,trueec1,truees1,truep1,nbins,lim,label)
+  # savefig(title)
   clf()
   offset = 365.25
   m2=vec(par_mcmc[:,iburn:nsteps,6]).* CGS.MSUN/CGS.MEARTH
@@ -281,8 +383,8 @@ function corner_plot(sigma,nyear,sim,model,nbins,include_moon::Bool=false)
   lim=0.0064,0.00652
   label=L"Per $- 365.25$ [days]"
   title=string("IMAGES/corners/",sim,model,"Earth-",sigma,"secs",nyear,"yrs.png")
-  corner(m2,ec2,es2,p2,truem2,trueec2,truees2,truep2,nbins,lim,label)
-  savefig(title)
+  # corner(m2,ec2,es2,p2,truem2,trueec2,truees2,truep2,nbins,lim,label)
+  # savefig(title)
   clf()
   if String(model)=="p4"
     m3=vec(par_mcmc[:,iburn:nsteps,11]).* CGS.MSUN/CGS.MEARTH
@@ -296,8 +398,8 @@ function corner_plot(sigma,nyear,sim,model,nbins,include_moon::Bool=false)
     lim=minimum(p3),maximum(p3)
     label="Per [days]"
     title=string("IMAGES/corners/",sim,model,"Mars-",sigma,"secs",nyear,"yrs.png")
-    corner(m3,ec3,es3,p3,truem3,trueec3,truees3,truep3,nbins,lim,label)
-    savefig(title)
+    # corner(m3,ec3,es3,p3,truem3,trueec3,truees3,truep3,nbins,lim,label)
+    # savefig(title)
     clf()
     m4=vec(par_mcmc[:,iburn:nsteps,16]).* CGS.MSUN/CGS.MEARTH
     ec4=vec(par_mcmc[:,iburn:nsteps,19])#.*sqrt.(vec(par_mcmc[:,1:nsteps,14]).^2 .+ vec(par_mcmc[:,1:nsteps,15]).^2)
@@ -310,8 +412,8 @@ function corner_plot(sigma,nyear,sim,model,nbins,include_moon::Bool=false)
     lim=minimum(p4),maximum(p4)
     label="Per [days]"
     title=string("IMAGES/corners/",sim,model,"Jupiter-",sigma,"secs",nyear,"yrs.png")
-    corner(m4,ec4,es4,p4,truem4,trueec4,truees4,truep4,nbins,lim,label)
-    savefig(title)
+    # corner(m4,ec4,es4,p4,truem4,trueec4,truees4,truep4,nbins,lim,label)
+    # savefig(title)
     clf()
   else
     m3=vec(par_mcmc[:,iburn:nsteps,11]).* CGS.MSUN/CGS.MEARTH
@@ -325,20 +427,22 @@ function corner_plot(sigma,nyear,sim,model,nbins,include_moon::Bool=false)
     lim=minimum(p3),maximum(p3)
     label="Per [days]"
     title=string("IMAGES/corners/",sim,model,"Jupiter-",sigma,"secs",nyear,"yrs.png")
-    corner(m3,ec3,es3,p3,truem3,trueec3,truees3,truep3,nbins,lim,label)
-    savefig(title)
+    # corner(m3,ec3,es3,p3,truem3,trueec3,truees3,truep3,nbins,lim,label)
+    # savefig(title)
     clf()
   end
   if include_moon
-    x1=sqrt.(vec(par_mcmc[:,iburn:nsteps,16]).^2 .+ vec(par_mcmc[:,iburn:nsteps,17]).^2)
+    tmax=sqrt.(vec(par_mcmc[:,iburn:nsteps,16]).^2 .+ vec(par_mcmc[:,iburn:nsteps,17]).^2)
+    x1=vec(par_mcmc[:,iburn:nsteps,16])
     x2=vec(par_mcmc[:,iburn:nsteps,17])
     x3=vec(par_mcmc[:,iburn:nsteps,18])#.*57.2957795
-    tmax=calc_tmax(CGS.AU,CGS.AMOON*CGS.AU,CGS.MEARTH,CGS.MMOON,365.256355) #0.0018
+    truetmax=calc_tmax(CGS.AU,CGS.AMOON*CGS.AU,CGS.MEARTH,CGS.MMOON,365.256355) #0.0018
     truex2=0.01
     truex3=2.31586#.*57.2957795
-    title=string("IMAGES/corners/",sim,model,"Moon-",sigma,"secs",nyear,"yrs.png")
-    # corner(x1,x2,x3,truex1,truex2,truex3,nbins)
+    title=string("IMAGES/corners/",sim,model,"Moon2-",sigma,"secs",nyear,"yrs.png")
+    # corner(tmax,x3,truetmax,truex3,nbins)
+    # corner(x1,x2,x3,nbins)
     # savefig(title)
-    show()
+    clf()
   end
 end

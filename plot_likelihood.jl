@@ -33,7 +33,7 @@ function plot_likelihood(sigma,nyear,sim,fitmodel,mcmodel,nbins,include_moon::Bo
 	param = vec(m["par_mcmc"][:,m["iburn"]:end,ncol])./365.25
 	xbin,xhist,xbin_square,hist_square=histogram(param,nbins)
 	label="Planet Period Search Grid [years]"
-	lim = f["p3in"]/365.25,f["p3out"]/365.25
+	lim = minimum(xgrid)/365.25,maximum(xgrid)/365.25
 	color="firebrick"
 	fig = plt.figure()
   ax1 = gca()
@@ -58,6 +58,25 @@ function plot_likelihood(sigma,nyear,sim,fitmodel,mcmodel,nbins,include_moon::Bo
   title=string("IMAGES/likelihoods/",sim,mcmodel,"Jupiter-",sigma,"secs",nyear,"yrs.png")
   # savefig(title)
   clf()
+  if fitmodel=="p4"
+  ncol = 12
+  xgrid = f["p4"]./365.25
+	xprob = exp.((f["lprob_p4"] .-maximum(f["lprob_p4"])))
+ #  grid_wide = 10 .^ range(log10(wide["p3in"]),stop=log10(wide["p3out"]),length=wide["np3"])
+	# lprob_wide = exp.((wide["lprob_p4"] .-maximum(wide["lprob_p4"])))
+	grid = [grid_wide[1:55];xgrid;grid_wide[198:end]]
+	prob = [lprob_wide[1:55];xprob;lprob_wide[198:end]]
+	bfvalue = f["best_p4"][ncol] /365.25	
+	truex = 1.88
+	param = vec(m["par_mcmc"][:,m["iburn"]:end,ncol])./365.25
+	xbin,xhist,xbin_square,hist_square=histogram(param,nbins)
+	figure()
+	plot(xgrid,xprob,color="darkcyan")
+	# plot()
+	axvline(truex,linestyle="--",color="black",label=string(truex))
+	show()
+
+  end
 	if include_moon
 		xgrid = range(f["dpin"],stop=f["dpout"],length=f["ndp"])
 		xprob = exp.((f["lprob_dp"] .-maximum(f["lprob_dp"])))
@@ -94,7 +113,7 @@ function plot_likelihood(sigma,nyear,sim,fitmodel,mcmodel,nbins,include_moon::Bo
 	  		right="true",labelright="true")
 	  tight_layout()
 	  title=string("IMAGES/likelihoods/",sim,mcmodel,"Moon-",sigma,"secs",nyear,"yrs.png")
-  	savefig(title)
+  	# savefig(title)
   	clf()
 	end
 end
