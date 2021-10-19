@@ -34,12 +34,9 @@ function corner(x1,x2,nbins)
   subplot(223,sharex=ax2,sharey=ax3)
   ax1=gca()
   ax1.hist2d(x1,x2,bins=nbins,cmin=1)
-  xlabel(L"$t_{max} \sin{\phi_0}$")
-  ylabel(L"$t_{max} \cos{\phi_0}$")
   ax1.axis([minimum(x1),maximum(x1),minimum(x2),maximum(x2)])
   ax1.tick_params(which="major",direction="out",top="true",right="true",length=6)
   ax1.tick_params(which="minor",direction="out",top="true",right="true",length=2)
-  tight_layout()
 end
 function corner(x1,x2,truex1,truex2,nbins)
 	meanx=mean(x1);sigmax=std(x1)
@@ -338,6 +335,139 @@ function corner(x1,x2,x3,x4,truex1,truex2,truex3,truex4,nbins,lim,label)
       labelbottom="false",labeltop="false",labelleft="false",labelright="false")
   tight_layout()
 end
+function corner_hist(sigma,nyear,sim,model,nbins,include_moon::Bool=false) 
+  if String(sim)=="EMB"  && isfile(string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
+    mcfile = string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+  elseif isfile(string("MCMC/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
+    mcfile = string("MCMC/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+  else
+    return  println("MCMC file for ",sim," with ",model," model at ",sigma," secs and ",nyear," yrs doesn't exist!!!!")
+  end
+  m = jldopen(String(mcfile),"r")
+  par_mcmc= m["par_mcmc"]
+  lprob_mcmc = m["lprob_mcmc"]
+  nwalkers = m["nwalkers"]
+  nsteps = m["nsteps"]
+  accept = m["accept"]
+  iburn = m["iburn"]
+  indepsamples = m["indepsamples"]
+  # True values based on "PlanetaryBodyData.pdf" (source?)
+  offset = 224.70
+  m1=vec(par_mcmc[:,iburn:nsteps,1]).* CGS.MSUN/CGS.MEARTH
+  ec1=vec(par_mcmc[:,iburn:nsteps,4])#.*sqrt.(vec(par_mcmc[11:20,iburn:nsteps,4]).^2 .+ vec(par_mcmc[11:20,iburn:nsteps,5]).^2)
+  es1=vec(par_mcmc[:,iburn:nsteps,5])#.*sqrt.(vec(par_mcmc[11:20,iburn:nsteps,4]).^2 .+ vec(par_mcmc[11:20,iburn:nsteps,5]).^2)
+  p1=vec(par_mcmc[:,iburn:nsteps,2]).-offset
+  e1=sqrt.(vec(par_mcmc[:,iburn:nsteps,4]).^2 .+ vec(par_mcmc[:,iburn:nsteps,5]).^2)
+  truem1=0.815
+  trueec1=calc_evec1(0.00677323,131.53298)
+  truees1=calc_evec2(0.00677323,131.53298)
+  truep1=224.7007992.-offset
+  truee1=0.00677323
+  lim=0.00076,0.00081
+  offset = 365.25
+  m2=vec(par_mcmc[:,iburn:nsteps,6]).* CGS.MSUN/CGS.MEARTH
+  ec2=vec(par_mcmc[:,iburn:nsteps,9])
+  es2=vec(par_mcmc[:,iburn:nsteps,10])#.*sqrt.(vec(par_mcmc[:,1:nsteps,9]).^2 .+ vec(par_mcmc[:,1:nsteps,10]).^2)
+  p2=vec(par_mcmc[:,iburn:nsteps,7]).-offset
+  e2=sqrt.(vec(par_mcmc[:,iburn:nsteps,9]).^2 .+ vec(par_mcmc[:,iburn:nsteps,10]).^2)
+  truem2=1
+  trueec2=calc_evec1(0.01671022,102.94719)
+  truees2=calc_evec2(0.01671022,102.94719)
+  truep2=365.2564-offset #365.256355
+  truee2=0.01671022
+  lim=0.0064,0.00652
+  corner(m1,m2,truem1,truem2,nbins)
+  ylabel(L"Mass of Earth [$M_{Earth}$]")
+  xlabel(L"Mass of Venus [$M_{Earth}$]")
+  tight_layout()
+  title=string("IMAGES/discussion/",sim,model,"masses",sigma,"secs",nyear,"yrs.png")
+  savefig(title)
+  clf()
+  corner(e1,e2,truee1,truee2,nbins)
+  ylabel("Eccentricy of Earth")
+  xlabel("Eccentricy of Venus")
+  tight_layout()
+  title=string("IMAGES/discussion/",sim,model,"eccs",sigma,"secs",nyear,"yrs.png")
+  savefig(title)
+  clf()
+  corner(ec1,ec2,trueec1,trueec2,nbins)
+  ylabel(L"$e \cos \varpi$ for Earth")
+  xlabel(L"$e \cos \varpi$ for Venus")
+  tight_layout()
+  title=string("IMAGES/discussion/",sim,model,"ecos",sigma,"secs",nyear,"yrs.png")
+  savefig(title)
+  clf()
+  corner(es1,es2,truees1,truees2,nbins)
+  ylabel(L"$e \sin \varpi$ for Earth")
+  xlabel(L"$e \sin \varpi$ for Venus")
+  tight_layout()
+  title=string("IMAGES/discussion/",sim,model,"esin",sigma,"secs",nyear,"yrs.png")
+  savefig(title)
+  clf()
+  if String(model)=="p4"
+    m3=vec(par_mcmc[:,iburn:nsteps,11]).* CGS.MSUN/CGS.MEARTH
+    ec3=vec(par_mcmc[:,iburn:nsteps,14])#.*sqrt.(vec(par_mcmc[:,1:nsteps,14]).^2 .+ vec(par_mcmc[:,1:nsteps,15]).^2)
+    es3=vec(par_mcmc[:,iburn:nsteps,15])#.*sqrt.(vec(par_mcmc[:,1:nsteps,14]).^2 .+ vec(par_mcmc[:,1:nsteps,15]).^2)
+    p3=vec(par_mcmc[:,iburn:nsteps,12])
+    e3=sqrt.(vec(par_mcmc[:,iburn:nsteps,14]).^2 .+ vec(par_mcmc[:,iburn:nsteps,15]).^2)
+    truem3=0.1074
+    trueec3=calc_evec1(0.09341233,336.04084)
+    truees3=calc_evec2(0.09341233,336.04084)
+    truep3=686.9795859
+    truee3=0.09341233
+    corner(m3,e3,truem3,truee3,nbins)
+    xlabel(L"Mass of Mars [$M_{Earth}$]")
+    ylabel("Eccentricy of Mars")
+    tight_layout()
+    title=string("IMAGES/discussion/",sim,model,"Vmecc",sigma,"secs",nyear,"yrs.png")
+    savefig(title)
+    clf()
+    m4=vec(par_mcmc[:,iburn:nsteps,16]).* CGS.MSUN/CGS.MEARTH
+    ec4=vec(par_mcmc[:,iburn:nsteps,19])#.*sqrt.(vec(par_mcmc[:,1:nsteps,14]).^2 .+ vec(par_mcmc[:,1:nsteps,15]).^2)
+    es4=vec(par_mcmc[:,iburn:nsteps,20])#.*sqrt.(vec(par_mcmc[:,1:nsteps,14]).^2 .+ vec(par_mcmc[:,1:nsteps,15]).^2)
+    p4=vec(par_mcmc[:,iburn:nsteps,17])
+    e4=sqrt.(vec(par_mcmc[:,iburn:nsteps,19]).^2 .+ vec(par_mcmc[:,iburn:nsteps,20]).^2)
+    truem4=317.8
+    trueec4=calc_evec1(0.04839266,14.75385)
+    truees4=calc_evec2(0.04839266,14.75385)
+    truep4=4332.82012875
+    truee4=0.04839266
+    corner(m4,e4,truem4,truee4,nbins)
+    xlabel(L"Mass of Jupiter [$M_{Earth}$]")
+    ylabel("Eccentricy of Jupiter")
+    tight_layout()
+    title=string("IMAGES/discussion/",sim,model,"Jmecc",sigma,"secs",nyear,"yrs.png")
+    savefig(title)
+    clf()
+  else 
+    m3=vec(par_mcmc[:,iburn:nsteps,11]).* CGS.MSUN/CGS.MEARTH
+    ec3=vec(par_mcmc[:,iburn:nsteps,14])#.*sqrt.(vec(par_mcmc[:,1:nsteps,14]).^2 .+ vec(par_mcmc[:,1:nsteps,15]).^2)
+    es3=vec(par_mcmc[:,iburn:nsteps,15])#.*sqrt.(vec(par_mcmc[:,1:nsteps,14]).^2 .+ vec(par_mcmc[:,1:nsteps,15]).^2)
+    p3=vec(par_mcmc[:,iburn:nsteps,12])
+    e3=sqrt.(vec(par_mcmc[:,iburn:nsteps,14]).^2 .+ vec(par_mcmc[:,iburn:nsteps,15]).^2)
+    truem3=317.8
+    trueec3=calc_evec1(0.04839266,14.75385)
+    truees3=calc_evec2(0.04839266,14.75385)
+    truep3=4332.82012875
+    truee3=0.04839266
+    corner(m3,e3,truem3,truee3,nbins)
+    xlabel(L"Mass of Jupiter [$M_{Earth}$]")
+    ylabel("Eccentricy of Jupiter")
+    tight_layout()
+    title=string("IMAGES/discussion/",sim,model,"mecc",sigma,"secs",nyear,"yrs.png")
+    savefig(title)
+    clf()
+    # corner(es2,es3,truees2,truees3,nbins)
+    # xlabel("Eccentricy of Earth")
+    # ylabel("Eccentricy of Jupiter")
+    # tight_layout()
+    # title=string("IMAGES/discussion/",sim,model,"ecc",sigma,"secs",nyear,"yrs.png")
+    # savefig(title)
+    # clf()
+  end
+  show()
+end
+
 # Create a corner plot for posterior distributions of planet parameters
 function corner_plot(sigma,nyear,sim,model,nbins,include_moon::Bool=false) 
   if String(sim)=="EMB"  && isfile(string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
@@ -440,7 +570,7 @@ function corner_plot(sigma,nyear,sim,model,nbins,include_moon::Bool=false)
     truex2=0.01
     truex3=2.31586#.*57.2957795
     title=string("IMAGES/corners/",sim,model,"Moon2-",sigma,"secs",nyear,"yrs.png")
-    corner(tmax,x3,truetmax,truex3,nbins)
+    # corner(tmax,x3,truetmax,truex3,nbins)
     corner(x1,x2,x3,nbins)
     savefig(title)
     clf()
