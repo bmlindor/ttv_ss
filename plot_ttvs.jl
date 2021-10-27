@@ -205,7 +205,7 @@ function plot_ttvs(sigma,nyear,sim,fitmodel,include_moon::Bool=false)
     bestfit="best_p4"
     nplanet=4
   elseif fitmodel=="moon" #if isfile(string("FITS/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")) 
-    bestfit = "best_dp"
+    bestfit = "best_p3"
   # else 
   #   return  println("FITS file for ",sim," with ",fitmodel," model at ",sigma," secs and ",nyear," yrs doesn't exist!!!!")
   end

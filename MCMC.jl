@@ -61,20 +61,20 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,
     lprior = 0.0
     # Loop over planets:
     for iplanet=1:nplanet
-      # Place prior on eccentricities:
+    # Place prior on eccentricities:
       ecc = sqrt(param[(iplanet-1)*5+4]^2+param[(iplanet-1)*5+5]^2)
       lprior_tmp,dpdx = log_bounds_upper(ecc,emax1,emax2)
       lprior += lprior_tmp
       lprior += -log(ecc) 
     end
     for iplanet=1:nplanet-1
-  # The periods of the planets should be ordered from least to greatest:
+    # The periods of the planets should be ordered from least to greatest:
         if param[(iplanet-1)*5+2] > param[iplanet*5+2]
           lprior += -Inf
         end
     end
     if nparam>16
-      # Plase priors on deltaphi and account for aliasing:
+    # Plase priors on deltaphi and account for aliasing:
       dpmin = 0.0; dpmax = pi
       deltaphi = param[18]
       while deltaphi < dpmin
@@ -92,7 +92,7 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,
       # end
     end
     if use_sigsys
-      # sigsys priors:
+    # sigsys priors:
       sigsys = param[end]
       if sigsys < 0 
         lprior += -Inf
