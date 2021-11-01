@@ -73,6 +73,12 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,
           lprior += -Inf
         end
     end
+    for iplanet=1:nplanet
+    # Place prior on masses, they must be positive
+      if param[iplanet*5+1] < 0
+        lprior += -Inf
+      end
+    end
     if nparam>16
     # Plase priors on deltaphi and account for aliasing:
       dpmin = 0.0; dpmax = pi

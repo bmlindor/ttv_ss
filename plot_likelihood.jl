@@ -115,6 +115,6 @@ function plot_likelihood(sigma,nyear,sim,fitmodel,mcmodel,nbins,include_moon::Bo
 	  title=string("IMAGES/likelihoods/",sim,mcmodel,"Moon-",sigma,"secs",nyear,"yrs.png")
 	end
   tight_layout()
-  savefig(title)
-	# clf()
+  # savefig(title)
+	show()
 end

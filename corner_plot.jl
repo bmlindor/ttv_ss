@@ -76,8 +76,6 @@ function corner(x1,x2,truex1,truex2,nbins)
 	subplot(223,sharex=ax2,sharey=ax3)
 	ax1=gca()
 	ax1.hist2d(x1,x2,bins=nbins,cmin=1)
-  xlabel(L"$t_{max}$ [days]")
-  ylabel(L"$\Delta \phi$ [rad]")
 	ax1.axis([minimum(x1),maximum(x1),minimum(x2),maximum(x2)])
 	ax1.tick_params(which="major",direction="out",top="true",right="true",length=6)
 	ax1.tick_params(which="minor",direction="out",top="true",right="true",length=2)
@@ -457,15 +455,24 @@ function corner_hist(sigma,nyear,sim,model,nbins,include_moon::Bool=false)
     title=string("IMAGES/discussion/",sim,model,"mecc",sigma,"secs",nyear,"yrs.png")
     savefig(title)
     clf()
-    # corner(es2,es3,truees2,truees3,nbins)
-    # xlabel("Eccentricity of Earth")
-    # ylabel("Eccentricity of Jupiter")
-    # tight_layout()
-    # title=string("IMAGES/discussion/",sim,model,"ecc",sigma,"secs",nyear,"yrs.png")
-    # savefig(title)
-    # clf()
   end
-  show()
+  if include_moon
+    tmax=sqrt.(vec(par_mcmc[:,iburn:nsteps,16]).^2 .+ vec(par_mcmc[:,iburn:nsteps,17]).^2)
+    x1=vec(par_mcmc[:,iburn:nsteps,16])
+    x2=vec(par_mcmc[:,iburn:nsteps,17])
+    x3=vec(par_mcmc[:,iburn:nsteps,18])#.*57.2957795
+    truetmax=calc_tmax(CGS.AU,CGS.AMOON*CGS.AU,CGS.MEARTH,CGS.MMOON,365.256355) #0.0018
+    truex2=0.01
+    truex3=2.31586#.*57.2957795
+    title=string("IMAGES/discussion/",sim,model,"Moon2-",sigma,"secs",nyear,"yrs.png")
+    corner(tmax,x3,truetmax,truex3,nbins)
+    xlabel(L"$t_{max}$ [days]")
+    ylabel(L"$\Delta \phi$ [rad]")
+    tight_layout()
+    savefig(title)
+    clf()
+  end
+  # show()
 end
 
 # Create a corner plot for posterior distributions of planet parameters
