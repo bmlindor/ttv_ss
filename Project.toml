@@ -1,0 +1,9 @@
+[deps]
+CALCEPH = "1537fe66-4725-5aba-80f4-3a74792cecc1"
+DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
+FFMPEG = "c87230d0-a227-11e9-1b43-d7ebe4e7570a"
+IJulia = "7073ff75-c697-5162-941a-fcdaad2a7d2a"
+JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+PyPlot = "d330b81b-6aea-500a-939a-2ce795aea3ee"
+Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
