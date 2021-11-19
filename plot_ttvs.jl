@@ -12,6 +12,10 @@ function plot_res(sigma,nyear,sim,fitmodel,include_moon::Bool=false)
     fitfile = string("FITS/fromEMB/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
     bestfit = "best_p3"
     label="EMB"
+  elseif String(sim)=="EMB" && fitmodel=="p4" #if isfile(string("FITS/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")) 
+    fitfile = string("FITS/fromEMB",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
+    bestfit = "best_p4"
+    label="EMB"
   elseif fitmodel=="p4" #if isfile(string("FITS/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")) 
     fitfile = string("FITS/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
     bestfit = "best_p4"
@@ -36,10 +40,10 @@ function plot_res(sigma,nyear,sim,fitmodel,include_moon::Bool=false)
   ttv1,ttv2 = (tt1.-time1).* (24 * 60),(tt2.-time2).* (24 * 60) #in minutes
   sigtt1,sigtt2 = sigtt[1:n1].* (24 * 60),sigtt[n1+1:n1+n2].* (24 * 60) #in minutes
 
-  fig=figure(figsize=(8,5))
+  fig=figure(figsize=(8,4))
   subplot(211)
   ax1=gca()
-  title("2-planet Fit for 10 sec")
+  title("2-planet fit with 10 sec noise")
   errorbar(ttsim1,ttv1,sigtt1,fmt=".",color="black",mec="black",mfc="white")#,label="Venus")
   errorbar(ttsim2,ttv2,sigtt2,fmt=".",color="black",mec="black",mfc="white")#,label="Earth")
   plot(ttsim1,p2_ttvs[1,2,1:n1],linewidth=1,label="Venus")
@@ -54,6 +58,7 @@ function plot_res(sigma,nyear,sim,fitmodel,include_moon::Bool=false)
   subplot(212)
   plot(ttsim1,ttv1-(p2_ttvs[1,2,1:n1]))
   plot(ttsim2,ttv2-(p2_ttvs[2,1,1:n2]))
+  ylim(-4,4)
   ylabel("Residuals [mins]")
   minorticks_on()
   tick_params(which="both",direction="in",top="true",right="true")
@@ -61,10 +66,10 @@ function plot_res(sigma,nyear,sim,fitmodel,include_moon::Bool=false)
   tick_params(which="minor",direction="in",top="true",right="true",length=2)
   tight_layout()
 
-  fig=figure(figsize=(8,5))
+  fig=figure(figsize=(8,4))
   subplot(211)
   ax2=gca()
-  title("3-planet Fit for 10 sec")
+  title("3-planet fit with 10 sec noise")
   errorbar(ttsim1,ttv1,sigtt1,fmt=".",color="black",mec="black",mfc="white")#,label="Venus")
   errorbar(ttsim2,ttv2,sigtt2,fmt=".",color="black",mec="black",mfc="white")#,label="Earth")
   plot(ttsim1,p3_ttvs[1,3,1:n1]+p3_ttvs[1,2,1:n1],linewidth=1,label="Venus")
@@ -79,6 +84,7 @@ function plot_res(sigma,nyear,sim,fitmodel,include_moon::Bool=false)
   subplot(212)
   plot(ttsim1,ttv1-(p3_ttvs[1,3,1:n1]+p3_ttvs[1,2,1:n1]))
   plot(ttsim2,ttv2-(p3_ttvs[2,3,1:n2]+p3_ttvs[2,1,1:n2]))
+  ylim(-4,4)
   ylabel("Residuals [mins]")
     minorticks_on()
   tick_params(which="both",direction="in",top="true",right="true")
@@ -87,10 +93,10 @@ function plot_res(sigma,nyear,sim,fitmodel,include_moon::Bool=false)
   tight_layout()
   if length(ntrans)==4
     p4_ttvs = decompose_ttvs(4,ntrans[1:4],f["best_p4"][1:20]) .* (24 * 60)
-    fig=figure(figsize=(8,3))
+    fig=figure(figsize=(8,4))
     subplot(211)
     ax3=gca()
-    title("4-planet Fit")
+    title("4-planet fit with 10 sec noise")
     errorbar(ttsim1,ttv1,sigtt1,fmt=".",color="black",mec="black",mfc="white")#,label="Venus")
     errorbar(ttsim2,ttv2,sigtt2,fmt=".",color="black",mec="black",mfc="white")#,label="Earth")
     plot(ttsim1,p4_ttvs[1,4,1:n1]+p4_ttvs[1,3,1:n1]+p4_ttvs[1,2,1:n1],linewidth=1,label="Venus")
@@ -105,6 +111,7 @@ function plot_res(sigma,nyear,sim,fitmodel,include_moon::Bool=false)
     subplot(212)
     plot(ttsim1,ttv1-(p4_ttvs[1,4,1:n1]+p4_ttvs[1,3,1:n1]+p4_ttvs[1,2,1:n1]))
     plot(ttsim2,ttv2-(p4_ttvs[2,4,1:n2]+p4_ttvs[2,3,1:n2]+p4_ttvs[2,1,1:n2]))
+    ylim(-4,4)
     ylabel("Residuals [mins]")
     minorticks_on()
   tick_params(which="both",direction="in",top="true",right="true")
@@ -118,9 +125,9 @@ function plot_res(sigma,nyear,sim,fitmodel,include_moon::Bool=false)
   moon = moon_ttvs(ntrans[1:3],f["best_dp"]) .* (24 * 60)
   p2_ttvs = decompose_ttvs(2,ntrans[1:2],f["best_dp"][1:10]) .* (24 * 60)
   p3_ttvs = decompose_ttvs(3,ntrans[1:3],f["best_dp"][1:15]) .* (24 * 60)
-  fig=figure(figsize=(8,3))
+  fig=figure(figsize=(8,4))
   subplot(211)
-  title("3-planet Fit + Moon")
+  title("3-planet + moon fit with 10 sec noise")
   errorbar(ttsim1,ttv1,sigtt1,fmt=".",color="black",mec="black",mfc="white")#,label="Venus")
   errorbar(ttsim2,ttv2,sigtt2,fmt=".",color="black",mec="black",mfc="white")#,label="Earth")
   plot(ttsim1,p3_ttvs[1,3,1:n1]+p3_ttvs[1,2,1:n1],linewidth=1,label="Venus")
@@ -135,6 +142,7 @@ function plot_res(sigma,nyear,sim,fitmodel,include_moon::Bool=false)
   subplot(212)
   plot(ttsim1,ttv1-(p3_ttvs[1,3,1:n1]+p3_ttvs[1,2,1:n1]))
   plot(ttsim2,ttv2-(p3_ttvs[2,3,1:n2]+p3_ttvs[2,1,1:n2]+moon))
+  ylim(-4,4)
   ylabel("Residuals [mins]")
     minorticks_on()
   tick_params(which="both",direction="in",top="true",right="true")
@@ -189,6 +197,55 @@ function plot_moon(sigma,nyear,fitmodel)
   tight_layout()
   # plot(Mtt0,Mtt,".",linestyle="-",label="Mtt")
   show()
+end
+function plot_ex(sigma,nyear,sim,fitmodel,include_moon::Bool=false)
+  fitfile = string("FITS/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
+  label="Earth"
+  bestfit="best_dp"
+
+  if String(sim)=="EMB" && isfile(string("FITS/fromEMB/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")) 
+    fitfile = string("FITS/fromEMB/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
+    bestfit = "best_p3"
+    label="EMB"
+  elseif String(sim)=="EMB" && fitmodel=="p4" #if isfile(string("FITS/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")) 
+    fitfile = string("FITS/fromEMB",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
+    bestfit = "best_p4"
+    label="EMB"
+  elseif fitmodel=="p4" #if isfile(string("FITS/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")) 
+    fitfile = string("FITS/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
+    bestfit = "best_p4"
+    label="Earth"
+  # else 
+  #   return  println("FITS file for ",sim," with ",fitmodel," model at ",sigma," secs and ",nyear," yrs doesn't exist!!!!")
+  end
+  f = jldopen(String(fitfile),"r")
+  tt,tt0,sigtt,ttmodel = f["tt"],f["tt0"],f["sigtt"],f["ttmodel"]
+  pbest_global = f[bestfit]
+  nplanet,ntrans = f["nplanet"],f["ntrans"]
+  # pair_ttvs = decompose_ttvs(nplanet,ntrans,f["best_p3"][1:15]) .* (24 * 60)
+  p2_ttvs = decompose_ttvs(2,ntrans[1:2],f["best_p3"][1:10]) .* (24 * 60)
+  p3_ttvs = decompose_ttvs(3,ntrans[1:3],f["best_p3"][1:15]) .* (24 * 60)
+  n1,n2 = ntrans[1],ntrans[2]
+  mu1,P1,t01,ecos1,esin1 = pbest_global[1:5]
+  mu2,P2,t02,ecos2,esin2 = pbest_global[6:10]
+  time1 = collect(t01 .+ range(0,stop=n1-1,length=n1) .* P1)
+  time2 = collect(t02 .+ range(0,stop=n2-1,length=n2) .* P2)
+  tt1,tt2 = tt[1:n1],tt[n1+1:n1+n2]
+  ttsim1,ttsim2 = (ttmodel[1:n1].-t01)./365.25,(ttmodel[n1+1:n1+n2].-t02)./365.25 #in years
+  ttv1,ttv2 = (tt1.-time1).* (24 * 60),(tt2.-time2).* (24 * 60) #in minutes
+  sigtt1,sigtt2 = sigtt[1:n1].* (24 * 60),sigtt[n1+1:n1+n2].* (24 * 60) #in minutes
+  fig=plt.figure(figsize=(8,6))
+  ax1=subplot(211)
+  ax1.plot(ttsim1,tt1,"o",color="grey")
+  ax1.set_ylabel("Observed mid-transit time ")
+  ax1.set_xlabel("Time Observed [yrs]")
+  ax2=subplot(212)
+  errorbar(ttsim1,ttv1,sigtt1,fmt=".",color="black",mec="black",mfc="white")
+  plot(ttsim1,ttv1)
+  ax2.set_ylabel("Observed - Calculated")
+  ax1.set_xlabel("Time Observed [yrs]")
+  show()
+
 end
 function plot_ttvs(sigma,nyear,sim,fitmodel,include_moon::Bool=false)
   fitfile = string("FITS/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
