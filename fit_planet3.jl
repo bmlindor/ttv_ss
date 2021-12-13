@@ -174,7 +174,7 @@ function fit_planet3(filename::String,
   @save fitfile p3 lprob_p3 best_p3 lprob_best_p3 p3best ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase
   return lprob_best_p3,best_p3
 end
-# If 3-planet fit already exists, can do moon search
+# If 3-planet fit already exists, can just do moon search
 function fit_moon(jd1,sigma,nyear,dpin,dpout,ndp)
   infile = string("FITS/fromEMB/p3_fit",sigma,"s",nyear,"yrs.jld2")
   m = jldopen(String(infile),"r")
@@ -295,4 +295,8 @@ function fit_planet4(jd1,sigma,nyear,p4in,p4out,np4,nphase)
   fitfile = string("FITS/fromEMB/p4_fit",sigma,"s",nyear,"yrs.jld2")
   @save fitfile p3 lprob_p3 best_p3 lprob_best_p3 p4 lprob_p4 best_p4 lprob_best_p4 ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase p4in p4out np4
   return best_p3,best_p4 
+end
+# If 4-planet fit already exists, can just do 5-planet search but what about after moon?
+function fit_planet5(jd1,sigma,nyear,p5in,p5out,np5,nphase)
+  
 end
