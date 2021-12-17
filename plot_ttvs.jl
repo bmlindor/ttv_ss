@@ -1,44 +1,43 @@
 using PyPlot,Statistics,JLD2,DelimitedFiles
 rc("font",family="sans-serif")
 include("decompose_ttvs.jl")
-# Create plot of observed TTVs vs model fit
-
-function plot_res(sigma,nyear,sim,fitmodel,include_moon::Bool=false)
-  fitfile = string("FITS/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
+# Plot residuals to best fit TTV models for different configurations
+function plot_res(sigma::Float64,nyear::Float64,sim,fitmodel,include_moon::Bool=false)
+  fitfile=string("FITS/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
   label="Earth"
   bestfit="best_dp"
 
   if String(sim)=="EMB" && isfile(string("FITS/fromEMB/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")) 
-    fitfile = string("FITS/fromEMB/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
-    bestfit = "best_p3"
+    fitfile=string("FITS/fromEMB/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
+    bestfit="best_p3"
     label="EMB"
   elseif String(sim)=="EMB" && fitmodel=="p4" #if isfile(string("FITS/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")) 
-    fitfile = string("FITS/fromEMB",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
-    bestfit = "best_p4"
+    fitfile=string("FITS/fromEMB",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
+    bestfit="best_p4"
     label="EMB"
   elseif fitmodel=="p4" #if isfile(string("FITS/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")) 
-    fitfile = string("FITS/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
-    bestfit = "best_p4"
+    fitfile=string("FITS/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
+    bestfit="best_p4"
     label="Earth"
   # else 
   #   return  println("FITS file for ",sim," with ",fitmodel," model at ",sigma," secs and ",nyear," yrs doesn't exist!!!!")
   end
-  f = jldopen(String(fitfile),"r")
-  tt,tt0,sigtt,ttmodel = f["tt"],f["tt0"],f["sigtt"],f["ttmodel"]
-  pbest_global = f[bestfit]
-  nplanet,ntrans = f["nplanet"],f["ntrans"]
-  # pair_ttvs = decompose_ttvs(nplanet,ntrans,f["best_p3"][1:15]) .* (24 * 60)
-  p2_ttvs = decompose_ttvs(2,ntrans[1:2],f["best_p3"][1:10]) .* (24 * 60)
-  p3_ttvs = decompose_ttvs(3,ntrans[1:3],f["best_p3"][1:15]) .* (24 * 60)
-  n1,n2 = ntrans[1],ntrans[2]
-  mu1,P1,t01,ecos1,esin1 = pbest_global[1:5]
-  mu2,P2,t02,ecos2,esin2 = pbest_global[6:10]
-  time1 = collect(t01 .+ range(0,stop=n1-1,length=n1) .* P1)
-  time2 = collect(t02 .+ range(0,stop=n2-1,length=n2) .* P2)
-  tt1,tt2 = tt[1:n1],tt[n1+1:n1+n2]
-  ttsim1,ttsim2 = (ttmodel[1:n1].-t01)./365.25,(ttmodel[n1+1:n1+n2].-t02)./365.25 #in years
-  ttv1,ttv2 = (tt1.-time1).* (24 * 60),(tt2.-time2).* (24 * 60) #in minutes
-  sigtt1,sigtt2 = sigtt[1:n1].* (24 * 60),sigtt[n1+1:n1+n2].* (24 * 60) #in minutes
+  f=jldopen(String(fitfile),"r")
+  tt,tt0,sigtt,ttmodel=f["tt"],f["tt0"],f["sigtt"],f["ttmodel"]
+  pbest_global=f[bestfit]
+  nplanet,ntrans=f["nplanet"],f["ntrans"]
+  # pair_ttvs=decompose_ttvs(nplanet,ntrans,f["best_p3"][1:15]) .* (24 * 60)
+  p2_ttvs=decompose_ttvs(2,ntrans[1:2],f["best_p3"][1:10]) .* (24 * 60)
+  p3_ttvs=decompose_ttvs(3,ntrans[1:3],f["best_p3"][1:15]) .* (24 * 60)
+  n1,n2=ntrans[1],ntrans[2]
+  mu1,P1,t01,ecos1,esin1=pbest_global[1:5]
+  mu2,P2,t02,ecos2,esin2=pbest_global[6:10]
+  time1=collect(t01 .+ range(0,stop=n1-1,length=n1) .* P1)
+  time2=collect(t02 .+ range(0,stop=n2-1,length=n2) .* P2)
+  tt1,tt2=tt[1:n1],tt[n1+1:n1+n2]
+  ttsim1,ttsim2=(ttmodel[1:n1].-t01)./365.25,(ttmodel[n1+1:n1+n2].-t02)./365.25 #in years
+  ttv1,ttv2=(tt1.-time1).* (24 * 60),(tt2.-time2).* (24 * 60) #in minutes
+  sigtt1,sigtt2=sigtt[1:n1].* (24 * 60),sigtt[n1+1:n1+n2].* (24 * 60) #in minutes
 
   fig=figure(figsize=(8,4))
   subplot(211)
@@ -92,7 +91,7 @@ function plot_res(sigma,nyear,sim,fitmodel,include_moon::Bool=false)
   tick_params(which="minor",direction="in",top="true",right="true",length=2)
   tight_layout()
   if length(ntrans)==4
-    p4_ttvs = decompose_ttvs(4,ntrans[1:4],f["best_p4"][1:20]) .* (24 * 60)
+    p4_ttvs=decompose_ttvs(4,ntrans[1:4],f["best_p4"][1:20]) .* (24 * 60)
     fig=figure(figsize=(8,4))
     subplot(211)
     ax3=gca()
@@ -122,9 +121,9 @@ function plot_res(sigma,nyear,sim,fitmodel,include_moon::Bool=false)
 
   if include_moon
     #why not loading best_p3 fit results?
-  moon = moon_ttvs(ntrans[1:3],f["best_dp"]) .* (24 * 60)
-  p2_ttvs = decompose_ttvs(2,ntrans[1:2],f["best_dp"][1:10]) .* (24 * 60)
-  p3_ttvs = decompose_ttvs(3,ntrans[1:3],f["best_dp"][1:15]) .* (24 * 60)
+  moon=moon_ttvs(ntrans[1:3],f["best_dp"]) .* (24 * 60)
+  p2_ttvs=decompose_ttvs(2,ntrans[1:2],f["best_dp"][1:10]) .* (24 * 60)
+  p3_ttvs=decompose_ttvs(3,ntrans[1:3],f["best_dp"][1:15]) .* (24 * 60)
   fig=figure(figsize=(8,4))
   subplot(211)
   title("3-planet + moon fit with 10 sec noise")
@@ -153,37 +152,38 @@ function plot_res(sigma,nyear,sim,fitmodel,include_moon::Bool=false)
   # savefig("IMAGES/ttvs.eps")
   show()
 end
-function plot_moon(sigma,nyear,fitmodel)
+# Plot moon signal from subtracting EMB times from Earth times
+function plot_moon(sigma::Float64,nyear::Float64,fitmodel)
   EMBfit= string("FITS/fromEMB/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
   EVfit=  string("FITS/moon_fit",sigma,"s",nyear,"yrs.jld2")
-  EMB = jldopen(String(EMBfit),"r")
-  EV = jldopen(String(EVfit),"r")
-  EMBtt,EMBtt0,EMBsigtt,EMBttmodel = EMB["tt"],EMB["tt0"],EMB["sigtt"],EMB["ttmodel"]
-  EVtt,EVtt0,EVsigtt,EVttmodel = EV["tt"],EV["tt0"],EV["sigtt"],EV["ttmodel"]
-  # # pair_ttvs = decompose_ttvs(nplanet,ntrans,f["best_p3"][1:15]) .* (24 * 60)
-  # p2_ttvs = decompose_ttvs(2,ntrans[1:2],EMB["best_p3"][1:10]) .* (24 * 60)
-  # p3_ttvs = decompose_ttvs(3,ntrans[1:3],EMB["best_p3"][1:15]) .* (24 * 60)
-  EMBpbest_global = EMB["best_p3"]
-  EMBnplanet,EMBntrans = EMB["nplanet"],EMB["ntrans"]
-  EMBn1,EMBn2 = EMBntrans[1],EMBntrans[2]
-  EMBmu1,EMBP1,EMBt01,EMBecos1,EMBesin1 = EMBpbest_global[1:5]
-  EMBmu2,EMBP2,EMBt02,EMBecos2,EMBesin2 = EMBpbest_global[6:10]
-  EMBtime1 = collect(EMBt01 .+ range(0,stop=EMBn1-1,length=EMBn1) .* EMBP1)
-  EMBtime2 = collect(EMBt02 .+ range(0,stop=EMBn2-1,length=EMBn2) .* EMBP2)
-  EMBttsim1,EMBttsim2 = (EMBttmodel[1:EMBn1].-EMBt01)./365.25,(EMBttmodel[EMBn1+1:EMBn1+EMBn2].-EMBt02)./365.25
-  EMBtt1,EMBtt2 = EMBtt[1:EMBn1],EMBtt[EMBn1+1:EMBn1+EMBn2]
-  EMBttv1,EMBttv2 = (EMBtt1.-EMBtime1).* (24 * 60),(EMBtt2.-EMBtime2).* (24 * 60)
-  EVpbest_global = EV["best_p3"]
-  EVnplanet,EVntrans = EV["nplanet"],EV["ntrans"]
-  EVn1,EVn2 = EVntrans[1],EVntrans[2]
-  EVmu1,EVP1,EVt01,EVecos1,EVesin1 = EVpbest_global[1:5]
-  EVmu2,EVP2,EVt02,EVecos2,EVesin2 = EVpbest_global[6:10]
-  EVtime1 = collect(EVt01 .+ range(0,stop=EVn1-1,length=EVn1) .* EVP1)
-  EVtime2 = collect(EVt02 .+ range(0,stop=EVn2-1,length=EVn2) .* EVP2)
-  EVttsim1,EVttsim2 = (EVttmodel[1:EVn1].-EVt01)./365.25,(EVttmodel[EVn1+1:EVn1+EVn2].-EVt02)./365.25
-  EVtt1,EVtt2 = EVtt[1:EVn1],EVtt[EVn1+1:EVn1+EVn2]
-  EVttv1,EVttv2 = (EVtt1.-EVtime1).* (24 * 60),(EVtt2.-EVtime2).* (24 * 60) #in minutes
-  # sigtt1,sigtt2 = sigtt[1:n1].* (24 * 60),sigtt[n1+1:n1+n2].* (24 * 60) #in minutes
+  EMB=jldopen(String(EMBfit),"r")
+  EV=jldopen(String(EVfit),"r")
+  EMBtt,EMBtt0,EMBsigtt,EMBttmodel=EMB["tt"],EMB["tt0"],EMB["sigtt"],EMB["ttmodel"]
+  EVtt,EVtt0,EVsigtt,EVttmodel=EV["tt"],EV["tt0"],EV["sigtt"],EV["ttmodel"]
+  # # pair_ttvs=decompose_ttvs(nplanet,ntrans,f["best_p3"][1:15]) .* (24 * 60)
+  # p2_ttvs=decompose_ttvs(2,ntrans[1:2],EMB["best_p3"][1:10]) .* (24 * 60)
+  # p3_ttvs=decompose_ttvs(3,ntrans[1:3],EMB["best_p3"][1:15]) .* (24 * 60)
+  EMBpbest_global=EMB["best_p3"]
+  EMBnplanet,EMBntrans=EMB["nplanet"],EMB["ntrans"]
+  EMBn1,EMBn2=EMBntrans[1],EMBntrans[2]
+  EMBmu1,EMBP1,EMBt01,EMBecos1,EMBesin1=EMBpbest_global[1:5]
+  EMBmu2,EMBP2,EMBt02,EMBecos2,EMBesin2=EMBpbest_global[6:10]
+  EMBtime1=collect(EMBt01 .+ range(0,stop=EMBn1-1,length=EMBn1) .* EMBP1)
+  EMBtime2=collect(EMBt02 .+ range(0,stop=EMBn2-1,length=EMBn2) .* EMBP2)
+  EMBttsim1,EMBttsim2=(EMBttmodel[1:EMBn1].-EMBt01)./365.25,(EMBttmodel[EMBn1+1:EMBn1+EMBn2].-EMBt02)./365.25
+  EMBtt1,EMBtt2=EMBtt[1:EMBn1],EMBtt[EMBn1+1:EMBn1+EMBn2]
+  EMBttv1,EMBttv2=(EMBtt1.-EMBtime1).* (24 * 60),(EMBtt2.-EMBtime2).* (24 * 60)
+  EVpbest_global=EV["best_p3"]
+  EVnplanet,EVntrans=EV["nplanet"],EV["ntrans"]
+  EVn1,EVn2=EVntrans[1],EVntrans[2]
+  EVmu1,EVP1,EVt01,EVecos1,EVesin1=EVpbest_global[1:5]
+  EVmu2,EVP2,EVt02,EVecos2,EVesin2=EVpbest_global[6:10]
+  EVtime1=collect(EVt01 .+ range(0,stop=EVn1-1,length=EVn1) .* EVP1)
+  EVtime2=collect(EVt02 .+ range(0,stop=EVn2-1,length=EVn2) .* EVP2)
+  EVttsim1,EVttsim2=(EVttmodel[1:EVn1].-EVt01)./365.25,(EVttmodel[EVn1+1:EVn1+EVn2].-EVt02)./365.25
+  EVtt1,EVtt2=EVtt[1:EVn1],EVtt[EVn1+1:EVn1+EVn2]
+  EVttv1,EVttv2=(EVtt1.-EVtime1).* (24 * 60),(EVtt2.-EVtime2).* (24 * 60) #in minutes
+  # sigtt1,sigtt2=sigtt[1:n1].* (24 * 60),sigtt[n1+1:n1+n2].* (24 * 60) #in minutes
   Mtt,Mtt0,Mttmodel=EMBtt.-EVtt,EMBtt0.-EVtt0,EMBttmodel.-EVttmodel
   moon=moon_ttvs(EVntrans,EV["best_dp"]) .* (24 * 60)
   Mttv=EVttv2.-EMBttv2 # transit times of actual Earth minus EMB
@@ -198,42 +198,43 @@ function plot_moon(sigma,nyear,fitmodel)
   # plot(Mtt0,Mtt,".",linestyle="-",label="Mtt")
   show()
 end
-function plot_ex(sigma,nyear,sim,fitmodel,include_moon::Bool=false)
-  fitfile = string("FITS/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
+# Plot timing data observed and observed - calculated (ie TTVs)
+function plot_ex(sigma::Float64,nyear::Float64,sim,fitmodel,include_moon::Bool=false)
+  fitfile=string("FITS/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
   label="Earth"
   bestfit="best_dp"
 
   if String(sim)=="EMB" && isfile(string("FITS/fromEMB/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")) 
-    fitfile = string("FITS/fromEMB/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
-    bestfit = "best_p3"
+    fitfile=string("FITS/fromEMB/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
+    bestfit="best_p3"
     label="EMB"
   elseif String(sim)=="EMB" && fitmodel=="p4" #if isfile(string("FITS/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")) 
-    fitfile = string("FITS/fromEMB",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
-    bestfit = "best_p4"
+    fitfile=string("FITS/fromEMB",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
+    bestfit="best_p4"
     label="EMB"
   elseif fitmodel=="p4" #if isfile(string("FITS/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")) 
-    fitfile = string("FITS/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
-    bestfit = "best_p4"
+    fitfile=string("FITS/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
+    bestfit="best_p4"
     label="Earth"
   # else 
   #   return  println("FITS file for ",sim," with ",fitmodel," model at ",sigma," secs and ",nyear," yrs doesn't exist!!!!")
   end
-  f = jldopen(String(fitfile),"r")
-  tt,tt0,sigtt,ttmodel = f["tt"],f["tt0"],f["sigtt"],f["ttmodel"]
-  pbest_global = f[bestfit]
-  nplanet,ntrans = f["nplanet"],f["ntrans"]
-  # pair_ttvs = decompose_ttvs(nplanet,ntrans,f["best_p3"][1:15]) .* (24 * 60)
-  p2_ttvs = decompose_ttvs(2,ntrans[1:2],f["best_p3"][1:10]) .* (24 * 60)
-  p3_ttvs = decompose_ttvs(3,ntrans[1:3],f["best_p3"][1:15]) .* (24 * 60)
-  n1,n2 = ntrans[1],ntrans[2]
-  mu1,P1,t01,ecos1,esin1 = pbest_global[1:5]
-  mu2,P2,t02,ecos2,esin2 = pbest_global[6:10]
-  time1 = collect(t01 .+ range(0,stop=n1-1,length=n1) .* P1)
-  time2 = collect(t02 .+ range(0,stop=n2-1,length=n2) .* P2)
-  tt1,tt2 = tt[1:n1],tt[n1+1:n1+n2]
-  ttsim1,ttsim2 = (ttmodel[1:n1].-t01)./365.25,(ttmodel[n1+1:n1+n2].-t02)./365.25 #in years
-  ttv1,ttv2 = (tt1.-time1).* (24 * 60),(tt2.-time2).* (24 * 60) #in minutes
-  sigtt1,sigtt2 = sigtt[1:n1].* (24 * 60),sigtt[n1+1:n1+n2].* (24 * 60) #in minutes
+  f=jldopen(String(fitfile),"r")
+  tt,tt0,sigtt,ttmodel=f["tt"],f["tt0"],f["sigtt"],f["ttmodel"]
+  pbest_global=f[bestfit]
+  nplanet,ntrans=f["nplanet"],f["ntrans"]
+  # pair_ttvs=decompose_ttvs(nplanet,ntrans,f["best_p3"][1:15]) .* (24 * 60)
+  p2_ttvs=decompose_ttvs(2,ntrans[1:2],f["best_p3"][1:10]) .* (24 * 60)
+  p3_ttvs=decompose_ttvs(3,ntrans[1:3],f["best_p3"][1:15]) .* (24 * 60)
+  n1,n2=ntrans[1],ntrans[2]
+  mu1,P1,t01,ecos1,esin1=pbest_global[1:5]
+  mu2,P2,t02,ecos2,esin2=pbest_global[6:10]
+  time1=collect(t01 .+ range(0,stop=n1-1,length=n1) .* P1)
+  time2=collect(t02 .+ range(0,stop=n2-1,length=n2) .* P2)
+  tt1,tt2=tt[1:n1],tt[n1+1:n1+n2]
+  ttsim1,ttsim2=(ttmodel[1:n1].-t01)./365.25,(ttmodel[n1+1:n1+n2].-t02)./365.25 #in years
+  ttv1,ttv2=(tt1.-time1).* (24 * 60),(tt2.-time2).* (24 * 60) #in minutes
+  sigtt1,sigtt2=sigtt[1:n1].* (24 * 60),sigtt[n1+1:n1+n2].* (24 * 60) #in minutes
   fig=plt.figure(figsize=(8,6))
   ax1=subplot(211)
   ax1.plot(ttsim1,tt1,"o",color="grey")
@@ -245,16 +246,16 @@ function plot_ex(sigma,nyear,sim,fitmodel,include_moon::Bool=false)
   ax2.set_ylabel("Observed - Calculated")
   ax1.set_xlabel("Time Observed [yrs]")
   show()
-
 end
-function plot_ttvs(sigma,nyear,sim,fitmodel,include_moon::Bool=false)
-  fitfile = string("FITS/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
+# Plot observed TTVs vs model fit, with contributions
+function plot_ttvs(sigma::Float64,nyear::Float64,sim,fitmodel,include_moon::Bool=false)
+  fitfile=string("FITS/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
   nplanet=3
   label="Earth contribution"
   labely="Earth TTVs [mins]"
   if String(sim)=="EMB" && isfile(string("FITS/fromEMB/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")) 
-    fitfile = string("FITS/fromEMB/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
-    bestfit = "best_p3"
+    fitfile=string("FITS/fromEMB/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
+    bestfit="best_p3"
     label="EMB contribution"
     labely="EMB TTVs [mins]"
   end
@@ -262,26 +263,26 @@ function plot_ttvs(sigma,nyear,sim,fitmodel,include_moon::Bool=false)
     bestfit="best_p4"
     nplanet=4
   elseif fitmodel=="moon" #if isfile(string("FITS/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")) 
-    bestfit = "best_p3"
+    bestfit="best_p3"
   # else 
   #   return  println("FITS file for ",sim," with ",fitmodel," model at ",sigma," secs and ",nyear," yrs doesn't exist!!!!")
   end
-  f = jldopen(String(fitfile),"r")
-  tt,tt0,sigtt,ttmodel = f["tt"],f["tt0"],f["sigtt"],f["ttmodel"]
-  pbest_global = f[bestfit]
-  ntrans = f["ntrans"]
-  pair_ttvs = decompose_ttvs(nplanet,ntrans[1:nplanet],pbest_global) .* (24 * 60)
+  f=jldopen(String(fitfile),"r")
+  tt,tt0,sigtt,ttmodel=f["tt"],f["tt0"],f["sigtt"],f["ttmodel"]
+  pbest_global=f[bestfit]
+  ntrans=f["ntrans"]
+  pair_ttvs=decompose_ttvs(nplanet,ntrans[1:nplanet],pbest_global) .* (24 * 60)
   println(bestfit)
-  n1,n2 = ntrans[1],ntrans[2]
-  mu1,P1,t01,ecos1,esin1 = pbest_global[1:5]
-  mu2,P2,t02,ecos2,esin2 = pbest_global[6:10]
-  mu3,P3,t03,ecos3,esin3 = pbest_global[11:15]
-  time1 = collect(t01 .+ range(0,stop=n1-1,length=n1) .* P1)
-  time2 = collect(t02 .+ range(0,stop=n2-1,length=n2) .* P2)
-  tt1,tt2 = tt[1:n1],tt[n1+1:n1+n2]
-  ttsim1,ttsim2 = (ttmodel[1:n1].-t01)./365.25,(ttmodel[n1+1:n1+n2].-t02)./365.25 #in years
-  ttv1,ttv2 = (tt1.-time1).* (24 * 60),(tt2.-time2).* (24 * 60) #in minutes
-  sigtt1,sigtt2 = sigtt[1:n1].* (24 * 60),sigtt[n1+1:n1+n2].* (24 * 60) #in minutes
+  n1,n2=ntrans[1],ntrans[2]
+  mu1,P1,t01,ecos1,esin1=pbest_global[1:5]
+  mu2,P2,t02,ecos2,esin2=pbest_global[6:10]
+  mu3,P3,t03,ecos3,esin3=pbest_global[11:15]
+  time1=collect(t01 .+ range(0,stop=n1-1,length=n1) .* P1)
+  time2=collect(t02 .+ range(0,stop=n2-1,length=n2) .* P2)
+  tt1,tt2=tt[1:n1],tt[n1+1:n1+n2]
+  ttsim1,ttsim2=(ttmodel[1:n1].-t01)./365.25,(ttmodel[n1+1:n1+n2].-t02)./365.25 #in years
+  ttv1,ttv2=(tt1.-time1).* (24 * 60),(tt2.-time2).* (24 * 60) #in minutes
+  sigtt1,sigtt2=sigtt[1:n1].* (24 * 60),sigtt[n1+1:n1+n2].* (24 * 60) #in minutes
 
   fig=figure(figsize=(7,5))
   subplot(211)
@@ -299,7 +300,7 @@ function plot_ttvs(sigma,nyear,sim,fitmodel,include_moon::Bool=false)
   # ax1.tick_params(which="minor",direction="in",top="true",right="true",length=2)
 
   if include_moon
-    moon = moon_ttvs(ntrans,pbest_global) .* (24 * 60)
+    moon=moon_ttvs(ntrans,pbest_global) .* (24 * 60)
     subplot(212,sharex=ax1)
     ax2=gca()
     plot(ttsim2,pair_ttvs[2,3,1:n2]+pair_ttvs[2,1,1:n2]+moon,linewidth=2,color="grey")#,label="Total variations")

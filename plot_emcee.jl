@@ -1,21 +1,21 @@
 using PyPlot,Statistics,JLD2
-
+# Plot MCMC mass vs period traces 
 function plot_trace(sigma,nyear,sim,model,include_moon::Bool=false)
   if String(sim)=="EMB" && isfile(string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jl"))
-    mcfile = string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+    mcfile=string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
   elseif isfile(string("MCMC/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
-    mcfile = string("MCMC/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+    mcfile=string("MCMC/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
   else 
     return  println("MCMC file for ",sim," with ",model," model at ",sigma," secs and ",nyear," yrs doesn't exist!!!!")
   end
-  m = jldopen(String(mcfile),"r")
+  m=jldopen(String(mcfile),"r")
   par_mcmc= m["par_mcmc"]
-  lprob_mcmc = m["lprob_mcmc"]
-  nwalkers = m["nwalkers"]
-  nsteps = m["nsteps"]
-  accept = m["accept"]
-  iburn = m["iburn"]
-  indepsamples = m["indepsamples"]
+  lprob_mcmc=m["lprob_mcmc"]
+  nwalkers=m["nwalkers"]
+  nsteps=m["nsteps"]
+  accept=m["accept"]
+  iburn=m["iburn"]
+  indepsamples=m["indepsamples"]
 
   if include_moon || String(sim)=="p4"
     fig=figure(figsize=(8,6))
@@ -130,24 +130,24 @@ function plot_trace(sigma,nyear,sim,model,include_moon::Bool=false)
   # title=string("IMAGES/traces/",sim,model,"traces-",sigma,"secs",nyear,"yrs.png")
   # savefig(title)
 end 
-
+# Plot MCMC traces of individual walkers
 function plot_emcee(sigma,nyear,sim,model,include_moon::Bool=false)
   if String(sim)=="EMB" && isfile(string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
-    mcfile = string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+    mcfile=string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
   elseif isfile(string("MCMC/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
-    mcfile = string("MCMC/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+    mcfile=string("MCMC/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
   else 
     return  println("MCMC file for ",sim," with ",model," model at ",sigma," secs and ",nyear," yrs doesn't exist!!!!")
   end
-  m = jldopen(String(mcfile),"r")
+  m=jldopen(String(mcfile),"r")
   par_mcmc= m["par_mcmc"]
-  lprob_mcmc = m["lprob_mcmc"]
-  nwalkers = m["nwalkers"]
-  nsteps = m["nsteps"]
-  accept = m["accept"]
-  iburn = m["iburn"]
-  indepsamples = m["indepsamples"]
-  parname = [L"$μ_1$ [$M_{⋆}$]",L"$P_1$ [days]",L"$t_{0,1}$",L"$e_1 cos(ω_1)$",L"$e_1 sin(ω_1)$",
+  lprob_mcmc=m["lprob_mcmc"]
+  nwalkers=m["nwalkers"]
+  nsteps=m["nsteps"]
+  accept=m["accept"]
+  iburn=m["iburn"]
+  indepsamples=m["indepsamples"]
+  parname=[L"$μ_1$ [$M_{⋆}$]",L"$P_1$ [days]",L"$t_{0,1}$",L"$e_1 cos(ω_1)$",L"$e_1 sin(ω_1)$",
     L"$μ_2$ [$M_{⋆}$]",L"$P_2$ [days]",L"$t_{0,2}$",L"$e_2 cos(ω_2)$",L"$e_2 sin(ω_2)$",
     L"$μ_3$ [$M_{⋆}$]",L"$P_3$ [days]",L"$t_{0,3}$",L"$e_3 cos(ω_3)$",L"$e_3 sin(ω_3)$",
     L"$μ_4$ [$M_{⋆}$]",L"$P_4$ [days]",L"$t_{0,4}$",L"$e_4 cos(ω_4)$",L"$e_4 sin(ω_4)$",
@@ -246,6 +246,23 @@ function plot_emcee(sigma,nyear,sim,model,include_moon::Bool=false)
   end
 end
 
+function plot_effects(sigma,nyear,sim,model)
+  if String(sim)=="EMB" && isfile(string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
+    mcfile=string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+  elseif isfile(string("MCMC/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
+    mcfile=string("MCMC/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+  else 
+    return  println("MCMC file for ",sim," with ",model," model at ",sigma," secs and ",nyear," yrs doesn't exist!!!!")
+  end
+  m=jldopen(String(mcfile),"r")
+  par_mcmc=m["par_mcmc"]
+  lprob_mcmc=m["lprob_mcmc"]
+  nwalkers=m["nwalkers"]
+  nsteps=m["nsteps"]
+  accept=m["accept"]
+  iburn=m["iburn"]
+  plot()
+end
 # # figsize=(8,6)
 # # for i=2:nparam
 # #   for j=1:i-1
@@ -254,4 +271,4 @@ end
 # #     ylabel(pname[j])
 # #   end
 # # end
-# # name = string("IMAGES/MCMCparams",label,".png")
+# # name=string("IMAGES/MCMCparams",label,".png")

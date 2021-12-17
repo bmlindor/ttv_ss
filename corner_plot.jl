@@ -1,11 +1,11 @@
 using PyPlot,Statistics
-include("CGS.jl")
+# include("CGS.jl")
 rc("font",family="sans-serif")
-calc_deg(value) = value * 180/pi
-calc_evec1(e,omega) = e* cos(omega-77)
-calc_evec2(e,omega) = e* sin(omega-77)
-calc_tmax(a_p,a_s,m_p,m_s,P_p) = (a_s*m_s*P_p) / (2*pi*a_p*(m_s+m_p)) 
-# Basic corner plot for posterior distributions of x vs y parameters
+calc_deg(value)=value * 180/pi
+calc_evec1(e,omega)=e* cos(omega-77)
+calc_evec2(e,omega)=e* sin(omega-77)
+calc_tmax(a_p,a_s,m_p,m_s,P_p)=(a_s*m_s*P_p) / (2*pi*a_p*(m_s+m_p)) 
+# Basic corner plot for posterior distributions of 2 parameters
 function corner(x1,x2,nbins)
   fig=figure(figsize=(5,5))
   subplots_adjust(hspace=0.05,wspace=0.05)
@@ -38,6 +38,7 @@ function corner(x1,x2,nbins)
   ax1.tick_params(which="major",direction="out",top="true",right="true",length=6)
   ax1.tick_params(which="minor",direction="out",top="true",right="true",length=2)
 end
+# Corner plot for posterior distributions of 2 parameters, compared to true values
 function corner(x1,x2,truex1,truex2,nbins)
 	meanx=mean(x1);sigmax=std(x1)
 	meany=mean(x2);sigmay=std(x2)
@@ -81,6 +82,7 @@ function corner(x1,x2,truex1,truex2,nbins)
 	ax1.tick_params(which="minor",direction="out",top="true",right="true",length=2)
 	tight_layout()
 end
+# Corner plot for posterior distributions of 3 parameters
 function corner(x1,x2,x3,nbins)
   fig=figure(figsize=(8,8))
   subplots_adjust(hspace=0.05,wspace=0.05)
@@ -148,6 +150,7 @@ function corner(x1,x2,x3,nbins)
       labelleft="false",labelbottom="true")
   tight_layout()
 end
+# Corner plot for posterior distributions of 3 parameters, compared to true values
 function corner(x1,x2,x3,truex1,truex2,truex3,nbins)
   fig=figure(figsize=(8,8))
   subplots_adjust(hspace=0.05,wspace=0.05)
@@ -219,6 +222,7 @@ function corner(x1,x2,x3,truex1,truex2,truex3,nbins)
       labelleft="false",labelbottom="true")
   tight_layout()
 end
+# Corner plot for posterior distributions of 4 parameters, compared to true values
 function corner(x1,x2,x3,x4,truex1,truex2,truex3,truex4,nbins,lim,label)
   fig=figure(figsize=(9,9))
   subplots_adjust(hspace=0.09,wspace=0.09)
@@ -333,24 +337,25 @@ function corner(x1,x2,x3,x4,truex1,truex2,truex3,truex4,nbins,lim,label)
       labelbottom="false",labeltop="false",labelleft="false",labelright="false")
   tight_layout()
 end
+# Create a corner plot for significant posterior distributions of planet parameters
 function corner_hist(sigma,nyear,sim,model,nbins,include_moon::Bool=false) 
   if String(sim)=="EMB"  && isfile(string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
-    mcfile = string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+    mcfile=string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
   elseif isfile(string("MCMC/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
-    mcfile = string("MCMC/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+    mcfile=string("MCMC/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
   else
     return  println("MCMC file for ",sim," with ",model," model at ",sigma," secs and ",nyear," yrs doesn't exist!!!!")
   end
-  m = jldopen(String(mcfile),"r")
+  m=jldopen(String(mcfile),"r")
   par_mcmc= m["par_mcmc"]
-  lprob_mcmc = m["lprob_mcmc"]
-  nwalkers = m["nwalkers"]
-  nsteps = m["nsteps"]
-  accept = m["accept"]
-  iburn = m["iburn"]
-  indepsamples = m["indepsamples"]
+  lprob_mcmc=m["lprob_mcmc"]
+  nwalkers=m["nwalkers"]
+  nsteps=m["nsteps"]
+  accept=m["accept"]
+  iburn=m["iburn"]
+  indepsamples=m["indepsamples"]
   # True values based on "PlanetaryBodyData.pdf" (source?)
-  offset = 224.70
+  offset=224.70
   m1=vec(par_mcmc[:,iburn:nsteps,1]).* CGS.MSUN/CGS.MEARTH
   ec1=vec(par_mcmc[:,iburn:nsteps,4])#.*sqrt.(vec(par_mcmc[11:20,iburn:nsteps,4]).^2 .+ vec(par_mcmc[11:20,iburn:nsteps,5]).^2)
   es1=vec(par_mcmc[:,iburn:nsteps,5])#.*sqrt.(vec(par_mcmc[11:20,iburn:nsteps,4]).^2 .+ vec(par_mcmc[11:20,iburn:nsteps,5]).^2)
@@ -362,7 +367,7 @@ function corner_hist(sigma,nyear,sim,model,nbins,include_moon::Bool=false)
   truep1=224.7007992.-offset
   truee1=0.00677323
   lim=0.00076,0.00081
-  offset = 365.25
+  offset=365.25
   m2=vec(par_mcmc[:,iburn:nsteps,6]).* CGS.MSUN/CGS.MEARTH
   ec2=vec(par_mcmc[:,iburn:nsteps,9])
   es2=vec(par_mcmc[:,iburn:nsteps,10])#.*sqrt.(vec(par_mcmc[:,1:nsteps,9]).^2 .+ vec(par_mcmc[:,1:nsteps,10]).^2)
@@ -474,26 +479,25 @@ function corner_hist(sigma,nyear,sim,model,nbins,include_moon::Bool=false)
   end
   # show()
 end
-
 # Create a corner plot for posterior distributions of planet parameters
 function corner_plot(sigma,nyear,sim,model,nbins,include_moon::Bool=false) 
   if String(sim)=="EMB"  && isfile(string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
-    mcfile = string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+    mcfile=string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
   elseif isfile(string("MCMC/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
-    mcfile = string("MCMC/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+    mcfile=string("MCMC/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
   else
     return  println("MCMC file for ",sim," with ",model," model at ",sigma," secs and ",nyear," yrs doesn't exist!!!!")
   end
-  m = jldopen(String(mcfile),"r")
+  m=jldopen(String(mcfile),"r")
   par_mcmc= m["par_mcmc"]
-  lprob_mcmc = m["lprob_mcmc"]
-  nwalkers = m["nwalkers"]
-  nsteps = m["nsteps"]
-  accept = m["accept"]
-  iburn = m["iburn"]
-  indepsamples = m["indepsamples"]
+  lprob_mcmc=m["lprob_mcmc"]
+  nwalkers=m["nwalkers"]
+  nsteps=m["nsteps"]
+  accept=m["accept"]
+  iburn=m["iburn"]
+  indepsamples=m["indepsamples"]
   # True values based on "PlanetaryBodyData.pdf" (source?)
-  offset = 224.70
+  offset=224.70
   m1=vec(par_mcmc[:,iburn:nsteps,1]).* CGS.MSUN/CGS.MEARTH
   ec1=vec(par_mcmc[:,iburn:nsteps,4])#.*sqrt.(vec(par_mcmc[11:20,iburn:nsteps,4]).^2 .+ vec(par_mcmc[11:20,iburn:nsteps,5]).^2)
   es1=vec(par_mcmc[:,iburn:nsteps,5])#.*sqrt.(vec(par_mcmc[11:20,iburn:nsteps,4]).^2 .+ vec(par_mcmc[11:20,iburn:nsteps,5]).^2)
@@ -508,7 +512,7 @@ function corner_plot(sigma,nyear,sim,model,nbins,include_moon::Bool=false)
   corner(m1,ec1,es1,p1,truem1,trueec1,truees1,truep1,nbins,lim,label)
   savefig(title)
   clf()
-  offset = 365.25
+  offset=365.25
   m2=vec(par_mcmc[:,iburn:nsteps,6]).* CGS.MSUN/CGS.MEARTH
   ec2=vec(par_mcmc[:,iburn:nsteps,9])#.*sqrt.(vec(par_mcmc[:,1:nsteps,9]).^2 .+ vec(par_mcmc[:,1:nsteps,10]).^2)
   es2=vec(par_mcmc[:,iburn:nsteps,10])#.*sqrt.(vec(par_mcmc[:,1:nsteps,9]).^2 .+ vec(par_mcmc[:,1:nsteps,10]).^2)
