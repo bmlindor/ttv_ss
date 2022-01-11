@@ -111,7 +111,7 @@ function get_vals(sigma::Float64,nyear::Float64,sim::String,model::String)
     periods=[mean(vec(par_mcmc[:,iburn:nsteps,i-3])) for i in 1:length(param) if i%5==0]
     per_errs=[std(vec(par_mcmc[:,iburn:nsteps,i-3])) for i in 1:length(param) if i%5==0]
     ecc=[mean(sqrt.(vec(par_mcmc[:,iburn:nsteps,i]).^2 .+ vec(par_mcmc[:,iburn:nsteps,i-1]).^2)) for i in 1:length(param) if i%5==0]
-    ecc_errs=std(sqrt.(vec(par_mcmc[:,iburn:nsteps,i]).^2 .+ vec(par_mcmc[:,iburn:nsteps,i-1]).^2))) for i in 1:length(param) if i%5==0]
+    ecc_errs=[std(sqrt.(vec(par_mcmc[:,iburn:nsteps,i]).^2 .+ vec(par_mcmc[:,iburn:nsteps,i-1]).^2)) for i in 1:length(param) if i%5==0]
     sigtot=[sqrt((sqrt(mean(vec(par_mcmc[:,iburn:nsteps,end]))).*3600*24)^2 + sigma^2) ]
-    return masses, mass_errs, periods, per_errs, sigtot
+    return masses, mass_errs#, periods, per_errs, sigtot
 end

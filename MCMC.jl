@@ -80,7 +80,7 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,
       end
     end
     if nparam>16
-    # Plase priors on deltaphi and account for aliasing:
+    # Place priors on deltaphi and account for aliasing:
       dpmin = 0.0; dpmax = pi
       deltaphi = param[18]
       while deltaphi < dpmin
