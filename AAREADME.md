@@ -67,34 +67,36 @@ fit_moon(filename::String,
   addnoise::Bool=false,sigma::Float64=0.0,wide::Bool=false)
 
 3).  Taking the minimum chi-square, or the maximum log-Probability,
-run a markov chain with all 3 planets.  
+run a markov chain with all 3 planets:  
 -Assuming the host star has the same mass as the Sun, which 3 planets did you detect?  
 -What are their masses and eccentricities (as well as uncertainties on these
 quantities)?
+
+3a). Run markov chain with planets + moon:
+Note: deltaphi dist. is multi-modal, so ensure that value is inside dp range.
 
  MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,
     nsteps::Int64,nwalkers::Int64,nplanet::Int64,ntrans::Array{Int64,1},
     tt0::Array{Float64,1},tt::Array{Float64,1},sigtt::Array{Float64,1},
     use_sigsys::Bool,EM::Bool) 
 
-4). Experiment with different runs to find which best show routine use.
-    Run routine for range of sigmas and nyears.
-    For different time spans, there are diff. posterior distributions:
-    change grid search to accomodate for width of dist.
-
-np3 = [fine=200, medium=100, coarse=10] <!-- xfine=1000 -->
-nphase = [fine=36, medium=10, coarse=2] <!-- xfine=72 -->
-ndp = [fine=72, medium=36, coarse=10] <!-- xfine=108 -->
-steps = [short=(1000), med=(10000), long=(50000)]
-sigmas = [10, 30, 45, 60, 75, 90, 105, 120, 135] <!-- which of these are realistic? -->
-years = [10, 12, 15, 18, 20, 23, 25, 28, 30, 40] <!-- how often to check results? -->
-label = [ppp, ppmp, pppp, etc.]
-runtype = [sim, grid, mcmc, wide]
-
-runtype, label = ARGS[1], ARGS[4]
-sigma, nyear = parse(Float64,ARGS[2]),parse(Float64,ARGS[3])
+4).  Run routine for range of noise levels (sigmas) and observation time spans (nyears):
+-Which runs best detect perturbing objects? 
+For different time spans, there are diff. posterior distributions, 
+must change grid search to accommodate for width of dist.
 
 julia full_run.jl grid 30.0 40 ppp &> results/run.out &
+......
+label = [ppp, ppmp, pppp, etc.]
+runtype = [sim, grid, mcmc, wide]
+runtype, label = ARGS[1], ARGS[4]
+sigma, nyear = parse(Float64,ARGS[2]),parse(Float64,ARGS[3])
+np3 = [fine=200, medium=100, coarse=50]     <!-- test=10 -->
+nphase = [fine=72, medium=36, coarse=18]    <!-- test=10 -->
+ndp = [fine=180, medium=72, coarse=36]      <!-- test=10 -->
+steps=[short=10000, med=50000, long=100000] <!-- test=1000 -->
+sigmas = [10, 30, 45, 60, 75, 90, 105, 120, 135] <!-- which of these are realistic? -->
+years = [10, 12, 15, 18, 20, 23, 25, 28, 30, 40] <!-- how often to check results? -->
 ......
 
 07/22/2021
@@ -110,6 +112,8 @@ their masses, as well as existence of Jupiter first then Moon
         could be different definitions of period (linear ephemeris fit vs average time to orbit)
 4). Once t_maxsinphi and t_maxcosphi are approx 0, no constrain on deltaphi
     Correlation betweem deltaphi and t_maxsinphi --> posterior broader than likelihood
+5). Four planet model preferred over model with moon and 3 planets. 
+        can't tell difference b/w Hppmp and Hpppp
 
 Q). Degenaracy b/w Jupiter and Moon? <--tail on Jupiter period with moon
         if you don't have enough time spans
@@ -117,74 +121,69 @@ Q). P-M_p degeneracy? <--tail on Jupiter distributions
         assymetry for ecosw and esinw
 Q). Wrong signs for evectors? <-- not first time this has been found
 
-
 ##########################	Writing Tasks	##########################
 0). Complete bibliography. [  ]
 0a). Find relevant papers and add them to .bib file [  ]
-0b). Read and summarize relevant papers [  ]
+0b). Read and summarize relevant papers [ x ]
 1). Write up model desctription (as above) [ x ]
-2). Write up methods description [ ]
-3). Write up analysis description [  ]
+2). Write up methods description [ x ]
+3). Write up analysis description [ x ]
+4). Create tables for parameters. [  ]
 
 ##########################  Project Tasks ##########################
-1). Makes plots of the contributions of individual bodies [ x ]
-    (including the ones we are neglecting). 
-2a). Add in the option for Moon. [ x ]
-2b). Fit for Moon deltaphi. [ x ]
-3). Create slurm file to run multiple grids on hyak.mox. [ x ] 
-3a). Schedule parallel fit and chain runs on hyak.mox using slurm scheduler [  ]
-     - exits prematurely, times out, or returns error in regress.jl assertion
+Make likelihood profiles continuous [ ]
+10). Condense results to 1 equation fit (ex. how much of X to get Y uncertainty). [  ]
+9). See if we can detect Mars [ ] or Saturn. [ ]
+8). See which scenario best fits simulated data [ ]
+7). Figure out whether the Earth-Moon barycenter offset causes
+bias in measurements and if so, why.
+6). Add in 4th planet. Fit for best params [ x ]
+5). Analyze chain results: trace plots, uncertainties, etc.
+5a). See how many observations would be needed (minimum number of years required). [ x ]
+5b). See what the necessary precision would be (vary noise added to simulations). [ x ]
 4). Show models are correct: derived Earth and Venus parameters.
 4b). Make plots of histograms of parameter results from MCMC with correct values. [ x ]
 4c). Make plots of orbits with 1-sigma uncertainties overplotted with the correct orbits. [  ] Q   - how to do this with eccentricities and omega? Need pomega and Omega?
 4d). Make plots of logL for Jupiter period and Moon deltaphi with correct values at peak. [ x ] 
     (include histograms of posterior results) 
 4e). Make plots of posterior results of model fit to simulated times. [ x ] 
-5). Analyze chain results: trace plots, uncertainties, etc.
-5a). See how many observations would be needed (minimum number of years required). [  ]
-5b). See what the necessary precision would be (vary noise added to simulations). [  ]
-6). From posteriors, show how well we can measure mean insolation. [  ]
-    (eccentricity of Earth's orbit). 
-7). See which scenario best fits simulated data [ ]
-7a). Create tables for parameters. [  ]
-8). Add in 4th planet. Fit for best params [ x ]
-8a). Rule out four planet fit instead of moon
-
-10). Condense results to 1 equation fit (ex. how much of X to get Y uncertainty). [  ]
+3). Create slurm file to run multiple grids on hyak.mox. [ x ] 
+3a). Schedule parallel fit and chain runs on hyak.mox using slurm scheduler [  ]
+     - exits prematurely, times out, or returns error in regress.jl assertion
+2a). Add in the option for Moon. [ x ]
+2b). Fit for Moon deltaphi. [ x ]
+1). Makes plots of the contributions of individual bodies [ x ]
+    (including the ones we are neglecting).      
 <!-- 
-3). Q: What really limits timing precision of Earth & Venus
-about the Sun? (related to Tyler's work)
-4). The masses inferred with sufficient data are good, although
-still a bit more discrepant than I would like. need to implement an N-body fit?
-##########################	Optional Tasks	##########################
-3). Figure out what the actual expected timing precision
-would be (limited by stellar noise -- related to Tyler's work). 
+##########################  Optional Tasks  ##########################
+Q: What really limits timing precision of Earth & Venus
+about the Sun? 
 3a). Could use existing telescope precision info
-5). See if we can detect Mars [ ] or Saturn. [ ]
-7). Show that model is correct either way (Moon first then Jupiter). [ ]
-    - unrealistic because it's more likely that the giant planet would be discovered first since it's easier
-8). Figure out whether the Earth-Moon barycenter offset causes
-bias in measurements and if so, why.
-9a). Figure out how to speed things up so I can do a global
-search, and explore duration & error bar dependence. 
-9b). Do inverse matrix fitting for linear parameters (Jupiter period & Moon deltaphi) to speed things up (might be more robust).
-9c). Maybe make a type to hold the pre-computed Laplace coefficents,
-and pass this to routines, or create a closure for this.
-13a). Make model of actual transit light curves (as opposed to just transit times).
-13b). Show how well constrained densities are (for Earth and Venus).
-13c). Show how well constrained densities are for Sun.
-14a). Using TTVFaster for first estimate, do NBody Gradient fit. [ ]
-14b). Refine TTVFaster estimates from finding Jupiter by applying NbodyGradient.
+3a). Figure out what the actual expected timing precision
+would be (limited by stellar noise -- related to Tyler's work). 
+Q: The masses inferred with sufficient data are good, although
+still a bit more discrepant than I would like. need to implement an N-body fit?
+4a). Using TTVFaster for first estimate, do NBody Gradient fit. 
+4b). Refine TTVFaster estimates from finding Jupiter by applying NbodyGradient.
 (should get better parameters for the masses of Venus and Earth)
 Heirarchy example for Solar System:
 Sun Venus Earth Moon Jupiter Saturn ....
 indices = [[-1, 1, 0, 0, 0, 0],  # SUN & VENUS orbit in a binary
            [ 0, 0,-1, 1, 0, 0],  # EARTH & MOON orbit in a binary 
            [-1,-1, 1, 1, 0, 0],  # SUN & VENUS orbit about them 
-           [-1,-1,-1,-1, 1, 0],	 # (optional) Jupiter orbits about them
-           [-1,-1,-1,-1,-1, 1],	 # (optional) etc...
+           [-1,-1,-1,-1, 1, 0],  # (optional) Jupiter orbits about them
+           [-1,-1,-1,-1,-1, 1],  # (optional) etc...
            [ 1, 1, 1, 1, 1, 1]]  # center of mass of the system
-14c). Compare TTVFaster and NBody Grad fits. [ ] 
+4c). Compare TTVFaster and NBody Grad fits. 
+5a). Figure out how to speed things up so I can do a global
+search, and explore duration & error bar dependence. 
+5b). Do inverse matrix fitting for linear parameters (Jupiter period & Moon deltaphi) to speed things up (might be more robust).
+5c). Maybe make a type to hold the pre-computed Laplace coefficents,
+and pass this to routines, or create a closure for this.
+6). From posteriors, show how well we can measure mean insolation. 
+7). Show that model is correct either way (Moon first then Jupiter). 
+    - unrealistic because it's more likely that the giant planet would be discovered first since it's easier
+8a). Make model of actual transit light curves (as opposed to just transit times).
+8b). Show how well constrained densities are (for Earth and Venus).
+8c). Show how well constrained densities are for Sun.
 -->
-
-

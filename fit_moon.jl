@@ -212,7 +212,7 @@ function fit_moon(filename::String,
   else
     fitfile = string("FITS/moon_fit",sigma,"s",nyear,"yrs.jld2")
   end
-  @save fitfile p3 lprob_p3 best_p3 lprob_best_p3 deltaphi lprob_dp best_dp lprob_best_dp ntrans nplanet tt0 tt ttmodel sigtt init_param
+  @save fitfile p3 lprob_p3 best_p3 lprob_best_p3 deltaphi lprob_dp best_dp lprob_best_dp ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase dpin dpout ndp
   return best_p3,best_dp
 end
 # If 3-planet fit already exists, can just do 4-planet search
