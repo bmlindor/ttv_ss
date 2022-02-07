@@ -147,6 +147,9 @@ function fit_planet3(filename::String,
     println("Period: ",p3[j]," log Prob: ",lprob_p3[j]," Param: ",vec(param_p3[1:nparam,j]))
   end
   println("Finished 3-planet fit w/ fixed period: ",p3best)
+  # Make likelihood profile continuous
+      # for j=1:np3
+      #   if abs(lprob_p3[j+1] - lprob_p3[j])
 
   #ttmodel=ttv_wrapper3(tt0,param3)
   #res = optimize(chisquare3,param3,method = :l_bfgs,iterations = 21)
@@ -170,9 +173,9 @@ function fit_planet3(filename::String,
   #   for i=1:nparam
   #     println(io,pname[i],": ",pbest_global[i]) # writedlm(results,pbest_global)
   #   end
-  fitfile = string("FITS/fromEMB/p3_fit",sigma,"s",nyear,"yrs.jld2")
-  @save fitfile p3 lprob_p3 best_p3 lprob_best_p3 p3best ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase
-  return lprob_best_p3,best_p3
+  # fitfile = string("FITS/fromEMB/p3_fit",sigma,"s",nyear,"yrs.jld2")
+  # @save fitfile p3 lprob_p3 best_p3 lprob_best_p3 p3best ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase
+  return lprob_best_p3,best_p3,lprob_p3,p3
 end
 # If 3-planet fit already exists, can just do moon search
 function fit_moon(jd1,sigma,nyear,dpin,dpout,ndp)
