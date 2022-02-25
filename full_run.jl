@@ -24,14 +24,14 @@ elseif nyear>=30 && nyear<=36
 	p3in,p3out=10.8*365.25,12.3*365.25
 	dpin,dpout=2.2,2.38
 	nsteps=50000
-elseif nyear>=20 && nyear<=29
+elseif nyear>=12 && nyear<=29
 	p3in,p3out=10.6*365.25,14.2*365.25 
 	dpin,dpout=2.1,2.52
 	nsteps=50000
-elseif nyear>=12 && nyear<=19
-	p3in,p3out=10.6*365.25,14.2*365.25 
-	dpin,dpout=2.1,2.52
-	nsteps=50000
+# elseif nyear>=12 && nyear<=19
+# 	p3in,p3out=10.6*365.25,14.2*365.25 
+# 	dpin,dpout=2.1,2.52
+# 	nsteps=50000
 elseif nyear<12
 	p3in,p3out=10*365.25,15*365.25 
 	nsteps=100000

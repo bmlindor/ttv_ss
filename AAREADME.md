@@ -135,6 +135,7 @@ Make likelihood profiles continuous [ ]
 10). Condense results to 1 equation fit (ex. how much of X to get Y uncertainty). [  ]
 9). See if we can detect Mars [ ] or Saturn. [ ]
 8). See which scenario best fits simulated data [ ]
+7). Add M_p > 0 prior to MCMC [ ]
 7). Figure out whether the Earth-Moon barycenter offset causes
 bias in measurements and if so, why.
 6). Add in 4th planet. Fit for best params [ x ]

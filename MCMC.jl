@@ -46,7 +46,8 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,
     par_trial = param[1:end]
     nsize = nparam
   end
-  @assert (nwalkers >= 40)  # nwalkers = nparam * 3
+  # Number of walkers should be at least 3 times number of parameters:
+  @assert (nwalkers >= 40)  
   # Set up arrays to hold the results:
   par_mcmc = zeros(nwalkers,nsteps,nsize)
   lprob_mcmc = zeros(nwalkers,nsteps)
@@ -74,13 +75,13 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,
         end
     end
     for iplanet=1:nplanet
-    # Place prior on masses, they must be positive
+    # The masses should be positive:
       if param[iplanet*5+1] < 0
         lprior += -Inf
       end
     end
     if nparam>16
-    # Place priors on deltaphi and account for aliasing:
+    # Force the deltaphi to be between 0 and pi (to account for aliasing):
       dpmin = 0.0; dpmax = pi
       deltaphi = param[18]
       while deltaphi < dpmin
@@ -98,7 +99,7 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,
       # end
     end
     if use_sigsys
-    # sigsys priors:
+    # The systematic uncertainty should be positive:
       sigsys = param[end]
       if sigsys < 0 
         lprior += -Inf
