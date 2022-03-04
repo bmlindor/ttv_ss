@@ -1,19 +1,20 @@
 if !@isdefined(TTVFaster)
-    include("TTVFaster/src/TTVFaster.jl")
-    using Main.TTVFaster
+    # include("TTVFaster/src/TTVFaster.jl")
+  # using TTVFaster
 end
-import Main.TTVFaster.ttv_wrapper
-import Main.TTVFaster.chisquare
+import TTVFaster.ttv_wrapper
+import TTVFaster.chisquare
 include("regress.jl")
 using DelimitedFiles,JLD2,Optim,LsqFit,Statistics
 # If the simulation already exists, can just do 2-planet fit
-function fit_planet2(sigma,nyear,sim,addnoise::Bool=false)
-  if String(sim)=="EMB"
+function fit_planet2(
+  jd1::Float64,sigma::Float64,nyear::Float64,
+  addnoise::Bool=true,EM::Bool=true)
+  if EM
     datafile = string("INPUTS/tt_",sigma,"sEMB",nyear,"yrs.txt")
   else
     datafile = string("INPUTS/tt_",sigma,"snoEMB",nyear,"yrs.txt")
   end
-  jd1 = 2.4332825e6
   jd2 = nyear*365.25 + jd1
   data1 = readdlm(datafile,Float64)
   nt1 = sum(data1[:,1] .== 1.0)
@@ -76,88 +77,25 @@ function fit_planet2(sigma,nyear,sim,addnoise::Bool=false)
   ntrans = [nt1,nt2]
   Nobs = sum(ntrans)
   nplanet = 2
-  println("Initial chi-square: ",chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt,jmax,true))
+  println("Initial chi-square: ",chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt,jmax,EM))
   param1 = init_param .+ 100.0
   while maximum(abs.(param1 .- init_param)) > 1e-5
     param1 = init_param
-    res = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,true),tt0,tt,weight,init_param)
+    res = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,EM),tt0,tt,weight,init_param)
     init_param = res.param
     # println("init_param: ",init_param)
     # println("New Initial chi-square: ",chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt))
   end
   println("Finished 2-planet fit: ",init_param)
-  chi2=chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt,jmax,true)
+  ttmodel = ttv_wrapper(tt0,nplanet,ntrans,init_param,jmax,EM)
+  lprob_best_p2= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
+  chi2=chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt,jmax,EM)
   println("New 2-planet chi-square: ",chi2)
-  fitfile = string("FITS/p2_fit",sigma,"s",nyear,"yrs.jld2")
-  @save fitfile chi2 init_param ntrans nplanet tt0 tt ttmodel sigtt
-  return chi2,init_param
-end
-# If the 2-planet fit already exists, can just do 3-planet search
-function fit_planet3(sigma,nyear,p3in,p3out,np3)
-  infile = string("FITS/p2_fit",sigma,"s",nyear,"yrs.jld2")
-  p = jldopen(String(infile),"r")
-  tt0,tt,ttmodel,sigtt=p["tt0"],p["tt"],p["ttmodel"],p["sigtt"]
-  nt1,nt2 = p["ntrans"][1],p["ntrans"][2]
-  jd1 = 2.4332825e6
-  jd2 = nyear*365.25 + jd1
-  offset = (jd1 + jd2)/2 
-  weight = ones(nt1+nt2)./ sigtt.^2 #assigns each data point stat weight d.t. noise = 1/σ^2
-  nphase=m["nphase"]
-  jmax=5
-  best_p3,lprob_best_p3=p["best_p3"],p["lprob_best_p3"]
-  Nobs = sum([nt1,nt2])
-  # Now,let's add the 3rd planet:
-  ntrans = [nt1,nt2,2] #requires at least 2 transits for each planet (even if it doesnt transit)
-  nplanet = 3
-  nparam = 15
-  # Grid of periods to search over:
-  p3 = 10 .^ range(log10(p3in),stop=log10(p3out),length=np3)
-  lprob_p3 = zeros(np3)
-  p3_cur = 11.86*365.25 #jupiter period in days,initial value
-  param_p3 = zeros(nparam,np3)
-  lprob_best = -1e100 #global best fit
-  p3best = zeros(nparam)
-  # Shifting to simulated observation range to search over period grid
-  offset = (jd1 + jd2)/2 
-  for j=1:np3
-    phase = p3[j]*range(0,stop=1,length=nphase) .+ offset 
-    lprob_phase = zeros(nphase)
-    lprob_p3[j] = -1e100
-    for i=1:nphase #loops over jupiter phases
-     # p3 param_names: mass ratio,phase,ecosw,esinw
-      param_tmp = [log10(1e-3),phase[i],0.01,0.01] 
-      param3 = [init_param;param_tmp] #concatenate 2 planet model to 3 planet model params
-      p3_cur = p3[j] #sets jupiter period to global value
-      param1 = param3 .+ 100.0
-      while maximum(abs.(param1 .- param3)) > 1e-5
-        param1 = param3
-        fit = curve_fit((tt0,param3) -> ttv_wrapper(tt0,nplanet,ntrans,[param3[1:10];10^param3[11];p3_cur;param3[12:end]],jmax,true),tt0,tt,weight,param3)
-        param3 = fit.param
-        # println("init_param: ",param3)
-        # println("New Initial chi-square: ",chisquare(tt0,nplanet,ntrans,param3,tt,sigtt,true,p3_cur))
-      end
-      ttmodel = ttv_wrapper(tt0,nplanet,ntrans,[param3[1:10];10^param3[11];p3_cur;param3[12:end]],jmax,true)
-      lprob_phase[i]= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
-      if lprob_phase[i] > lprob_best # check that best fit for period is better than global best fit
-        lprob_best = lprob_phase[i]
-        p3best = [fit.param[1:10];10^fit.param[11];p3_cur;fit.param[12:end]]
-      end
-      if lprob_phase[i] > lprob_p3[j] # checks best fit over all phases of jupiter for this particular period
-        lprob_p3[j] = lprob_phase[i]
-        param_p3[1:nparam,j] =  [fit.param[1:10];10^fit.param[11];p3_cur;fit.param[12:end]]
-      end
-    end
-    println("Period: ",p3[j]," log Prob: ",lprob_p3[j]," Param: ",vec(param_p3[1:nparam,j]))
+  if EM
+    fitfile = string("FITS/fromEMB/p2_fit",sigma,"s",nyear,"yrs.jld2")
+  else
+    fitfile = string("FITS/p2_fit",sigma,"s",nyear,"yrs.jld2")
   end
-  println("Finished 3-planet fit w/ fixed period: ",p3best)
-  fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,true),tt0,tt,weight,p3best)
-  best_p3 = fit.param
-  ttmodel = ttv_wrapper(tt0,nplanet,ntrans,best_p3,jmax,true)
-  lprob_best_p3= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
-  println("Finished global 3-planet fit.")
-  println("New 3-planet chi-square: ",chisquare(tt0,nplanet,ntrans,best_p3,tt,sigtt,jmax,true))
-  println("Maximum: ",lprob_best_p3," Param: ",best_p3)
-  fitfile = string("FITS/p3_fit",sigma,"s",nyear,"yrs.jld2")
-  @save fitfile p3 lprob_p3 best_p3 lprob_best_p3 ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase
-  return lprob_best_p3,best_p3
+  @save fitfile chi2 init_param ntrans nplanet tt0 tt ttmodel sigtt
+  return 
 end
