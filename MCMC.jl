@@ -29,7 +29,7 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,
     errors = [errors[1:10];1e-7;1e-5;1e-5;1e-2;1e-2;errors[11:end]]
     pname = [pname[1:end];"mu_4";"P_4";"t04";"e4 cos(om4)";"e4 sin(om4)"]
   elseif nplanet==5
-    errors=[errors[1:end];1e-7;1e-1;1e-1;1e-2;1e-2;errors[11:end];1e-6;1e-1;1e-1;1e-2;1e-2]
+    errors=[errors[1:10];1e-7;1e-1;1e-1;1e-2;1e-2;errors[11:end];1e-6;1e-1;1e-1;1e-2;1e-2]
     pname = [pname[1:end];"mu_4";"P_4";"t04";"e4 cos(om4)";"e4 sin(om4)";"mu_5";"P_5";"t05";"e5 cos(om5)";"e5 sin(om5)"]
   elseif nplanet==2
     errors=errors[1:10]

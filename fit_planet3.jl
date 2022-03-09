@@ -1,7 +1,7 @@
-# if !@isdefined(TTVFaster)
+if !@isdefined(TTVFaster)
     include("TTVFaster/src/TTVFaster.jl")
     using Main.TTVFaster
-# end
+end
 import Main.TTVFaster.ttv_wrapper
 import Main.TTVFaster.chisquare
 include("regress.jl")
@@ -183,6 +183,7 @@ function fit_planet3(jd1::Float64,sigma::Float64,nyear::Float64,
   jmax=5
   init_param=p["init_param"]
   Nobs = sum([nt1,nt2])
+  println("Planet 2 fit loaded.")
   # Now,let's add the 3rd planet:
   ntrans = [nt1,nt2,2] #requires at least 2 transits for each planet (even if it doesnt transit)
   nplanet = 3

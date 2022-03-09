@@ -228,6 +228,7 @@ function fit_planet4(jd1::Float64,sigma::Float64,nyear::Float64,
   jmax=5
   jd2 = nyear*365.25 + jd1
   weight = ones(nt1+nt2)./ sigtt.^2 #assigns each data point stat weight d.t. noise = 1/σ^2
+  println("Planet 3 fit loaded.")
  # Now,add a 4th planet:
   ntrans = [nt1,nt2,2,2] #requires at least 2 transits for each planet (even if it doesnt transit)
   nplanet = 4

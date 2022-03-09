@@ -86,6 +86,7 @@ For different time spans, there are diff. posterior distributions,
 must change grid search to accommodate for width of dist.
 
 julia full_run.jl grid 30.0 40 ppp &> results/run.out &
+julia EMB_run.jl grid 10 40 ppppp &> results/p5test.out &
 ......
 label = [ppp, ppmp, pppp, etc.]
 runtype = [sim, grid, mcmc, wide]
@@ -133,9 +134,9 @@ Q). Wrong signs for evectors? <-- not first time this has been found
 ##########################  Project Tasks ##########################
 Make likelihood profiles continuous [ ]
 10). Condense results to 1 equation fit (ex. how much of X to get Y uncertainty). [  ]
-9). See if we can detect Mars [ ] or Saturn. [ ]
+9). See if we can detect Mars [ x ] or Saturn. [  ]
 8). See which scenario best fits simulated data [ ]
-7). Add M_p > 0 prior to MCMC [ ]
+7). Add M_p > 0 prior to MCMC [ x ]
 7). Figure out whether the Earth-Moon barycenter offset causes
 bias in measurements and if so, why.
 6). Add in 4th planet. Fit for best params [ x ]
