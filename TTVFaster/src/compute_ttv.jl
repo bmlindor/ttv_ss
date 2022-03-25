@@ -57,7 +57,7 @@ function compute_ttv!(jmax::Integer,p1::Planet_plane_hk{T},p2::Planet_plane_hk{T
 
   # Compute the semi-major axis ratio of the planets:
   # println(p1.period,p2.period)
-  global alpha = (p1.period/p2.period)^(2//3)  #check memory allocation >>>>>>>>>>>>
+  global alpha = (p1.period/p2.period)^(2//3)  #shouldn't need to be global !!!!!!
   # println(alpha, p1.period, p2.period)
   @assert(alpha < 1)
   @assert(alpha > 0)

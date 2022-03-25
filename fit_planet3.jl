@@ -1,11 +1,11 @@
-if !@isdefined(TTVFaster)
-    include("TTVFaster/src/TTVFaster.jl")
-    using Main.TTVFaster
-end
-import Main.TTVFaster.ttv_wrapper
-import Main.TTVFaster.chisquare
-include("regress.jl")
-using DelimitedFiles,JLD2,Optim,LsqFit,Statistics
+# if !@isdefined(TTVFaster)
+#     include("TTVFaster/src/TTVFaster.jl")
+#     using Main.TTVFaster
+# end
+# import Main.TTVFaster.ttv_wrapper
+# import Main.TTVFaster.chisquare
+# include("regress.jl")
+# using DelimitedFiles,JLD2,Optim,LsqFit,Statistics
 
 function fit_planet3(filename::String,
   jd1::Float64,sigma::Float64,nyear::Float64,
@@ -117,7 +117,8 @@ function fit_planet3(filename::String,
     phase = p3[j]*range(0,stop=1,length=nphase) .+ offset 
     lprob_phase = zeros(nphase)
     lprob_p3[j] = -1e100
-    for i=1:nphase #loops over jupiter phases
+    # Loop over planet 3 phases:    
+    for i=1:nphase
      # p3 param_names: mass ratio,phase,ecosw,esinw
       param_tmp = [log10(1e-3),phase[i],0.01,0.01] 
       param3 = [init_param;param_tmp] #concatenate 2 planet model to 3 planet model params
@@ -178,7 +179,6 @@ function fit_planet3(jd1::Float64,sigma::Float64,nyear::Float64,
   nt1,nt2 = p["ntrans"][1],p["ntrans"][2]
 
   jd2 = nyear*365.25 + jd1
-  offset = (jd1 + jd2)/2 
   weight = ones(nt1+nt2)./ sigtt.^2 #assigns each data point stat weight d.t. noise = 1/σ^2
   jmax=5
   init_param=p["init_param"]
@@ -201,7 +201,8 @@ function fit_planet3(jd1::Float64,sigma::Float64,nyear::Float64,
     phase = p3[j]*range(0,stop=1,length=nphase) .+ offset 
     lprob_phase = zeros(nphase)
     lprob_p3[j] = -1e100
-    for i=1:nphase #loops over jupiter phases
+    # Loop over planet 3 phases:
+    for i=1:nphase 
      # p3 param_names: mass ratio,phase,ecosw,esinw
       param_tmp = [log10(1e-3),phase[i],0.01,0.01] 
       param3 = [init_param;param_tmp] #concatenate 2 planet model to 3 planet model params
@@ -225,7 +226,7 @@ function fit_planet3(jd1::Float64,sigma::Float64,nyear::Float64,
         param_p3[1:nparam,j] =  [fit.param[1:10];10^fit.param[11];p3_cur;fit.param[12:end]]
       end
     end
-    println("Period: ",p3[j]," log Prob: ",lprob_p3[j]," Param: ",vec(param_p3[1:nparam,j]))
+    # println("Period: ",p3[j]," log Prob: ",lprob_p3[j]," Param: ",vec(param_p3[1:nparam,j]))
   end
   println("Finished 3-planet fit w/ fixed period: ",p3best)
   fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,EM),tt0,tt,weight,p3best)

@@ -1,11 +1,11 @@
-if !@isdefined(TTVFaster)
-    include("TTVFaster/src/TTVFaster.jl")
-  using Main.TTVFaster
-end
-import Main.TTVFaster.ttv_wrapper
-import Main.TTVFaster.chisquare
-include("regress.jl")
-using DelimitedFiles,JLD2,Optim,LsqFit,Statistics
+# if !@isdefined(TTVFaster)
+#     include("TTVFaster/src/TTVFaster.jl")
+#   using Main.TTVFaster
+# end
+# import Main.TTVFaster.ttv_wrapper
+# import Main.TTVFaster.chisquare
+# include("regress.jl")
+# using DelimitedFiles,JLD2,Optim,LsqFit,Statistics
 # If the simulation already exists, can just do 2-planet fit
 function fit_planet2(
   jd1::Float64,sigma::Float64,nyear::Float64,
@@ -28,6 +28,7 @@ function fit_planet2(
     sigtt1 = ones(nt1)
     sigtt2 = ones(nt2)
   end
+
   # Okay,let's do a linear fit to the transit times (third column):
   function find_coeffs(tt,period,sigtt)
     nt = length(tt)
@@ -49,13 +50,14 @@ function fit_planet2(
   # @assert (sigtt[1] .* (24 * 3600) .= sigma)
   t01 = coeff1[1]; per1 = coeff1[2]
   t02 = coeff2[1]; per2 = coeff2[2]
-  t1  = collect(t01 .+ per1 .* range(0,stop=nt1-1,length=nt1)) #best fit linear transit times w/o ttvs
+  t1  = collect(t01 .+ per1 .* range(0,stop=nt1-1,length=nt1)) 
   t2  = collect(t02 .+ per2 .* range(0,stop=nt2-1,length=nt2))
-  # Best-fit linear transit times:
+  # Best-fit linear transit times without TTVs:
   tt0 = [t1;t2]
   weight = ones(nt1+nt2)./ sigtt.^2 #assigns each data point stat weight d.t. noise = 1/σ^2
   # Actual transit times:
   tt=[tt1;tt2]
+
   # Okay,now let's do a 2-planet fit:
   # param_names = mass ratio,period,initial transit time,e*cos(omega),e*sin(omega)
   init_param = [3e-6,per1,t01,0.01,0.01,
@@ -72,7 +74,8 @@ function fit_planet2(
   ttv1 = zeros(nt1)
   ttv2 = zeros(nt2)
   # Need first call to TTVFaster,without optimizing
-  dummy=TTVFaster.compute_ttv!(jmax,p1,p2,time1,time2,ttv1,ttv2) 
+  dummy=TTVFaster.compute_ttv!(jmax,p1,p2,time1,time2,ttv1,ttv2)
+
   # Now,optimize 2-planet fit
   ntrans = [nt1,nt2]
   Nobs = sum(ntrans)

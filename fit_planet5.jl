@@ -1,11 +1,11 @@
-if !@isdefined(TTVFaster)
-    include("TTVFaster/src/TTVFaster.jl")
-    using Main.TTVFaster
-end
-import Main.TTVFaster.ttv_wrapper
-import Main.TTVFaster.chisquare
-include("regress.jl")
-using DelimitedFiles,JLD2,Optim,LsqFit,Statistics
+# if !@isdefined(TTVFaster)
+#     include("TTVFaster/src/TTVFaster.jl")
+#     using Main.TTVFaster
+# end
+# import Main.TTVFaster.ttv_wrapper
+# import Main.TTVFaster.chisquare
+# include("regress.jl")
+# using DelimitedFiles,JLD2,Optim,LsqFit,Statistics
 
 function fit_planet5(filename::String,
   jd1::Float64,sigma::Float64,nyear::Float64,
@@ -323,7 +323,7 @@ function fit_planet5(jd1::Float64,sigma::Float64,nyear::Float64,
         param_p5[1:nparam,j] =  [fit.param[1:20];10^param5[21];p5_cur;fit.param[22:end]]
       end
     end
-    println("Period: ",p5[j]," log Prob: ",lprob_p5[j]," Param: ",vec(param_p5[1:nparam,j]))
+    # println("Period: ",p5[j]," log Prob: ",lprob_p5[j]," Param: ",vec(param_p5[1:nparam,j]))
   end
   println("Finished 5-planet fit w/ fixed period: ",p5best)
 
