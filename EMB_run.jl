@@ -47,7 +47,12 @@ function sim()
 end
 # Perform 3-planet grid search, given width flag
 function grid_run(p3in,p3out,np3,nphase)
-	@time fit_planet3(datafile,jd1,sigma,nyear,p3in,p3out,np3,nphase,true,true) 
+	@time fit_planet4(datafile,jd1,sigma,nyear,p3in,p3out,np3,nphase,p4in,p4out,np4,true,true) 
+	fit_planet4(filename::String,
+  jd1::Float64,sigma::Float64,nyear::Float64,
+  p3in::Float64,p3out::Float64,np3::Int,nphase::Int,
+  p4in::Float64,p4out::Float64,np4::Int,
+  addnoise::Bool=true,EM::Bool=true)
 end
 # Run 3-planet markov chain
 function p3_mcmc()
