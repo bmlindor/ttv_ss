@@ -10,7 +10,7 @@ module TTVFaster
 include("ttv_wrapper.jl")
 
 export Planet_plane_hk, compute_ttv!
-export Planet_plane
+# export Planet_plane
 # export ttv_nplanet, ttv_wrapper, ttv_chisquare    
 
 end

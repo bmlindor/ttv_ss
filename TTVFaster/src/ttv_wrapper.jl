@@ -1,13 +1,7 @@
 include("ttv_nplanet.jl")
 function ttv_wrapper(tt0,nplanet::Int64,ntrans::Vector{Int64},params::Vector{T},jmax::Integer,EM::Bool) where T<:Real
-  # These lines need modification for different choices of parameters:
-  if nplanet == 2
-    n1,n2 = ntrans
-  elseif nplanet == 3
-    n1,n2,n3 = ntrans
-  elseif nplanet == 4
-    n1,n2,n3,n4 = ntrans
-  end
+  n1,n2 = ntrans[1:2]
+  # println(n1, " ", n2)
 
   # Call ttv_nplanet:
   ttv = ttv_nplanet(nplanet,jmax,ntrans,params[1:5*nplanet])
