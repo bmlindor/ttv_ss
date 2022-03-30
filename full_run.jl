@@ -25,7 +25,7 @@ nphase=36 #wide: 100,36,180
 p3in,p3out,np3=10*365.25,15*365.25,10
 dpin,dpout,ndp=2.1,2.6,10
 p4in,p4out,np4=1.5*365.25,5*365.25,100
-p5in,p5out,np5=26*365.25,40*365.25,100
+p5in,p5out,np5=26*365.25,34*365.25,100
 nwalkers,nsteps=50,1000
 # Change search grids to accomodate for wider distributions when time spans are shorter
 # if nyear>36
@@ -81,9 +81,9 @@ function test_fit(jd1::Float64,sigma::Float64,nyear::Float64,
   p4in::Float64,p4out::Float64,np4::Int,
   p5in::Float64,p5out::Float64,np5::Int,
   )
-	@time fit_planet2(jd1,sigma,nyear,addnoise,EM)
-	@time fit_planet3(jd1,sigma,nyear,p3in,p3out,np3,nphase,EM)
-	@time fit_planet4(jd1,sigma,nyear,p4in,p4out,np4,nphase,EM)
+	# @time fit_planet2(jd1,sigma,nyear,addnoise,EM)
+	# @time fit_planet3(jd1,sigma,nyear,p3in,p3out,np3,nphase,EM)
+	# @time fit_planet4(jd1,sigma,nyear,p4in,p4out,np4,nphase,EM)
 	@time fit_planet5(jd1,sigma,nyear,p5in,p5out,np5,nphase,EM)
 	
 end
