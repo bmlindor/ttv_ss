@@ -151,6 +151,7 @@ function plot_emcee(sigma,nyear,sim,model,include_moon::Bool=false)
     L"$μ_2$ [$M_{⋆}$]",L"$P_2$ [days]",L"$t_{0,2}$",L"$e_2 cos(ω_2)$",L"$e_2 sin(ω_2)$",
     L"$μ_3$ [$M_{⋆}$]",L"$P_3$ [days]",L"$t_{0,3}$",L"$e_3 cos(ω_3)$",L"$e_3 sin(ω_3)$",
     L"$μ_4$ [$M_{⋆}$]",L"$P_4$ [days]",L"$t_{0,4}$",L"$e_4 cos(ω_4)$",L"$e_4 sin(ω_4)$",
+    L"$μ_5$ [$M_{⋆}$]",L"$P_5$ [days]",L"$t_{0,5}$",L"$e_4 cos(ω_5)$",L"$e_5 sin(ω_5)$",
     L"$t_{max} sin(ϕ_0)$",L"$t_{max} cos(ϕ_0)$",L"$Δϕ$ [rad]",L"$σ_{sys}^2$ [days]"]
   figure(figsize=(8,6))
   for i=1:5
@@ -176,7 +177,49 @@ function plot_emcee(sigma,nyear,sim,model,include_moon::Bool=false)
   title=string("IMAGES/traces/",sim,model,"testEarth-",sigma,"secs",nyear,"yrs.png")
   savefig(title)
   clf()
-  if String(model)=="p4"
+  if String(model)=="p5"
+    figure(figsize=(8,6))
+    for i=1:5
+    ax3=subplot(3,2,i)
+    for j=1:nwalkers 
+    ax3.plot(par_mcmc[j,iburn:nsteps,i+20])
+    end
+    ax3.set_ylabel(parname[i+20])
+    end
+    tight_layout()
+    title=string("IMAGES/traces/",sim,model,"testSaturn-",sigma,"secs",nyear,"yrs.png")
+    savefig(title)
+    clf()
+    figure(figsize=(8,6))
+    for i=1:5
+    ax3=subplot(3,2,i)
+    for j=1:nwalkers 
+    ax3.plot(par_mcmc[j,iburn:nsteps,i+10])
+    end
+    ax3.set_ylabel(parname[i+10])
+    end
+    tight_layout()
+    title=string("IMAGES/traces/",sim,model,"testMars-",sigma,"secs",nyear,"yrs.png")
+    savefig(title)
+    clf()
+    figure(figsize=(8,6))
+    for i=1:5
+    ax3=subplot(3,2,i)
+    for j=1:nwalkers 
+    ax3.plot(par_mcmc[j,iburn:nsteps,i+15])
+    end
+    ax3.set_ylabel(parname[i+15])
+    end
+    ax4=subplot(3,2,6)
+    for j=1:nwalkers
+      ax4.plot(par_mcmc[j,iburn:nsteps,end])
+      ax4.set_ylabel(parname[end])
+    end
+    tight_layout()
+    title=string("IMAGES/traces/",sim,model,"testJupiter-",sigma,"secs",nyear,"yrs.png")
+    savefig(title)
+    clf()
+  elseif String(model)=="p4"
     figure(figsize=(8,6))
     for i=1:5
     ax3=subplot(3,2,i)

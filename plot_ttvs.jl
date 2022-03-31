@@ -269,6 +269,9 @@ function plot_ttvs(sigma::Float64,nyear::Float64,sim,fitmodel,include_moon::Bool
   if fitmodel=="p4"
     bestfit="best_p4"
     nplanet=4
+  elseif fitmodel=="p5"
+    bestfit="best_p5"
+    nplanet=5
   elseif fitmodel=="moon" #if isfile(string("FITS/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")) 
     bestfit="best_p3"
   # else 
@@ -279,11 +282,11 @@ function plot_ttvs(sigma::Float64,nyear::Float64,sim,fitmodel,include_moon::Bool
   pbest_global=f[bestfit]
   ntrans=f["ntrans"]
   pair_ttvs=decompose_ttvs(nplanet,ntrans[1:nplanet],pbest_global) .* (24 * 60)
-  println(bestfit)
+  # println(bestfit)
   n1,n2=ntrans[1],ntrans[2]
   mu1,P1,t01,ecos1,esin1=pbest_global[1:5]
   mu2,P2,t02,ecos2,esin2=pbest_global[6:10]
-  mu3,P3,t03,ecos3,esin3=pbest_global[11:15]
+  # mu3,P3,t03,ecos3,esin3=pbest_global[11:15]
   time1=collect(t01 .+ range(0,stop=n1-1,length=n1) .* P1)
   time2=collect(t02 .+ range(0,stop=n2-1,length=n2) .* P2)
   tt1,tt2=tt[1:n1],tt[n1+1:n1+n2]
@@ -333,14 +336,23 @@ function plot_ttvs(sigma::Float64,nyear::Float64,sim,fitmodel,include_moon::Bool
     ax2.plot(ttsim2,pair_ttvs[2,3,1:n2]+pair_ttvs[2,1,1:n2]+pair_ttvs[2,4,1:n2],linewidth=2,color="grey")
     ax2.plot(ttsim2,pair_ttvs[2,3,1:n2],linestyle="-.",color="darkcyan",label="'Mars' contribution",alpha=0.9)
     ax2.plot(ttsim2,pair_ttvs[2,4,1:n2],color="firebrick",label="Jupiter contribution")
-    else
+  elseif nplanet==5
+    ax1.plot(ttsim1,pair_ttvs[1,3,1:n1]+pair_ttvs[1,2,1:n1]+pair_ttvs[1,4,1:n1]+pair_ttvs[1,5,1:n1],linewidth=2,color="grey")
+    ax1.plot(ttsim1,pair_ttvs[1,3,1:n1],linestyle="-.",color="darkcyan",label="'Mars' contribution",alpha=0.9)
+    ax1.plot(ttsim1,pair_ttvs[1,4,1:n1],color="firebrick",label="Jupiter contribution")
+    ax1.plot(ttsim1,pair_ttvs[1,5,1:n1],color="tan",label="Saturn contribution")
+    ax2.plot(ttsim2,pair_ttvs[2,3,1:n2]+pair_ttvs[2,1,1:n2]+pair_ttvs[2,4,1:n2]+pair_ttvs[2,5,1:n2],linewidth=2,color="grey")
+    ax2.plot(ttsim2,pair_ttvs[2,3,1:n2],linestyle="-.",color="darkcyan",label="'Mars' contribution",alpha=0.9)
+    ax2.plot(ttsim2,pair_ttvs[2,4,1:n2],color="firebrick",label="Jupiter contribution")
+    ax2.plot(ttsim2,pair_ttvs[2,5,1:n2],color="tan",label="Saturn contribution")
+  else 
     ax1.plot(ttsim1,pair_ttvs[1,3,1:n1]+pair_ttvs[1,2,1:n1],linewidth=2,color="grey")
     ax1.plot(ttsim1,pair_ttvs[1,3,1:n1],color="firebrick",label="Jupiter contribution",alpha=0.9)
     ax2.plot(ttsim2,pair_ttvs[2,3,1:n2],color="firebrick",label="Jupiter contribution",alpha=0.9)
     ax2.plot(ttsim2,pair_ttvs[2,3,1:n2]+pair_ttvs[2,1,1:n2],linewidth=2,color="grey")
-    end
-    ax1.set_ylim(-6,6)
-    ax2.set_ylim(-6,6)
+  end
+  ax1.set_ylim(-6,6)
+  ax2.set_ylim(-6,6)
   ax1.legend(bbox_to_anchor=(0.,1.02,1.,.102),loc="lower left",
       ncol=3,mode="expand",borderaxespad=0.0)
   ax2.legend(bbox_to_anchor=(0.,1.02,1.,.102),loc="lower left",
