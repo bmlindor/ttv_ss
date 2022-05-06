@@ -24,7 +24,7 @@ nphase=36 #wide: 100,36,180
 p3in,p3out,np3=10*365.25,15*365.25,10
 dpin,dpout,ndp=2.1,2.6,10
 p4in,p4out,np4=1.5*365.25,5*365.25,100
-p5in,p5out,np5=29*365.25,31*365.25,100
+p5in,p5out,np5=28*365.25,33*365.25,100
 nwalkers,nsteps=50,1000
 # Change search grids to accomodate for wider distributions when time spans are shorter
 # if nyear>36
@@ -46,8 +46,8 @@ nwalkers,nsteps=50,1000
 # From EMB simulations, use datafile=string("INPUTS/tt_",sigma,"sEMB",nyear,"yrs.txt") and EMB==true.
 # Simulate orbits, create datafile, and perform 3-planet grid search
 jd1=2.4332825e6
-function simfit()
-	sim_times(jd1,nyear,true,sigma,true)
+function sim_fit(EM::Bool)
+	sim_times(jd1,nyear,true,sigma,EM)
 	# @time fit_moon(datafile,jd1,sigma,nyear,p3in,p3out,np3,nphase,dpin,dpout,ndp,true,false)   
 end
 # Perform 3-planet grid search, given width flag
@@ -100,6 +100,7 @@ end
 #     @warn "Could not find simulation file."
 # end
 if runtype=="fit" && label=="test"
+	sim_fit(true)
 	test_fit(jd1,sigma,nyear,true,true,nphase,p3in,p3out,np3,p4in,p4out,np4,p5in,p5out,np5)
 # elseif runtype=="mcmc" && label=="ppmp"
 # 	moon_mcmc()
