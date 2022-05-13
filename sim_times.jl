@@ -39,12 +39,12 @@ function sim_times(jd1::Float64,nyear::Float64,
   pva_earth = zeros(9,jdsize)
   # for i=1:np0
   for i=1:jdsize
-    pva_sun[1:9,i] = compute(eph,t0[i],0.5,10,10,options,2)./AU
-    pva_venus[1:9,i] = compute(eph,t0[i],0.5,2,10,options,2)./AU
+    pva_sun[1:9,i] = compute(eph,t0[i],0.5,10,0,options,2)./AU
+    pva_venus[1:9,i] = compute(eph,t0[i],0.5,2,0,options,2)./AU
     if EMB
-      pva_earth[1:9,i] = compute(eph,t0[i],0.5,3,10,options,2)./AU 
+      pva_earth[1:9,i] = compute(eph,t0[i],0.5,3,0,options,2)./AU 
     else
-      pva_earth[1:9,i] = compute(eph,t0[i],0.5,399,10,options,2)./AU
+      pva_earth[1:9,i] = compute(eph,t0[i],0.5,399,0,options,2)./AU
 #            pva_emb = compute(eph,t0[i],0.5,3,10,options,2)
 #            pva_moon = compute(eph,t0[i],0.5,301,10,options,2)
 #            println("Earth - EMB: ",norm(pva_earth[1:3,i] .- pva_emb[1:3]))
@@ -71,7 +71,7 @@ function sim_times(jd1::Float64,nyear::Float64,
     pos = zeros(3,N) # position of body relative to Sun
     # Compute functions of position and velocity wrt time:
     function calc_ffs(t)
-    pva = compute(eph,JD_0,t,body_id,10,options,2)
+    pva = compute(eph,JD_0,t,body_id,0,options,2)
 #     println(JD_0)
     x = pva[1:3]; v = pva[4:6]; a = pva[7:9];
     f = dot(x,v) - (dot(x,n_obs))*(dot(v,n_obs))

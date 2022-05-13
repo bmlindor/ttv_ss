@@ -14,7 +14,7 @@ function prob(xgrid::Array{Float64,1},lprob::Array{Float64,1},truex::Float64,nbi
 		ax1.plot(xgrid ./365.25,xprob,color=color) 
 		ax1.axvline(truex,linestyle="--",color="black",label=string(truex))
 		ax1.set_xlabel("Planet Period Search Grid [years]")
-		ax1.text(round(truex),1,pname)
+		ax1.text(truex + .1,1.01,pname)
 		ax1.set_ylabel("Probability")
 		ax1.minorticks_on()
 		ax1.tick_params(which="both",direction="in")
