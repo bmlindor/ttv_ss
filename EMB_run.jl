@@ -68,11 +68,11 @@ function moon_mcmc()
 	@time MCMC(foutput,m["best_dp"],m["lprob_best_dp"],nsteps,nwalkers,3,m["ntrans"][1:3],m["tt0"],m["tt"],m["sigtt"],true,false)	  
 end
 # Run 4-planet markov chain
-function p4_mcmc()
-	foutput=string("MCMC/fromEMB/p4_mcmc",sigma,"s",nyear,"yrs.jld2")
-	p4file=string("FITS/fromEMB/p4_fit",sigma,"s",nyear,"yrs.jld2")
-	p=jldopen(String(p4file),"r")
-	@time MCMC(foutput,p["best_p4"],p["lprob_best_p4"],nsteps,nwalkers,4,p["ntrans"][1:4],p["tt0"],p["tt"],p["sigtt"],true,true)
+function p5_mcmc()
+	foutput=string("MCMC/fromEMB/p5_mcmc",sigma,"s",nyear,"yrs.jld2")
+	p5file=string("FITS/fromEMB/p5_fit",sigma,"s",nyear,"yrs.jld2")
+	p=jldopen(String(p5file),"r")
+	@time MCMC(foutput,p["best_p5"],p["lprob_best_p5"],nsteps,nwalkers,5,p["ntrans"][1:5],p["tt0"],p["tt"],p["sigtt"],true,true)
 end
 if runtype=="sim" && label=="pp"
 	sim()

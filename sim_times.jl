@@ -10,15 +10,15 @@ end
 include("regress.jl")
 # Simulate solar system orbits from ephemerides
 function sim_times(jd1::Float64,nyear::Float64,
-  addnoise::Bool=false,sigma::Float64=0.0,EMB::Bool=true,seed::Int=42)
+  addnoise::Bool,sigma::Float64,EMB::Bool=true,seed::Int=42)
   # To do: output file with arguments in header?
   # nyear = (jd2 - jd1)/365.25 
   jd2 = nyear*365.25 + jd1
   jdsize = 1000
   # dt = (jd2 - jd1)/jdsize
   # Initial JD times for days in nyear 
-  @assert jd1 >= 2287184.5 #2414105.0
-  @assert jd2 <= 2688976.5 #2488985.0
+  @assert (jd1 >= 2287184.5) #2414105.0
+  @assert (jd2 <= 2688976.5) #2488985.0
   Random.seed!(seed)
   t0 = range(jd1,stop=jd2-1,length = jdsize)
   # println(t0[1]) #= 2.4332825e6  
@@ -39,12 +39,12 @@ function sim_times(jd1::Float64,nyear::Float64,
   pva_earth = zeros(9,jdsize)
   # for i=1:np0
   for i=1:jdsize
-    pva_sun[1:9,i] = compute(eph,t0[i],0.5,10,0,options,2)./AU
-    pva_venus[1:9,i] = compute(eph,t0[i],0.5,2,0,options,2)./AU
+    pva_sun[1:9,i] = compute(eph,t0[i],0.5,10,10,options,2)./AU
+    pva_venus[1:9,i] = compute(eph,t0[i],0.5,2,10,options,2)./AU
     if EMB
-      pva_earth[1:9,i] = compute(eph,t0[i],0.5,3,0,options,2)./AU 
+      pva_earth[1:9,i] = compute(eph,t0[i],0.5,3,10,options,2)./AU 
     else
-      pva_earth[1:9,i] = compute(eph,t0[i],0.5,399,0,options,2)./AU
+      pva_earth[1:9,i] = compute(eph,t0[i],0.5,399,10,options,2)./AU
 #            pva_emb = compute(eph,t0[i],0.5,3,10,options,2)
 #            pva_moon = compute(eph,t0[i],0.5,301,10,options,2)
 #            println("Earth - EMB: ",norm(pva_earth[1:3,i] .- pva_emb[1:3]))
@@ -52,8 +52,8 @@ function sim_times(jd1::Float64,nyear::Float64,
 #            println("Moon - EMB: ",norm(pva_moon[1:3] .- pva_emb[1:3]))
 #            println("Ratio: ",norm(pva_earth[1:3,i] .- pva_emb[1:3])/norm(pva_moon[1:3] .- pva_emb[1:3]))
     end
-
   end
+  println("Finished CALCEPH computation.")
   L_venus = cross(pva_venus[1:3],pva_venus[4:6])
   L_earth = cross(pva_earth[1:3],pva_earth[4:6])
   n_obs = cross(L_earth,L_venus)
