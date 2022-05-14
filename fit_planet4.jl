@@ -212,13 +212,15 @@ function fit_planet4(filename::String,
 end
 # If 3-planet fit already exists, can just do 4-planet search
 function fit_planet4(jd1::Float64,sigma::Float64,nyear::Float64,
-  p4in::Float64,p4out::Float64,np4::Int,nphase::Int
-  ,EM::Bool=true)
+  p4in::Float64,p4out::Float64,np4::Int,nphase::Int,EM::Bool)
   if EM
     infile = string("FITS/fromEMB/p3_fit",sigma,"s",nyear,"yrs.jld2")
+    outfile = string("FITS/fromEMB/p4_fit",sigma,"s",nyear,"yrs.jld2")
   else
     infile = string("FITS/p3_fit",sigma,"s",nyear,"yrs.jld2")
+    outfile = string("FITS/p4_fit",sigma,"s",nyear,"yrs.jld2")
   end
+  @assert isfile(infile)
   m = jldopen(String(infile),"r")
   tt0,tt,ttmodel,sigtt=m["tt0"],m["tt"],m["ttmodel"],m["sigtt"]
   nt1,nt2 = m["ntrans"][1],m["ntrans"][2]
@@ -279,11 +281,77 @@ function fit_planet4(jd1::Float64,sigma::Float64,nyear::Float64,
   println("Finished global 4-planet fit.")
   println("New 4-planet chi-square: ",chisquare(tt0,nplanet,ntrans,best_p4,tt,sigtt,jmax,EM))
   println("Maximum: ",lprob_best_p4," Param: ",best_p4)
-  if EM
-    fitfile = string("FITS/fromEMB/p4_fit",sigma,"s",nyear,"yrs.jld2")
-  else
-    fitfile = string("FITS/p4_fit",sigma,"s",nyear,"yrs.jld2")
-  end
-  @save fitfile p3 lprob_p3 best_p3 lprob_best_p3 p4 lprob_p4 best_p4 lprob_best_p4 ntrans nplanet tt0 tt ttmodel sigtt
+  @save outfile p3 lprob_p3 best_p3 lprob_best_p3 p4 lprob_p4 best_p4 lprob_best_p4 ntrans nplanet tt0 tt ttmodel sigtt
   return best_p3,best_p4 
+end
+# If 3-planet fit with moon already exists, can do 4-planet search
+function fit_planet4(jd1::Float64,sigma::Float64,nyear::Float64,
+  p4in::Float64,p4out::Float64,np4::Int,nphase::Int)
+  infile = string("FITS/p3moon_fit",sigma,"s",nyear,"yrs.jld2")
+  @assert isfile(infile)
+  m = jldopen(String(infile),"r")
+  tt0,tt,ttmodel,sigtt=m["tt0"],m["tt"],m["ttmodel"],m["sigtt"]
+  nt1,nt2 = m["ntrans"][1],m["ntrans"][2]
+  p3,lprob_p3=m["p3"],m["lprob_p3"]
+  best_p3,lprob_best_p3=m["best_p3"],m["lprob_best_p3"]
+  dp,lprob_dp=m["dp"],m["lprob_dp"]
+  best_dp,lprob_best_dp=m["best_dp"],m["lprob_best_dp"]
+  Nobs = sum([nt1,nt2])
+  jmax=5
+  jd2 = nyear*365.25 + jd1
+  weight = ones(nt1+nt2)./ sigtt.^2 #assigns each data point stat weight d.t. noise = 1/σ^2
+ # Now,add a 4th planet:
+  ntrans = [nt1,nt2,2,2] #requires at least 2 transits for each planet (even if it doesnt transit)
+  nplanet = 4
+  nparam = 23
+  # Grid of periods to search over:
+  p4 = 10 .^ range(log10(p4in),stop=log10(p4out),length=np4)
+  p4_cur =  1.88*365.25 
+  lprob_p4 = zeros(np4)
+  param_p4 = zeros(nparam,np4)
+  lprob_best = -1e100 
+  p4best = zeros(nparam)
+  offset = (jd1 + jd2)/2 
+  for j=1:np4
+    phase = p4[j]*range(0,stop=1,length=nphase) .+ offset 
+    lprob_phase = zeros(nphase) 
+    lprob_p4[j] = -1e100
+    for i=1:nphase
+     # p4 param_names: mass ratio,phase,ecosw,esinw; uses same nphase as p3
+      param_tmp = [log10(1e-7),phase[i],0.01,0.01]
+      # Mars' period is shorter than Jupiter's, so need to keep sorted for now
+      param4 = [best_dp[1:10];param_tmp;best_dp[11:end]]   
+      p4_cur = p4[j]
+      param1 = param4 .+ 100.0
+      while maximum(abs.(param1 .- param4)) > 1e-5
+        param1 = param4
+        fit = curve_fit((tt0,param4) -> ttv_wrapper(tt0,nplanet,ntrans,[param4[1:10];10^param4[11];p4_cur;param4[12:end]],jmax,false),tt0,tt,weight,param4)
+        param4 = fit.param 
+      end
+      ttmodel=ttv_wrapper(tt0,nplanet,ntrans,[param4[1:10];10^param4[11];p4_cur;param4[12:end]],jmax,false)
+      lprob_phase[i]= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
+      if lprob_phase[i] > lprob_best
+        lprob_best = lprob_phase[i]
+        p4best = [fit.param[1:10];10^param4[11];p4_cur;fit.param[12:end]]
+      end
+      if lprob_phase[i] > lprob_p4[j] 
+        lprob_p4[j] = lprob_phase[i]
+        param_p4[1:nparam,j] =  [fit.param[1:10];10^param4[11];p4_cur;fit.param[12:end]]
+      end
+    end
+    println("Period: ",p4[j]," log Prob: ",lprob_p4[j]," Param: ",vec(param_p4[1:nparam,j]))
+  end
+  println("Finished 4-planet fit w/ fixed period: ",p4best)
+
+  fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,false),tt0,tt,weight,p4best)
+  best_p4 = fit.param
+  ttmodel = ttv_wrapper(tt0,nplanet,ntrans,best_p4,jmax,false)
+  lprob_best_p4= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
+  println("Finished global 4-planet fit.")
+  println("New 4-planet chi-square: ",chisquare(tt0,nplanet,ntrans,best_p4,tt,sigtt,jmax,false))
+  println("Maximum: ",lprob_best_p4," Param: ",best_p4)
+  
+  outfile = string("FITS/moonp4_fit",sigma,"s",nyear,"yrs.jld2")
+  @save outfile p3 lprob_p3 best_p3 dp lprob_dp best_dp lprob_best_p3 p4 lprob_p4 best_p4 lprob_best_p4 ntrans nplanet tt0 tt ttmodel sigtt 
+  return best_p3,best_dp,best_p4 
 end

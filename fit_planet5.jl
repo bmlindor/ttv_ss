@@ -266,13 +266,15 @@ function fit_planet5(filename::String,
 end
 # If 4-planet fit already exists, can just do 5-planet search but what about after moon?
 function fit_planet5(jd1::Float64,sigma::Float64,nyear::Float64,
-  p5in::Float64,p5out::Float64,np5::Int,nphase::Int
-  ,EM::Bool=true)
+  p5in::Float64,p5out::Float64,np5::Int,nphase::Int,EM::Bool)
   if EM
     infile = string("FITS/fromEMB/p4_fit",sigma,"s",nyear,"yrs.jld2")
+    outfile = string("FITS/fromEMB/p5_fit",sigma,"s",nyear,"yrs.jld2")
   else
     infile = string("FITS/p4_fit",sigma,"s",nyear,"yrs.jld2")
+    outfile = string("FITS/p5_fit",sigma,"s",nyear,"yrs.jld2")
   end
+  @assert isfile(infile)
   m = jldopen(String(infile),"r")
   tt0,tt,ttmodel,sigtt=m["tt0"],m["tt"],m["ttmodel"],m["sigtt"]
   nt1,nt2 = m["ntrans"][1],m["ntrans"][2]
@@ -282,11 +284,11 @@ function fit_planet5(jd1::Float64,sigma::Float64,nyear::Float64,
   jmax=5
   jd2 = nyear*365.25 + jd1
   weight = ones(nt1+nt2)./ sigtt.^2 #assigns each data point stat weight d.t. noise = 1/σ^2
+  println("Planet 4 fit loaded.")
  # Now,add a 5th planet:
   ntrans = [nt1,nt2,2,2,2] #requires at least 2 transits for each planet (even if it doesnt transit)
   nplanet = 5
   nparam = 25
-  println("Planet 4 fit loaded.")
   # Grid of periods to search over:
   p5 = 10 .^ range(log10(p5in),stop=log10(p5out),length=np5)
   p5_cur =  29.44*365.25 
@@ -334,11 +336,6 @@ function fit_planet5(jd1::Float64,sigma::Float64,nyear::Float64,
   println("Finished global 5-planet fit.")
   println("New 5-planet chi-square: ",chisquare(tt0,nplanet,ntrans,best_p5,tt,sigtt,jmax,EM))
   println("Maximum: ",lprob_best_p5," Param: ",best_p5)
-  if EM
-    fitfile = string("FITS/fromEMB/p5_fit",sigma,"s",nyear,"yrs.jld2")
-  else
-    fitfile = string("FITS/p5_fit",sigma,"s",nyear,"yrs.jld2")
-  end  
-  @save fitfile p4 lprob_p4 best_p4 lprob_best_p4 p5 lprob_p5 best_p5 lprob_best_p5 ntrans nplanet tt0 tt ttmodel sigtt 
+  @save outfile p4 lprob_p4 best_p4 lprob_best_p4 p5 lprob_p5 best_p5 lprob_best_p5 ntrans nplanet tt0 tt ttmodel sigtt 
   return best_p4, best_p5   
 end

@@ -6,7 +6,7 @@ import Main.TTVFaster.ttv_wrapper
 import Main.TTVFaster.chisquare
 include("regress.jl")
 using DelimitedFiles,JLD2,Optim,LsqFit,Statistics
-function fit_planet2(data_file::Array{}, jmax::Int)
+function fit_planet2(data_file::Array{}, jmax::Int,tref::Real,tol::Real)
   # (::Core.kwftype(typeof(fit_planet2)))(kws, fit_planet2, data_file, jmax)
   # if haskey(kws, :jmax)
   #     jmax = kws.jmax
@@ -19,8 +19,8 @@ function fit_planet2(data_file::Array{}, jmax::Int)
   # data_file = readdlm(filename,Float64)
   nt1 = sum(data_file[:,1] .== 1.0)
   nt2 = sum(data_file[:,1] .== 2.0)
-  tt1 = vec(data_file[1:nt1,3])
-  tt2 = vec(data_file[nt1+1:nt1+nt2,3])
+  tt1 = vec(data_file[1:nt1,3]) .- tref
+  tt2 = vec(data_file[nt1+1:nt1+nt2,3]) .- tref
   sigtt1 = data_file[1:nt1,4]
   sigtt2 = data_file[nt1+1:nt1+nt2,4]
   # Okay,let's do a linear fit to the transit times (third column):
@@ -34,6 +34,8 @@ function fit_planet2(data_file::Array{}, jmax::Int)
     end
     coeff,covcoeff = regress(x,tt,sigtt)
     # println(tt,sigtt,std(sigtt))
+    println(coeff)
+    println(sum((tt .- coeff[1].-coeff[2].*x[2,:])./sigtt).^2)
     return coeff,covcoeff
   end
   # Guess the planets' period by finding median of transit times
@@ -76,14 +78,18 @@ function fit_planet2(data_file::Array{}, jmax::Int)
   nplanet = 2
   println("Initial chi-square: ",chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt,jmax,true))
   param1 = init_param .+ 100.0
-  while maximum(abs.(param1 .- init_param)) > 1e-5
+  niter = 0
+  # pscale = [1e-5,1.0,1.0,0.01,0.01,1e-5,1.0,1.0,0.01,0.01]
+  pscale = ones(10)
+  while maximum(abs.(param1 .- init_param)./pscale) > tol
     param1 = init_param
     fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,true),tt0,tt,weight,init_param)
     init_param = fit.param
     # println("init_param: ",init_param)
-    # println("New Initial chi-square: ",chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt))
+    # println("New Initial chi-square: ",chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt,jmax,true))
+    niter += 1
   end
-  println("Finished 2-planet fit: ",init_param)
+  println("Finished 2-planet fit: ",init_param," ",niter)
   ttmodel = ttv_wrapper(tt0,nplanet,ntrans,init_param,jmax,true)
   lprob_best= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
   chi2=chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt,jmax,true)
@@ -95,26 +101,24 @@ function fit_planet2(data_file::Array{}, jmax::Int)
 end
 # If the simulation already exists, can just do 2-planet fit
 function fit_planet2(
-  jd1::Float64,sigma::Float64,nyear::Float64,
-  addnoise::Bool=true,EM::Bool=true)
+  jd1::Float64,sigma::Real,nyear::Real,
+  tref::Real,tol::Real,EM::Bool=true)
   if EM
     datafile = string("INPUTS/tt_",sigma,"sEMB",nyear,"yrs.txt")
+    # outfile = string("FITS/fromEMB/p2_fit",sigma,"s",nyear,"yrs.jld2")
   else
     datafile = string("INPUTS/tt_",sigma,"snoEMB",nyear,"yrs.txt")
+    # outfile = string("FITS/p2_fit",sigma,"s",nyear,"yrs.jld2")
   end
-  jd2 = nyear*365.25 + jd1
+  # @assert isfile(datafile)
+  # tref = 2430000
   data1 = readdlm(datafile,Float64)
   nt1 = sum(data1[:,1] .== 1.0)
   nt2 = sum(data1[:,1] .== 2.0)
-  tt1 = vec(data1[1:nt1,3])
-  tt2 = vec(data1[nt1+1:nt1+nt2,3])
-  if addnoise 
-    sigtt1 = data1[1:nt1,4]
-    sigtt2 = data1[nt1+1:nt1+nt2,4]
-  else
-    sigtt1 = ones(nt1)
-    sigtt2 = ones(nt2)
-  end
+  tt1 = vec(data1[1:nt1,3]) .- tref
+  tt2 = vec(data1[nt1+1:nt1+nt2,3]) .- tref
+  sigtt1 = data1[1:nt1,4]
+  sigtt2 = data1[nt1+1:nt1+nt2,4]
 
   # Okay,let's do a linear fit to the transit times (third column):
   function find_coeffs(tt,period,sigtt)
@@ -127,13 +131,14 @@ function fit_planet2(
     end
     coeff,covcoeff = regress(x,tt,sigtt)
     # println(tt,sigtt,std(sigtt))
+    println(coeff)
+    println(sum((tt .- coeff[1].-coeff[2].*x[2,:])./sigtt).^2)
     return coeff,covcoeff
   end
   p1est = median(tt1[2:end] - tt1[1:end-1])
   p2est = median(tt2[2:end] - tt2[1:end-1])
   coeff1,covcoeff1 = find_coeffs(tt1,p1est,sigtt1)
   coeff2,covcoeff2 = find_coeffs(tt2,p2est,sigtt2)
-  sigtt=[sigtt1;sigtt2] 
   # @assert (sigtt[1] .* (24 * 3600) .= sigma)
   t01 = coeff1[1]; per1 = coeff1[2]
   t02 = coeff2[1]; per2 = coeff2[2]
@@ -141,10 +146,10 @@ function fit_planet2(
   t2  = collect(t02 .+ per2 .* range(0,stop=nt2-1,length=nt2))
   # Best-fit linear transit times without TTVs:
   tt0 = [t1;t2]
-  weight = ones(nt1+nt2)./ sigtt.^2 #assigns each data point stat weight d.t. noise = 1/σ^2
   # Actual transit times:
   tt=[tt1;tt2]
-
+  sigtt=[sigtt1;sigtt2]
+  weight = ones(nt1+nt2)./ sigtt.^2 #assigns each data point stat weight d.t. noise = 1/σ^2
   # Okay,now let's do a 2-planet fit:
   # param_names = mass ratio,period,initial transit time,e*cos(omega),e*sin(omega)
   init_param = [3e-6,per1,t01,0.01,0.01,
@@ -167,25 +172,32 @@ function fit_planet2(
   ntrans = [nt1,nt2]
   Nobs = sum(ntrans)
   nplanet = 2
-  println("Initial chi-square: ",chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt,jmax,EM))
+  println("Initial chi-square: ",chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt,jmax,true))
   param1 = init_param .+ 100.0
-  while maximum(abs.(param1 .- init_param)) > 1e-5
+  niter = 0
+  while maximum(abs.(param1 .- init_param)) > tol
     param1 = init_param
-    res = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,EM),tt0,tt,weight,init_param)
+    res = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,true),tt0,tt,weight,init_param)
     init_param = res.param
     # println("init_param: ",init_param)
     # println("New Initial chi-square: ",chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt))
+    niter += 1
   end
-  println("Finished 2-planet fit: ",init_param)
-  ttmodel = ttv_wrapper(tt0,nplanet,ntrans,init_param,jmax,EM)
+  println("New initial 2-planet fit: ",init_param)
+
+  # fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,EM),tt0,tt,weight,init_param)
+  # best_p2 = fit.param ##### is this the global p2 fit???
+  ttmodel = ttv_wrapper(tt0,nplanet,ntrans,init_param,jmax,true)
   lprob_best_p2= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
-  chi2=chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt,jmax,EM)
+  chi2=chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt,jmax,true)
+  println("Finished 2-planet fit: ",init_param," ",niter)
   println("New 2-planet chi-square: ",chi2)
+  # println("Maximum: ",lprob_best_p2," Param: ",best_p2)
   if EM
-    fitfile = string("FITS/fromEMB/p2_fit",sigma,"s",nyear,"yrs.jld2")
+    outfile = string("FITS/fromEMB/p2_fit",sigma,"s",nyear,"yrs.jld2")
   else
-    fitfile = string("FITS/p2_fit",sigma,"s",nyear,"yrs.jld2")
+    outfile = string("FITS/p2_fit",sigma,"s",nyear,"yrs.jld2")
   end
-  @save fitfile chi2 init_param ntrans nplanet tt0 tt ttmodel sigtt
-  return 
+  @save outfile chi2 init_param ntrans nplanet tt0 tt ttmodel sigtt
+  return
 end

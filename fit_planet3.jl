@@ -167,22 +167,23 @@ function fit_planet3(filename::String,
 end
 # If the 2-planet fit already exists, can just do 3-planet search
 function fit_planet3(jd1::Float64,sigma::Float64,nyear::Float64,
-  p3in::Float64,p3out::Float64,np3::Int,nphase::Int
-  ,EM::Bool=true)
+  p3in::Float64,p3out::Float64,np3::Int,nphase::Int,EM::Bool)
   if EM
     infile = string("FITS/fromEMB/p2_fit",sigma,"s",nyear,"yrs.jld2")
+    outfile = string("FITS/fromEMB/p3_fit",sigma,"s",nyear,"yrs.jld2")
   else
     infile = string("FITS/p2_fit",sigma,"s",nyear,"yrs.jld2")
+    outfile = string("FITS/p3_fit",sigma,"s",nyear,"yrs.jld2")
   end
+  @assert isfile(infile)
   p = jldopen(String(infile),"r")
   tt0,tt,ttmodel,sigtt=p["tt0"],p["tt"],p["ttmodel"],p["sigtt"]
   nt1,nt2 = p["ntrans"][1],p["ntrans"][2]
-
-  jd2 = nyear*365.25 + jd1
-  weight = ones(nt1+nt2)./ sigtt.^2 #assigns each data point stat weight d.t. noise = 1/σ^2
-  jmax=5
   init_param=p["init_param"]
   Nobs = sum([nt1,nt2])
+  jmax=5
+  jd2 = nyear*365.25 + jd1
+  weight = ones(nt1+nt2)./ sigtt.^2 #assigns each data point stat weight d.t. noise = 1/σ^2
   println("Planet 2 fit loaded.")
   # Now,let's add the 3rd planet:
   ntrans = [nt1,nt2,2] #requires at least 2 transits for each planet (even if it doesnt transit)
@@ -229,6 +230,7 @@ function fit_planet3(jd1::Float64,sigma::Float64,nyear::Float64,
     # println("Period: ",p3[j]," log Prob: ",lprob_p3[j]," Param: ",vec(param_p3[1:nparam,j]))
   end
   println("Finished 3-planet fit w/ fixed period: ",p3best)
+
   fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,EM),tt0,tt,weight,p3best)
   best_p3 = fit.param
   ttmodel = ttv_wrapper(tt0,nplanet,ntrans,best_p3,jmax,EM)
@@ -236,11 +238,6 @@ function fit_planet3(jd1::Float64,sigma::Float64,nyear::Float64,
   println("Finished global 3-planet fit.")
   println("New 3-planet chi-square: ",chisquare(tt0,nplanet,ntrans,best_p3,tt,sigtt,jmax,EM))
   println("Maximum: ",lprob_best_p3," Param: ",best_p3)
-  if EM
-    fitfile = string("FITS/fromEMB/p3_fit",sigma,"s",nyear,"yrs.jld2")
-  else
-    fitfile = string("FITS/p3_fit",sigma,"s",nyear,"yrs.jld2")
-  end
-  @save fitfile p3 lprob_p3 best_p3 lprob_best_p3 ntrans nplanet tt0 tt ttmodel sigtt
+  @save outfile p3 lprob_p3 best_p3 lprob_best_p3 ntrans nplanet tt0 tt ttmodel sigtt
   return best_p3
 end
