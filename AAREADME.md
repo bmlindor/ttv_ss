@@ -27,9 +27,11 @@ and the delta the fractional part (step through day).
 Note: For planets without moons, Mercury and Venus, 
 the barycenter location coincides with the body center of mass. 
 NaifID: 
-      2           'VENUS BARYCENTER'
-      3           'EARTH MOON BARYCENTER'
-      399         'EARTH'
+    10          'SUN'
+    0           'SOLAR SYSTEM BARYCENTER'
+    2           'VENUS BARYCENTER'
+    3           'EARTH MOON BARYCENTER'
+    399         'EARTH'
 
 1). Simulate transit times from JPLEphemeris. Add noise option to data.
 

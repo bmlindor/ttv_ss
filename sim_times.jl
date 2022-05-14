@@ -71,12 +71,12 @@ function sim_times(jd1::Float64,nyear::Float64,
     pos = zeros(3,N) # position of body relative to Sun
     # Compute functions of position and velocity wrt time:
     function calc_ffs(t)
-    pva = compute(eph,JD_0,t,body_id,0,options,2)
-#     println(JD_0)
-    x = pva[1:3]; v = pva[4:6]; a = pva[7:9];
-    f = dot(x,v) - (dot(x,n_obs))*(dot(v,n_obs))
-    Df = dot(v,v) + dot(x,a) - (dot(v,n_obs))^2 - (dot(x,n_obs)*dot(a,n_obs))
-    return f,Df,dot(x,n_obs),x
+      pva = compute(eph,JD_0,t,body_id,10,options,2)
+  #     println(JD_0)
+      x = pva[1:3]; v = pva[4:6]; a = pva[7:9];
+      f = dot(x,v) - (dot(x,n_obs))*(dot(v,n_obs))
+      Df = dot(v,v) + dot(x,a) - (dot(v,n_obs))^2 - (dot(x,n_obs)*dot(a,n_obs))
+      return f,Df,dot(x,n_obs),x
     end
     # Computing minimum sky separation of planet wrt star for all JDs
     dt =  (jd2 - jd1)/(N-1)
