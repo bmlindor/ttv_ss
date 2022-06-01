@@ -22,6 +22,9 @@ function print_vals(sigma::Float64,nyear::Float64,sim::String,model::String)
             "tcosϕ","tsinϕ","Δϕ","σ_sys2"]
     if model=="p4"
         pname=[pname[1:15];"mu_4";"P_4";"t04";"ecos4";"esin4";pname[end]]
+    elseif model=="p5"
+        pname=[pname[1:15];"mu_4";"P_4";"t04";"ecos4";"esin4";"mu_5";"P_5";"t05";"ecos5";"esin5"]
+
     end
     println("           Fitted posterior params from ",mcfile)
     for i=1:length(param)

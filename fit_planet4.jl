@@ -287,14 +287,17 @@ end
 # If 3-planet fit with moon already exists, can do 4-planet search
 function fit_planet4(jd1::Float64,sigma::Float64,nyear::Float64,
   p4in::Float64,p4out::Float64,np4::Int,nphase::Int)
-  infile = string("FITS/p3moon_fit",sigma,"s",nyear,"yrs.jld2")
+  infile = string("FITS/moon_fit",sigma,"s",nyear,"yrs.jld2")
   @assert isfile(infile)
   m = jldopen(String(infile),"r")
   tt0,tt,ttmodel,sigtt=m["tt0"],m["tt"],m["ttmodel"],m["sigtt"]
   nt1,nt2 = m["ntrans"][1],m["ntrans"][2]
   p3,lprob_p3=m["p3"],m["lprob_p3"]
   best_p3,lprob_best_p3=m["best_p3"],m["lprob_best_p3"]
-  dp,lprob_dp=m["dp"],m["lprob_dp"]
+  # dp,
+  dpin,dpout,ndp = m["dpin"],m["dpout"],m["ndp"]
+  dp =  range(dpin,stop=dpout,length=ndp)
+  lprob_dp=m["lprob_dp"]
   best_dp,lprob_best_dp=m["best_dp"],m["lprob_best_dp"]
   Nobs = sum([nt1,nt2])
   jmax=5

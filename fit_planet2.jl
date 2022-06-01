@@ -112,6 +112,7 @@ function fit_planet2(
   end
   # @assert isfile(datafile)
   # tref = 2430000
+  println("Loading.... ",datafile)
   data1 = readdlm(datafile,Float64)
   nt1 = sum(data1[:,1] .== 1.0)
   nt2 = sum(data1[:,1] .== 2.0)
@@ -130,9 +131,10 @@ function fit_planet2(
       x[2,i] = x[2,i-1] + round((tt[i]-tt[i-1])/period) 
     end
     coeff,covcoeff = regress(x,tt,sigtt)
+    println(x)
     # println(tt,sigtt,std(sigtt))
-    println(coeff)
-    println(sum((tt .- coeff[1].-coeff[2].*x[2,:])./sigtt).^2)
+    # println(coeff)
+    # println(sum((tt .- coeff[1].-coeff[2].*x[2,:])./sigtt).^2)
     return coeff,covcoeff
   end
   p1est = median(tt1[2:end] - tt1[1:end-1])
