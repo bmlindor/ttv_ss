@@ -136,7 +136,7 @@ Q). Wrong signs for evectors? <-- not first time this has been found
 ##########################  Project Tasks ##########################
 Make likelihood profiles continuous [ ]
 10). Condense results to 1 equation fit (ex. how much of X to get Y uncertainty). [  ]
-9). See if we can detect Mars [ x ] or Saturn. [  ]
+9). See if we can detect Mars [ x ] or Saturn. [ x ]
 8). See which scenario best fits simulated data [ ]
 7). Add M_p > 0 prior to MCMC [ x ]
 7). Figure out whether the Earth-Moon barycenter offset causes

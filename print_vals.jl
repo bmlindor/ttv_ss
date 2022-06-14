@@ -2,7 +2,7 @@ using PyPlot,JLD2,Statistics,LsqFit
 import Main.TTVFaster.ttv_wrapper
 # include("CGS.jl")
 # Print results from MCMC run after burn-in
-function print_vals(sigma::Float64,nyear::Float64,sim::String,model::String)
+function print_vals(sigma::Real,nyear::Real,sim::String,model::String)
     mcfile=string("MCMC/",model,"_fit",sigma,"s",nyear,"yrs.jld2")
     if String(sim)=="EMB" && isfile(string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
         mcfile=string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
@@ -20,7 +20,9 @@ function print_vals(sigma::Float64,nyear::Float64,sim::String,model::String)
           "mu_2","P_2","t02","ecos2","esin2",
           "mu_3","P_3","t03","ecos3","esin3", 
             "tcosϕ","tsinϕ","Δϕ","σ_sys2"]
-    if model=="p4"
+    if model=="p3"
+        pname=pname[1:15]
+    elseif model=="p4"
         pname=[pname[1:15];"mu_4";"P_4";"t04";"ecos4";"esin4";pname[end]]
     elseif model=="p5"
         pname=[pname[1:15];"mu_4";"P_4";"t04";"ecos4";"esin4";"mu_5";"P_5";"t05";"ecos5";"esin5"]

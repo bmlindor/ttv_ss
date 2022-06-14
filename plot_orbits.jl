@@ -2,18 +2,18 @@ using CALCEPH,PyPlot
 rc("font",family="sans-serif")
 include("sim_times.jl")
 
-function plot_orbits(dimension::Int64,include_moon::Bool=false)
+function plot_orbits(jd1::Float64,sigma::Real,nyear::Real,dimension::Int64,EMB::Bool=false)
 
 jd1 = 2.4332825e6
-nyear = 40.0
+# nyear = 40.0
 jd2 = nyear*365.25 + jd1
 jdsize = 1000
-sigma = 30.0
+# sigma = 30.0
 t0 = range(jd1,stop=jd2-1,length = jdsize)
 
 # pva_sun,pva_venus,pva_earth are the body positions,velocities,and ang. momentum computed for the jd1--jd2 range
 #sim_times(jd1::Float64,nyear::Float64,addnoise::Bool=false,sigma::Float64=0.0,EMB::Bool=true,seed::Int=42)
-tt1,tt2,n_obs,pva_sun,pva_venus,pva_earth = sim_times(jd1,nyear,true,sigma,true)
+tt1,tt2,n_obs,pva_sun,pva_venus,pva_earth = sim_times(jd1,sigma,nyear,EMB)
 
 eph = Ephem("INPUTS/DE440.bsp") ; prefetch(eph)
 options = useNaifId+unitKM+unitDay # useNaifId + unitDay + unitAU
@@ -29,7 +29,7 @@ pva2 = zeros(9,length(tt2))
 for i=1:length(tt2)
 pva0[1:9,i] = compute(eph,tt1[i],0.5,10,10,options,2)./AU
 pva1[1:9,i] = compute(eph,tt1[i],0.5,2,10,options,2)./AU
-	if include_moon
+	if EMB
 	  pva_2[1:9,i] = compute(eph,t0[i],0.5,3,10,options,2)./AU
 	else
 		pva2[1:9,i] = compute(eph,tt2[i],0.5,399,10,options,2)./AU
@@ -38,20 +38,21 @@ end
 
 if dimension==2
 fig = plt.figure(figsize=(6, 6))
-ax1 = fig.add_subplot(211)
+ax1 = fig.add_subplot(111)
 # ax1.plot(vec(pva_sun[2,:]),vec(pva_sun[3,:]),color=:yellow,marker="o",mec="black")
+ax1.plot(vec(pva_venus[1,:]),vec(pva_venus[2,:]),alpha=0.25)
+ax1.plot(vec(pva_earth[1,:]),vec(pva_earth[2,:]),alpha=0.25)
+ax1.plot(vec(pva1[1,:]),vec(pva1[2,:]),label="Venus Transit",marker="o")
+ax1.plot(vec(pva2[1,:]),vec(pva2[2,:]),color=:orange,label="Earth Transit",marker="o")
+ax1.plot([0,n_obs[1]*1.1],[0,n_obs[2]*1.1],color=:grey,linestyle="--",alpha=0.5)
 ax1.plot(xsun,ysun,color=:yellow,marker="o",ms=5,mec=:gold)
-ax1.plot(vec(pva_venus[2,:]),vec(pva_venus[3,:]),label="Venus",color=:orange,alpha=0.25)
-ax1.plot(vec(pva_earth[2,:]),vec(pva_earth[3,:]),label="Earth",color=:skyblue,alpha=0.5)
-# ax1.plot([0,n_obs[2]*1.1],[0,n_obs[3]*1.1],color=:black)
-ax1.plot(vec(pva1[2,:]),vec(pva1[3,:]),vec(pva1[3,:]),color=:orange,marker="o")
-ax1.plot(vec(pva2[2,:]),vec(pva2[3,:]),vec(pva2[3,:]),color=:skyblue,marker="o")
 # ax1.plot(vec(pva_sun[2,:]),vec(pva_sun[3,:]),label="Sun",color=:yellow,marker="o",ms=10,mec="gold")
 ax1.tick_params(which="major",direction="in",length=6,
     left="false",right="false",top="false",bottom="false",
-    labelbottom="false",labeltop="false",labelleft="false",labelright="false")
-# xlabel("y-position [AU]")
-# ylabel("x-position [AU]")
+    labelbottom="true",labeltop="false",labelleft="true",labelright="false")
+# legend()
+xlabel("x-position [AU]")
+ylabel("y-position [AU]")
 # legend(loc="lower left")
 
 # subplot(212,sharex=ax1)
@@ -76,19 +77,19 @@ end
 if dimension==3
 fig=figure(figsize=(8,6))
 # PyPlot.scatter3D(xsun,ysun,0,marker="o",color=:yellow,ms=20)
-PyPlot.plot3D(vec(pva_venus[1,:]), vec(pva_venus[2,:]), vec(pva_venus[3,:]),color=:orange,label="Venus Orbit",alpha=0.25)
-PyPlot.plot3D(vec(pva_earth[1,:]), vec(pva_earth[2,:]), vec(pva_earth[3,:]),color=:skyblue,label="Earth Orbit",alpha=0.5)
-PyPlot.plot3D([0,n_obs[1]*1.2],[0,n_obs[2]*1.2],[0,n_obs[3]*1.2],linestyle="--",color=:black,alpha=0.5)
+PyPlot.plot3D(vec(pva_venus[1,:]), vec(pva_venus[2,:]), vec(pva_venus[3,:]),alpha=0.25)
+PyPlot.plot3D(vec(pva_earth[1,:]), vec(pva_earth[2,:]), vec(pva_earth[3,:]),alpha=0.25)
+PyPlot.plot3D([0,n_obs[1]*1.2],[0,n_obs[2]*1.2],[0,n_obs[3]*1.2],linestyle="--",color=:grey,alpha=0.5)
 PyPlot.plot3D(vec(pva0[1,:]), vec(pva0[2,:]), vec(pva0[3,:]),color=:yellow,marker="o",ms=10,mec=:gold)
-PyPlot.plot3D(vec(pva1[1,:]),vec(pva1[2,:]),vec(pva1[3,:]),color=:orange,marker="o")
-PyPlot.plot3D(vec(pva2[1,:]),vec(pva2[2,:]),vec(pva2[3,:]),marker="o")
+PyPlot.plot3D(vec(pva1[1,:]),vec(pva1[2,:]),vec(pva1[3,:]),label="Venus",marker="o")
+PyPlot.plot3D(vec(pva2[1,:]),vec(pva2[2,:]),vec(pva2[3,:]),color=:orange,label="Earth",marker="o")
 PyPlot.tick_params(which="major",
-    left="false",right="false",top="false",bottom="false",
-    labelbottom="false",labeltop="false",labelleft="false",labelright="false")
+    left="false",right="false",top="false",bottom="false")
+legend()
 # xlim(-1,1)
 # ylim(-1,1)
-# xlabel("x [AU]")
-# ylabel("y [AU]")
-# zlabel("z [AU]")    
+xlabel("x [AU]")
+ylabel("y [AU]")
+zlabel("z [AU]")    
 end
 end

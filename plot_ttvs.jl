@@ -2,7 +2,7 @@ using PyPlot,Statistics,JLD2,DelimitedFiles
 rc("font",family="sans-serif")
 include("decompose_ttvs.jl")
 # Plot residuals to best fit TTV models for different configurations
-function plot_res(sigma::Float64,nyear::Float64,sim,fitmodel,include_moon::Bool=false)
+function plot_res(sigma::Real,nyear::Real,sim,fitmodel,include_moon::Bool=false)
   fitfile=string("FITS/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
   label="Earth"
   bestfit="best_dp"
@@ -40,31 +40,34 @@ function plot_res(sigma::Float64,nyear::Float64,sim,fitmodel,include_moon::Bool=
   sigtt1,sigtt2=sigtt[1:n1].* (24 * 60),sigtt[n1+1:n1+n2].* (24 * 60) #in minutes
 
   fig=figure(figsize=(8,3))
+  subplots_adjust(hspace=0.05,wspace=0.05)
   ax1=subplot(121)
   errorbar(ttsim1,ttv1,sigtt1,fmt=".",color="black",mec="black",mfc="white")#,label="Venus")
   errorbar(ttsim2,ttv2,sigtt2,fmt=".",color="black",mec="black",mfc="white")#,label="Earth")
   plot(ttsim1,p2_ttvs[1,2,1:n1],linewidth=1,label="Venus")
   plot(ttsim2,p2_ttvs[2,1,1:n2],linewidth=1,label=label)
   ylim(-6,6)
+  xlabel("Time [yrs]")
   ylabel("TTVs [mins]")
-  xlabel("Time Observed [yrs]")
+  # title("2-planet Model Fits")
+  ax1.legend(loc="upper right")
   minorticks_on()
   tick_params(which="both",direction="in",top="true",right="true")
   tick_params(which="major",direction="in",top="true",right="true",length=6)
   tick_params(which="minor",direction="in",top="true",right="true",length=2)
   ax2=subplot(122)
-  title("Residuals from 2-planet fit")
-  plot(ttsim1,ttv1-(p2_ttvs[1,2,1:n1]))
-  plot(ttsim2,ttv2-(p2_ttvs[2,1,1:n2]))
+  # title("Residuals from 2-planet fit")
+  plot(ttsim1,ttv1-(p2_ttvs[1,2,1:n1]),label="Venus")
+  plot(ttsim2,ttv2-(p2_ttvs[2,1,1:n2]),label=label)
   ylim(-6,6)
   xlabel("Time [yrs]")
-  ylabel("Residuals [mins]")
+  ylabel("Hpp Model Residuals [mins]")
   minorticks_on()
   tick_params(which="both",direction="in",top="true",right="true")
   tick_params(which="major",direction="in",top="true",right="true",length=6)
   tick_params(which="minor",direction="in",top="true",right="true",length=2)
-  ax1.legend(bbox_to_anchor=(0.,1.02,1.,.102),loc="lower left",
-      ncol=3,mode="expand",borderaxespad=0.0)
+  # ax1.legend(bbox_to_anchor=(0.,1.02,1.,.102),loc="lower left",
+  #     ncol=3,mode="expand",borderaxespad=0.0)
   tight_layout()
 
   fig=figure(figsize=(8,3))
@@ -76,23 +79,23 @@ function plot_res(sigma::Float64,nyear::Float64,sim,fitmodel,include_moon::Bool=
   ylim(-6,6)
   ylabel("TTVs [mins]")
   xlabel("Time [yrs]")
+  ax1.legend(loc="upper right")
   minorticks_on()
   tick_params(which="both",direction="in",top="true",right="true")
   tick_params(which="major",direction="in",top="true",right="true",length=6)
   tick_params(which="minor",direction="in",top="true",right="true",length=2)
   ax2=subplot(122)
- title("Residuals from 3-planet fit")
   plot(ttsim1,ttv1-(p3_ttvs[1,3,1:n1]+p3_ttvs[1,2,1:n1]))
   plot(ttsim2,ttv2-(p3_ttvs[2,3,1:n2]+p3_ttvs[2,1,1:n2]))
   ylim(-6,6)
-  ylabel("Residuals [mins]")
+  ylabel("Hppp Model Residuals [mins]")
   xlabel("Time [yrs]")
     minorticks_on()
   tick_params(which="both",direction="in",top="true",right="true")
   tick_params(which="major",direction="in",top="true",right="true",length=6)
   tick_params(which="minor",direction="in",top="true",right="true",length=2)
-  ax1.legend(bbox_to_anchor=(0.,1.02,1.,.102),loc="lower left",
-      ncol=3,mode="expand",borderaxespad=0.0)
+  # ax1.legend(bbox_to_anchor=(0.,1.02,1.,.102),loc="lower left",
+  #     ncol=3,mode="expand",borderaxespad=0.0)
   tight_layout()
   if length(ntrans)==4
     p4_ttvs=decompose_ttvs(4,ntrans[1:4],f["best_p4"][1:20]) .* (24 * 60)
@@ -112,11 +115,12 @@ function plot_res(sigma::Float64,nyear::Float64,sim,fitmodel,include_moon::Bool=
     tick_params(which="major",direction="in",top="true",right="true",length=6)
     tick_params(which="minor",direction="in",top="true",right="true",length=2)
   ax2=subplot(122)
- title("Residuals from 4-planet fit")
+ # title("Residuals from 4-planet fit")
     plot(ttsim1,ttv1-(p4_ttvs[1,4,1:n1]+p4_ttvs[1,3,1:n1]+p4_ttvs[1,2,1:n1]))
     plot(ttsim2,ttv2-(p4_ttvs[2,4,1:n2]+p4_ttvs[2,3,1:n2]+p4_ttvs[2,1,1:n2]))
     ylim(-6,6)
-    ylabel("Residuals [mins]")
+    xlabel("Time [yrs]")
+    ylabel("Hpppp Model Residuals [mins]")
     minorticks_on()
   tick_params(which="both",direction="in",top="true",right="true")
   tick_params(which="major",direction="in",top="true",right="true",length=6)
@@ -149,7 +153,8 @@ function plot_res(sigma::Float64,nyear::Float64,sim,fitmodel,include_moon::Bool=
   plot(ttsim1,ttv1-(p3_ttvs[1,3,1:n1]+p3_ttvs[1,2,1:n1]))
   plot(ttsim2,ttv2-(p3_ttvs[2,3,1:n2]+p3_ttvs[2,1,1:n2]+moon))
   ylim(-4,4)
-  ylabel("Residuals [mins]")
+  xlabel("Time [yrs]")
+  ylabel("Hppmp Model Residuals [mins]")
     minorticks_on()
   tick_params(which="both",direction="in",top="true",right="true")
   tick_params(which="major",direction="in",top="true",right="true",length=6)
@@ -160,7 +165,7 @@ function plot_res(sigma::Float64,nyear::Float64,sim,fitmodel,include_moon::Bool=
   show()
 end
 # Plot moon signal from subtracting EMB times from Earth times
-function plot_moon(sigma::Float64,nyear::Float64,fitmodel)
+function plot_moon(sigma::Real,nyear::Real,fitmodel)
   EMBfit= string("FITS/fromEMB/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
   EVfit=  string("FITS/moon_fit",sigma,"s",nyear,"yrs.jld2")
   EMB=jldopen(String(EMBfit),"r")
@@ -206,7 +211,7 @@ function plot_moon(sigma::Float64,nyear::Float64,fitmodel)
   show()
 end
 # Plot timing data observed and observed - calculated (ie TTVs)
-function plot_ex(sigma::Float64,nyear::Float64,sim,fitmodel,include_moon::Bool=false)
+function plot_ex(sigma::Real,nyear::Real,sim,fitmodel,include_moon::Bool=false)
   fitfile=string("FITS/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
   label="Earth"
   bestfit="best_dp"
@@ -255,7 +260,7 @@ function plot_ex(sigma::Float64,nyear::Float64,sim,fitmodel,include_moon::Bool=f
   show()
 end
 # Plot observed TTVs vs model fit, with contributions
-function plot_ttvs(sigma::Float64,nyear::Float64,sim,fitmodel,include_moon::Bool=false)
+function plot_ttvs(sigma::Real,nyear::Real,sim,fitmodel,include_moon::Bool=false)
   fitfile=string("FITS/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
   nplanet=3
   label="Earth contribution"
@@ -354,9 +359,9 @@ function plot_ttvs(sigma::Float64,nyear::Float64,sim,fitmodel,include_moon::Bool
   ax1.set_ylim(-6,6)
   ax2.set_ylim(-6,6)
   ax1.legend(bbox_to_anchor=(0.,1.02,1.,.102),loc="lower left",
-      ncol=2,mode="expand",borderaxespad=0.0)
+      ncol=3,mode="expand",borderaxespad=0.0)
   ax2.legend(bbox_to_anchor=(0.,1.02,1.,.102),loc="lower left",
-      ncol=2,mode="expand",borderaxespad=0.0)
+      ncol=3,mode="expand",borderaxespad=0.0)
   tight_layout()
   title=string("IMAGES/ttvs/",sim,fitmodel,"ttvs-",sigma,"secs",nyear,"yrs.png")
   # savefig(title)

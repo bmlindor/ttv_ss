@@ -1,4 +1,5 @@
-using PyPlot,Statistics
+using PyPlot,Statistics,Distributions,LinearAlgebra
+using3D() # Needed to create a 3D subplot
 # include("CGS.jl")
 rc("font",family="sans-serif")
 calc_deg(value)=value * 180/pi

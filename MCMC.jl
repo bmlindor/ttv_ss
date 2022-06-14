@@ -8,10 +8,7 @@ include("bounds.jl")
 using DelimitedFiles,JLD2,Statistics,MCMCDiagnostics
 
 # Run a Markov chain:
-function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,
-  nsteps::Int64,nwalkers::Int64,nplanet::Int64,ntrans::Array{Int64,1},
-  tt0::Array{Float64,1},tt::Array{Float64,1},sigtt::Array{Float64,1},
-  use_sigsys::Bool,EM::Bool) 
+function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,nsteps::Int64,nwalkers::Int64,nplanet::Int64,ntrans::Array{Int64,1},tt0::Array{Float64,1},tt::Array{Float64,1},sigtt::Array{Float64,1},use_sigsys::Bool,EM::Bool) 
   println("Parameters from fit: ",param)
   println("Maximum log Prob from fit: ",lprob_best)
   nparam = length(param)

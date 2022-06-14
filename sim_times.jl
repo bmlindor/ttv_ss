@@ -9,8 +9,7 @@ if !@isdefined(CGS)
 end
 include("regress.jl")
 # Simulate solar system orbits from ephemerides
-function sim_times(jd1::Float64,nyear::Float64,
-  addnoise::Bool,sigma::Float64,EMB::Bool=true,seed::Int=42)
+function sim_times(jd1::Float64,sigma::Real,nyear::Real,EMB::Bool=true,seed::Int=42)
   # To do: output file with arguments in header?
   # nyear = (jd2 - jd1)/365.25 
   jd2 = nyear*365.25 + jd1
@@ -167,23 +166,24 @@ function sim_times(jd1::Float64,nyear::Float64,
   # accounts for missing transits (noncontinuous) 
   # by rounding [difference in consecutive transit times/Period]
   # function find_ttvs(tt,period; sigma_x = ones(length(tt)))
-  function find_coeffs(tt,period,addnoise,sigma)
+  function find_coeffs(tt,period,sigma)
     nt = length(tt)
     noise = zeros(nt)
     x = zeros(2,nt)
     x[1,1:nt] .= 1.0
     x[2,1] = 0.0 # for fitting time of first transit
     for i=2:nt
-        x[2,i] = x[2,i-1] + round((tt[i]-tt[i-1])/period) 
+        x[2,i] = round((tt[i]-tt[1])/period) 
     end
     # coeff,cov = regress(x,tt,sigma_x)
     # Add noise to transit times
-    if addnoise
+    if sigma > 0
         sigtt = ones(nt) * sigma / (24 * 3600) # sigma in seconds,sigtt in days
         noise = randn(nt) .* sigtt  
         # println("Noise added with σ of ",string(sigma)," seconds.")
     else
-        sigtt = ones(nt)
+        sigtt = zeros(nt)
+        noise = zeros(nt)
         # println("No noise added.")
     end
     coeff,covcoeff = regress(x,tt,sigtt)
@@ -195,8 +195,8 @@ function sim_times(jd1::Float64,nyear::Float64,
     return coeff,noise,sigtt,ttv
   end
   # coeff_venus,ttv1 = find_ttvs(tt1,P_venus,noise::Bool)
-  coeff_venus,noise1,sigtt1,ttv1 = find_coeffs(tt1,P_venus,addnoise,sigma);
-  coeff_earth,noise2,sigtt2,ttv2 = find_coeffs(tt2,P_earth,addnoise,sigma);
+  coeff_venus,noise1,sigtt1,ttv1 = find_coeffs(tt1,P_venus,sigma);
+  coeff_earth,noise2,sigtt2,ttv2 = find_coeffs(tt2,P_earth,sigma);
 
   t01 = coeff_venus[1]; per1 = coeff_venus[2]
   t02 = coeff_earth[1]; per2 = coeff_earth[2]
@@ -270,18 +270,17 @@ function sim_times(jd1::Float64,nyear::Float64,
   body[1:nt1] .= 1.0
   body[nt1+1:nt1+nt2] .= 2.0
   tt = [tt1+noise1;tt2+noise2]
-  if addnoise
-    noise = [noise1;noise2]
-    sigtt = [sigtt1;sigtt2]
-    if EMB
-      name = string("INPUTS/tt_",sigma,"sEMB",nyear,"yrs.txt")
-    else
-      name = string("INPUTS/tt_",sigma,"snoEMB",nyear,"yrs.txt")
-    end
-    writedlm(name,zip(body,tt0,tt,sigtt))
+  noise = [noise1;noise2]
+  sigtt = [sigtt1;sigtt2]
+  if EMB
+    name = string("INPUTS/tt_",sigma,"sEMB",nyear,"yrs.txt")
   else
-    writedlm("INPUTS/tt_data.txt",zip(body,tt))
+    name = string("INPUTS/tt_",sigma,"snoEMB",nyear,"yrs.txt")
   end
+  writedlm(name,zip(body,tt0,tt,sigtt))
+  # else
+  #   writedlm("INPUTS/tt_data.txt",zip(body,tt))
+  # end
   # file = string("sim",sigma,"times.jld2")
   # @save file pva_sun pva_venus pva_earth n_obs eph
   return tt1, tt2, n_obs, pva_sun, pva_venus, pva_earth
