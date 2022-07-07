@@ -1,6 +1,6 @@
 using PyPlot,Statistics,JLD2
 # Plot MCMC mass vs period traces 
-function plot_trace(sigma,nyear,sim,model,include_moon::Bool=false)
+function plot_trace(sigma::Real,nyear::Real,sim::String,model::String,include_moon::Bool=false)
   if String(sim)=="EMB" && isfile(string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jl"))
     mcfile=string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
   elseif isfile(string("MCMC/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
@@ -131,7 +131,7 @@ function plot_trace(sigma,nyear,sim,model,include_moon::Bool=false)
   # savefig(title)
 end 
 # Plot MCMC traces of individual walkers
-function plot_emcee(sigma,nyear,sim,model,include_moon::Bool=false)
+function plot_emcee(sigma::Real,nyear::Real,sim::String,model::String,include_moon::Bool=false)
   if String(sim)=="EMB" && isfile(string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
     mcfile=string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
   elseif isfile(string("MCMC/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
@@ -289,7 +289,7 @@ function plot_emcee(sigma,nyear,sim,model,include_moon::Bool=false)
   end
 end
 
-function plot_effects(sigma,nyear,sim,model)
+function plot_effects(sigma::Real,nyear::Real,sim::String,model::String)
   if String(sim)=="EMB" && isfile(string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
     mcfile=string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
   elseif isfile(string("MCMC/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2"))

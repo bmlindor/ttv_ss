@@ -7,10 +7,10 @@ import Main.TTVFaster.chisquare
 include("regress.jl")
 using DelimitedFiles,JLD2,Optim,LsqFit,Statistics
 
-function fit_planet4(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p3in::Float64,p3out::Float64,np3::Int,nphase::Int,p4in::Float64,p4out::Float64,np4::Int,from_EMB::Bool=true)
-  if from_EMB
+function fit_planet4(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p3in::Float64,p3out::Float64,np3::Int,nphase::Int,p4in::Float64,p4out::Float64,np4::Int,obs::String)
+  if obs=="fromEMB"
     fitfile = string("FITS/fromEMB/p4_fit",sigma,"s",nyear,"yrs.jld2")
-  else
+  elseif obs=="fromEV"
     fitfile = string("FITS/p4_fit",sigma,"s",nyear,"yrs.jld2")
   end
   jd2 = nyear*365.25 + jd1
@@ -208,11 +208,11 @@ function fit_planet4(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref:
   return best_p3,best_p4 
 end
 # If 3-planet fit already exists, can just do 4-planet search
-function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p4in::Float64,p4out::Float64,np4::Int,nphase::Int,from_EMB::Bool)
-  if from_EMB
+function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p4in::Float64,p4out::Float64,np4::Int,nphase::Int,obs::String)
+  if obs=="fromEMB"
     infile = string("FITS/fromEMB/p3_fit",sigma,"s",nyear,"yrs.jld2")
     outfile = string("FITS/fromEMB/p4_fit",sigma,"s",nyear,"yrs.jld2")
-  else
+  elseif obs=="fromEV"
     infile = string("FITS/p3_fit",sigma,"s",nyear,"yrs.jld2")
     outfile = string("FITS/p4_fit",sigma,"s",nyear,"yrs.jld2")
   end
@@ -272,7 +272,7 @@ function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
     end
     # println("Period: ",p4[j]," log Prob: ",lprob_p4[j]," Param: ",vec(param_p4[1:nparam,j]))
   end
-  println("Finished 3-planet fit w/ fixed period: ",p4best," in ",niter," iterations")
+  println("Finished 4-planet fit w/ fixed period: ",p4best," in ",niter," iterations")
 
   fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,true),tt0,tt,weight,p4best)
   best_p4 = fit.param
@@ -303,7 +303,7 @@ function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
   jd2 = nyear*365.25 + jd1
   weight = ones(nt1+nt2)./ sigtt.^2 #assigns each data point stat weight d.t. noise = 1/σ^2
   println(infile," loaded.")
-  println("Previous model params: ",best_p3)
+  println("Previous model params: ",best_dp)
  # Now,add a 4th planet:
   ntrans = [nt1,nt2,2,2] #requires at least 2 transits for each planet (even if it doesnt transit)
   nplanet = 4
@@ -350,7 +350,7 @@ function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
     end
     println("Period: ",p4[j]," log Prob: ",lprob_p4[j]," Param: ",vec(param_p4[1:nparam,j]))
   end
-  println("Finished 4-planet fit w/ fixed period: ",p4best)
+  println("Finished 4-planet fit w/ fixed period: ",p4best," in ",niter," iterations")
 
   fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,false),tt0,tt,weight,p4best)
   best_p4 = fit.param

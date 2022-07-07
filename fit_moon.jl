@@ -7,14 +7,81 @@ import Main.TTVFaster.chisquare
 include("regress.jl")
 using DelimitedFiles,JLD2,Optim,LsqFit,Statistics
 
-function fit_moon(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p3in::Float64,p3out::Float64,np3::Int,nphase::Int,dpin::Float64,dpout::Float64,ndp::Int,wide::Bool=false)
-  if wide
+# If planet fit already exists, can just do moon search
+function fit_moon(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,dpin::Float64,dpout::Float64,ndp::Int,nplanets::Real)
+  infile = string("FITS/p",nplanets,"_fit",sigma,"s",nyear,"yrs.jld2")
+  outfile = string("FITS/p",nplanets,"moon_fit",sigma,"s",nyear,"yrs.jld2")
+  @assert isfile(infile)
+  m = jldopen(String(infile),"r")
+  tt0,tt,ttmodel,sigtt=m["tt0"],m["tt"],m["ttmodel"],m["sigtt"]
+  nt1,nt2 = m["ntrans"][1],m["ntrans"][2]
+  nplanet,ntrans = m["nplanet"],m["ntrans"]
+  best_par = m[string("best_p",nplanets)]
+  lprob_best_par = m[string("lprob_best_p",nplanets)]
+  if nplanets>2
+    per, lprob_per = m[string("p",nplanets)],m[string("lprob_p",nplanets)]
+  end
+  Nobs = sum([nt1,nt2])
+  jmax=5
+  jd2 = nyear*365.25 + jd1
+  weight = ones(nt1+nt2)./ sigtt.^2
+  println(infile," loaded.")
+  println("Previous model params: ",best_par)
+
+  # Now,search for Moon:
+  nparam = length(best_par)+3
+  deltaphi_cur = 2.312
+  deltaphi = range(dpin,stop=dpout,length=ndp)
+  lprob_dp = zeros(ndp)
+  param_dp = zeros(nparam,ndp)
+  lprob_best = -1e100 
+  dpbest = zeros(nparam)
+  niter = 0
+  for j=1:ndp
+    lprob_dp[j] = -1e100 
+    # lunar params: tmax sin(phi_0) ,tmax cos(phi_0) ,deltaphi 
+    param_tmp = [0.01,0.01,deltaphi[j]] 
+    param5 = [best_par;param_tmp]
+    deltaphi_cur = deltaphi[j]
+    param1 = param5 .+ 100.0
+    while maximum(abs.(param1 .- param5)) > tol #&& niter < 20
+      param1 = param5
+      fit = curve_fit((tt0,param5) -> ttv_wrapper(tt0,nplanet,ntrans,param5,jmax,false),tt0,tt,weight,param5)
+      param5 = fit.param
+      niter+=1 
+    end
+    ttmodel = ttv_wrapper(tt0,nplanet,ntrans,[fit.param[1:end-1];deltaphi_cur],jmax,false)
+    lprob_dp[j]= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
+    if lprob_dp[j] > lprob_best 
+      lprob_best = lprob_dp[j]
+      dpbest = [fit.param[1:end-1];deltaphi_cur]
+    end
+    param_dp[1:nparam,j] = [fit.param[1:end-1];deltaphi_cur]
+    # println("deltaphi: ",deltaphi[j]," log Prob: ",lprob_dp[j]," Param: ",vec(param_dp[1:nparam,j]))
+  end
+  println("Finished lunar search: ",dpbest," in ",niter," iterations")
+
+  fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,false),tt0,tt,weight,dpbest)
+  best_dp = fit.param
+  ttmodel = ttv_wrapper(tt0,nplanet,ntrans,best_dp,jmax,false)
+  lprob_best_dp = (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
+  println("Finished global moon fit.")
+  println("Lunar chi-square: ",chisquare(tt0,nplanet,ntrans,best_dp,tt,sigtt,jmax,false))
+  println("Maximum: ",lprob_best_dp," Param: ",best_dp)
+  @save outfile deltaphi lprob_dp best_dp lprob_best_dp ntrans nplanet tt0 tt ttmodel sigtt
+  return best_dp
+end
+
+function fit_wide(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p3in::Float64,p3out::Float64,np3::Int,nphase::Int,dpin::Float64,dpout::Float64,ndp::Int,p4in::Float64,p4out::Float64,np4::Int,obs::String)
+  if obs=="fromEMB"
+    datafile = string("INPUTS/tt_",sigma,"sEMB",nyear,"yrs.txt")
+    fitfile = string("FITS/fromEMB/wide_fit",sigma,"s",nyear,"yrs.jld2")
+  elseif obs=="fromEV"
+    datafile = string("INPUTS/tt_",sigma,"snoEMB",nyear,"yrs.txt")
     fitfile = string("FITS/wide_fit",sigma,"s",nyear,"yrs.jld2")
-  else
-    fitfile = string("FITS/p3moon_fit",sigma,"s",nyear,"yrs.jld2")
   end
   jd2 = nyear*365.25 + jd1
-  data1 = readdlm(filename,Float64)
+  data1 = readdlm(datafile,Float64)
   nt1 = sum(data1[:,1] .== 1.0)
   nt2 = sum(data1[:,1] .== 2.0)
   tt1 = vec(data1[1:nt1,3]) .- tref
@@ -110,9 +177,9 @@ function fit_moon(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref::Re
   lprob_best = -1e100 
   p3best = zeros(nparam)
   # Shifting to simulated observation range to search over period grid
-  offset = (jd1 + jd2)/2 
+  niter=0
   for j=1:np3
-    phase = p3[j]*range(0,stop=1,length=nphase) #.+ offset 
+    phase = p3[j]*range(0,stop=1,length=nphase) 
     lprob_phase = zeros(nphase)
     lprob_p3[j] = -1e100
     for i=1:nphase 
@@ -197,72 +264,61 @@ function fit_moon(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref::Re
   println("3-planet lunar chi-square: ",chisquare(tt0,nplanet,ntrans,best_dp,tt,sigtt,jmax,false))
   println("Maximum: ",lprob_best_dp," Param: ",best_dp)
 
-  @save fitfile p3 lprob_p3 best_p3 lprob_best_p3 deltaphi lprob_dp best_dp lprob_best_dp ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase dpin dpout ndp
-  return best_p3,best_dp
-end
-# If planet fit already exists, can just do moon search
-function fit_moon(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,dpin::Float64,dpout::Float64,ndp::Int,nplanets::Real)
-  infile = string("FITS/p",nplanets,"_fit",sigma,"s",nyear,"yrs.jld2")
-  outfile = string("FITS/p",nplanets,"moon_fit",sigma,"s",nyear,"yrs.jld2")
-  @assert isfile(infile)
-  m = jldopen(String(infile),"r")
-  tt0,tt,ttmodel,sigtt=m["tt0"],m["tt"],m["ttmodel"],m["sigtt"]
-  nt1,nt2 = m["ntrans"][1],m["ntrans"][2]
-  nplanet,ntrans = m["nplanet"],m["ntrans"]
-  if nplanets == 2
-    best_par = m["init_param"]
-  else 
-    per, lprob_per = m[string("p",nplanets)],m[string("lprob_p",nplanets)]
-    best_par = m[string("best_p",nplanets)]
-    lprob_best_par = m[string("lprob_best_p",nplanets)]
-  end
-  Nobs = sum([nt1,nt2])
-  jmax=5
-  jd2 = nyear*365.25 + jd1
-  weight = ones(nt1+nt2)./ sigtt.^2
-  println(infile," loaded.")
-  println("Previous model params: ",best_par)
-
-  # Now,search for Moon:
-  nparam = length(best_par)+3
-  deltaphi_cur = 2.312
-  deltaphi = range(dpin,stop=dpout,length=ndp)
-  lprob_dp = zeros(ndp)
-  param_dp = zeros(nparam,ndp)
+  # Now,add a 4th planet:
+  ntrans = [nt1,nt2,2,2] #requires at least 2 transits for each planet (even if it doesnt transit)
+  nplanet = 4
+  nparam = 23
+  # Grid of periods to search over:
+  p4 = 10 .^ range(log10(p4in),stop=log10(p4out),length=np4)
+  p4_cur =  1.88*365.25 
+  lprob_p4 = zeros(np4)
+  param_p4 = zeros(nparam,np4)
   lprob_best = -1e100 
-  dpbest = zeros(nparam)
+  p4best = zeros(nparam)
   niter = 0
-  for j=1:ndp
-    lprob_dp[j] = -1e100 
-    # lunar params: tmax sin(phi_0) ,tmax cos(phi_0) ,deltaphi 
-    param_tmp = [0.01,0.01,deltaphi[j]] 
-    param5 = [best_par;param_tmp]
-    deltaphi_cur = deltaphi[j]
-    param1 = param5 .+ 100.0
-    while maximum(abs.(param1 .- param5)) > tol #&& niter < 20
-      param1 = param5
-      fit = curve_fit((tt0,param5) -> ttv_wrapper(tt0,nplanet,ntrans,param5,jmax,false),tt0,tt,weight,param5)
-      param5 = fit.param
-      niter+=1 
+  for j=1:np4
+    phase = p4[j]*range(0,stop=1,length=nphase) 
+    lprob_phase = zeros(nphase) 
+    lprob_p4[j] = -1e100
+    for i=1:nphase
+     # p4 param_names: mass ratio,phase,ecosw,esinw; uses same nphase as p3
+      param_tmp = [log10(1e-7),phase[i],0.01,0.01]
+      # Mars' period is shorter than Jupiter's, so need to keep sorted for now
+      param4 = [best_dp[1:10];param_tmp;best_dp[11:end]]   
+      p4_cur = p4[j]
+      param1 = param4 .+ 100.0
+      niter=0
+      while maximum(abs.(param1 .- param4)) > tol && niter <20
+        param1 = param4
+        # println("param1 ", param1)
+        fit = curve_fit((tt0,param4) -> ttv_wrapper(tt0,nplanet,ntrans,[param4[1:10];10^param4[11];p4_cur;param4[12:end]],jmax,false),tt0,tt,weight,param4)
+        param4 = fit.param 
+        niter+=1
+        # println(p4_cur)
+        println("param4 ", param4)
+      end
+      ttmodel=ttv_wrapper(tt0,nplanet,ntrans,[param4[1:10];10^param4[11];p4_cur;param4[12:end]],jmax,false)
+      lprob_phase[i]= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
+      if lprob_phase[i] > lprob_best
+        lprob_best = lprob_phase[i]
+        p4best = [fit.param[1:10];10^param4[11];p4_cur;fit.param[12:end]]
+      end
+      if lprob_phase[i] > lprob_p4[j] 
+        lprob_p4[j] = lprob_phase[i]
+        param_p4[1:nparam,j] =  [fit.param[1:10];10^param4[11];p4_cur;fit.param[12:end]]
+      end
     end
-    ttmodel = ttv_wrapper(tt0,nplanet,ntrans,[fit.param[1:end-1];deltaphi_cur],jmax,false)
-    lprob_dp[j]= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
-    if lprob_dp[j] > lprob_best 
-      lprob_best = lprob_dp[j]
-      dpbest = [fit.param[1:end-1];deltaphi_cur]
-    end
-    param_dp[1:nparam,j] = [fit.param[1:end-1];deltaphi_cur]
-    # println("deltaphi: ",deltaphi[j]," log Prob: ",lprob_dp[j]," Param: ",vec(param_dp[1:nparam,j]))
+    # println("Period: ",p4[j]," log Prob: ",lprob_p4[j]," Param: ",vec(param_p4[1:nparam,j]))
   end
-  println("Finished lunar search: ",dpbest," in ",niter," iterations")
+  println("Finished 4-planet fit w/ fixed period: ",p4best," in ",niter," iterations")
 
-  fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,false),tt0,tt,weight,dpbest)
-  best_dp = fit.param
-  ttmodel = ttv_wrapper(tt0,nplanet,ntrans,best_dp,jmax,false)
-  lprob_best_dp = (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
-  println("Finished global moon fit.")
-  println("Lunar chi-square: ",chisquare(tt0,nplanet,ntrans,best_dp,tt,sigtt,jmax,false))
-  println("Maximum: ",lprob_best_dp," Param: ",best_dp)
-  @save outfile deltaphi lprob_dp best_dp lprob_best_dp ntrans nplanet tt0 tt ttmodel sigtt
-  return best_dp
+  fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,false),tt0,tt,weight,p4best)
+  best_p4 = fit.param
+  ttmodel = ttv_wrapper(tt0,nplanet,ntrans,best_p4,jmax,false)
+  lprob_best_p4= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
+  println("Finished global 4-planet fit.")
+  println("New 4-planet chi-square: ",chisquare(tt0,nplanet,ntrans,best_p4,tt,sigtt,jmax,false))
+  println("Maximum: ",lprob_best_p4," Param: ",best_p4)
+  @save fitfile p3 lprob_p3 best_p3 lprob_best_p3 deltaphi lprob_dp best_dp lprob_best_dp p4 lprob_p4 best_p4 lprob_best_p4 ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase dpin dpout ndp
+  return best_p3,best_dp,best_p4
 end

@@ -20,7 +20,7 @@ function prob(xgrid::Array{Float64,1},lprob::Array{Float64,1},truex::Float64,nbi
 		ax1.tick_params(which="both",direction="in")
 end
 # Create likelihood/probability plots of search grids
-function plot_prob(sigma,nyear,sim,fitmodel,mcmodel,nbins,include_moon::Bool=false)
+function plot_prob(sigma::Real,nyear::Real,sim::String,fitmodel::String,mcmodel::String,nbins::Int,include_moon::Bool=false)
 	if String(sim)=="EMB" && isfile(string("MCMC/fromEMB/",mcmodel,"_mcmc",sigma,"s",nyear,"yrs.jld2")) 
     mcfile=string("MCMC/fromEMB/",mcmodel,"_mcmc",sigma,"s",nyear,"yrs.jld2")
     fitfile=string("FITS/fromEMB/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
@@ -34,29 +34,31 @@ function plot_prob(sigma,nyear,sim,fitmodel,mcmodel,nbins,include_moon::Bool=fal
  	m=jldopen(String(mcfile),"r")
 	f=jldopen(String(fitfile),"r")
 
-	p3=vec(f["p3"])./365.25
-	p3prob=exp.((vec(f["lprob_p3"]) .-maximum(vec(f["lprob_p3"]))))
-	p3_cur=11.862615
-	bfvalue=f["best_p3"][12] /365.25	
-	param=vec(m["par_mcmc"][:,m["iburn"]:end,12])./365.25
-	prob(p3,p3prob,p3_cur,nbins,param,"firebrick","Jupiter")
-	title=string("IMAGES/likelihoods/",sim,mcmodel,"planet3-",sigma,"secs",nyear,"yrs.png")
-	show()
+	# p3=vec(f["p3"])./365.25
+	# p3prob=exp.((vec(f["lprob_p3"]) .-maximum(vec(f["lprob_p3"]))))
+	# p3_cur=11.862615
+	# bfvalue=f["best_p3"][12] /365.25	
+	# param=vec(m["par_mcmc"][:,m["iburn"]:end,12])./365.25
+	# prob(p3,p3prob,p3_cur,nbins,param,"firebrick","Jupiter")
+	# title=string("IMAGES/likelihoods/",sim,mcmodel,"planet3-",sigma,"secs",nyear,"yrs.png")
+	# show()
 	# savefig(title)
  #  if fitmodel=="p4"
-	#   xgrid4=f["p4"]./365.25
-	# 	xprob4=exp.((f["lprob_p4"] .-maximum(f["lprob_p4"])))
-	# 	# grid=[grid_wide[1:55];xgrid;grid_wide[60:end]]
-	# 	# prob=[lprob_wide[1:55];xprob;lprob_wide[60:end]]
-	# 	bfvalue4=f["best_p4"][ncol] /365.25	
-	# 	truex4=1.88
-	# 	param4=vec(m["par_mcmc"][:,m["iburn"]:end,ncol])./365.25
-	# 	xbin4,xhist4,xbin_square4,hist_square4=histogram(param4,nbins)
-	# 	ax1.plot(xgrid,xprob,color="firebrick") 
-	# 	ax1.axvline(truex4,linestyle="--",color="black",label=string(truex4))
-	# 	ax1.plot(xgrid4,xprob4,color="darkcyan")
-	# 	ax1.text(2,1,"Mars")
-	# 	ax1.set_xlim(1,14.3)
+		fig=figure(figsize=(6,6))
+  	subplots_adjust(hspace=0.05,wspace=0.05)
+	  ax1=gca()
+	  xgrid4=f["p4"]./365.25
+		xprob4=exp.((f["lprob_p4"] .-maximum(f["lprob_p4"])))
+		# grid=[grid_wide[1:55];xgrid;grid_wide[60:end]]
+		# prob=[lprob_wide[1:55];xprob;lprob_wide[60:end]]
+		bfvalue4=f["best_p4"][12] /365.25	
+		truex4=1.88
+		param4=vec(m["par_mcmc"][:,m["iburn"]:end,12])./365.25
+		xbin4,xhist4,xbin_square4,hist_square4=histogram(param4,nbins)
+		ax1.axvline(truex4,linestyle="--",color="black",label=string(truex4))
+		ax1.plot(xgrid4,xprob4,color="darkcyan")
+		ax1.text(2,1,"Mars")
+		ax1.set_xlim(1,5)
 	#   title=string("IMAGES/likelihoods/",sim,mcmodel,"planet4-",sigma,"secs",nyear,"yrs.png")
 	# else
 	# 	ax1.plot(xgrid,xprob,color="firebrick") 
@@ -71,9 +73,10 @@ function plot_prob(sigma,nyear,sim,fitmodel,mcmodel,nbins,include_moon::Bool=fal
 	# 	savefig(title)
 	#   tight_layout()
  #  end
+		show()
 end
 # Plot wide likelihood of values in search grids, with probability inset
-function plot_likelihood(sigma,nyear,sim,fitmodel,mcmodel,nbins,include_moon::Bool=false)
+function plot_likelihood(sigma::Real,nyear::Real,sim::String,fitmodel::String,mcmodel::String,nbins::Int,include_moon::Bool=false)
 	if String(sim)=="EMB" && isfile(string("MCMC/fromEMB/",mcmodel,"_mcmc",sigma,"s",nyear,"yrs.jld2")) 
     mcfile=string("MCMC/fromEMB/",mcmodel,"_mcmc",sigma,"s",nyear,"yrs.jld2")
     fitfile=string("FITS/fromEMB/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")

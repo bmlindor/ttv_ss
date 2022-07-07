@@ -7,10 +7,10 @@ import Main.TTVFaster.chisquare
 include("regress.jl")
 using DelimitedFiles,JLD2,Optim,LsqFit,Statistics
 
-function fit_planet5(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p3in::Float64,p3out::Float64,np3::Int,nphase::Int,p4in::Float64,p4out::Float64,np4::Int,p5in::Float64,p5out::Float64,np5::Int,from_EMB::Bool=true)
-  if from_EMB
+function fit_planet5(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p3in::Float64,p3out::Float64,np3::Int,nphase::Int,p4in::Float64,p4out::Float64,np4::Int,p5in::Float64,p5out::Float64,np5::Int,obs::String)
+  if obs=="fromEMB"
     fitfile = string("FITS/fromEMB/p5_fit",sigma,"s",nyear,"yrs.jld2")
-  else
+  elseif obs=="fromEV"
     fitfile = string("FITS/p5_fit",sigma,"s",nyear,"yrs.jld2")
   end
   jd2 = nyear*365.25 + jd1
@@ -260,11 +260,11 @@ function fit_planet5(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref:
   return best_p4, best_p5   
 end
 # If 4-planet fit already exists, can just do 5-planet search
-function fit_planet5(jd1::Float64,sigma::Float64,nyear::Float64,p5in::Float64,p5out::Float64,np5::Int,nphase::Int,from_EMB::Bool)
-  if from_EMB
+function fit_planet5(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p5in::Float64,p5out::Float64,np5::Int,nphase::Int,obs::String)
+  if obs=="fromEMB"
     infile = string("FITS/fromEMB/p4_fit",sigma,"s",nyear,"yrs.jld2")
     outfile = string("FITS/fromEMB/p5_fit",sigma,"s",nyear,"yrs.jld2")
-  else
+  elseif obs=="fromEV"
     infile = string("FITS/p4_fit",sigma,"s",nyear,"yrs.jld2")
     outfile = string("FITS/p5_fit",sigma,"s",nyear,"yrs.jld2")
   end
@@ -303,7 +303,7 @@ function fit_planet5(jd1::Float64,sigma::Float64,nyear::Float64,p5in::Float64,p5
       param5 = [best_p4[1:20];param_tmp]   
       p5_cur = p5[j]
       param1 = param5 .+ 100.0
-      while maximum(abs.(param1 .- param5)) > 1e-5
+      while maximum(abs.(param1 .- param5)) > tol && niter < 20
         param1 = param5
         fit = curve_fit((tt0,param5) -> ttv_wrapper(tt0,nplanet,ntrans,[param5[1:20];10^param5[21];p5_cur;param5[22:end]],jmax,true),tt0,tt,weight,param5)
         param5 = fit.param 

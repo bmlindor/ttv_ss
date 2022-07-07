@@ -1,11 +1,12 @@
 if !@isdefined(TTVFaster)
     include("TTVFaster/src/TTVFaster.jl")
-  using Main.TTVFaster
+    using Main.TTVFaster
 end
 import Main.TTVFaster.ttv_wrapper
 import Main.TTVFaster.chisquare
 include("regress.jl")
 using DelimitedFiles,JLD2,Optim,LsqFit,Statistics
+
 function fit_planet2(data_file::Array{}, jmax::Int,tref::Real,tol::Real)
   # (::Core.kwftype(typeof(fit_planet2)))(kws, fit_planet2, data_file, jmax)
   # if haskey(kws, :jmax)
@@ -100,11 +101,11 @@ function fit_planet2(data_file::Array{}, jmax::Int,tref::Real,tol::Real)
   return 
 end
 # If the simulation already exists, can just do 2-planet fit
-function fit_planet2(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,from_EMB::Bool=true)
-  if from_EMB
+function fit_planet2(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,obs::String)
+  if obs=="fromEMB"
     datafile = string("INPUTS/tt_",sigma,"sEMB",nyear,"yrs.txt")
     outfile = string("FITS/fromEMB/p2_fit",sigma,"s",nyear,"yrs.jld2")
-  else
+  elseif obs=="fromEV"
     datafile = string("INPUTS/tt_",sigma,"snoEMB",nyear,"yrs.txt")
     outfile = string("FITS/p2_fit",sigma,"s",nyear,"yrs.jld2")
   end
@@ -182,15 +183,15 @@ function fit_planet2(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,f
   end
   println("New initial 2-planet fit: ",init_param)
 
-  # fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,EM),tt0,tt,weight,init_param)
-  # best_p2 = fit.param ##### is this the global p2 fit???
-  ttmodel = ttv_wrapper(tt0,nplanet,ntrans,init_param,jmax,true)
+  fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,true),tt0,tt,weight,init_param)
+  best_p2 = fit.param ##### is this the global p2 fit???
+  ttmodel = ttv_wrapper(tt0,nplanet,ntrans,best_p2,jmax,true)
   lprob_best_p2= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
-  chi2=chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt,jmax,true)
+  chi2=chisquare(tt0,nplanet,ntrans,best_p2,tt,sigtt,jmax,true)
   println("Finished 2-planet fit in ",niter," iterations.")
   println("New 2-planet chi-square: ",chi2)
-  println("Param: ",init_param)
+  println("Param: ",best_p2)
   # println("Maximum: ",lprob_best_p2," Param: ",best_p2)
-  @save outfile chi2 init_param ntrans nplanet tt0 tt ttmodel sigtt
-  return init_param
+  @save outfile chi2 best_p2 lprob_best_p2 ntrans nplanet tt0 tt ttmodel sigtt
+  return best_p2
 end

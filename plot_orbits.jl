@@ -54,24 +54,6 @@ ax1.tick_params(which="major",direction="in",length=6,
 xlabel("x-position [AU]")
 ylabel("y-position [AU]")
 # legend(loc="lower left")
-
-# subplot(212,sharex=ax1)
-# ax2=gca()
-# # ax2.scatter(pva_venus[1,imin1],pva_venus[2,imin1],label="Venus Transit",color=:orange)
-# ax2.plot(vec(pva_venus[1,:]),vec(pva_venus[2,:]),color=:gray)
-# ax2.scatter(vec(pva1[1,:]),vec(pva1[2,:]),label="Venus",color=:orange,marker=".")
-# # ax2.scatter(pva_earth[1,imin2],pva_earth[2,imin2],label="Earth Transit")
-# ax2.plot(vec(pva_earth[1,:]),vec(pva_earth[2,:]),color=:gray)
-# ax2.scatter(vec(pva2[1,:]),vec(pva2[2,:]),label="Earth",marker=".")
-# ax2.plot([0,n_obs[1]*1.1],[0,n_obs[2]*1.1],"k--")
-# ax2.scatter(vec(pva0[2,:]),vec(pva0[3,:]),color=:yellow,marker="o",edgecolors="gold")
-# ax2.tick_params(which="major",direction="in",
-#     left="true",right="false",top="false",bottom="true",
-#     labelbottom="true",labeltop="false",labelleft="true",labelright="false")
-# ax2.legend()
-# xlabel("[AU]")
-# ylabel("[AU]")
-# savefig("sim_times.eps")
 end
 
 if dimension==3
@@ -92,4 +74,49 @@ xlabel("x [AU]")
 ylabel("y [AU]")
 zlabel("z [AU]")    
 end
+end
+
+
+function plot_res(sigma::Real,nyear::Real,sim,fitmodel,include_moon::Bool=false)
+  fitfile=string("FITS/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
+  label="Earth"
+  bestfit="best_p3"
+
+  if String(sim)=="EMB" && isfile(string("FITS/fromEMB/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")) 
+    fitfile=string("FITS/fromEMB/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
+    bestfit="best_p3"
+    label="EMB"
+  elseif String(sim)=="EMB" && fitmodel=="p4" #if isfile(string("FITS/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")) 
+    fitfile=string("FITS/fromEMB",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
+    bestfit="best_p4"
+    label="EMB"
+  elseif fitmodel=="p4" #if isfile(string("FITS/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")) 
+    fitfile=string("FITS/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
+    bestfit="best_p4"
+    label="Earth"
+  # else 
+  #   return  println("FITS file for ",sim," with ",fitmodel," model at ",sigma," secs and ",nyear," yrs doesn't exist!!!!")
+  end
+  f=jldopen(String(fitfile),"r")
+  tt,tt0,sigtt,ttmodel=f["tt"],f["tt0"],f["sigtt"],f["ttmodel"]
+  pbest_global=f[bestfit]
+  nplanet,ntrans=f["nplanet"],f["ntrans"]
+  # pair_ttvs=decompose_ttvs(nplanet,ntrans,f["best_p3"][1:15]) .* (24 * 60)
+  p2_ttvs=decompose_ttvs(2,ntrans[1:2],f["best_p3"][1:10]) .* (24 * 60)
+  p3_ttvs=decompose_ttvs(3,ntrans[1:3],f["best_p3"][1:15]) .* (24 * 60)
+  n1,n2=ntrans[1],ntrans[2]
+  mu1,P1,t01,ecos1,esin1=pbest_global[1:5]
+  mu2,P2,t02,ecos2,esin2=pbest_global[6:10]
+  time1=collect(t01 .+ range(0,stop=n1-1,length=n1) .* P1)
+  time2=collect(t02 .+ range(0,stop=n2-1,length=n2) .* P2)
+  tt1,tt2=tt[1:n1],tt[n1+1:n1+n2]
+  ttsim1,ttsim2=(ttmodel[1:n1].-t01)./365.25,(ttmodel[n1+1:n1+n2].-t02)./365.25 #in years
+  epoch1,epoch2=(time1.-t01)./P1,(time2.-t02)./P2
+  ttv1,ttv2=(tt1.-time1).* (24 * 60),(tt2.-time2).* (24 * 60) #in minutes
+  sigtt1,sigtt2=sigtt[1:n1].* (24*60),sigtt[n1+1:n1+n2].* (24 * 60) #in minutes
+  # for i=1:15
+  #   println("time: ",time2[i]," ttmodel-t0: ",ttsim2[i]," time-t0/Per: ",epoch2[i])
+  #   # println("Venus & ",round(tt1[i],digits=5)," & ",round(ttv1[i],digits=5)," \\") 
+  #   #   println(label," & ",round(tt2[i],digits=5)," & ",round(ttv2[i],digits=5)," \\") 
+  # end
 end

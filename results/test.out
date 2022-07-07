@@ -1,50 +1,47 @@
 
 signal (2): Interrupt: 2
-in expression starting at /Users/bethleelindor/work/washington/ttv_project/ttv_ss/full_run.jl:109
-Rational at ./rational.jl:15 [inlined]
-Rational at ./rational.jl:82 [inlined]
-convert at ./number.jl:7 [inlined]
-_promote at ./promotion.jl:259 [inlined]
-promote at ./promotion.jl:282 [inlined]
-+ at ./promotion.jl:311 [inlined]
-laplace_wisdom at /Users/bethleelindor/work/washington/ttv_project/ttv_ss/TTVFaster/src/laplace_wisdom.jl:61
-ttv_succinct! at /Users/bethleelindor/work/washington/ttv_project/ttv_ss/TTVFaster/src/ttv_succinct.jl:21
-compute_ttv! at /Users/bethleelindor/work/washington/ttv_project/ttv_ss/TTVFaster/src/compute_ttv.jl:70
-ttv_nplanet at /Users/bethleelindor/work/washington/ttv_project/ttv_ss/TTVFaster/src/ttv_nplanet.jl:53
-ttv_wrapper at /Users/bethleelindor/work/washington/ttv_project/ttv_ss/TTVFaster/src/ttv_wrapper.jl:7
-unknown function (ip: 0x13f312270)
-#24 at /Users/bethleelindor/work/washington/ttv_project/ttv_ss/fit_planet3.jl:214
-#32 at /Users/bethleelindor/.julia/packages/LsqFit/LeVh7/src/curve_fit.jl:146
-ff! at /Users/bethleelindor/.julia/packages/NLSolversBase/QPnui/src/objective_types/inplace_factory.jl:11
-#finite_difference_jacobian!#43 at /Users/bethleelindor/.julia/packages/FiniteDiff/sNUd8/src/jacobians.jl:413
-finite_difference_jacobian! at /Users/bethleelindor/.julia/packages/FiniteDiff/sNUd8/src/jacobians.jl:334 [inlined]
-finite_difference_jacobian! at /Users/bethleelindor/.julia/packages/FiniteDiff/sNUd8/src/jacobians.jl:334 [inlined]
-fj_finitediff! at /Users/bethleelindor/.julia/packages/NLSolversBase/QPnui/src/objective_types/oncedifferentiable.jl:139
-value_jacobian!! at /Users/bethleelindor/.julia/packages/NLSolversBase/QPnui/src/interface.jl:124
-value_jacobian!! at /Users/bethleelindor/.julia/packages/NLSolversBase/QPnui/src/interface.jl:122 [inlined]
-#levenberg_marquardt#10 at /Users/bethleelindor/.julia/packages/LsqFit/LeVh7/src/levenberg_marquardt.jl:42
-levenberg_marquardt at /Users/bethleelindor/.julia/packages/LsqFit/LeVh7/src/levenberg_marquardt.jl:42 [inlined]
-#lmfit#15 at /Users/bethleelindor/.julia/packages/LsqFit/LeVh7/src/curve_fit.jl:68
-lmfit at /Users/bethleelindor/.julia/packages/LsqFit/LeVh7/src/curve_fit.jl:68
-#lmfit#14 at /Users/bethleelindor/.julia/packages/LsqFit/LeVh7/src/curve_fit.jl:64
-lmfit at /Users/bethleelindor/.julia/packages/LsqFit/LeVh7/src/curve_fit.jl:61 [inlined]
-#curve_fit#30 at /Users/bethleelindor/.julia/packages/LsqFit/LeVh7/src/curve_fit.jl:147
-unknown function (ip: 0x13f35c0fa)
-curve_fit at /Users/bethleelindor/.julia/packages/LsqFit/LeVh7/src/curve_fit.jl:137
-fit_planet3 at /Users/bethleelindor/work/washington/ttv_project/ttv_ss/fit_planet3.jl:214
-macro expansion at ./util.jl:155 [inlined]
-test_fit at /Users/bethleelindor/work/washington/ttv_project/ttv_ss/full_run.jl:98
-unknown function (ip: 0x13f2c9462)
+in expression starting at /Users/bethleelindor/work/washington/ttv_project/ttv_ss/full_run.jl:5
+jl_field_isptr at /Users/bethleelindor/julia/src/./julia.h:967 [inlined]
+jl_set_nth_field at /Users/bethleelindor/julia/src/datatype.c:1004
+jl_new_struct at /Users/bethleelindor/julia/src/datatype.c:823
+jl_type_unionall at /Users/bethleelindor/julia/src/jltypes.c:529
+sub_msp at /Users/bethleelindor/julia/src/subtype.c:3295
+type_morespecific_ at /Users/bethleelindor/julia/src/subtype.c:3525
+type_morespecific_ at /Users/bethleelindor/julia/src/subtype.c:3528
+type_morespecific_ at /Users/bethleelindor/julia/src/subtype.c:3528
+type_morespecific_ at /Users/bethleelindor/julia/src/subtype.c:3528
+type_morespecific_ at /Users/bethleelindor/julia/src/subtype.c:3528
+type_morespecific_ at /Users/bethleelindor/julia/src/subtype.c:0
+type_morespecific_ at /Users/bethleelindor/julia/src/subtype.c:3563
+type_morespecific_ at /Users/bethleelindor/julia/src/subtype.c:3563
+type_morespecific_ at /Users/bethleelindor/julia/src/subtype.c:0
+type_morespecific_ at /Users/bethleelindor/julia/src/subtype.c:0
+type_morespecific_ at /Users/bethleelindor/julia/src/subtype.c:0
+type_morespecific_ at /Users/bethleelindor/julia/src/subtype.c:3372
+type_morespecific_ at /Users/bethleelindor/julia/src/subtype.c:0
+type_morespecific_ at /Users/bethleelindor/julia/src/subtype.c:0
+type_morespecific_ at /Users/bethleelindor/julia/src/subtype.c:0
+jl_typemap_list_insert_sorted at /Users/bethleelindor/julia/src/typemap.c:1075
+jl_typemap_array_insert_ at /Users/bethleelindor/julia/src/typemap.c:969
+jl_typemap_level_insert_ at /Users/bethleelindor/julia/src/typemap.c:1010
+jl_typemap_insert at /Users/bethleelindor/julia/src/typemap.c:1060
+jl_method_table_insert at /Users/bethleelindor/julia/src/gf.c:1616
+jl_insert_methods at /Users/bethleelindor/julia/src/dump.c:2225 [inlined]
+_jl_restore_incremental at /Users/bethleelindor/julia/src/dump.c:3227
+jl_restore_incremental at /Users/bethleelindor/julia/src/dump.c:3272
+_include_from_serialized at ./loading.jl:676
+_require_search_from_serialized at ./loading.jl:776
+_tryrequire_from_serialized at ./loading.jl:707
+_require_search_from_serialized at ./loading.jl:765
+_tryrequire_from_serialized at ./loading.jl:707
+_require_search_from_serialized at ./loading.jl:765
+_require at ./loading.jl:1001
+require at ./loading.jl:922
+require at ./loading.jl:917
 jl_apply at /Users/bethleelindor/julia/src/./julia.h:1631 [inlined]
-do_call at /Users/bethleelindor/julia/src/interpreter.c:328
-eval_stmt_value at /Users/bethleelindor/julia/src/interpreter.c:368 [inlined]
-eval_body at /Users/bethleelindor/julia/src/interpreter.c:764
-jl_interpret_toplevel_thunk_callback at /Users/bethleelindor/julia/src/interpreter.c:888
-unknown function (ip: 0xfffffffffffffffe)
-unknown function (ip: 0x11376188f)
-unknown function (ip: 0x5)
-jl_interpret_toplevel_thunk at /Users/bethleelindor/julia/src/interpreter.c:897
-jl_toplevel_eval_flex at /Users/bethleelindor/julia/src/toplevel.c:814
+call_require at /Users/bethleelindor/julia/src/toplevel.c:399 [inlined]
+eval_import_path at /Users/bethleelindor/julia/src/toplevel.c:436
+jl_toplevel_eval_flex at /Users/bethleelindor/julia/src/toplevel.c:656
 jl_parse_eval_all at /Users/bethleelindor/julia/src/ast.c:873
 jl_load at /Users/bethleelindor/julia/src/toplevel.c:878 [inlined]
 jl_load_ at /Users/bethleelindor/julia/src/toplevel.c:885
@@ -57,15 +54,4 @@ jfptr__start_2084 at /Users/bethleelindor/julia/usr/lib/julia/sys.dylib (unknown
 true_main at /Users/bethleelindor/julia/julia (unknown line)
 main at /Users/bethleelindor/julia/julia (unknown line)
 unknown function (ip: 0xffffffffffffffff)
-Allocations: 236249760 (Pool: 236177901; Big: 71859); GC: 318
-args = ["fit", "10.0", "30.0", "test"]
-Number of planets in model: 0
-Number of satellites in model: 0
-Initial parameters: [3.0e-6, 224.7002991994928, 2.4335038552479846e6, 0.01, 0.01, 3.0e-6, 365.25772638590075, 2.4336244888104755e6, 0.01, 0.01]
-Initial chi-square: 2.4438718734338403e8
-New initial 2-planet fit: [-3.3560507468286343e-6, 224.7002022407529, 2.4335038561270847e6, 0.8093192766555921, 0.003115001515497542, 7.502461647974752e-6, 365.25771249471774, 2.433624488223294e6, 0.7895540991537304, -0.1586411311890567]
-Finished global 2-planet fit.
-New 2-planet chi-square: 2.4221642826944208e8
-Maximum: -752.9083464293258 Param: [-3.3560121535437253e-6, 224.70020224034766, 2.4335038561270866e6, 0.8093302293892171, 0.003122753644892562, 7.502400103906304e-6, 365.25771249500184, 2.433624488223292e6, 0.7895782848065901, -0.1586302874284078]
- 63.834818 seconds (17.60 M allocations: 2.640 GiB, 1.10% gc time)
-Planet 2 fit loaded.
+Allocations: 12797430 (Pool: 12795106; Big: 2324); GC: 11

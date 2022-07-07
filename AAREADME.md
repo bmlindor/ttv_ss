@@ -35,8 +35,8 @@ NaifID:
 
 1). Simulate transit times from JPLEphemeris. Add noise option to data.
 
-sim_times(jd1::Float64,nyear::Float64,
-  addnoise::Bool=false,sigma::Float64=0.0,EMB::Bool=true,seed::Int=42)
+sim_times(jd1::Float64,sigma::Real,nyear::Real,obs::String,seed::Int=42)
+
 
 2a). Carry out a linear fit to the transit times. 
 

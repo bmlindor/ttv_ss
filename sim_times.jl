@@ -9,7 +9,7 @@ if !@isdefined(CGS)
 end
 include("regress.jl")
 # Simulate solar system orbits from ephemerides
-function sim_times(jd1::Float64,sigma::Real,nyear::Real,EMB::Bool=true,seed::Int=42)
+function sim_times(jd1::Float64,sigma::Real,nyear::Real,obs::String,seed::Int=42)
   # To do: output file with arguments in header?
   # nyear = (jd2 - jd1)/365.25 
   jd2 = nyear*365.25 + jd1
@@ -40,7 +40,7 @@ function sim_times(jd1::Float64,sigma::Real,nyear::Real,EMB::Bool=true,seed::Int
   for i=1:jdsize
     pva_sun[1:9,i] = compute(eph,t0[i],0.5,10,10,options,2)./AU
     pva_venus[1:9,i] = compute(eph,t0[i],0.5,2,10,options,2)./AU
-    if EMB
+    if obs=="fromEMB"
       pva_earth[1:9,i] = compute(eph,t0[i],0.5,3,10,options,2)./AU 
     else
       pva_earth[1:9,i] = compute(eph,t0[i],0.5,399,10,options,2)./AU
@@ -152,7 +152,7 @@ function sim_times(jd1::Float64,sigma::Real,nyear::Real,EMB::Bool=true,seed::Int
   P_err = 2
   tt1 = find_times(2,eph,t0,P_venus,P_err,n_obs,10)
   nt1 = length(tt1)
-  if EMB
+  if obs=="fromEMB"
     # Find times of Earth-Moon barycenter transit:
     tt2 = find_times(3,eph,t0,P_earth,P_err,n_obs,10)
   else
@@ -272,7 +272,7 @@ function sim_times(jd1::Float64,sigma::Real,nyear::Real,EMB::Bool=true,seed::Int
   tt = [tt1+noise1;tt2+noise2]
   noise = [noise1;noise2]
   sigtt = [sigtt1;sigtt2]
-  if EMB
+  if obs=="fromEMB"
     name = string("INPUTS/tt_",sigma,"sEMB",nyear,"yrs.txt")
   else
     name = string("INPUTS/tt_",sigma,"snoEMB",nyear,"yrs.txt")
