@@ -206,7 +206,7 @@ function fit_planet3(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
       param3 = [best_p2;param_tmp] #concatenate 2 planet model to 3 planet model params
       p3_cur = p3[j] #sets jupiter period to global value
       param1 = param3 .+ 100.0
-      while maximum(abs.(param1 .- param3)) > tol && niter < 20
+      while maximum(abs.(param1 .- param3)) > tol #&& niter < 20
         param1 = param3
         fit = curve_fit((tt0,param3) -> ttv_wrapper(tt0,nplanet,ntrans,[param3[1:10];10^param3[11];p3_cur;param3[12:end]],jmax,true),tt0,tt,weight,param3)
         param3 = fit.param
@@ -225,7 +225,7 @@ function fit_planet3(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
         param_p3[1:nparam,j] =  [fit.param[1:10];10^fit.param[11];p3_cur;fit.param[12:end]]
       end
     end
-    # println("Period: ",p3[j]," log Prob: ",lprob_p3[j]," Param: ",vec(param_p3[1:nparam,j]))
+    println("Period: ",p3[j]," log Prob: ",lprob_p3[j]," Param: ",vec(param_p3[1:nparam,j]))
   end
   println("Finished 3-planet fit w/ fixed period: ",p3best," in ",niter," iterations")
 

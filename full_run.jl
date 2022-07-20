@@ -41,10 +41,10 @@ jd1=2.4332825e6
 tref=2430000
 tol=1e-5
 nphase=36 #wide: 100,36,180 
-p3in,p3out,np3=10.6*365.25,14*365.25,20
-dpin,dpout,ndp=2.1,2.6,30
-p4in,p4out,np4=1.8*365.25,5*365.25,20
-p5in,p5out,np5=28*365.25,33*365.25,20
+p3in,p3out,np3=10*365.25,15*365.25,100
+dpin,dpout,ndp=2.1,2.4,100
+p4in,p4out,np4=1.8*365.25,5*365.25,100
+p5in,p5out,np5=28*365.25,33*365.25,100
 nwalkers=75
 # Change search grids to accomodate for wider distributions when time spans are shorter
 # if nyear>36
@@ -117,7 +117,7 @@ function run_grid(label::String,obs::String)
 end
 function test_fit(label::String,obs::String)
 	nphase=36 #wide: 100,36,180 
-	p3in,p3out,np3=11.6*365.25,12.2*365.25,20
+	p3in,p3out,np3=11.4*365.25,12.2*365.25,20
 	dpin,dpout,ndp=2.29,2.35,20
 	p4in,p4out,np4=1.6*365.25,2.2*365.25,20
 	p5in,p5out,np5=29.2*365.25,29.6*365.25,20
@@ -131,11 +131,15 @@ function test_fit(label::String,obs::String)
 		@time fit_planet4(jd1,sigma,nyear,tref,tol,p4in,p4out,np4,nphase)
 	end
 end
-if runtype=="test" && label=="Hppmpp"
+if runtype=="fittest" 
+	println("Testing")
+	test_fit(label,obs)
+	# @time planet_mcmc(nplanet,1000,obs)
+elseif	runtype=="test" && label=="Hppmpp"
 	println("Testing")
 	test_fit(label,obs)
 	@time moon_mcmc(nplanet,1000,label)
-elseif runtype=="test"
+elseif runtype=="mctest"
 	println("Testing")
 	# test_fit(label,obs)
 	@time planet_mcmc(nplanet,1000,obs)
@@ -146,6 +150,9 @@ if runtype=="full" && nmoon==0
 elseif runtype=="full" && nmoon>0
 	@time run_grid(label,obs)
 	@time moon_mcmc(nplanet,nsteps,label)
+end
+if runtype=="grid"
+	@time run_grid(label,obs)
 end
 if runtype=="mcmc" && nmoon==0
 	@time planet_mcmc(nplanet,nsteps,obs)
