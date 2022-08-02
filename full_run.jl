@@ -43,7 +43,7 @@ tol=1e-5
 nphase=36 #wide: 100,36,180 
 p3in,p3out,np3=10*365.25,15*365.25,100
 dpin,dpout,ndp=2.1,2.4,100
-p4in,p4out,np4=1.8*365.25,5*365.25,100
+p4in,p4out,np4=1.8*365.25,2.2*365.25,100
 p5in,p5out,np5=28*365.25,33*365.25,100
 nwalkers=75
 # Change search grids to accomodate for wider distributions when time spans are shorter

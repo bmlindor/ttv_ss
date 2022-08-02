@@ -1,11 +1,12 @@
-if !@isdefined(TTVFaster)
-    include("TTVFaster/src/TTVFaster.jl")
-    using Main.TTVFaster
-end
+# if !@isdefined(TTVFaster)
+#     include("TTVFaster/src/TTVFaster.jl")
+#     using Main.TTVFaster
+# end
 import Main.TTVFaster.ttv_wrapper
 import Main.TTVFaster.chisquare
 include("regress.jl")
-using DelimitedFiles,JLD2,Optim,LsqFit,Statistics
+include("plot_likelihood.jl")
+using DelimitedFiles,JLD2,LsqFit,Statistics
 
 function fit_planet3(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p3in::Float64,p3out::Float64,np3::Int,nphase::Int,obs::String)
   if obs=="fromEMB"
@@ -122,6 +123,7 @@ function fit_planet3(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref:
       param3 = [init_param;param_tmp] #concatenate 2 planet model to 3 planet model params
       p3_cur = p3[j] #sets jupiter period to global value
       param1 = param3 .+ 100.0
+      niter=0
       while maximum(abs.(param1 .- param3)) > tol && niter < 20
         param1 = param3
         fit = curve_fit((tt0,param3) -> ttv_wrapper(tt0,nplanet,ntrans,[param3[1:10];10^param3[11];p3_cur;param3[12:end]],jmax,true),tt0,tt,weight,param3)
@@ -132,14 +134,21 @@ function fit_planet3(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref:
       end
       ttmodel = ttv_wrapper(tt0,nplanet,ntrans,[param3[1:10];10^param3[11];p3_cur;param3[12:end]],jmax,true)
       lprob_phase[i]= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
-      if lprob_phase[i] > lprob_best # check that best fit for period is better than global best fit
+      if lprob_phase[i] > lprob_best 
+      # check that best fit for period is better than global best fit
         lprob_best = lprob_phase[i]
         p3best = [fit.param[1:10];10^fit.param[11];p3_cur;fit.param[12:end]]
       end
-      if lprob_phase[i] > lprob_p3[j] # checks best fit over all phases of jupiter for this particular period
+      if lprob_phase[i] > lprob_p3[j] 
+      # checks best fit over all phases of jupiter for this particular period
         lprob_p3[j] = lprob_phase[i]
         param_p3[1:nparam,j] =  [fit.param[1:10];10^fit.param[11];p3_cur;fit.param[12:end]]
       end
+      # if j>1 && abs(lprob_p3[j] - lprob_p3[j-1])>5
+      #   # Check that best fit for current period is close to that of previous period
+      #   lprob_p3[j] = lprob_p3[j-1]
+      #   param_p3[1:nparam,j] = [fit.param[1:10];10^fit.param[11];p3_cur;fit.param[12:end]]
+      # end
     end
     println("Period: ",p3[j]," log Prob: ",lprob_p3[j]," Param: ",vec(param_p3[1:nparam,j]))
   end
@@ -158,6 +167,9 @@ function fit_planet3(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref:
   println("Finished global 3-planet fit.")
   println("New 3-planet chi-square: ",chisquare(tt0,nplanet,ntrans,best_p3,tt,sigtt,jmax,true))
   println("Maximum: ",lprob_best_p3," Param: ",best_p3)
+  plot_profile(p3,lprob_p3,p3_cur,50,[sigma,nyear],"firebrick","Jupiter")
+  title=string("IMAGES/likelihoods/",obs,"Jupiter",sigma,"secs",nyear,"yrs.png")
+  savefig(title)
   # Create files
   @save fitfile p3 lprob_p3 best_p3 lprob_best_p3 p3best ntrans nplanet tt0 tt ttmodel sigtt
   return lprob_best_p3,best_p3,lprob_p3,p3
@@ -206,7 +218,8 @@ function fit_planet3(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
       param3 = [best_p2;param_tmp] #concatenate 2 planet model to 3 planet model params
       p3_cur = p3[j] #sets jupiter period to global value
       param1 = param3 .+ 100.0
-      while maximum(abs.(param1 .- param3)) > tol #&& niter < 20
+      niter=0
+      while maximum(abs.(param1 .- param3)) > tol && niter < 20
         param1 = param3
         fit = curve_fit((tt0,param3) -> ttv_wrapper(tt0,nplanet,ntrans,[param3[1:10];10^param3[11];p3_cur;param3[12:end]],jmax,true),tt0,tt,weight,param3)
         param3 = fit.param

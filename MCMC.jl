@@ -5,6 +5,7 @@ end
 import Main.TTVFaster.ttv_wrapper
 import Main.TTVFaster.chisquare
 include("bounds.jl")
+include("CGS.jl")
 using DelimitedFiles,JLD2,Statistics,MCMCDiagnostics
 
 # Run a Markov chain:
@@ -40,6 +41,7 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,nsteps
   end
   # Initialize walkers:
   if use_sigsys
+    # pname=[pname;"sigsys"]
     par_trial = [param[1:end];1e-8]
     nsize = nparam+1
   else
@@ -125,7 +127,7 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,nsteps
         # println(length(tt)," ",length(model))
         if use_sigsys
     # ll = (-0.5 * sum((tt-model).^2 ./(sigtt.^2 .+ sigsys.^2) .+ log.(sigtt.^2 .+ sigsys.^2)))
-         lprob_trial += (-0.5 * sum((tt-model).^2 ./(sigtt.^2 .+ par_trial[end]) .+ log.(sigtt.^2 .+ par_trial[end])))
+         lprob_trial += (-0.5 * sum((tt-model).^2 ./(sigtt.^2 .+ par_trial[end].^2) .+ log.(sigtt.^2 .+ par_trial[end].^2)))
         else
     # ll = log(sum((tt-model).^2 ./sigtt.^2))
           lprob_trial += log(sum((tt-model).^2 ./sigtt.^2))*(1 - Nobs/2) #mostly useful for grid search
@@ -161,7 +163,7 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,nsteps
     # ll =  log(sum((tt-model_trial).^2 ./sigtt.^2))
     # lprob_trial = calc_lprior(par_trial) + ll*(1 - Nobs/2) 
         if use_sigsys
-         lprob_trial += (-0.5 * sum((tt-model_trial).^2 ./(sigtt.^2 .+ par_trial[end]) .+ log.(sigtt.^2 .+ par_trial[end])))
+         lprob_trial += (-0.5 * sum((tt-model_trial).^2 ./(sigtt.^2 .+ par_trial[end].^2) .+ log.(sigtt.^2 .+ par_trial[end].^2)))
         else
           lprob_trial += log(sum((tt-model_trial).^2 ./sigtt.^2))*(1 - Nobs/2) 
         end 
@@ -213,6 +215,23 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,nsteps
   end
   indepsamples = minimum(samplesize)
   println("Independent Sample Size: ",indepsamples)
+
+  # Find mean and standard deviation of posteriors after burn-in:
+  for i=1:nparam
+    println(pname[i], mean(vec(par_mcmc[:,iburn:nsteps,i]))," ± ",std(vec(par_mcmc[:,iburn:nsteps,i])))
+  end
+
+  mean_mp = [mean(vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+1])).*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
+  mp_errs = [std(vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+1])).*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
+  println("Retrieved Earth masses: ",mean_mp," ± ",mp_errs)
+
+  mean_ecc=[mean(sqrt.(vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+4]).^2 .+ vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+5]).^2)) for iplanet=1:nplanet]
+  ecc_errs=[std(sqrt.(vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+4]).^2 .+ vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+5]).^2)) for iplanet=1:nplanet]
+  println("Retrieved eccentricities: ",mean_ecc," ± ",ecc_errs)
+
+  sigtot=[sqrt((mean(vec(par_mcmc[:,iburn:nsteps,end])).*3600*24)^2 + (mean(sigtt).*3600*24)^2) ]
+  println("Retrieved σ_tot [secs] : ",sigtot)
+
   println("Saved in ",foutput)
   mcmcfile = string(foutput)
   @save mcmcfile par_mcmc lprob_mcmc param nwalkers nsteps accept iburn indepsamples

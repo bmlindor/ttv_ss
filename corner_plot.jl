@@ -481,13 +481,13 @@ function corner_hist(sigma,nyear,sim,model,nbins,include_moon::Bool=false)
   # show()
 end
 # Create a corner plot for posterior distributions of planet parameters
-function corner_plot(sigma,nyear,sim,model,nbins,include_moon::Bool=false) 
-  if String(sim)=="EMB"  && isfile(string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
+function corner_plot(sigma,nyear,obs,model,nbins,include_moon::Bool=false) 
+  if obs=="fromEMB"  && isfile(string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
     mcfile=string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
   elseif isfile(string("MCMC/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
     mcfile=string("MCMC/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
   else
-    return  println("MCMC file for ",sim," with ",model," model at ",sigma," secs and ",nyear," yrs doesn't exist!!!!")
+    return  println("MCMC file for ",obs," with ",model," model at ",sigma," secs and ",nyear," yrs doesn't exist!!!!")
   end
   m=jldopen(String(mcfile),"r")
   par_mcmc= m["par_mcmc"]
@@ -509,7 +509,7 @@ function corner_plot(sigma,nyear,sim,model,nbins,include_moon::Bool=false)
   truep1=224.7007992.-offset
   lim=0.00076,0.00081
   label=L"Per $- 224.7$ [days]"
-  title=string("IMAGES/corners/",sim,model,"Venus-",sigma,"secs",nyear,"yrs.png")
+  title=string("IMAGES/corners/",obs,model,"Venus-",sigma,"secs",nyear,"yrs.png")
   corner(m1,ec1,es1,p1,truem1,trueec1,truees1,truep1,nbins,lim,label)
   savefig(title)
   clf()
@@ -524,7 +524,7 @@ function corner_plot(sigma,nyear,sim,model,nbins,include_moon::Bool=false)
   truep2=365.2564-offset #365.256355
   lim=0.0064,0.00652
   label=L"Per $- 365.25$ [days]"
-  title=string("IMAGES/corners/",sim,model,"Earth-",sigma,"secs",nyear,"yrs.png")
+  title=string("IMAGES/corners/",obs,model,"Earth-",sigma,"secs",nyear,"yrs.png")
   corner(m2,ec2,es2,p2,truem2,trueec2,truees2,truep2,nbins,lim,label)
   savefig(title)
   clf()
@@ -539,7 +539,7 @@ function corner_plot(sigma,nyear,sim,model,nbins,include_moon::Bool=false)
     truep3=686.9795859
     lim=minimum(p3),maximum(p3)
     label="Per [days]"
-    title=string("IMAGES/corners/",sim,model,"Mars-",sigma,"secs",nyear,"yrs.png")
+    title=string("IMAGES/corners/",obs,model,"Mars-",sigma,"secs",nyear,"yrs.png")
     corner(m3,ec3,es3,p3,truem3,trueec3,truees3,truep3,nbins,lim,label)
     savefig(title)
     clf()
@@ -553,7 +553,7 @@ function corner_plot(sigma,nyear,sim,model,nbins,include_moon::Bool=false)
     truep4=4332.82012875
     lim=minimum(p4),maximum(p4)
     label="Per [days]"
-    title=string("IMAGES/corners/",sim,model,"Jupiter-",sigma,"secs",nyear,"yrs.png")
+    title=string("IMAGES/corners/",obs,model,"Jupiter-",sigma,"secs",nyear,"yrs.png")
     corner(m4,ec4,es4,p4,truem4,trueec4,truees4,truep4,nbins,lim,label)
     savefig(title)
     clf()
@@ -568,7 +568,7 @@ function corner_plot(sigma,nyear,sim,model,nbins,include_moon::Bool=false)
     truep3=4332.82012875
     lim=minimum(p3),maximum(p3)
     label="Per [days]"
-    title=string("IMAGES/corners/",sim,model,"Jupiter-",sigma,"secs",nyear,"yrs.png")
+    title=string("IMAGES/corners/",obs,model,"Jupiter-",sigma,"secs",nyear,"yrs.png")
     corner(m3,ec3,es3,p3,truem3,trueec3,truees3,truep3,nbins,lim,label)
     savefig(title)
     clf()
@@ -581,7 +581,7 @@ function corner_plot(sigma,nyear,sim,model,nbins,include_moon::Bool=false)
     truetmax=calc_tmax(CGS.AU,CGS.AMOON*CGS.AU,CGS.MEARTH,CGS.MMOON,365.256355) #0.0018
     truex2=0.01
     truex3=2.31586#.*57.2957795
-    title=string("IMAGES/corners/",sim,model,"Moon2-",sigma,"secs",nyear,"yrs.png")
+    title=string("IMAGES/corners/",obs,model,"Moon2-",sigma,"secs",nyear,"yrs.png")
     # corner(tmax,x3,truetmax,truex3,nbins)
     corner(x1,x2,x3,nbins)
     savefig(title)

@@ -120,6 +120,7 @@ function fit_planet4(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref:
       param3 = [init_param;param_tmp] #concatenate 2 planet model to 3 planet model params
       p3_cur = p3[j] #sets jupiter period to global value
       param1 = param3 .+ 100.0
+      niter=0
       while maximum(abs.(param1 .- param3)) > tol && niter < 20
         param1 = param3
         fit = curve_fit((tt0,param3) -> ttv_wrapper(tt0,nplanet,ntrans,[param3[1:10];10^param3[11];p3_cur;param3[12:end]],jmax,EM),tt0,tt,weight,param3)
@@ -173,6 +174,7 @@ function fit_planet4(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref:
       param4 = [best_p3[1:10];param_tmp;best_p3[11:15]]   
       p4_cur = p4[j]
       param1 = param4 .+ 100.0
+      niter=0
       while maximum(abs.(param1 .- param4)) > tol #&& niter < 20
         param1 = param4
         fit = curve_fit((tt0,param4) -> ttv_wrapper(tt0,nplanet,ntrans,[param4[1:10];10^param4[11];p4_cur;param4[12:end]],jmax,EM),tt0,tt,weight,param4)
