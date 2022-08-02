@@ -1,8 +1,8 @@
 using PyPlot,JLD2,Statistics,LsqFit
-import Main.TTVFaster.ttv_wrapper
-# include("CGS.jl")
+# import Main.TTVFaster.ttv_wrapper
+include("CGS.jl")
 # Print results from MCMC run after burn-in
-function print_vals(sigma::Float64,nyear::Float64,sim::String,model::String)
+function print_vals(sigma::Real,nyear::Real,sim::String,model::String,nplanet::Int64)
     mcfile=string("MCMC/",model,"_fit",sigma,"s",nyear,"yrs.jld2")
     if String(sim)=="EMB" && isfile(string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
         mcfile=string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
@@ -19,23 +19,35 @@ function print_vals(sigma::Float64,nyear::Float64,sim::String,model::String)
     pname=["mu_1","P_1","t01","ecos1","esin1",
           "mu_2","P_2","t02","ecos2","esin2",
           "mu_3","P_3","t03","ecos3","esin3", 
-            "tcosϕ","tsinϕ","Δϕ","σ_sys2"]
-    if model=="p4"
-        pname=[pname[1:15];"mu_4";"P_4";"t04";"ecos4";"esin4";pname[end]]
+          "mu_4","P_4","t04","ecos4","esin4", 
+          "mu_5","P_5","t05","ecos5","esin5"]
+    if model=="p3"
+        pname=pname[1:15]
+    elseif model=="p4"
+        pname=pname[1:20]
+    elseif model=="p5"
+        pname=pname[1:25]
     end
+    # if n
+    #   moon_names=["tcosϕ","tsinϕ","Δϕ"]
+    #   append!(pname,moon_name)
+    # end
     println("           Fitted posterior params from ",mcfile)
-    for i=1:length(param)
+    for i=1:length(param)-1
         println(pname[i]," : ",mean(vec(par_mcmc[:,iburn:nsteps,i]))," ± ",std(vec(par_mcmc[:,iburn:nsteps,i]))) # writedlm(results,pbest_global)
     end
-        println(pname[end]," : ",mean(vec(par_mcmc[:,iburn:nsteps,end]))," ± ",std(vec(par_mcmc[:,iburn:nsteps,end])))
+        println("σ_sys2 : ",mean(vec(par_mcmc[:,iburn:nsteps,end]))," ± ",std(vec(par_mcmc[:,iburn:nsteps,end])))
         println("Derived Parameters")
     for i=1:length(param)
         if i%5 == 0
             println(pname[i-4]," * M_star: ",mean(vec(par_mcmc[:,iburn:nsteps,i-4])).* CGS.MSUN/CGS.MEARTH," ± ",std(vec(par_mcmc[:,iburn:nsteps,i-4])).* CGS.MSUN/CGS.MEARTH)
             println("ecc : ",mean(sqrt.(vec(par_mcmc[:,iburn:nsteps,i]).^2 .+ vec(par_mcmc[:,iburn:nsteps,i-1]).^2))," ± ",std(sqrt.(vec(par_mcmc[:,iburn:nsteps,i]).^2 .+ vec(par_mcmc[:,iburn:nsteps,i-1]).^2)))
+            println(pname[i-3]," * days: ",mean(vec(par_mcmc[:,iburn:nsteps,i-3]))," ± ",std(vec(par_mcmc[:,iburn:nsteps,i-3])))
         end     
     end
-    println(" lprob: ",mean(vec(lprob_mcmc[iburn:nsteps]))," ± ",std(vec(lprob_mcmc[iburn:nsteps])))
+    # println(" lprob: ",mean(vec(lprob_mcmc[iburn:nsteps]))," ± ",std(vec(lprob_mcmc[iburn:nsteps])))
+    sigtot=[sqrt((sqrt(mean(vec(par_mcmc[:,iburn:nsteps,end]))).*3600*24)^2 + sigma^2) ]
+    println("σ_tot : ",sigtot)
 end
 # Print results from likelihood fit
 function print_fits(sigma::Float64,nyear::Float64,sim::String,model::String,no_moon::Bool=true)
@@ -91,14 +103,14 @@ function print_fits(sigma::Float64,nyear::Float64,sim::String,model::String,no_m
     println(" lprob: ",lprob)
 end
 # Retrieve MCMC results after burn-in
-function get_vals(sigma::Float64,nyear::Float64,sim::String,model::String)
-    mcfile=string("MCMC/",model,"_fit",sigma,"s",nyear,"yrs.jld2")
-    if String(sim)=="EMB" && isfile(string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
+function get_vals(sigma::Real,nyear::Real,obs::String,model::String)
+    # mcfile=string("MCMC/",model,"_fit",sigma,"s",nyear,"yrs.jld2")
+    if obs=="fromEMB" && isfile(string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
         mcfile=string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
-    elseif isfile(string("MCMC/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
+    elseif obs=="fromEV" && isfile(string("MCMC/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
         mcfile=string("MCMC/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
     else
-        return println("MCMC file for ",sim," with ",model," model at ",sigma," secs and ",nyear," yrs doesn't exist!!!!")
+        return println("MCMC file for ",obs," with ",model," model at ",sigma," secs and ",nyear," yrs doesn't exist!!!!")
     end
     jldmc=jldopen(String(mcfile),"r")
     par_mcmc,lprob_mcmc=jldmc["par_mcmc"],jldmc["lprob_mcmc"]
@@ -113,5 +125,13 @@ function get_vals(sigma::Float64,nyear::Float64,sim::String,model::String)
     ecc=[mean(sqrt.(vec(par_mcmc[:,iburn:nsteps,i]).^2 .+ vec(par_mcmc[:,iburn:nsteps,i-1]).^2)) for i in 1:length(param) if i%5==0]
     ecc_errs=[std(sqrt.(vec(par_mcmc[:,iburn:nsteps,i]).^2 .+ vec(par_mcmc[:,iburn:nsteps,i-1]).^2)) for i in 1:length(param) if i%5==0]
     sigtot=[sqrt((sqrt(mean(vec(par_mcmc[:,iburn:nsteps,end]))).*3600*24)^2 + sigma^2) ]
-    return masses, mass_errs#, periods, per_errs, sigtot
+    println("Retrieved masses.")
+    println(masses," +/- ",mass_errs)
+    println("Retrieved periods.")
+    println(periods," +/- ",per_errs)
+    println("Retrieved eccentricities.")
+    println(ecc," +/- ",ecc_errs)
+    println("Retrieved σ_tot.")
+    println(sigtot)
+    return masses, mass_errs, periods, per_errs, sigtot
 end

@@ -27,14 +27,16 @@ and the delta the fractional part (step through day).
 Note: For planets without moons, Mercury and Venus, 
 the barycenter location coincides with the body center of mass. 
 NaifID: 
-      2           'VENUS BARYCENTER'
-      3           'EARTH MOON BARYCENTER'
-      399         'EARTH'
+    10          'SUN'
+    0           'SOLAR SYSTEM BARYCENTER'
+    2           'VENUS BARYCENTER'
+    3           'EARTH MOON BARYCENTER'
+    399         'EARTH'
 
 1). Simulate transit times from JPLEphemeris. Add noise option to data.
 
-sim_times(jd1::Float64,nyear::Float64,
-  addnoise::Bool=false,sigma::Float64=0.0,EMB::Bool=true,seed::Int=42)
+sim_times(jd1::Float64,sigma::Real,nyear::Real,obs::String,seed::Int=42)
+
 
 2a). Carry out a linear fit to the transit times. 
 
@@ -134,7 +136,7 @@ Q). Wrong signs for evectors? <-- not first time this has been found
 ##########################  Project Tasks ##########################
 Make likelihood profiles continuous [ ]
 10). Condense results to 1 equation fit (ex. how much of X to get Y uncertainty). [  ]
-9). See if we can detect Mars [ x ] or Saturn. [  ]
+9). See if we can detect Mars [ x ] or Saturn. [ x ]
 8). See which scenario best fits simulated data [ ]
 7). Add M_p > 0 prior to MCMC [ x ]
 7). Figure out whether the Earth-Moon barycenter offset causes
