@@ -1,7 +1,7 @@
 function show_args(args)
 @show args
 end
-using Profile
+using Profile,PyPlot
 include("sim_times.jl")
 # include("fit_planet3.jl")
 # include("fit_planet4.jl")

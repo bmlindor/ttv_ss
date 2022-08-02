@@ -5,19 +5,19 @@ end
 import Main.TTVFaster.ttv_wrapper
 import Main.TTVFaster.chisquare
 include("regress.jl")
-using DelimitedFiles,JLD2,Optim,LsqFit,Statistics
+using DelimitedFiles,JLD2,LsqFit,Statistics
 
 function fit_planet3(filename::String,
   jd1::Float64,sigma::Float64,nyear::Float64,
   p3in::Float64,p3out::Float64,np3::Int,nphase::Int,
   addnoise::Bool=false,EM::Bool=true)
-
-  jd2 = nyear*365.25 + jd1
+  tref=2430000
+  jd2 = nyear*365.25 + (jd1 -tref)
   data1 = readdlm(filename,Float64)
   nt1 = sum(data1[:,1] .== 1.0)
   nt2 = sum(data1[:,1] .== 2.0)
-  tt1 = vec(data1[1:nt1,3])
-  tt2 = vec(data1[nt1+1:nt1+nt2,3])
+  tt1 = vec(data1[1:nt1,3]) .- tref
+  tt2 = vec(data1[nt1+1:nt1+nt2,3]).- tref
 
   if addnoise 
     sigtt1 = data1[1:nt1,4]
@@ -34,7 +34,8 @@ function fit_planet3(filename::String,
     x[1,1:nt] .= 1.0
     x[2,1] = 0.0 
     for i=2:nt
-      x[2,i] = x[2,i-1] + round((tt[i]-tt[i-1])/period) 
+      #x[2,i] = x[2,i-1] + round((tt[i]-tt[i-1])/period)
+	x[2,i] = round((tt[i]-tt[1])/period) 
     end
     coeff,covcoeff = regress(x,tt,sigtt)
     # println(tt,sigtt,std(sigtt))
@@ -112,9 +113,10 @@ function fit_planet3(filename::String,
   lprob_best = -1e100 #global best fit
   p3best = zeros(nparam)
   # Shifting to simulated observation range to search over period grid
-  offset = (jd1 + jd2)/2 
+  offset = ((jd1 -tref) + jd2)/2 
+	niter=0
   for j=1:np3
-    phase = p3[j]*range(0,stop=1,length=nphase) .+ offset 
+    phase = p3[j].*range(0,stop=1,length=nphase)  #.+ offset
     lprob_phase = zeros(nphase)
     lprob_p3[j] = -1e100
     for i=1:nphase #loops over jupiter phases
@@ -126,10 +128,12 @@ function fit_planet3(filename::String,
       # fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,true,p3_cur),tt0,tt,weight,param3) 
       # param3 = fit.param
       param1 = param3 .+ 100.0
-      while maximum(abs.(param1 .- param3)) > 1e-5
+			niter=0
+      while maximum(abs.(param1 .- param3)) > 1e-5 && niter < 21
         param1 = param3
-        fit = curve_fit((tt0,param3) -> ttv_wrapper(tt0,nplanet,ntrans,[param3[1:10];10^param3[11];p3_cur;param3[12:end]],jmax,EM),tt0,tt,weight,param3)
+        fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,[params[1:10];10^params[11];p3_cur;params[12:end]],jmax,EM),tt0,tt,weight,param3)
         param3 = fit.param
+        niter+=1
         # println("init_param: ",param3)
         # println("New Initial chi-square: ",chisquare(tt0,nplanet,ntrans,param3,tt,sigtt,true,p3_cur))
       end
@@ -139,14 +143,18 @@ function fit_planet3(filename::String,
         lprob_best = lprob_phase[i]
         p3best = [fit.param[1:10];10^fit.param[11];p3_cur;fit.param[12:14]]
       end
-      if lprob_phase[i] > lprob_p3[j] # checks best fit over all phases of jupiter for this particular period
+      if lprob_phase[i] > lprob_p3[j] # checks best fit over all phases of jupiter for this particular periods
         lprob_p3[j] = lprob_phase[i]
         param_p3[1:nparam,j] =  [fit.param[1:10];10^fit.param[11];p3_cur;fit.param[12:14]]
       end
+			#if j>1 && (lprob_p3[j] - lprob_p3[j-1]) > 5
+				lprob_p3[j] = lprob_p3[j-1]
+				param_p3[1:nparam,j] =  [fit.param[1:10];10^fit.param[11];p3_cur;fit.param[12:14]]
+			end
     end
     println("Period: ",p3[j]," log Prob: ",lprob_p3[j]," Param: ",vec(param_p3[1:nparam,j]))
   end
-  println("Finished 3-planet fit w/ fixed period: ",p3best)
+  println("Finished 3-planet fit w/ fixed period: ",p3best," ",niter)
 
   #ttmodel=ttv_wrapper3(tt0,param3)
   #res = optimize(chisquare3,param3,method = :l_bfgs,iterations = 21)
@@ -170,9 +178,24 @@ function fit_planet3(filename::String,
   #   for i=1:nparam
   #     println(io,pname[i],": ",pbest_global[i]) # writedlm(results,pbest_global)
   #   end
-  fitfile = string("FITS/fromEMB/p3_fit",sigma,"s",nyear,"yrs.jld2")
-  @save fitfile p3 lprob_p3 best_p3 lprob_best_p3 p3best ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase
-  return lprob_best_p3,best_p3
+  #fitfile = string("FITS/fromEMB/p3_fit",sigma,"s",nyear,"yrs.jld2")
+  #@save fitfile p3 lprob_p3 best_p3 lprob_best_p3 p3best ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase
+	function prob(xgrid,lprob,truex,nbins,color,text)
+                 figure(figsize=(6,6))
+                 subplots_adjust(hspace=0.05,wspace=0.05)
+                 ax1=gca()
+                 lim=minimum(xgrid),maximum(xgrid)
+                      
+                       ax1.plot(xgrid,lprob,color=color) 
+                       ax1.axvline(truex,linestyle="--",color="black",label=string(truex))
+                       ax1.set_xlabel("Planet Period Search Grid [years]")
+                       ax1.text(round(truex),1,text)
+                       ax1.set_ylabel("Probability")
+                       ax1.minorticks_on()
+                       ax1.tick_params(which="both",direction="in")
+  end
+	prob(p3,lprob_p3,11.86*365.25,50,"firebrick","Jupiter")
+  return p3,lprob_p3
 end
 # If 3-planet fit already exists, can do moon search
 function fit_moon(jd1,sigma,nyear,dpin,dpout,ndp)
