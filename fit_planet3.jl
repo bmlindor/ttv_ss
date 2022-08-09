@@ -126,7 +126,7 @@ function fit_planet3(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref:
       niter=0
       while maximum(abs.(param1 .- param3)) > tol && niter < 20
         param1 = param3
-        fit = curve_fit((tt0,param3) -> ttv_wrapper(tt0,nplanet,ntrans,[param3[1:10];10^param3[11];p3_cur;param3[12:end]],jmax,true),tt0,tt,weight,param3)
+        fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,[params[1:10];10^params[11];p3_cur;params[12:end]],jmax,true),tt0,tt,weight,param3)
         param3 = fit.param
         niter+=1
         # println("init_param: ",param3)
@@ -221,7 +221,7 @@ function fit_planet3(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
       niter=0
       while maximum(abs.(param1 .- param3)) > tol && niter < 20
         param1 = param3
-        fit = curve_fit((tt0,param3) -> ttv_wrapper(tt0,nplanet,ntrans,[param3[1:10];10^param3[11];p3_cur;param3[12:end]],jmax,true),tt0,tt,weight,param3)
+        fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,[params[1:10];10^params[11];p3_cur;params[12:end]],jmax,true),tt0,tt,weight,param3)
         param3 = fit.param
         niter+=1
         # println("init_param: ",param3)

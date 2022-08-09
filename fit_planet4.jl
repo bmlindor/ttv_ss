@@ -123,7 +123,7 @@ function fit_planet4(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref:
       niter=0
       while maximum(abs.(param1 .- param3)) > tol && niter < 20
         param1 = param3
-        fit = curve_fit((tt0,param3) -> ttv_wrapper(tt0,nplanet,ntrans,[param3[1:10];10^param3[11];p3_cur;param3[12:end]],jmax,EM),tt0,tt,weight,param3)
+        fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,[params[1:10];10^params[11];p3_cur;params[12:end]],jmax,EM),tt0,tt,weight,param3)
         param3 = fit.param
         niter+=1
         # println("init_param: ",param3)
@@ -177,7 +177,7 @@ function fit_planet4(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref:
       niter=0
       while maximum(abs.(param1 .- param4)) > tol #&& niter < 20
         param1 = param4
-        fit = curve_fit((tt0,param4) -> ttv_wrapper(tt0,nplanet,ntrans,[param4[1:10];10^param4[11];p4_cur;param4[12:end]],jmax,EM),tt0,tt,weight,param4)
+        fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,[params[1:10];10^params[11];p4_cur;params[12:end]],jmax,EM),tt0,tt,weight,param4)
         param4 = fit.param 
         niter+=1
         # println("init_param: ",param4)
@@ -257,7 +257,7 @@ function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
       niter=0
       while maximum(abs.(param1 .- param4)) > tol && niter < 20
         param1 = param4
-        fit = curve_fit((tt0,param4) -> ttv_wrapper(tt0,nplanet,ntrans,[param4[1:10];10^param4[11];p4_cur;param4[12:end]],jmax,true),tt0,tt,weight,param4)
+        fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,[params[1:10];10^params[11];p4_cur;params[12:end]],jmax,true),tt0,tt,weight,param4)
         param4 = fit.param 
         niter+=1
       end
@@ -333,7 +333,7 @@ function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
       while maximum(abs.(param1 .- param4)) > tol && niter <20
         param1 = param4
         # println("param1 ", param1)
-        fit = curve_fit((tt0,param4) -> ttv_wrapper(tt0,nplanet,ntrans,[param4[1:10];10^param4[11];p4_cur;param4[12:end]],jmax,false),tt0,tt,weight,param4)
+        fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,[params[1:10];10^params[11];p4_cur;params[12:end]],jmax,false),tt0,tt,weight,param4)
         param4 = fit.param 
         niter+=1
         # println(p4_cur)
