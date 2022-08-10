@@ -16,7 +16,7 @@ tref = 2430000
 tol = 1e-5
 mratio = 1e-3
 per_guess = 11.86*365.25
-per_in, per_out, nper, nphase = 5*365.25, *365.25, 200, 36
+per_in, per_out, nper, nphase = 5*365.25, 15*365.25, 200, 36
 jmax = 5
 planet="Jupiter"
 color="firebrick"
@@ -24,7 +24,7 @@ datafile="INPUTS/tt_30.0sEMB30.0yrs.txt"
 
 function fit_mysteryplanet() #fit_mysteryplanet(datafile::String,jd1::Float64,tref::Real,tol::Real,obs::String)#::Int,mratio::Float64,per_guess::Float64,per_in::Float64,per_out::Float64,nper::Int,nphase::Int,
   #outfile = string("FITS/",obs,"/mystery_",planet,"_fit",jd1,"JED.jld2")
-  outfile = string("FITS/mystery_",planet,"_fit",jd1,"JED.txt")
+  outfile = string("FITS/mystery_",planet,"_fit",jd1,".txt")
   @assert isfile(datafile)
   println(datafile," loaded.")
   data1 = readdlm(datafile,Float64)

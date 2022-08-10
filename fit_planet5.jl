@@ -267,9 +267,13 @@ function fit_planet5(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
   if obs=="fromEMB"
     infile = string("FITS/fromEMB/p4_fit",sigma,"s",nyear,"yrs.jld2")
     outfile = string("FITS/fromEMB/p5_fit",sigma,"s",nyear,"yrs.jld2")
+      results = string("results/fromEMB/p5_fit",sigma,"s",nyear,"yrs.txt")
+    grid = string("grid/fromEMB/p5_grid",sigma,"s",nyear,"yrs.txt")
   elseif obs=="fromEV"
     infile = string("FITS/p4_fit",sigma,"s",nyear,"yrs.jld2")
     outfile = string("FITS/p5_fit",sigma,"s",nyear,"yrs.jld2")
+    results = string("results/p5_fit",sigma,"s",nyear,"yrs.txt")
+    grid = string("grid/p5_grid",sigma,"s",nyear,"yrs.txt")
   end
   @assert isfile(infile)
   m = jldopen(String(infile),"r")
@@ -326,15 +330,36 @@ function fit_planet5(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
     end
     # println("Period: ",p5[j]," log Prob: ",lprob_p5[j]," Param: ",vec(param_p5[1:nparam,j]))
   end
-  println("Finished 5-planet fit w/ fixed period: ",p5best)
-
+  println("Finished 5-planet fit w/ fixed period: ",p5best," in ",niter," iterations")
+  writedlm(grid,zip(p5,lprob_p5))
   fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,true),tt0,tt,weight,p5best)
+  cov=estimate_covar(fit)
+  err=[sqrt(cov[i,j]) for i=1:nparam, j=1:nparam if i==j ]
   best_p5 = fit.param
   ttmodel = ttv_wrapper(tt0,nplanet,ntrans,best_p5,jmax,true)
   lprob_best_p5= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
-  println("Finished global 5-planet fit.")
+  # println("Finished global 5-planet fit.")
   println("New 5-planet chi-square: ",chisquare(tt0,nplanet,ntrans,best_p5,tt,sigtt,jmax,true))
   println("Maximum: ",lprob_best_p5," Param: ",best_p5)
-  @save outfile p4 lprob_p4 best_p4 lprob_best_p4 p5 lprob_p5 best_p5 lprob_best_p5 ntrans nplanet tt0 tt ttmodel sigtt 
-  return best_p5   
+
+  pname=["mu_1","P_1","t01","ecos1","esin1",
+      "mu_2","P_2","t02","ecos2","esin2",
+      "mu_3","P_3","t03","ecos3","esin3",
+      "mu_4","P_4","t04","ecos4","esin4",
+      "mu_5","P_5","t05","ecos5","esin5"]
+  mean_mp=[best_p5[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
+  mp_errs=[err[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
+  mean_ecc=[sqrt(best_p5[(iplanet-1)*5+4]^2 + best_p5[(iplanet-1)*5+4]^2) for iplanet=1:nplanet]
+  ecc_errs=[sqrt(err[(iplanet-1)*5+4]^2 + err[(iplanet-1)*5+4]^2) for iplanet=1:nplanet]
+
+  open(results,"w") do io
+    println(io,"Global Fit Results. Per=[",p5in," - ",p5out,", length=",np5,"]")
+    for i=1:nparam
+      println(io,pname[i],": ",best_p5[i]," ± ",err[i])
+    end
+    println(io,"Retrieved Earth masses: ",mean_mp," ± ",mp_errs)
+    println(io,"Retrieved eccentricity:",mean_ecc," ± ",ecc_errs)
+  end
+  @save outfile p4 lprob_p4 best_p4 lprob_best_p4 p5 lprob_p5 best_p5 lprob_best_p5 ntrans nplanet tt0 tt ttmodel sigtt nphase
+  return best_p5,lprob_best_p5   
 end

@@ -105,9 +105,11 @@ function fit_planet2(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,o
   if obs=="fromEMB"
     datafile = string("INPUTS/tt_",sigma,"sEMB",nyear,"yrs.txt")
     outfile = string("FITS/fromEMB/p2_fit",sigma,"s",nyear,"yrs.jld2")
+    results = string("OUTPUTS/fromEMB/p2_fit",sigma,"s",nyear,"yrs.txt")
   elseif obs=="fromEV"
     datafile = string("INPUTS/tt_",sigma,"snoEMB",nyear,"yrs.txt")
     outfile = string("FITS/p2_fit",sigma,"s",nyear,"yrs.jld2")
+    results = string("OUTPUTS/p2_fit",sigma,"s",nyear,"yrs.txt")
   end
   @assert isfile(datafile)
   println(datafile," loaded.")
@@ -181,17 +183,33 @@ function fit_planet2(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,o
     # println("init_param: ",init_param)
     # println("New Initial chi-square: ",chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt))
   end
-  println("New initial 2-planet fit: ",init_param)
+  println("New initial 2-planet fit: ",init_param," in ",niter," iterations.")
 
   fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,true),tt0,tt,weight,init_param)
+  cov=estimate_covar(fit)
+  err=[sqrt(cov[i,j]) for i=1:nparam, j=1:nparam if i==j ]
   best_p2 = fit.param ##### is this the global p2 fit???
   ttmodel = ttv_wrapper(tt0,nplanet,ntrans,best_p2,jmax,true)
   lprob_best_p2= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
-  chi2=chisquare(tt0,nplanet,ntrans,best_p2,tt,sigtt,jmax,true)
-  println("Finished 2-planet fit in ",niter," iterations.")
-  println("New 2-planet chi-square: ",chi2)
-  println("Param: ",best_p2)
-  # println("Maximum: ",lprob_best_p2," Param: ",best_p2)
-  @save outfile chi2 best_p2 lprob_best_p2 ntrans nplanet tt0 tt ttmodel sigtt
-  return best_p2
+  # println("Finished 2-planet fit") 
+  println("New 2-planet chi-square: ",chisquare(tt0,nplanet,ntrans,best_p2,tt,sigtt,jmax,true))
+  println("Maximum: ",lprob_best_p2," Param: ",best_p2)
+
+  pname=["mu_1","P_1","t01","ecos1","esin1",
+          "mu_2","P_2","t02","ecos2","esin2"]
+  mean_mp=[best_per[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
+  mp_errs=[err[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
+  mean_ecc=[sqrt(best_per[(iplanet-1)*5+4]^2 + best_per[(iplanet-1)*5+4]^2) for iplanet=1:nplanet]
+  ecc_errs=[sqrt(err[(iplanet-1)*5+4]^2 + err[(iplanet-1)*5+4]^2) for iplanet=1:nplanet]
+
+  open(results,"w") do io
+    println(io,"Global Fit Results. Per=[",per_in," - ",per_out,", length=",nper,"]")
+    for i=1:nparam
+      println(io,pname[i],": ",best_per[i]," ± ",err[i])
+    end
+    println(io,"Retrieved Earth masses: ",mean_mp," ± ",mp_errs)
+    println(io,"Retrieved eccentricity:",mean_ecc," ± ",ecc_errs)
+  end
+  # @save outfile chi2 best_p2 lprob_best_p2 ntrans nplanet tt0 tt ttmodel sigtt
+  return best_p2,lprob_best_p2
 end

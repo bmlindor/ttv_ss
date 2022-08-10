@@ -3,6 +3,7 @@
 deprecated/
 NbodyGradient/
 #OUTPUTS/
+MCMC/
 *.bsp
 */*.bsp
 *.jld2

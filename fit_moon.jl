@@ -11,6 +11,8 @@ using DelimitedFiles,JLD2,Optim,LsqFit,Statistics
 function fit_moon(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,dpin::Float64,dpout::Float64,ndp::Int,nplanets::Real)
   infile = string("FITS/p",nplanets,"_fit",sigma,"s",nyear,"yrs.jld2")
   outfile = string("FITS/p",nplanets,"moon_fit",sigma,"s",nyear,"yrs.jld2")
+  results = string("results/p",nplanets,"_fit",sigma,"s",nyear,"yrs.txt")
+  grid = string("grid/p",nplanets,"_grid",sigma,"s",nyear,"yrs.txt")
   @assert isfile(infile)
   m = jldopen(String(infile),"r")
   tt0,tt,ttmodel,sigtt=m["tt0"],m["tt"],m["ttmodel"],m["sigtt"]
@@ -60,16 +62,35 @@ function fit_moon(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,dpin
     # println("deltaphi: ",deltaphi[j]," log Prob: ",lprob_dp[j]," Param: ",vec(param_dp[1:nparam,j]))
   end
   println("Finished lunar search: ",dpbest," in ",niter," iterations")
-
+  writedlm(grid,zip(deltaphi,lprob_dp))
   fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,false),tt0,tt,weight,dpbest)
+  cov=estimate_covar(fit)
+  err=[sqrt(cov[i,j]) for i=1:nparam, j=1:nparam if i==j ]
   best_dp = fit.param
   ttmodel = ttv_wrapper(tt0,nplanet,ntrans,best_dp,jmax,false)
   lprob_best_dp = (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
-  println("Finished global moon fit.")
+  # println("Finished global moon fit.")
   println("Lunar chi-square: ",chisquare(tt0,nplanet,ntrans,best_dp,tt,sigtt,jmax,false))
   println("Maximum: ",lprob_best_dp," Param: ",best_dp)
+
+  pname=["mu_1","P_1","t01","ecos1","esin1",
+        "mu_2","P_2","t02","ecos2","esin2",
+        "mu_3","P_3","t03","ecos3","esin3"]
+  mean_mp=[best_dp[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
+  mp_errs=[err[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
+  mean_ecc=[sqrt(best_dp[(iplanet-1)*5+4]^2 + best_dp[(iplanet-1)*5+4]^2) for iplanet=1:nplanet]
+  ecc_errs=[sqrt(err[(iplanet-1)*5+4]^2 + err[(iplanet-1)*5+4]^2) for iplanet=1:nplanet]
+
+  open(results,"w") do io
+    println(io,"Global Fit Results. Δϕ=[",dpin," - ",dpout,", length=",ndp,"]")
+    for i=1:nparam
+      println(io,pname[i],": ",best_dp[i]," ± ",err[i])
+    end
+    println(io,"Retrieved Earth masses: ",mean_mp," ± ",mp_errs)
+    println(io,"Retrieved eccentricity:",mean_ecc," ± ",ecc_errs)
+  end
   @save outfile deltaphi lprob_dp best_dp lprob_best_dp ntrans nplanet tt0 tt ttmodel sigtt
-  return best_dp
+  return best_dp,lprob_best_dp
 end
 
 function fit_wide(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p3in::Float64,p3out::Float64,np3::Int,nphase::Int,dpin::Float64,dpout::Float64,ndp::Int,p4in::Float64,p4out::Float64,np4::Int,obs::String)
