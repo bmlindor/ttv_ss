@@ -5,7 +5,7 @@ NbodyGradient/
 #OUTPUTS/
 MCMC/
 *.bsp
-*/*.bsp
+# */*.bsp
 *.jld2
 */*.jld2
 *.pdf
