@@ -1,8 +1,8 @@
 # Julia v1.1
 using CALCEPH 
 using DelimitedFiles,JLD2
-using Statistics,DataFitting,Random
-using PyPlot,Unitful,UnitfulAstro,LinearAlgebra
+using Statistics,Random
+using PyPlot,LinearAlgebra
 if !@isdefined(CGS)
   include("CGS.jl")
   using Main.CGS

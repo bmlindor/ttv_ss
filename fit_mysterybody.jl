@@ -6,6 +6,7 @@ end
 import Main.TTVFaster.ttv_wrapper
 import Main.TTVFaster.chisquare
 include("regress.jl")
+include("misc.jl")
 include("CGS.jl")
 include("plot_likelihood.jl")
 using DelimitedFiles,JLD2,LsqFit,Statistics,Profile,PyPlot
@@ -14,12 +15,11 @@ using DelimitedFiles,JLD2,LsqFit,Statistics,Profile,PyPlot
 jd1=2.4332825e6
 tref = 2430000
 tol = 1e-5
-mratio = 1e-3
-per_guess = 11.86*365.25
-per_in, per_out, nper, nphase = 5*365.25, 15*365.25, 200, 36
+mratio = 1e-7
+per_guess = 1.88*365.25
+per_in, per_out, nper, nphase = 1.6*365.25, 3*365.25, 10, 36
 jmax = 5
-planet="Jupiter"
-color="firebrick"
+planet="Mars"
 datafile="INPUTS/tt_30.0sEMB30.0yrs.txt"
 
 function fit_mysteryplanet() #fit_mysteryplanet(datafile::String,jd1::Float64,tref::Real,tol::Real,obs::String)#::Int,mratio::Float64,per_guess::Float64,per_in::Float64,per_out::Float64,nper::Int,nphase::Int,
@@ -31,6 +31,7 @@ function fit_mysteryplanet() #fit_mysteryplanet(datafile::String,jd1::Float64,tr
   tt = data1[:,3] .- tref
   sigtt = data1[:,4]
   nplanet_cond = 2
+	nparam=10
   ntrans = zeros(nplanet_cond)
   ntrans=[sum(data1[:,1] .== i) for i=1:nplanet_cond]
   Nobs = sum(ntrans)
@@ -43,17 +44,6 @@ function fit_mysteryplanet() #fit_mysteryplanet(datafile::String,jd1::Float64,tr
   p1est = median(tt1[2:end] - tt1[1:end-1])
   p2est = median(tt2[2:end] - tt2[1:end-1])
   # Okay,let's do a linear fit to the transit times:
-  function find_coeffs(tt,period,sigtt)
-    nt = length(tt)
-    x = zeros(2,nt)
-    x[1,1:nt] .= 1.0
-    x[2,1] = 0.0 
-    for i=2:nt
-      x[2,i] = round((tt[i]-tt[1])/period) 
-    end
-    coeff,covcoeff = regress(x,tt,sigtt)
-    return coeff,covcoeff
-  end
   coeff1,covcoeff1 = find_coeffs(tt1,p1est,sigtt1)
   coeff2,covcoeff2 = find_coeffs(tt2,p2est,sigtt2)
   # Best-fit linear transit times without TTVs:
@@ -65,10 +55,24 @@ function fit_mysteryplanet() #fit_mysteryplanet(datafile::String,jd1::Float64,tr
 
   # Okay,now let's do a 2-planet fit:
     # param_names = mass ratio,period,initial transit time,e*cos(omega),e*sin(omega)
-  function fit_cond_planets(tt0,tt,sigtt,jmax,nplanet)
-    init_param = [3e-6,per1,t01,0.01,0.01,
+	init_param_guess = [3e-6,per1,t01,0.01,0.01,
                   3e-6,per2,t02,0.01,0.01] 
-    println("Initial parameters: ",init_param)
+    # println("Initial parameters: ",init_param)
+	function global_fit(nplanet,ntrans,guess_params) 
+	  # Perform fit with best params, and calculate covariances for parameters: 
+  fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,true),tt0,tt,weight,guess_params)
+  covar=estimate_covar(fit)
+  err=[sqrt(covar[i,j]) for i=1:nparam, j=1:nparam if i==j ]
+  best_global = fit.param
+  ttmodel = ttv_wrapper(tt0,nplanet,ntrans,best_global,jmax,true)
+  lprob_best_global= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
+  # println("Finished global fit.")
+  println("New chi-square: ",chisquare(tt0,nplanet,ntrans,best_global,tt,sigtt,jmax,true))
+  println("Maximum: ",lprob_best_global,'\n'," Param: ",best_global)
+  return best_global,err
+end
+
+  function fit_cond_planets(tt0,tt,sigtt,jmax,nplanet,init_param)
     # Set up data structure to hold planet properties,passed to TTVFaster
     data=init_param
     p1=TTVFaster.Planet_plane_hk(data[1],data[2],data[3],data[4],data[ 5])
@@ -96,17 +100,10 @@ function fit_mysteryplanet() #fit_mysteryplanet(datafile::String,jd1::Float64,tr
     end
     println("New initial 2-planet fit: ",init_param," in ",niter," iterations.")
 
-    # fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,true),tt0,tt,weight,init_param)
-    best_p2 = init_param ##### is this the global p2 fit???
-    ttmodel = ttv_wrapper(tt0,nplanet,ntrans,init_param,jmax,true)
-    lprob_best_p2= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
-    chi2=chisquare(tt0,nplanet,ntrans,best_p2,tt,sigtt,jmax,true)
-    #println("Finished global 2-planet fit.")
-    #println("New 2-planet chi-square: ",chi2)
-    #println("Param: ",best_p2)
-    return best_p2
+		best_p2,err=global_fit(nplanet,ntrans,init_param)
+    return best_p2,err
   end
-  @time best_p2 = fit_cond_planets(tt0,tt,sigtt,jmax,nplanet_cond)
+  @time best_p2,err = fit_cond_planets(tt0,tt,sigtt,jmax,nplanet_cond,init_param_guess)
   # Now,let's add the 3rd planet:
   ntrans = [ntrans;2] #requires at least 2 transits for each planet (even if it doesnt transit)
   nplanet = nplanet_cond + 1
@@ -126,29 +123,29 @@ function fit_mysteryplanet() #fit_mysteryplanet(datafile::String,jd1::Float64,tr
     # Loop over planet 3 phases:
     for i=1:nphase 
      # per param_names: mass ratio,phase,ecosw,esinw
-      param_tmp = [10^(log10(mratio)),phase[i],0.01,0.01] 
+      param_tmp = [log10(mratio),phase[i],0.01,0.01] 
       param3 = [best_p2;param_tmp] #concatenate 2 planet model to 3 planet model params
       per_cur = per[j]
       param1 = param3 .+ 100.0
       niter=0
       while maximum(abs.(param1 .- param3)) > tol && niter < 20
         param1 = param3
-        fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,[params[1:11];per_cur;params[12:end]],jmax,true),tt0,tt,weight,param3)
+        fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,[params[1:10];10^params[11];per_cur;params[12:end]],jmax,true),tt0,tt,weight,param3)
         param3 = fit.param
         niter+=1
         # println("New Initial chi-square: ",chisquare(tt0,nplanet,ntrans,param3,tt,sigtt,true,per_cur))
       end
-      ttmodel = ttv_wrapper(tt0,nplanet,ntrans,[param3[1:11];per_cur;param3[12:end]],jmax,true)
+      ttmodel = ttv_wrapper(tt0,nplanet,ntrans,[param3[1:10];10^param3[11];per_cur;param3[12:end]],jmax,true)
       lprob_phase[i]= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
       if lprob_phase[i] > lprob_best 
       # Check that best fit for phase is better than global best minimum
         lprob_best = lprob_phase[i]
-        perbest = [fit.param[1:11];per_cur;fit.param[12:end]]
+        perbest = [fit.param[1:10];10^fit.param[11];per_cur;fit.param[12:end]]
       end
       if lprob_phase[i] > lprob_per[j] 
       # Check best fit over planet phases for this particular period
         lprob_per[j] = lprob_phase[i]
-        param_per[1:nparam,j] = [fit.param[1:11];per_cur;fit.param[12:end]]
+        param_per[1:nparam,j] = [fit.param[1:10];10^fit.param[11];per_cur;fit.param[12:end]]
       end
       # if j>1 && abs(lprob_p3[j] - lprob_p3[j-1])>5
       #   # Check that best fit for current period is close to that of previous period
@@ -161,18 +158,8 @@ function fit_mysteryplanet() #fit_mysteryplanet(datafile::String,jd1::Float64,tr
   println("Finished ",planet," planet fit w/ fixed period: ",perbest," in ",niter," iterations")
   
   writedlm(outfile,zip(per,lprob_per))
-
-  # Perform fit with best params, and calculate covariances for parameters:
-  fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,true),tt0,tt,weight,perbest)
-  cov=estimate_covar(fit)
-  err=[sqrt(cov[i,j]) for i=1:nparam, j=1:nparam if i==j ]
-  best_per = fit.param
-  ttmodel = ttv_wrapper(tt0,nplanet,ntrans,best_per,jmax,true)
-  lprob_best_per= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
-  # println("Finished global ",planet," planet fit.")
-  println("New chi-square: ",chisquare(tt0,nplanet,ntrans,best_per,tt,sigtt,jmax,true))
-  println("Maximum: ",lprob_best_per," Param: ",best_per)
-
+	
+	best_per,err=global_fit(nplanet,ntrans,perbest)
   # @save outfile per lprob_per best_per lprob_best_per ntrans nplanet tt0 tt ttmodel sigtt
   pname=["mu_1","P_1","t01","ecos1","esin1",
           "mu_2","P_2","t02","ecos2","esin2",
@@ -185,14 +172,14 @@ function fit_mysteryplanet() #fit_mysteryplanet(datafile::String,jd1::Float64,tr
   mean_ecc=[sqrt(best_per[(iplanet-1)*5+4]^2 + best_per[(iplanet-1)*5+4]^2) for iplanet=1:nplanet]
   ecc_errs=[sqrt(err[(iplanet-1)*5+4]^2 + err[(iplanet-1)*5+4]^2) for iplanet=1:nplanet]
 
-  results = string("OUTPUTS/",planet,"per_fitresults.txt")
+  results = string("results/mystery",planet,"_fitresults.txt")
   open(results,"w") do io
-  	println(io,"Global Fit Results. Per=[",per_in," - ",per_out,", length=",nper,"]")
+  	println(io,"Global Fit Results.",'\n',"per=[",per_in," - ",per_out,", length=",nper,"]")
   	for i=1:nparam
 			println(io,pname[i],": ",best_per[i]," ± ",err[i])
   	end
-  	println(io,"Retrieved Earth masses: ",mean_mp," ± ",mp_errs)
-  	println(io,"Retrieved eccentricities:",mean_ecc," ± ",ecc_errs)
+    println(io,"Retrieved Earth masses:",'\n',mean_mp,'\n'," ± ",mp_errs)
+    println(io,"Retrieved eccentricity:",'\n',mean_ecc,'\n'," ± ",ecc_errs)
   end
   fig=figure(figsize=(6,6))
   subplots_adjust(hspace=0.05,wspace=0.05)

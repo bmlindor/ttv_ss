@@ -5,6 +5,7 @@ end
 import Main.TTVFaster.ttv_wrapper
 import Main.TTVFaster.chisquare
 include("regress.jl")
+include("misc.jl")
 using DelimitedFiles,JLD2,Optim,LsqFit,Statistics
 
 function fit_planet4(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p3in::Float64,p3out::Float64,np3::Int,nphase::Int,p4in::Float64,p4out::Float64,np4::Int,obs::String)
@@ -279,7 +280,15 @@ function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
     # println("Period: ",p4[j]," log Prob: ",lprob_p4[j]," Param: ",vec(param_p4[1:nparam,j]))
   end
   println("Finished 4-planet fit w/ fixed period: ",p4best," in ",niter," iterations")
-  writedlm(grid,zip(p4,lprob_p4))
+	open(grid,"w") do io
+	  writedlm(io,zip(p4,lprob_p4))
+	end
+	fig=figure(figsize=(6,6))
+  subplots_adjust(hspace=0.05,wspace=0.05)
+	ax1=gca()
+	ax1.plot(p4 ./365.25,exp.(lprob_p4 .- maximum(lprob_p4)))
+  ax1.axvline( 1.88,linestyle="--",color="black") 
+	@show()
   fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,true),tt0,tt,weight,p4best)
   cov=estimate_covar(fit)
   err=[sqrt(cov[i,j]) for i=1:nparam, j=1:nparam if i==j ]
@@ -289,7 +298,7 @@ function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
   # println("Finished global 4-planet fit.")
   println("New 4-planet chi-square: ",chisquare(tt0,nplanet,ntrans,best_p4,tt,sigtt,jmax,true))
   println("Maximum: ",lprob_best_p4," Param: ",best_p4)
-
+	
   pname=["mu_1","P_1","t01","ecos1","esin1",
         "mu_2","P_2","t02","ecos2","esin2",
         "mu_3","P_3","t03","ecos3","esin3",
@@ -298,17 +307,19 @@ function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
   mp_errs=[err[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
   mean_ecc=[sqrt(best_p4[(iplanet-1)*5+4]^2 + best_p4[(iplanet-1)*5+4]^2) for iplanet=1:nplanet]
   ecc_errs=[sqrt(err[(iplanet-1)*5+4]^2 + err[(iplanet-1)*5+4]^2) for iplanet=1:nplanet]
-
+	
   open(results,"w") do io
-    println(io,"Global Fit Results. Per=[",p4in," - ",p4out,", length=",np4,"]")
+    println(io,"Global Fit Results.",'\n',"per 4 range=[",p4in," - ",p4out,", length=",np4,"]")
     for i=1:nparam
       println(io,pname[i],": ",best_p4[i]," ± ",err[i])
     end
-    println(io,"Retrieved Earth masses: ",mean_mp," ± ",mp_errs)
-    println(io,"Retrieved eccentricity:",mean_ecc," ± ",ecc_errs)
+    println(io,"Retrieved Earth masses:",'\n',mean_mp,'\n'," ± ",mp_errs)
+    println(io,"Retrieved eccentricity:",'\n',mean_ecc,'\n'," ± ",ecc_errs)
   end
-  @save outfile p3 lprob_p3 best_p3 lprob_best_p3 p4 lprob_p4 best_p4 lprob_best_p4 ntrans nplanet tt0 tt ttmodel sigtt nphase
-  return best_p4 
+	peak=second_peak(p4,lprob_p4)
+
+  #@save outfile p3 lprob_p3 best_p3 lprob_best_p3 p4 lprob_p4 best_p4 lprob_best_p4 ntrans nplanet tt0 tt ttmodel sigtt nphase
+  return peak 
 end
 # If 3-planet fit with moon already exists, can do 4-planet search
 function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p4in::Float64,p4out::Float64,np4::Int,nphase::Int)
@@ -377,7 +388,9 @@ function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
     # println("Period: ",p4[j]," log Prob: ",lprob_p4[j]," Param: ",vec(param_p4[1:nparam,j]))
   end
   println("Finished 4-planet fit w/ fixed period: ",p4best," in ",niter," iterations")
-  writedlm(grid,zip(p4,lprob_p4))
+	open(grid,"w") do io
+	  writedlm(io,zip(p4,lprob_p4))
+	end
   fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,false),tt0,tt,weight,p4best)
   cov=estimate_covar(fit)
   err=[sqrt(cov[i,j]) for i=1:nparam, j=1:nparam if i==j ]
@@ -398,12 +411,12 @@ function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
   ecc_errs=[sqrt(err[(iplanet-1)*5+4]^2 + err[(iplanet-1)*5+4]^2) for iplanet=1:nplanet]
 
   open(results,"w") do io
-    println(io,"Global Fit Results. Per=[",p4in," - ",p4out,", length=",np4,"]")
+    println(io,"Global Fit Results.",'\n',"per 4 range=[",p4in," - ",p4out,", length=",np4,"]")
     for i=1:nparam
       println(io,pname[i],": ",best_p4[i]," ± ",err[i])
     end
-    println(io,"Retrieved Earth masses: ",mean_mp," ± ",mp_errs)
-    println(io,"Retrieved eccentricity:",mean_ecc," ± ",ecc_errs)
+    println(io,"Retrieved Earth masses:",'\n',mean_mp,'\n'," ± ",mp_errs)
+    println(io,"Retrieved eccentricity:",'\n',mean_ecc,'\n'," ± ",ecc_errs)
   end
   @save outfile p3 lprob_p3 best_p3 dp lprob_dp best_dp lprob_best_p3 p4 lprob_p4 best_p4 lprob_best_p4 ntrans nplanet tt0 tt ttmodel sigtt nphase
   return best_p4,lprob_best_p4 

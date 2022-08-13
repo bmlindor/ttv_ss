@@ -2,7 +2,7 @@ function show_args(args)
 @show args
 end
 using Profile
-using DelimitedFiles,JLD2,Optim,LsqFit,Statistics
+using DelimitedFiles,JLD2,LsqFit,Statistics
 if !@isdefined(TTVFaster)
     include("TTVFaster/src/TTVFaster.jl")
   using Main.TTVFaster
@@ -117,15 +117,15 @@ function run_grid(label::String,obs::String)
 end
 function test_fit(label::String,obs::String)
 	nphase=36 #wide: 100,36,180 
-	p3in,p3out,np3=11.4*365.25,12.2*365.25,20
-	dpin,dpout,ndp=2.29,2.35,20
-	p4in,p4out,np4=1.6*365.25,2.2*365.25,20
-	p5in,p5out,np5=29.2*365.25,29.6*365.25,20
-	sim_times(jd1,sigma,nyear,obs)
-	@time fit_planet2(jd1,sigma,nyear,tref,tol,obs)
-	@time fit_planet3(jd1,sigma,nyear,tref,tol,p3in,p3out,np3,nphase,obs)
+	p3in,p3out,np3=11.4*365.25,12.2*365.25,10
+	dpin,dpout,ndp=2.29,2.35,10
+	p4in,p4out,np4=1.6*365.25,3*365.25,20
+	p5in,p5out,np5=28*365.25,30*365.25,10
+	#sim_times(jd1,sigma,nyear,obs)
+	#@time fit_planet2(jd1,sigma,nyear,tref,tol,obs)
+	#@time fit_planet3(jd1,sigma,nyear,tref,tol,p3in,p3out,np3,nphase,obs)
 	@time fit_planet4(jd1,sigma,nyear,tref,tol,p4in,p4out,np4,nphase,obs)
-	@time fit_planet5(jd1,sigma,nyear,tref,tol,p5in,p5out,np5,nphase,obs)
+	#@time fit_planet5(jd1,sigma,nyear,tref,tol,p5in,p5out,np5,nphase,obs)
 	if label=="Hppmpp" 
 		@time fit_moon(jd1,sigma,nyear,tref,tol,dpin,dpout,ndp,3)
 		@time fit_planet4(jd1,sigma,nyear,tref,tol,p4in,p4out,np4,nphase)

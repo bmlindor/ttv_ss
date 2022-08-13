@@ -331,7 +331,9 @@ function fit_planet5(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
     # println("Period: ",p5[j]," log Prob: ",lprob_p5[j]," Param: ",vec(param_p5[1:nparam,j]))
   end
   println("Finished 5-planet fit w/ fixed period: ",p5best," in ",niter," iterations")
-  writedlm(grid,zip(p5,lprob_p5))
+	open(grid,"w") do io
+	  writedlm(io,zip(p5,lprob_p5))
+	end
   fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,true),tt0,tt,weight,p5best)
   cov=estimate_covar(fit)
   err=[sqrt(cov[i,j]) for i=1:nparam, j=1:nparam if i==j ]
@@ -353,12 +355,12 @@ function fit_planet5(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
   ecc_errs=[sqrt(err[(iplanet-1)*5+4]^2 + err[(iplanet-1)*5+4]^2) for iplanet=1:nplanet]
 
   open(results,"w") do io
-    println(io,"Global Fit Results. Per=[",p5in," - ",p5out,", length=",np5,"]")
+    println(io,"Global Fit Results.",'\n',"per 5 range=[",p5in," - ",p5out,", length=",np5,"]")
     for i=1:nparam
       println(io,pname[i],": ",best_p5[i]," ± ",err[i])
     end
-    println(io,"Retrieved Earth masses: ",mean_mp," ± ",mp_errs)
-    println(io,"Retrieved eccentricity:",mean_ecc," ± ",ecc_errs)
+    println(io,"Retrieved Earth masses:",'\n',mean_mp,'\n'," ± ",mp_errs)
+    println(io,"Retrieved eccentricity:",'\n',mean_ecc,'\n'," ± ",ecc_errs)
   end
   @save outfile p4 lprob_p4 best_p4 lprob_best_p4 p5 lprob_p5 best_p5 lprob_best_p5 ntrans nplanet tt0 tt ttmodel sigtt nphase
   return best_p5,lprob_best_p5   

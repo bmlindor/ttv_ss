@@ -105,11 +105,11 @@ function fit_planet2(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,o
   if obs=="fromEMB"
     datafile = string("INPUTS/tt_",sigma,"sEMB",nyear,"yrs.txt")
     outfile = string("FITS/fromEMB/p2_fit",sigma,"s",nyear,"yrs.jld2")
-    results = string("OUTPUTS/fromEMB/p2_fit",sigma,"s",nyear,"yrs.txt")
+    results = string("results/fromEMB/p2_fit",sigma,"s",nyear,"yrs.txt")
   elseif obs=="fromEV"
     datafile = string("INPUTS/tt_",sigma,"snoEMB",nyear,"yrs.txt")
     outfile = string("FITS/p2_fit",sigma,"s",nyear,"yrs.jld2")
-    results = string("OUTPUTS/p2_fit",sigma,"s",nyear,"yrs.txt")
+    results = string("results/p2_fit",sigma,"s",nyear,"yrs.txt")
   end
   @assert isfile(datafile)
   println(datafile," loaded.")
@@ -172,6 +172,7 @@ function fit_planet2(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,o
   ntrans = [nt1,nt2]
   Nobs = sum(ntrans)
   nplanet = 2
+	nparam=10
   println("Initial chi-square: ",chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt,jmax,true))
   param1 = init_param .+ 100.0
   niter = 0
@@ -197,19 +198,19 @@ function fit_planet2(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,o
 
   pname=["mu_1","P_1","t01","ecos1","esin1",
           "mu_2","P_2","t02","ecos2","esin2"]
-  mean_mp=[best_per[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
+  mean_mp=[best_p2[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
   mp_errs=[err[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
-  mean_ecc=[sqrt(best_per[(iplanet-1)*5+4]^2 + best_per[(iplanet-1)*5+4]^2) for iplanet=1:nplanet]
+  mean_ecc=[sqrt(best_p2[(iplanet-1)*5+4]^2 + best_p2[(iplanet-1)*5+4]^2) for iplanet=1:nplanet]
   ecc_errs=[sqrt(err[(iplanet-1)*5+4]^2 + err[(iplanet-1)*5+4]^2) for iplanet=1:nplanet]
 
   open(results,"w") do io
-    println(io,"Global Fit Results. Per=[",per_in," - ",per_out,", length=",nper,"]")
+    println(io,"Global Fit Results.")
     for i=1:nparam
-      println(io,pname[i],": ",best_per[i]," ± ",err[i])
+      println(io,pname[i],": ",best_p2[i]," ± ",err[i])
     end
-    println(io,"Retrieved Earth masses: ",mean_mp," ± ",mp_errs)
-    println(io,"Retrieved eccentricity:",mean_ecc," ± ",ecc_errs)
+    println(io,"Retrieved Earth masses:",'\n',mean_mp,'\n'," ± ",mp_errs)
+    println(io,"Retrieved eccentricity:",'\n',mean_ecc,'\n'," ± ",ecc_errs)
   end
-  # @save outfile chi2 best_p2 lprob_best_p2 ntrans nplanet tt0 tt ttmodel sigtt
+   @save outfile best_p2 lprob_best_p2 ntrans nplanet tt0 tt ttmodel sigtt
   return best_p2,lprob_best_p2
 end

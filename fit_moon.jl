@@ -46,6 +46,7 @@ function fit_moon(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,dpin
     param5 = [best_par;param_tmp]
     deltaphi_cur = deltaphi[j]
     param1 = param5 .+ 100.0
+		niter=0
     while maximum(abs.(param1 .- param5)) > tol #&& niter < 20
       param1 = param5
       fit = curve_fit((tt0,param5) -> ttv_wrapper(tt0,nplanet,ntrans,param5,jmax,false),tt0,tt,weight,param5)
@@ -62,7 +63,9 @@ function fit_moon(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,dpin
     # println("deltaphi: ",deltaphi[j]," log Prob: ",lprob_dp[j]," Param: ",vec(param_dp[1:nparam,j]))
   end
   println("Finished lunar search: ",dpbest," in ",niter," iterations")
-  writedlm(grid,zip(deltaphi,lprob_dp))
+	open(grid,"w") do io
+	  writedlm(io,zip(deltaphi,lprob_dp))
+	end
   fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,false),tt0,tt,weight,dpbest)
   cov=estimate_covar(fit)
   err=[sqrt(cov[i,j]) for i=1:nparam, j=1:nparam if i==j ]
@@ -82,12 +85,12 @@ function fit_moon(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,dpin
   ecc_errs=[sqrt(err[(iplanet-1)*5+4]^2 + err[(iplanet-1)*5+4]^2) for iplanet=1:nplanet]
 
   open(results,"w") do io
-    println(io,"Global Fit Results. Δϕ=[",dpin," - ",dpout,", length=",ndp,"]")
+    println(io,"Global Fit Results.",'\n',"Δϕ range=[",dpin," - ",dpout,", length=",ndp,"]")
     for i=1:nparam
       println(io,pname[i],": ",best_dp[i]," ± ",err[i])
     end
-    println(io,"Retrieved Earth masses: ",mean_mp," ± ",mp_errs)
-    println(io,"Retrieved eccentricity:",mean_ecc," ± ",ecc_errs)
+    println(io,"Retrieved Earth masses:",'\n',mean_mp,'\n'," ± ",mp_errs)
+    println(io,"Retrieved eccentricity:",'\n',mean_ecc,'\n'," ± ",ecc_errs)
   end
   @save outfile deltaphi lprob_dp best_dp lprob_best_dp ntrans nplanet tt0 tt ttmodel sigtt
   return best_dp,lprob_best_dp
