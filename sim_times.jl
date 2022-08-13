@@ -1,16 +1,151 @@
-# Julia v1.1
+# Julia v1.3
 using CALCEPH 
-using DelimitedFiles,JLD2
-using Statistics,Random
-using PyPlot,LinearAlgebra
-if !@isdefined(CGS)
-  include("CGS.jl")
-  using Main.CGS
-end
+using DelimitedFiles
+using Statistics,Random,LinearAlgebra
+using PyPlot
 include("regress.jl")
-# Simulate solar system orbits from ephemerides
-function sim_times(jd1::Float64,sigma::Real,nyear::Real,obs::String,seed::Int=42)
-  # To do: output file with arguments in header?
+# Load ephemerides from data and set units
+eph = Ephem("INPUTS/DE440.bsp") ; prefetch(eph)
+options = useNaifId+unitKM+unitDay # useNaifId + unitDay + unitAU
+AU = 149597870.700 #km
+
+# Find local minimum of f(t) by solving for time when f(t) = x_bar dot v_bar = 0
+# Returns transit time in JD 
+function find_transit(body_id::Int,eph::CALCEPH.Ephem,jd1::Float64,jd2::Float64,n_obs::Vector{Float64},N::Int)
+  # N = jd2 - jd1
+  JD_0 = 0.0
+  ff = zeros(N)
+  xdotn = 0.0
+  pos = zeros(3,N) # position of body relative to Sun
+  # Compute functions of position and velocity wrt time:
+  function calc_ffs(t)
+    pva = compute(eph,JD_0,t,body_id,10,options,2)
+    #println(JD_0)
+    x = pva[1:3]; v = pva[4:6]; a = pva[7:9];
+    f = dot(x,v) - (dot(x,n_obs))*(dot(v,n_obs))
+    Df = dot(v,v) + dot(x,a) - (dot(v,n_obs))^2 - (dot(x,n_obs)*dot(a,n_obs))
+    return f,Df,dot(x,n_obs),x
+  end
+  # Computing minimum sky separation of planet wrt star for all JDs
+  dt =  (jd2 - jd1)/(N-1)
+  JD = zeros(N)
+  i_min = 1
+  ff_min = Inf
+  for i=1:N
+    JD[i] = jd1 + dt*(i-1)
+    JD_0 = JD[i]
+    ff[i],Df,xdotn,pos[:,i] = calc_ffs(0.0)
+  # Estimate of transit time:
+      # Df > 0 for transit occuring; 
+      # xdotn > 0 for planet in front of star as seen by observer; 
+      # local minimum value over entire range (i.e. when close to zero)
+    if (Df > 0) && (xdotn > 0) && (abs(ff[i]) < ff_min)
+      i_min = i 
+      ff_min = abs(ff[i])
+    end
+  end
+   #println("Estimated Transit Time: ",JD[i_min])
+  # Refine initial guess using linear approx:
+  JD_0 = JD[i_min]
+  JD_n = 0.0
+  JD_n1 = JD_n + 1
+  JD_n2 = JD_n + 2
+  iter = 0
+  # ITMAX = 20
+  ITMAX = 6 
+  # we've found that we don't need large ITMAX to find solution; does that change for different bodies?
+  for iter=0:ITMAX
+      JD_n2 = JD_n1
+      JD_n1 = JD_n
+      while JD_n > 1
+          JD_n -= 1.0
+          JD_0 += 1.0
+      end
+      while JD_n < 0
+          JD_n += 1.0
+          JD_0 -= 1.0
+      end
+      f_n,Df_n,xdotn,x = calc_ffs(JD_n)
+      JD_n -= f_n/Df_n 
+      # Break out if we have reached maximum iterations,or if
+      # current transit time estimate equals one of the prior two steps:
+      if (JD_n == JD_n1) || (JD_n == JD_n2)
+          break
+      end
+  end          
+  JD_tt = JD_0 + JD_n
+  #println("Refined Transit Time: ",JD_tt)
+  return JD,ff,i_min,pos,JD_tt
+end
+
+# Find the transit times for given body_id,planetary period,and number of refinement steps N
+function find_times(body_id::Int,eph::CALCEPH.Ephem,t0::Float64,period::Float64,per_err::Float64,n_obs::Vector{Float64},N::Int)
+  times = Float64[]
+  t_final = t0[end]
+  i=1
+  # initializes & finds first transit time
+  JD,ff,i_min,pos,JD_tt = find_transit(body_id,eph,t0[i],t0[i]+period,n_obs,1000) #why did we use 1000 here?
+  push!(times,JD_tt)
+  # Find subsequent transit times by shifting time frame by 1 planetary period
+  while JD_tt < t_final
+    t_start = JD_tt+period-period_err
+    t_end = JD_tt+period+period_err
+    JD,ff,i_min,pos,JD_tt = find_transit(body_id,eph,t_start,t_end,n_obs,N)
+    #println(body_id," ",t_start," ",JD_tt," ",t_end)
+    push!(times,JD_tt)
+  end
+  return times
+end
+# Do linear regression of transit time data.
+# code currently accounts for missing transits (noncontinuous) 
+# by rounding [difference in consecutive transit times/Period]
+function find_epochs(tt::Array{Float64,1},period::Float64)
+  nt=length(tt)
+  noise = zeros(nt)
+  x = zeros(2,nt)
+  x[1,1:nt] .= 1.0
+  x[2,1] = 0.0 # for fitting time of first transit
+  for i=2:nt
+      x[2,i] = round((tt[i]-tt[1])/period) 
+  end
+  return x
+end
+function fixed_noise(tt::Array{Float64,1},sigma::Real)
+  Random.seed!(42)
+  # Add noise to transit times:
+  if sigma > 0
+      sigtt = ones(length(tt)) * sigma / (24 * 3600) # sigma in seconds,sigtt in days
+      noise = randn(length(tt)) .* sigtt  
+      # println("Noise added with σ of ",string(sigma)," seconds.")
+  else
+      sigtt=0
+      println("No noise added.")
+  end
+  return sigtt 
+end
+function find_coeffs(tt::Array{Float64,1},period::Float64,sigma::Real)
+  x=find_epochs(tt,period)
+  sigtt=fixed_noise(tt,sigma)
+  # println(tt,sigtt,std(sigtt))
+  # coeff[1] is best linear fit approx of first tt,coeff[2] is average period
+  coeff,covcoeff = regress(x,tt,sigtt)
+  t0,per=coeff[1],coeff[2]
+  return t0,per
+end
+function collect_linear_times(tt::Array{Float64,1},period::Float64,sigma::Real)
+  nt=length(tt)
+  t0,per=find_coeffs(tt,period,sigma)
+  times=collect(t0 .+ per .* range(0,stop = nt-1,length = nt)) 
+  return times
+end
+function calc_ttvs_given_coeffs(tt::Array{Float64,1},period::Float64,sigma::Real)
+  nt=length(tt)
+  x=find_epochs(tt,period)
+  t0,per=find_coeffs(tt,period,sigma)
+  ttv = tt .- t0.*vec(x[1,1:nt]) .- per.*vec(x[2,1:nt])
+  return ttv
+end
+function sim_obs_and_find_times(jd1::Float64,sigma::Real,nyear::Real,obs::String)
   # nyear = (jd2 - jd1)/365.25 
   jd2 = nyear*365.25 + jd1
   jdsize = 1000
@@ -18,21 +153,9 @@ function sim_times(jd1::Float64,sigma::Real,nyear::Real,obs::String,seed::Int=42
   # Initial JD times for days in nyear 
   @assert (jd1 >= 2287184.5) #2414105.0
   @assert (jd2 <= 2688976.5) #2488985.0
-  Random.seed!(seed)
   t0 = range(jd1,stop=jd2-1,length = jdsize)
-  # println(t0[1]) #= 2.4332825e6  
 
-  # Make a circle to represent the Sun, for plotting
-  # theta_sun = range(0,stop = 2pi,length = 100)
-  # xsun = CGS.RSUN/CGS.AU * cos.(theta_sun)
-  # ysun = CGS.RSUN/CGS.AU * sin.(theta_sun)
-
-  # Load ephemerides from data and set units
-  eph = Ephem("INPUTS/DE440.bsp") ; prefetch(eph)
-  options = useNaifId+unitKM+unitDay # useNaifId + unitDay + unitAU
-  AU = 149597870.700 #km
-
-  # Find observer location required to see transits
+  # Compute ephemerides of Sun, Venus and Earth (or EMB)
   pva_sun = zeros(9,jdsize)
   pva_venus = zeros(9,jdsize)
   pva_earth = zeros(9,jdsize)
@@ -44,114 +167,28 @@ function sim_times(jd1::Float64,sigma::Real,nyear::Real,obs::String,seed::Int=42
       pva_earth[1:9,i] = compute(eph,t0[i],0.5,3,10,options,2)./AU 
     else
       pva_earth[1:9,i] = compute(eph,t0[i],0.5,399,10,options,2)./AU
-#            pva_emb = compute(eph,t0[i],0.5,3,10,options,2)
-#            pva_moon = compute(eph,t0[i],0.5,301,10,options,2)
-#            println("Earth - EMB: ",norm(pva_earth[1:3,i] .- pva_emb[1:3]))
-#            println("Earth - Moon: ",norm(pva_earth[1:3,i] .- pva_moon[1:3]))
-#            println("Moon - EMB: ",norm(pva_moon[1:3] .- pva_emb[1:3]))
-#            println("Ratio: ",norm(pva_earth[1:3,i] .- pva_emb[1:3])/norm(pva_moon[1:3] .- pva_emb[1:3]))
+      # pva_emb = compute(eph,t0[i],0.5,3,10,options,2)
+      # pva_moon = compute(eph,t0[i],0.5,301,10,options,2)
+      # println("Earth - EMB: ",norm(pva_earth[1:3,i] .- pva_emb[1:3]))
+      # println("Earth - Moon: ",norm(pva_earth[1:3,i] .- pva_moon[1:3]))
+      # println("Moon - EMB: ",norm(pva_moon[1:3] .- pva_emb[1:3]))
+      # println("Ratio: ",norm(pva_earth[1:3,i] .- pva_emb[1:3])/norm(pva_moon[1:3] .- pva_emb[1:3]))
     end
   end
-  println("Finished CALCEPH computation.")
+
+  # Find observer location required to see transits
   L_venus = cross(pva_venus[1:3],pva_venus[4:6])
   L_earth = cross(pva_earth[1:3],pva_earth[4:6])
   n_obs = cross(L_earth,L_venus)
   n_obs /= norm(n_obs) #from one direction when both transit
   x_obs,y_obs,z_obs = n_obs[1],n_obs[2],n_obs[3]
 
-  # Finds the transit by calculating the position,velocity,and acceleration for a body,
-  # Finds local minimum of f(t) by solving for time when f(t) = x_bar dot v_bar = 0
-  # Returns transit time in JD 
-  function find_transit(body_id,eph,jd1,jd2,n_obs,N)
-    # N = jd2 - jd1
-    JD_0 = 0.0
-    ff = zeros(N)
-    xdotn = 0.0
-    pos = zeros(3,N) # position of body relative to Sun
-    # Compute functions of position and velocity wrt time:
-    function calc_ffs(t)
-      pva = compute(eph,JD_0,t,body_id,10,options,2)
-  #     println(JD_0)
-      x = pva[1:3]; v = pva[4:6]; a = pva[7:9];
-      f = dot(x,v) - (dot(x,n_obs))*(dot(v,n_obs))
-      Df = dot(v,v) + dot(x,a) - (dot(v,n_obs))^2 - (dot(x,n_obs)*dot(a,n_obs))
-      return f,Df,dot(x,n_obs),x
-    end
-    # Computing minimum sky separation of planet wrt star for all JDs
-    dt =  (jd2 - jd1)/(N-1)
-    JD = zeros(N)
-    i_min = 1
-    ff_min = Inf
-    for i=1:N
-      JD[i] = jd1 + dt*(i-1)
-      JD_0 = JD[i]
-      ff[i],Df,xdotn,pos[:,i] = calc_ffs(0.0)
-    # Estimate of transit time:
-        # Df > 0 for transit occuring; 
-        # xdotn > 0 for planet in front of star as seen by observer; 
-        # local minimum value over entire range (i.e. when close to zero)
-      if (Df > 0) && (xdotn > 0) && (abs(ff[i]) < ff_min)
-        i_min = i 
-        ff_min = abs(ff[i])
-      end
-    end
-       #println("Estimated Transit Time: ",JD[i_min])
-      # Refine initial guess using linear approx:
-    JD_0 = JD[i_min]
-    JD_n = 0.0
-    JD_n1 = JD_n + 1
-    JD_n2 = JD_n + 2
-    iter = 0
-    # ITMAX = 20
-    ITMAX = 6 
-    # we've found that we don't need large ITMAX to find solution; does that change for different bodies?
-    for iter=0:ITMAX
-        JD_n2 = JD_n1
-        JD_n1 = JD_n
-        while JD_n > 1
-            JD_n -= 1.0
-            JD_0 += 1.0
-        end
-        while JD_n < 0
-            JD_n += 1.0
-            JD_0 -= 1.0
-        end
-        f_n,Df_n,xdotn,x = calc_ffs(JD_n)
-        JD_n -= f_n/Df_n 
-        # Break out if we have reached maximum iterations,or if
-              # current transit time estimate equals one of the prior two steps:
-        if (JD_n == JD_n1) || (JD_n == JD_n2)
-            break
-        end
-    end          
-    JD_tt = JD_0 + JD_n
-    #println("Refined Transit Time: ",JD_tt)
-    return JD,ff,i_min,pos,JD_tt
-  end
-
-  # Find the transit times for given body_id,planetary period,and number of refinement steps N
-  function find_times(body_id,eph,t0,period,period_err,n_obs,N)
-    times = Float64[]
-    t_final = t0[end]
-    i=1
-    # initializes & finds first transit time
-    JD,ff,i_min,pos,JD_tt = find_transit(body_id,eph,t0[i],t0[i]+period,n_obs,1000) #why did we use 1000 here?
-    push!(times,JD_tt)
-    # Find subsequent transit times by shifting time frame by 1 planetary period
-    while JD_tt < t_final
-      t_start = JD_tt+period-period_err
-      t_end = JD_tt+period+period_err
-      JD,ff,i_min,pos,JD_tt = find_transit(body_id,eph,t_start,t_end,n_obs,N)
-#       println(body_id," ",t_start," ",JD_tt," ",t_end)
-      push!(times,JD_tt)
-    end
-    return times
-  end
-  P_venus = 225
-  P_earth = 365
+  # Actual transit times:
+  P_venus = 225.0
+  P_earth = 365.0
   P_err = 2
   tt1 = find_times(2,eph,t0,P_venus,P_err,n_obs,10)
-  nt1 = length(tt1)
+  nt1=length(tt1)
   if obs=="fromEMB"
     # Find times of Earth-Moon barycenter transit:
     tt2 = find_times(3,eph,t0,P_earth,P_err,n_obs,10)
@@ -159,129 +196,106 @@ function sim_times(jd1::Float64,sigma::Real,nyear::Real,obs::String,seed::Int=42
     # Find times of Earth transit:
     tt2 = find_times(399,eph,t0,P_earth,P_err,n_obs,10)
   end
-  nt2 = length(tt2)
-  # Actual transit times:
+  nt2=length(tt2)
 
-  # Find ttvs via linear regression of transit time data
-  # accounts for missing transits (noncontinuous) 
-  # by rounding [difference in consecutive transit times/Period]
-  # function find_ttvs(tt,period; sigma_x = ones(length(tt)))
-  function find_coeffs(tt,period,sigma)
-    nt = length(tt)
-    noise = zeros(nt)
-    x = zeros(2,nt)
-    x[1,1:nt] .= 1.0
-    x[2,1] = 0.0 # for fitting time of first transit
-    for i=2:nt
-        x[2,i] = round((tt[i]-tt[1])/period) 
-    end
-    # coeff,cov = regress(x,tt,sigma_x)
-    # Add noise to transit times
-    if sigma > 0
-        sigtt = ones(nt) * sigma / (24 * 3600) # sigma in seconds,sigtt in days
-        noise = randn(nt) .* sigtt  
-        # println("Noise added with σ of ",string(sigma)," seconds.")
-    else
-        sigtt = zeros(nt)
-        noise = zeros(nt)
-        # println("No noise added.")
-    end
-    coeff,covcoeff = regress(x,tt,sigtt)
-    # println(tt,sigtt,std(sigtt))
-    # coeff[1] is best linear fit approx of first tt,coeff[2] is average period
-    ttv = tt .- coeff[1].*vec(x[1,1:nt]) .- coeff[2].*vec(x[2,1:nt])
-    # return coeff,ttv
-    # might want to return sigtt at some point?
-    return coeff,noise,sigtt,ttv
-  end
-  # coeff_venus,ttv1 = find_ttvs(tt1,P_venus,noise::Bool)
-  coeff_venus,noise1,sigtt1,ttv1 = find_coeffs(tt1,P_venus,sigma);
-  coeff_earth,noise2,sigtt2,ttv2 = find_coeffs(tt2,P_earth,sigma);
+  t01,per1 = find_coeffs(tt1,P_venus,sigma)
+  t02,per2 = find_coeffs(tt2,P_earth,sigma)
+  sigtt=fixed_noise(tt,sigma)
 
-  t01 = coeff_venus[1]; per1 = coeff_venus[2]
-  t02 = coeff_earth[1]; per2 = coeff_earth[2]
-
-  # best fit linear transit times w/o ttvs
-  t1  = collect(t01 .+ per1 .* range(0,stop = nt1-1,length = nt1)) 
-  t2  = collect(t02 .+ per2 .* range(0,stop = nt2-1,length = nt2))
   # Best-fit linear transit times:
-  tt0 = [t1;t2] # appends t2 times to t1 times
-
-  # Plot orbits along ecliptic and top-down,point to observer of Venus and Earth transits
-  function plot_orbits()
-    subplot(211)
-    title("Orbits Along Ecliptic")
-    plot(xsun,ysun,label="Sun")
-    plot(vec(pva_venus[2,1:jdsize]),vec(pva_venus[3,1:jdsize]),label="Venus")
-    plot(vec(pva_earth[2,1:jdsize]),vec(pva_earth[3,1:jdsize]),label="Earth")
-    xlabel("[AU]")
-    ylabel("[AU]")
-    legend()
-    subplot(212)
-    title("Top-Down Orbits")
-    plot(xsun,ysun,label="Sun")
-    plot(vec(pva_venus[1,1:jdsize]),vec(pva_venus[2,1:jdsize]),label="Venus")
-    plot(vec(pva_earth[1,1:jdsize]),vec(pva_earth[2,1:jdsize]),label="Earth")
-    xlabel("[AU]")
-    ylabel("[AU]")
-    legend(loc="lower left")
-    clf()
-    test = 365 
-    i=1
-    JD_venus,ff_venus,i_min_venus,pos_venus,tt_venus = find_transit(2,eph,t0[i],t0[i]+test,n_obs,test)
-    JD_earth,ff_earth,i_min_earth,pos_earth,tt_earth = find_transit(3,eph,t0[i],t0[i]+test,n_obs,test)
-    # title("Top-Down Orbits w/ Observer")
-    figsize=(8,8)
-    plot(pos_venus[1,i_min_venus],pos_venus[2,i_min_venus],"o",label="Venus Transit",color=:orange)
-    plot(pos_earth[1,i_min_earth],pos_earth[2,i_min_earth],"o",label="Earth Transit")
-    plot(xsun,ysun,"o",label="Sun",color=:yellow)
-    plot(pos_venus[1,:],pos_venus[2,:],color=:grey)
-    plot(pos_earth[1,:],pos_earth[2,:],color=:grey)
-    plot([0,x_obs*1.1],[0,y_obs*1.1],"k--")
-    legend(loc="upper left")
-    xlabel("[AU]")
-    ylabel("[AU]")
-    # savefig("sim_times.eps")
-  end
-
-  # Plot transit times and TTVs
-  function plot_ttvs(sigma)
-    # subplot(211)
-    # scatter((t1.-t01)./per1,tt1.-t1) #x is tranit number 
-    # plot((t1.- t01)./per1,ttv1) 
-    # errorbar((t1.-t01)./per1,ttv1,noise1)
-    scatter((t1.-t01)./365.25,tt1.-t1) # x is JD in years
-    plot((t1.-t01)./365.25,ttv1)
-    # subplot(212)
-    scatter((t2.-t02)./365.25,tt2.-t2,color="green")
-    plot((t2.-t02)./365.25,ttv2)
-    errorbar((t2.-t02)./365.25,ttv2,noise2)
-    # scatter((t2.-t02)./per2,tt2.-t2,color="green") 
-    # plot((t2.-t02)./per2,ttv2)
-    # title(sigma)
-    xlabel("JD (years)")
-    ylabel("TTVs")
-    # savefig("OUTPUTs/")
-  end
-  # plot_ttvs(sigma)
-  # plot_orbits()
+  t1  = collect_linear_times(tt1,P_venus,sigma)
+  t2  = collect_linear_times(tt2,P_earth,sigma)
+  tt0 = [t1;t2]
 
   body = zeros((nt1+nt2))
   body[1:nt1] .= 1.0
   body[nt1+1:nt1+nt2] .= 2.0
-  tt = [tt1+noise1;tt2+noise2]
-  noise = [noise1;noise2]
-  sigtt = [sigtt1;sigtt2]
-  if obs=="fromEMB"
-    name = string("INPUTS/tt_",sigma,"sEMB",nyear,"yrs.txt")
-  else
-    name = string("INPUTS/tt_",sigma,"snoEMB",nyear,"yrs.txt")
-  end
-  writedlm(name,zip(body,tt0,tt,sigtt))
-  # else
-  #   writedlm("INPUTS/tt_data.txt",zip(body,tt))
-  # end
-  # file = string("sim",sigma,"times.jld2")
-  # @save file pva_sun pva_venus pva_earth n_obs eph
-  return tt1, tt2, n_obs, pva_sun, pva_venus, pva_earth
+  return body,tt,tt0
 end
+
+function test_sim_obs_and_find_times()
+  jd1=2.4332825e6
+  sigma=30.0
+  nyear=30.0
+  obs="fromEMB"
+  body,tt,tt0=sim_obs_and_find_times(jd1,sigma,nyear,obs)
+end
+
+function sim_times(jd1::Float64,sigma::Real,nyear::Real,obs::String)
+  body,tt,tt0=sim_obs_and_find_times(jd1,sigma,nyear,obs)
+  if obs=="fromEMB"
+    name = string("sims/fromEMB/tt_",sigma,"s",nyear,"yrs.txt")
+  else
+    name = string("sims/tt_",sigma,"s",nyear,"yrs.txt")
+  end
+  open(name,"w") do io
+    println(io,"# body",'\t',"tt0",'\t',"tt",'\t',"sigtt")
+    for i=1:length(tt)
+      println(io,body[i],'\t',tt0[i],'\t',tt[i],'\t',sigtt[i])
+    end
+  end
+end
+  # Plot orbits along ecliptic and top-down,point to observer of Venus and Earth transits
+  # function plot_orbits()
+  #   subplot(211)
+  #   title("Orbits Along Ecliptic")
+  #   plot(xsun,ysun,label="Sun")
+  #   plot(vec(pva_venus[2,1:jdsize]),vec(pva_venus[3,1:jdsize]),label="Venus")
+  #   plot(vec(pva_earth[2,1:jdsize]),vec(pva_earth[3,1:jdsize]),label="Earth")
+  #   xlabel("[AU]")
+  #   ylabel("[AU]")
+  #   legend()
+  #   subplot(212)
+  #   title("Top-Down Orbits")
+  #   plot(xsun,ysun,label="Sun")
+  #   plot(vec(pva_venus[1,1:jdsize]),vec(pva_venus[2,1:jdsize]),label="Venus")
+  #   plot(vec(pva_earth[1,1:jdsize]),vec(pva_earth[2,1:jdsize]),label="Earth")
+  #   xlabel("[AU]")
+  #   ylabel("[AU]")
+  #   legend(loc="lower left")
+  #   clf()
+  #   test = 365 
+  #   i=1
+  #   JD_venus,ff_venus,i_min_venus,pos_venus,tt_venus = find_transit(2,eph,t0[i],t0[i]+test,n_obs,test)
+  #   JD_earth,ff_earth,i_min_earth,pos_earth,tt_earth = find_transit(3,eph,t0[i],t0[i]+test,n_obs,test)
+  #   # title("Top-Down Orbits w/ Observer")
+  #   figsize=(8,8)
+  #   plot(pos_venus[1,i_min_venus],pos_venus[2,i_min_venus],"o",label="Venus Transit",color=:orange)
+  #   plot(pos_earth[1,i_min_earth],pos_earth[2,i_min_earth],"o",label="Earth Transit")
+  #   plot(xsun,ysun,"o",label="Sun",color=:yellow)
+  #   plot(pos_venus[1,:],pos_venus[2,:],color=:grey)
+  #   plot(pos_earth[1,:],pos_earth[2,:],color=:grey)
+  #   plot([0,x_obs*1.1],[0,y_obs*1.1],"k--")
+  #   legend(loc="upper left")
+  #   xlabel("[AU]")
+  #   ylabel("[AU]")
+  #   # savefig("sim_times.eps")
+  # end
+  # function plot_ttvs(sigma,eph,obs)
+  #   P_venus = 225
+  #   P_earth = 365
+  #   P_err = 2
+  #   t01,per1=find_coeffs(tt1,P_venus,sigma)
+  #   t02,per2=find_coeffs(tt2,P_venus,sigma)
+  #   t1  = collect_linear_times(tt1,P_venus,sigma)
+  #   t2  = collect_linear_times(tt2,P_earth,sigma)
+  #   ttv1=calc_ttvs_given_coeffs(tt1,P_venus,sigma)
+  #   ttv2=calc_ttvs_given_coeffs(tt2,P_earth,sigma)  
+  #   # subplot(211)
+  #   # scatter((t1.-t01)./per1,tt1.-t1) #x is tranit number 
+  #   # plot((t1.- t01)./per1,ttv1) 
+  #   # errorbar((t1.-t01)./per1,ttv1,noise1)
+  #   scatter((t1.-t01)./365.25,tt1.-t1) # x is JD in years
+  #   plot((t1.-t01)./365.25,ttv1)
+  #   # subplot(212)
+  #   scatter((t2.-t02)./365.25,tt2.-t2,color="green")
+  #   plot((t2.-t02)./365.25,ttv2)
+  #   errorbar((t2.-t02)./365.25,ttv2,noise2)
+  #   # scatter((t2.-t02)./per2,tt2.-t2,color="green") 
+  #   # plot((t2.-t02)./per2,ttv2)
+  #   # title(sigma)
+  #   xlabel("JD (years)")
+  #   ylabel("TTVs")
+  #   # savefig("OUTPUTs/")
+  # end
+
