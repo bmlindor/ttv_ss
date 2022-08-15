@@ -35,7 +35,7 @@ NaifID:
 
 1). Simulate transit times from JPLEphemeris. Add noise option to data.
 
-sim_times(jd1::Float64,sigma::Real,nyear::Real,obs::String,seed::Int=42)
+sim_times(jd1::Float64,sigma::Real,nyear::Real,obs::String)
 
 
 2a). Carry out a linear fit to the transit times. 
@@ -54,19 +54,12 @@ Note: This assumes 2 transits for Jupiter because transits are required for TTVF
 Show that likelihood curve peaks at period of Jupiter.
 Note: the third planet can't be too close to the transiting planets.
 
-fit_planet3(filename::String,
-    jd1::Float64,nyear::Float64,
-    p3in::Float64,p3out::Float64,np3::Int,nphase::Int,
-    addnoise::Bool=false,sigma::Float64=0.0,EM::Bool=true)
+fit_planet3(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p3in::Float64,p3out::Float64,np3::Int,nphase::Int,obs::String)
 
 2d). Search for moon. Initialize a grid of moon phases & compute the best-fit at each.
 Optimize the fit to the two sets of transit times by varying all of the
 other parameters. 
-fit_moon(filename::String,
-  jd1::Float64,nyear::Float64,
-  p3in::Float64,p3out::Float64,np3::Int,nphase::Int,
-  dpin::Float64,dpout::Float64,ndp::Int, 
-  addnoise::Bool=false,sigma::Float64=0.0,wide::Bool=false)
+fit_moon(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,dpin::Float64,dpout::Float64,ndp::Int,nplanets::Real)
 
 3).  Taking the minimum chi-square, or the maximum log-Probability,
 run a markov chain with all 3 planets:  
@@ -117,6 +110,7 @@ their masses, as well as existence of Jupiter first then Moon
     Correlation betweem deltaphi and t_maxsinphi --> posterior broader than likelihood
 5). Four planet model preferred over model with moon and 3 planets. 
         can't tell difference b/w Hppmp and Hpppp
+6). If wrong four planet params, wrong Jupiter params.
 
 Q). Degenaracy b/w Jupiter and Moon? <--tail on Jupiter period with moon
         if you don't have enough time spans
@@ -142,6 +136,7 @@ Make likelihood profiles continuous [ ]
 7). Figure out whether the Earth-Moon barycenter offset causes
 bias in measurements and if so, why.
 6). Add in 4th planet. Fit for best params [ x ]
+6a). Search for second peak in likelihood profile to fit. [  ]
 5). Analyze chain results: trace plots, uncertainties, etc.
 5a). See how many observations would be needed (minimum number of years required). [ x ]
 5b). See what the necessary precision would be (vary noise added to simulations). [ x ]

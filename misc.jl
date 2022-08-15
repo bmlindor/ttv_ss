@@ -1,5 +1,5 @@
 #include TTVFaster  
-function if_second_peak(xgrid,lprob)
+function second_peak(xgrid,lprob)
 	second_peak=false
 	s=sortperm(lprob)
 	sorted_grid=xgrid[s];sorted_prob=lprob[s]
@@ -14,6 +14,3 @@ function if_second_peak(xgrid,lprob)
 	end
 	return second_peak
 end
-
-
-function global_fit
