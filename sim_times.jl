@@ -76,7 +76,7 @@ function find_transit(body_id::Int,eph::CALCEPH.Ephem,jd1::Float64,jd2::Float64,
   return JD_tt
 end
 # Find the transit times for given body_id, planetary period estimate,and number of refinement steps N
-function find_times(body_id::Int,eph::CALCEPH.Ephem,t0::Float64,period::Float64,per_err::Float64,n_obs::Vector{Float64},N::Int)
+function find_times(body_id::Int,eph::CALCEPH.Ephem,t0,period::Float64,period_err::Float64,n_obs::Vector{Float64},N::Int)
   times = Float64[]
   t_final = t0[end]
   i=1
@@ -106,7 +106,7 @@ function fixed_noise(tt::Array{Float64,1},sigma::Real)
   return sigtt 
 end
 # Do linear regression of transit time data
-function linear_fit(tt::Array{Float64,1},period::Float64,sigma::Real)
+function linear_fit(tt::Vector{Float64},period::Float64,sigtt::Vector{Float64})
   nt=length(tt)
   noise = zeros(nt)
   x = zeros(2,nt)
@@ -117,22 +117,21 @@ function linear_fit(tt::Array{Float64,1},period::Float64,sigma::Real)
     # by rounding [difference in consecutive transit times/Period]
       x[2,i] = round((tt[i]-tt[1])/period) 
   end
-  sigtt=fixed_noise(tt,sigma)
   # println(tt,sigtt,std(sigtt))
   # coeff[1] is best linear fit approx of first tt,coeff[2] is average period
   coeff,covcoeff = regress(x,tt,sigtt)
   t0,per=coeff[1],coeff[2]
   return x,t0,per
 end
-function collect_linear_times(tt::Array{Float64,1},period::Float64,sigma::Real)
+function collect_linear_times(tt::Vector{Float64},period::Float64,sigtt::Vector{Float64})
   nt=length(tt)
-  x,t0,per=linear_fit(tt,period,sigma)
+  x,t0,per=linear_fit(tt,period,sigtt)
   times=collect(t0 .+ per .* range(0,stop = nt-1,length = nt)) 
   return times
 end
-function calc_ttvs_given_per_est(tt::Array{Float64,1},period::Float64,sigma::Real)
+function calc_ttvs_given_per_est(tt::Vector{Float64},period::Float64,sigtt::Vector{Float64})
   nt=length(tt)
-  x,t0,per=linear_fit(tt,period,sigma)
+  x,t0,per=linear_times(tt,period,sigtt)
   ttv = tt .- t0.*vec(x[1,1:nt]) .- per.*vec(x[2,1:nt])
   return ttv
 end
@@ -175,7 +174,7 @@ function sim_obs_and_find_times(jd1::Float64,sigma::Real,nyear::Real,obs::String
   # Find actual transit times:
   P_venus = 225.0
   P_earth = 365.0
-  P_err = 2
+  P_err = 2.0
   tt1 = find_times(2,eph,t0,P_venus,P_err,n_obs,10)
   nt1=length(tt1)
   if obs=="fromEMB"
@@ -184,20 +183,24 @@ function sim_obs_and_find_times(jd1::Float64,sigma::Real,nyear::Real,obs::String
     tt2 = find_times(399,eph,t0,P_earth,P_err,n_obs,10)
   end
   nt2=length(tt2)
+	sigtt1=fixed_noise(tt1,sigma)
+	sigtt2=fixed_noise(tt2,sigma)
 
-  t01,per1 = linear_fit(tt1,P_venus,sigma)
-  t02,per2 = linear_fit(tt2,P_earth,sigma)
-  sigtt=fixed_noise(tt,sigma)
+  x1,t01,per1 = linear_fit(tt1,P_venus,sigtt1)
+  x2,t02,per2 = linear_fit(tt2,P_earth,sigtt2)
+	#println("coefficients: ",t02," , ",per2)
+	tt=[tt1;tt2]
 
   # Best-fit linear transit times:
-  t1  = collect_linear_times(tt1,P_venus,sigma)
-  t2  = collect_linear_times(tt2,P_earth,sigma)
+  t1  = collect(t01 .+ per1 .* range(0,stop=nt1-1,length=nt1)) 
+  t2  = collect(t02 .+ per2 .* range(0,stop=nt2-1,length=nt2))
   tt0 = [t1;t2]
+	sigtt=[sigtt1;sigtt2]
 
   body = zeros((nt1+nt2))
   body[1:nt1] .= 1.0
   body[nt1+1:nt1+nt2] .= 2.0
-  return body,tt,tt0,sigtt
+  return body,tt0,tt,sigtt
 end
 
 function test_sim_obs_and_find_times()
@@ -205,18 +208,18 @@ function test_sim_obs_and_find_times()
   sigma=30.0
   nyear=30.0
   obs="fromEMB"
-  body,tt,tt0,sigtt=sim_obs_and_find_times(jd1,sigma,nyear,obs)
+  body,tt0,tt,sigtt=sim_obs_and_find_times(jd1,sigma,nyear,obs)
 end
 
 function sim_times(jd1::Float64,sigma::Real,nyear::Real,obs::String)
-  body,tt,tt0,sigtt=sim_obs_and_find_times(jd1,sigma,nyear,obs)
+  body,tt0,tt,sigtt=sim_obs_and_find_times(jd1,sigma,nyear,obs)
   if obs=="fromEMB"
     name = string("sims/fromEMB/tt_",sigma,"s",nyear,"yrs.txt")
   else
     name = string("sims/tt_",sigma,"s",nyear,"yrs.txt")
   end
   open(name,"w") do io
-    println(io,"# body",'\t',"tt0",'\t',"tt",'\t',"sigtt")
+    println(io,"#body",'\t',"tt0",'\t',"tt",'\t',"sigtt")
     for i=1:length(tt)
       println(io,body[i],'\t',tt0[i],'\t',tt[i],'\t',sigtt[i])
     end
@@ -258,7 +261,7 @@ end
   #   ylabel("[AU]")
   #   # savefig("sim_times.eps")
   # end
-  # function plot_ttvs(sigma,eph,obs)
+  # function plot_ttvs(sigma,obs)
   #   P_venus = 225
   #   P_earth = 365
   #   P_err = 2

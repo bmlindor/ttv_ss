@@ -20,7 +20,7 @@ function fit_planet4(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref:
   end
   @assert isfile(filename)
   println(filename," loaded.")
-  data1 = readdlm(filename,Float64)
+    data1 = readdlm(filename,Float64,comments=true)
   nt1 = sum(data1[:,1] .== 1.0)
   nt2 = sum(data1[:,1] .== 2.0)
   tt1 = vec(data1[1:nt1,3]) .- tref
@@ -114,13 +114,13 @@ function fit_planet4(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref:
       niter=0
       while maximum(abs.(param1 .- param3)) > tol && niter < 20
         param1 = param3
-        fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,[params[1:10];10^params[11];p3_cur;params[12:end]],jmax,EM),tt0,tt,weight,param3)
+        fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,[params[1:10];10^params[11];p3_cur;params[12:end]],jmax,true),tt0,tt,weight,param3)
         param3 = fit.param
         niter+=1
         # println("init_param: ",param3)
         # println("New Initial chi-square: ",chisquare(tt0,nplanet,ntrans,param3,tt,sigtt,true,p3_cur))
       end
-      ttmodel = ttv_wrapper(tt0,nplanet,ntrans,[param3[1:10];10^param3[11];p3_cur;param3[12:end]],jmax,EM)
+      ttmodel = ttv_wrapper(tt0,nplanet,ntrans,[param3[1:10];10^param3[11];p3_cur;param3[12:end]],jmax,true)
       lprob_phase[i]= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
       if lprob_phase[i] > lprob_best # check that best fit for period is better than global best fit
         lprob_best = lprob_phase[i]
@@ -134,12 +134,12 @@ function fit_planet4(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref:
     # println("Period: ",p3[j]," log Prob: ",lprob_p3[j]," Param: ",vec(param_p3[1:nparam,j]))
   end
   println("Finished 3-planet fit w/ fixed period: ",p3best," in ",niter," iterations")
-  fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,EM),tt0,tt,weight,p3best)
+    fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,true),tt0,tt,weight,p3best)
   best_p3 = fit.param
-  ttmodel = ttv_wrapper(tt0,nplanet,ntrans,best_p3,jmax,EM)
+    ttmodel = ttv_wrapper(tt0,nplanet,ntrans,best_p3,jmax,true)
   lprob_best_p3= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
   println("Finished global 3-planet fit.")
-  println("New 3-planet chi-square: ",chisquare(tt0,nplanet,ntrans,best_p3,tt,sigtt,jmax,EM))
+    println("New 3-planet chi-square: ",chisquare(tt0,nplanet,ntrans,best_p3,tt,sigtt,jmax,true))
   println("Maximum: ",lprob_best_p3," Param: ",best_p3)
 
   # Now,add a 4th planet:
@@ -168,13 +168,13 @@ function fit_planet4(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref:
       niter=0
       while maximum(abs.(param1 .- param4)) > tol && niter < 20
         param1 = param4
-        fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,[params[1:10];10^params[11];p4_cur;params[12:end]],jmax,EM),tt0,tt,weight,param4)
+        fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,[params[1:10];10^params[11];p4_cur;params[12:end]],jmax,true),tt0,tt,weight,param4)
         param4 = fit.param 
         niter+=1
         # println("init_param: ",param4)
         # println("New Initial chi-square: ",chisquare(tt0,nplanet,ntrans,param4,tt,sigtt,5,true))
       end
-      ttmodel=ttv_wrapper(tt0,nplanet,ntrans,[param4[1:10];10^param4[11];p4_cur;param4[12:end]],jmax,EM)
+      ttmodel=ttv_wrapper(tt0,nplanet,ntrans,[param4[1:10];10^param4[11];p4_cur;param4[12:end]],jmax,true)
       lprob_phase[i]= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
       if lprob_phase[i] > lprob_best
         lprob_best = lprob_phase[i]
