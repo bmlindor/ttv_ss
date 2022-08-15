@@ -1,18 +1,5 @@
 #include TTVFaster  
-function find_coeffs(tt,period,sigtt)
-    nt = length(tt)
-    x = zeros(2,nt)
-    x[1,1:nt] .= 1.0
-    x[2,1] = 0.0 
-    for i=2:nt
-      x[2,i] = round((tt[i]-tt[1])/period) 
-    end
-    coeff,covcoeff = regress(x,tt,sigtt)
-    return coeff,covcoeff
-  end
-
-
-function second_peak(xgrid,lprob)
+function if_second_peak(xgrid,lprob)
 	second_peak=false
 	s=sortperm(lprob)
 	sorted_grid=xgrid[s];sorted_prob=lprob[s]
@@ -29,3 +16,4 @@ function second_peak(xgrid,lprob)
 end
 
 
+function global_fit

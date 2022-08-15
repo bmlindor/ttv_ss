@@ -58,19 +58,19 @@ function fit_mysteryplanet() #fit_mysteryplanet(datafile::String,jd1::Float64,tr
 	init_param_guess = [3e-6,per1,t01,0.01,0.01,
                   3e-6,per2,t02,0.01,0.01] 
     # println("Initial parameters: ",init_param)
-	function global_fit(nplanet,ntrans,guess_params) 
+	function global_fit(tt0,nplanet,ntrans,init_param,jmax,EM) 
 	  # Perform fit with best params, and calculate covariances for parameters: 
-  fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,true),tt0,tt,weight,guess_params)
+  fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,EM),tt0,tt,weight,init_param)
   covar=estimate_covar(fit)
+  best_global = fit.param ;   nparam=length(best_global)
   err=[sqrt(covar[i,j]) for i=1:nparam, j=1:nparam if i==j ]
-  best_global = fit.param
-  ttmodel = ttv_wrapper(tt0,nplanet,ntrans,best_global,jmax,true)
+  ttmodel = ttv_wrapper(tt0,nplanet,ntrans,best_global,jmax,EM)
   lprob_best_global= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
   # println("Finished global fit.")
-  println("New chi-square: ",chisquare(tt0,nplanet,ntrans,best_global,tt,sigtt,jmax,true))
+  println("New chi-square: ",chisquare(tt0,nplanet,ntrans,best_global,tt,sigtt,jmax,EM))
   println("Maximum: ",lprob_best_global,'\n'," Param: ",best_global)
   return best_global,err
-end
+  end
 
   function fit_cond_planets(tt0,tt,sigtt,jmax,nplanet,init_param)
     # Set up data structure to hold planet properties,passed to TTVFaster
@@ -100,7 +100,7 @@ end
     end
     println("New initial 2-planet fit: ",init_param," in ",niter," iterations.")
 
-		best_p2,err=global_fit(nplanet,ntrans,init_param)
+		best_p2,err=global_fit(tt0,nplanet,ntrans,init_param_guess,jmax,true)
     return best_p2,err
   end
   @time best_p2,err = fit_cond_planets(tt0,tt,sigtt,jmax,nplanet_cond,init_param_guess)
@@ -159,7 +159,7 @@ end
   
   writedlm(outfile,zip(per,lprob_per))
 	
-	best_per,err=global_fit(nplanet,ntrans,perbest)
+	best_per,err=global_fit(tt0,nplanet,ntrans,perbest,jmax,true)
   # @save outfile per lprob_per best_per lprob_best_per ntrans nplanet tt0 tt ttmodel sigtt
   pname=["mu_1","P_1","t01","ecos1","esin1",
           "mu_2","P_2","t02","ecos2","esin2",

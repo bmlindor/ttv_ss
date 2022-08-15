@@ -4,10 +4,10 @@ if !@isdefined(TTVFaster)
 end
 import Main.TTVFaster.ttv_wrapper
 import Main.TTVFaster.chisquare
-include("regress.jl")
+include("sim_times.jl")
 using DelimitedFiles,JLD2,Optim,LsqFit,Statistics
 
-function fit_planet2(data_file::Array{}, jmax::Int,tref::Real,tol::Real)
+function fit_planet2(filename::Array{}, jmax::Int,tref::Real,tol::Real)
   # (::Core.kwftype(typeof(fit_planet2)))(kws, fit_planet2, data_file, jmax)
   # if haskey(kws, :jmax)
   #     jmax = kws.jmax
@@ -25,28 +25,11 @@ function fit_planet2(data_file::Array{}, jmax::Int,tref::Real,tol::Real)
   sigtt1 = data_file[1:nt1,4]
   sigtt2 = data_file[nt1+1:nt1+nt2,4]
   # Okay,let's do a linear fit to the transit times (third column):
-  function find_coeffs(tt,period,sigtt)
-    nt = length(tt)
-    x = zeros(2,nt)
-    x[1,1:nt] .= 1.0
-    x[2,1] = 0.0 
-    for i=2:nt
-      x[2,i] = x[2,i-1] + round((tt[i]-tt[i-1])/period) 
-    end
-    coeff,covcoeff = regress(x,tt,sigtt)
-    # println(tt,sigtt,std(sigtt))
-    println(coeff)
-    println(sum((tt .- coeff[1].-coeff[2].*x[2,:])./sigtt).^2)
-    return coeff,covcoeff
-  end
   # Guess the planets' period by finding median of transit times
   p1_est = median(tt1[2:end] - tt1[1:end-1])
   p2_est = median(tt2[2:end] - tt2[1:end-1])
-  # Do fit to find linear ephemeris (t0, per)
-  coeff1,covcoeff1 = find_coeffs(tt1,p1_est,sigtt1)
-  coeff2,covcoeff2 = find_coeffs(tt2,p2_est,sigtt2)
-  t01 = coeff1[1]; per1 = coeff1[2]
-  t02 = coeff2[1]; per2 = coeff2[2]
+  x1,t01,per1 = linear_fit(tt1,p1est,sigtt1)
+  x2,t02,per2 = linear_fit(tt2,p2est,sigtt2)
   t1  = collect(t01 .+ per1 .* range(0,stop=nt1-1,length=nt1)) 
   t2  = collect(t02 .+ per2 .* range(0,stop=nt2-1,length=nt2))
   # Best-fit linear transit times:
@@ -86,7 +69,6 @@ function fit_planet2(data_file::Array{}, jmax::Int,tref::Real,tol::Real)
     param1 = init_param
     fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,true),tt0,tt,weight,init_param)
     init_param = fit.param
-    # println("init_param: ",init_param)
     # println("New Initial chi-square: ",chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt,jmax,true))
     niter += 1
   end
@@ -103,11 +85,11 @@ end
 # If the simulation already exists, can just do 2-planet fit
 function fit_planet2(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,obs::String)
   if obs=="fromEMB"
-    datafile = string("INPUTS/tt_",sigma,"sEMB",nyear,"yrs.txt")
+    datafile = string("sims/fromEMB/tt_",sigma,"s",nyear,"yrs.txt")
     outfile = string("FITS/fromEMB/p2_fit",sigma,"s",nyear,"yrs.jld2")
     results = string("results/fromEMB/p2_fit",sigma,"s",nyear,"yrs.txt")
   elseif obs=="fromEV"
-    datafile = string("INPUTS/tt_",sigma,"snoEMB",nyear,"yrs.txt")
+    datafile = string("sims/tt_",sigma,"s",nyear,"yrs.txt")
     outfile = string("FITS/p2_fit",sigma,"s",nyear,"yrs.jld2")
     results = string("results/p2_fit",sigma,"s",nyear,"yrs.txt")
   end
@@ -122,24 +104,10 @@ function fit_planet2(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,o
   sigtt2 = data1[nt1+1:nt1+nt2,4]
 
   # Okay,let's do a linear fit to the transit times (third column):
-  function find_coeffs(tt,period,sigtt)
-    nt = length(tt)
-    x = zeros(2,nt)
-    x[1,1:nt] .= 1.0
-    x[2,1] = 0.0 
-    for i=2:nt
-      x[2,i] = round((tt[i]-tt[1])/period) 
-    end
-    coeff,covcoeff = regress(x,tt,sigtt)
-    return coeff,covcoeff
-  end
   p1est = median(tt1[2:end] - tt1[1:end-1])
   p2est = median(tt2[2:end] - tt2[1:end-1])
-  coeff1,covcoeff1 = find_coeffs(tt1,p1est,sigtt1)
-  coeff2,covcoeff2 = find_coeffs(tt2,p2est,sigtt2)
-  # @assert (sigtt[1] .* (24 * 3600) .= sigma)
-  t01 = coeff1[1]; per1 = coeff1[2]
-  t02 = coeff2[1]; per2 = coeff2[2]
+  x1,t01,per1 = linear_fit(tt1,p1est,sigtt1)
+  x2,t02,per2 = linear_fit(tt2,p2est,sigtt2)
   t1  = collect(t01 .+ per1 .* range(0,stop=nt1-1,length=nt1)) 
   t2  = collect(t02 .+ per2 .* range(0,stop=nt2-1,length=nt2))
   # Best-fit linear transit times without TTVs:

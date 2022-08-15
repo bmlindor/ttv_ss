@@ -4,19 +4,17 @@ using DelimitedFiles
 using Statistics,Random,LinearAlgebra
 using PyPlot
 include("regress.jl")
-# Load ephemerides from data and set units
+# Load JPL ephemerides from data and set units
 eph = Ephem("INPUTS/DE440.bsp") ; prefetch(eph)
 options = useNaifId+unitKM+unitDay # useNaifId + unitDay + unitAU
 AU = 149597870.700 #km
 
-# Find local minimum of f(t) by solving for time when f(t) = x_bar dot v_bar = 0
-# Returns transit time in JD 
+# Compute the local minimum of f(t) and solve for times when f(t) = dot(x_bar, v_bar) == 0
 function find_transit(body_id::Int,eph::CALCEPH.Ephem,jd1::Float64,jd2::Float64,n_obs::Vector{Float64},N::Int)
-  # N = jd2 - jd1
   JD_0 = 0.0
   ff = zeros(N)
   xdotn = 0.0
-  pos = zeros(3,N) # position of body relative to Sun
+  pos = zeros(3,N) 
   # Compute functions of position and velocity wrt time:
   function calc_ffs(t)
     pva = compute(eph,JD_0,t,body_id,10,options,2)
@@ -75,40 +73,24 @@ function find_transit(body_id::Int,eph::CALCEPH.Ephem,jd1::Float64,jd2::Float64,
   end          
   JD_tt = JD_0 + JD_n
   #println("Refined Transit Time: ",JD_tt)
-  return JD,ff,i_min,pos,JD_tt
+  return JD_tt
 end
-
-# Find the transit times for given body_id,planetary period,and number of refinement steps N
+# Find the transit times for given body_id, planetary period estimate,and number of refinement steps N
 function find_times(body_id::Int,eph::CALCEPH.Ephem,t0::Float64,period::Float64,per_err::Float64,n_obs::Vector{Float64},N::Int)
   times = Float64[]
   t_final = t0[end]
   i=1
-  # initializes & finds first transit time
-  JD,ff,i_min,pos,JD_tt = find_transit(body_id,eph,t0[i],t0[i]+period,n_obs,1000) #why did we use 1000 here?
+  # Initialize & find first transit time:
+  JD_tt = find_transit(body_id,eph,t0[i],t0[i]+period,n_obs,1000) #why did we use 1000 here?
   push!(times,JD_tt)
-  # Find subsequent transit times by shifting time frame by 1 planetary period
+  # Find subsequent transit times by shifting time frame by 1 planetary period:
   while JD_tt < t_final
     t_start = JD_tt+period-period_err
     t_end = JD_tt+period+period_err
-    JD,ff,i_min,pos,JD_tt = find_transit(body_id,eph,t_start,t_end,n_obs,N)
-    #println(body_id," ",t_start," ",JD_tt," ",t_end)
+    JD_tt = find_transit(body_id,eph,t_start,t_end,n_obs,N)
     push!(times,JD_tt)
   end
   return times
-end
-# Do linear regression of transit time data.
-# code currently accounts for missing transits (noncontinuous) 
-# by rounding [difference in consecutive transit times/Period]
-function find_epochs(tt::Array{Float64,1},period::Float64)
-  nt=length(tt)
-  noise = zeros(nt)
-  x = zeros(2,nt)
-  x[1,1:nt] .= 1.0
-  x[2,1] = 0.0 # for fitting time of first transit
-  for i=2:nt
-      x[2,i] = round((tt[i]-tt[1])/period) 
-  end
-  return x
 end
 function fixed_noise(tt::Array{Float64,1},sigma::Real)
   Random.seed!(42)
@@ -123,25 +105,34 @@ function fixed_noise(tt::Array{Float64,1},sigma::Real)
   end
   return sigtt 
 end
-function find_coeffs(tt::Array{Float64,1},period::Float64,sigma::Real)
-  x=find_epochs(tt,period)
+# Do linear regression of transit time data
+function linear_fit(tt::Array{Float64,1},period::Float64,sigma::Real)
+  nt=length(tt)
+  noise = zeros(nt)
+  x = zeros(2,nt)
+  x[1,1:nt] .= 1.0
+  x[2,1] = 0.0 
+  for i=2:nt
+    # currently accounts for missing transits (noncontinuous) 
+    # by rounding [difference in consecutive transit times/Period]
+      x[2,i] = round((tt[i]-tt[1])/period) 
+  end
   sigtt=fixed_noise(tt,sigma)
   # println(tt,sigtt,std(sigtt))
   # coeff[1] is best linear fit approx of first tt,coeff[2] is average period
   coeff,covcoeff = regress(x,tt,sigtt)
   t0,per=coeff[1],coeff[2]
-  return t0,per
+  return x,t0,per
 end
 function collect_linear_times(tt::Array{Float64,1},period::Float64,sigma::Real)
   nt=length(tt)
-  t0,per=find_coeffs(tt,period,sigma)
+  x,t0,per=linear_fit(tt,period,sigma)
   times=collect(t0 .+ per .* range(0,stop = nt-1,length = nt)) 
   return times
 end
-function calc_ttvs_given_coeffs(tt::Array{Float64,1},period::Float64,sigma::Real)
+function calc_ttvs_given_per_est(tt::Array{Float64,1},period::Float64,sigma::Real)
   nt=length(tt)
-  x=find_epochs(tt,period)
-  t0,per=find_coeffs(tt,period,sigma)
+  x,t0,per=linear_fit(tt,period,sigma)
   ttv = tt .- t0.*vec(x[1,1:nt]) .- per.*vec(x[2,1:nt])
   return ttv
 end
@@ -150,16 +141,14 @@ function sim_obs_and_find_times(jd1::Float64,sigma::Real,nyear::Real,obs::String
   jd2 = nyear*365.25 + jd1
   jdsize = 1000
   # dt = (jd2 - jd1)/jdsize
-  # Initial JD times for days in nyear 
   @assert (jd1 >= 2287184.5) #2414105.0
   @assert (jd2 <= 2688976.5) #2488985.0
   t0 = range(jd1,stop=jd2-1,length = jdsize)
 
-  # Compute ephemerides of Sun, Venus and Earth (or EMB)
+  # Compute ephemerides of Sun, Venus and Earth (or EMB):
   pva_sun = zeros(9,jdsize)
   pva_venus = zeros(9,jdsize)
   pva_earth = zeros(9,jdsize)
-  # for i=1:np0
   for i=1:jdsize
     pva_sun[1:9,i] = compute(eph,t0[i],0.5,10,10,options,2)./AU
     pva_venus[1:9,i] = compute(eph,t0[i],0.5,2,10,options,2)./AU
@@ -176,30 +165,28 @@ function sim_obs_and_find_times(jd1::Float64,sigma::Real,nyear::Real,obs::String
     end
   end
 
-  # Find observer location required to see transits
+  # Find observer location required to see transits:
   L_venus = cross(pva_venus[1:3],pva_venus[4:6])
   L_earth = cross(pva_earth[1:3],pva_earth[4:6])
   n_obs = cross(L_earth,L_venus)
   n_obs /= norm(n_obs) #from one direction when both transit
   x_obs,y_obs,z_obs = n_obs[1],n_obs[2],n_obs[3]
 
-  # Actual transit times:
+  # Find actual transit times:
   P_venus = 225.0
   P_earth = 365.0
   P_err = 2
   tt1 = find_times(2,eph,t0,P_venus,P_err,n_obs,10)
   nt1=length(tt1)
   if obs=="fromEMB"
-    # Find times of Earth-Moon barycenter transit:
     tt2 = find_times(3,eph,t0,P_earth,P_err,n_obs,10)
   else
-    # Find times of Earth transit:
     tt2 = find_times(399,eph,t0,P_earth,P_err,n_obs,10)
   end
   nt2=length(tt2)
 
-  t01,per1 = find_coeffs(tt1,P_venus,sigma)
-  t02,per2 = find_coeffs(tt2,P_earth,sigma)
+  t01,per1 = linear_fit(tt1,P_venus,sigma)
+  t02,per2 = linear_fit(tt2,P_earth,sigma)
   sigtt=fixed_noise(tt,sigma)
 
   # Best-fit linear transit times:
@@ -210,7 +197,7 @@ function sim_obs_and_find_times(jd1::Float64,sigma::Real,nyear::Real,obs::String
   body = zeros((nt1+nt2))
   body[1:nt1] .= 1.0
   body[nt1+1:nt1+nt2] .= 2.0
-  return body,tt,tt0
+  return body,tt,tt0,sigtt
 end
 
 function test_sim_obs_and_find_times()
@@ -218,11 +205,11 @@ function test_sim_obs_and_find_times()
   sigma=30.0
   nyear=30.0
   obs="fromEMB"
-  body,tt,tt0=sim_obs_and_find_times(jd1,sigma,nyear,obs)
+  body,tt,tt0,sigtt=sim_obs_and_find_times(jd1,sigma,nyear,obs)
 end
 
 function sim_times(jd1::Float64,sigma::Real,nyear::Real,obs::String)
-  body,tt,tt0=sim_obs_and_find_times(jd1,sigma,nyear,obs)
+  body,tt,tt0,sigtt=sim_obs_and_find_times(jd1,sigma,nyear,obs)
   if obs=="fromEMB"
     name = string("sims/fromEMB/tt_",sigma,"s",nyear,"yrs.txt")
   else
@@ -275,12 +262,12 @@ end
   #   P_venus = 225
   #   P_earth = 365
   #   P_err = 2
-  #   t01,per1=find_coeffs(tt1,P_venus,sigma)
-  #   t02,per2=find_coeffs(tt2,P_venus,sigma)
+  #   t01,per1=linear_fit(tt1,P_venus,sigma)
+  #   t02,per2=linear_fit(tt2,P_venus,sigma)
   #   t1  = collect_linear_times(tt1,P_venus,sigma)
   #   t2  = collect_linear_times(tt2,P_earth,sigma)
-  #   ttv1=calc_ttvs_given_coeffs(tt1,P_venus,sigma)
-  #   ttv2=calc_ttvs_given_coeffs(tt2,P_earth,sigma)  
+  #   ttv1=calc_ttvs_given_per_est(tt1,P_venus,sigma)
+  #   ttv2=calc_ttvs_given_per_est(tt2,P_earth,sigma)  
   #   # subplot(211)
   #   # scatter((t1.-t01)./per1,tt1.-t1) #x is tranit number 
   #   # plot((t1.- t01)./per1,ttv1) 

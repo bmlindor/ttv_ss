@@ -4,101 +4,90 @@
 # end
 import Main.TTVFaster.ttv_wrapper
 import Main.TTVFaster.chisquare
-include("regress.jl")
-include("plot_likelihood.jl")
+include("sim_times.jl")
+
 using DelimitedFiles,JLD2,LsqFit,Statistics
 
 function fit_planet3(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p3in::Float64,p3out::Float64,np3::Int,nphase::Int,obs::String)
   if obs=="fromEMB"
-    fitfile = string("FITS/fromEMB/p3_fit",sigma,"s",nyear,"yrs.jld2")
+    fitfile = string("FITS/fromEMB/p3_fittest",sigma,"s",nyear,"yrs.jld2")
+    results = string("results/fromEMB/p3_fittest",sigma,"s",nyear,"yrs.txt")
+    grid = string("grid/fromEMB/p3_gridtest",sigma,"s",nyear,"yrs.txt")
   elseif obs=="fromEV"
-    fitfile = string("FITS/p3_fit",sigma,"s",nyear,"yrs.jld2")
+    fitfile = string("FITS/p3_fittest",sigma,"s",nyear,"yrs.jld2")
+    results = string("results/p3_fittest",sigma,"s",nyear,"yrs.txt")
+    grid = string("grid/p3_gridtest",sigma,"s",nyear,"yrs.txt")
   end
-  jd2 = nyear*365.25 + jd1
+  @assert isfile(filename)
+  println(filename," loaded.")
   data1 = readdlm(filename,Float64)
-  nt1 = sum(data1[:,1] .== 1.0) 
-  nt2 = sum(data1[:,1] .== 2.0) 
+  nt1 = sum(data1[:,1] .== 1.0)
+  nt2 = sum(data1[:,1] .== 2.0)
   tt1 = vec(data1[1:nt1,3]) .- tref
   tt2 = vec(data1[nt1+1:nt1+nt2,3]) .- tref
   sigtt1 = data1[1:nt1,4]
   sigtt2 = data1[nt1+1:nt1+nt2,4]
 
   # Okay,let's do a linear fit to the transit times (third column):
-  function find_coeffs(tt,period,sigtt)
-    nt = length(tt)
-    x = zeros(2,nt)
-    x[1,1:nt] .= 1.0
-    x[2,1] = 0.0 
-    for i=2:nt
-      x[2,i] = round((tt[i]-tt[1])/period) 
-    end
-    # println(x)
-    coeff,covcoeff = regress(x,tt,sigtt)
-    # println(tt,sigtt,std(sigtt))
-    return coeff,covcoeff
-  end
-
   p1est = median(tt1[2:end] - tt1[1:end-1])
   p2est = median(tt2[2:end] - tt2[1:end-1])
-  coeff1,covcoeff1 = find_coeffs(tt1,p1est,sigtt1)
-  coeff2,covcoeff2 = find_coeffs(tt2,p2est,sigtt2)
-  sigtt=[sigtt1;sigtt2] 
-  # @assert (sigtt[1] .* (24 * 3600) .= sigma)
-  t01 = coeff1[1]; per1 = coeff1[2]
-  t02 = coeff2[1]; per2 = coeff2[2]
-  t1  = collect(t01 .+ per1 .* range(0,stop=nt1-1,length=nt1)) #best fit linear transit times w/o ttvs
+  x1,t01,per1 = linear_fit(tt1,p1est,sigtt1)
+  x2,t02,per2 = linear_fit(tt2,p2est,sigtt2)
+  t1  = collect(t01 .+ per1 .* range(0,stop=nt1-1,length=nt1)) 
   t2  = collect(t02 .+ per2 .* range(0,stop=nt2-1,length=nt2))
-  # Best-fit linear transit times:
+  # Best-fit linear transit times without TTVs:
   tt0 = [t1;t2]
-  weight = ones(nt1+nt2)./ sigtt.^2 #assigns each data point stat weight d.t. noise = 1/σ^2
   # Actual transit times:
   tt=[tt1;tt2]
-
+  sigtt=[sigtt1;sigtt2]
+  weight = ones(nt1+nt2)./ sigtt.^2 #assigns each data point stat weight d.t. noise = 1/σ^2
   # Okay,now let's do a 2-planet fit:
   # param_names = mass ratio,period,initial transit time,e*cos(omega),e*sin(omega)
   init_param = [3e-6,per1,t01,0.01,0.01,
                 3e-6,per2,t02,0.01,0.01] 
   println("Initial parameters: ",init_param)
-  #model = ttv_wrapper2(tt0,param)
   # Set up data structure to hold planet properties,passed to TTVFaster
   jmax = 5
   data=init_param
   p1=TTVFaster.Planet_plane_hk(data[1],data[2],data[3],data[4],data[ 5])
   p2=TTVFaster.Planet_plane_hk(data[6],data[7],data[8],data[9],data[10])
+  # assuming no transits are skipped/duplicated ########### To Change
   time1 = collect(p1.trans0 .+ range(0,stop=nt1-1,length=nt1) .* p1.period)
   time2 = collect(p2.trans0 .+ range(0,stop=nt2-1,length=nt2) .* p2.period)
+  ##########
   # Initialize the computation of the Laplace coefficients:
   ttv1 = zeros(nt1)
   ttv2 = zeros(nt2)
   # Need first call to TTVFaster,without optimizing
-  dummy=TTVFaster.compute_ttv!(jmax,p1,p2,time1,time2,ttv1,ttv2) 
+  dummy=TTVFaster.compute_ttv!(jmax,p1,p2,time1,time2,ttv1,ttv2)
 
   # Now,optimize 2-planet fit
-  #res = optimize(chisquare2,param,method = :l_bfgs,iterations = 21)
   ntrans = [nt1,nt2]
   Nobs = sum(ntrans)
   nplanet = 2
-  # create initial simplex? need function for this?
-  # result = optimize(f0,xcurr,NelderMead(initial_simplex=MySimplexer(),show_trace=true,iterations=1))
+  nparam=10
   println("Initial chi-square: ",chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt,jmax,true))
-  # res = optimize(params -> chisquare(nplanet,ntrans,params,tt,sigtt),init_param) 
-  # init_param = res.minimizer
   param1 = init_param .+ 100.0
   niter = 0
   while maximum(abs.(param1 .- init_param)) > tol && niter < 20
     param1 = init_param
     res = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,true),tt0,tt,weight,init_param)
     init_param = res.param
-    niter+=1
+    niter += 1
     # println("init_param: ",init_param)
     # println("New Initial chi-square: ",chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt))
   end
-  # res = optimize(params -> chisquare(tt0,nplanet,ntrans,params,tt,sigtt),init_param) 
-  # init_param = res.minimizer
-  # fit2 = curve_fit(ttv_wrapper2,tt0,tt,weight,param; show_trace=true)
-  println("Finished 2-planet fit in ",niter," iterations.")
-  println("New 2-planet chi-square: ",chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt,jmax,true))
-  println("Param: ",init_param)
+  println("New initial 2-planet fit: ",init_param," in ",niter," iterations.")
+
+  fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,true),tt0,tt,weight,init_param)
+  cov=estimate_covar(fit)
+  err=[sqrt(cov[i,j]) for i=1:nparam, j=1:nparam if i==j ]
+  best_p2 = fit.param ##### is this the global p2 fit???
+  ttmodel = ttv_wrapper(tt0,nplanet,ntrans,best_p2,jmax,true)
+  lprob_best_p2= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
+  # println("Finished 2-planet fit") 
+  println("New 2-planet chi-square: ",chisquare(tt0,nplanet,ntrans,best_p2,tt,sigtt,jmax,true))
+  println("Maximum: ",lprob_best_p2," Param: ",best_p2)
 
   # Now,let's add the 3rd planet:
   ntrans = [nt1,nt2,2] #requires at least 2 transits for each planet (even if it doesnt transit)
@@ -120,7 +109,7 @@ function fit_planet3(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref:
     for i=1:nphase
      # p3 param_names: mass ratio,phase,ecosw,esinw
       param_tmp = [log10(1e-3),phase[i],0.01,0.01] 
-      param3 = [init_param;param_tmp] #concatenate 2 planet model to 3 planet model params
+      param3 = [best_p2;param_tmp] #concatenate 2 planet model to 3 planet model params
       p3_cur = p3[j] #sets jupiter period to global value
       param1 = param3 .+ 100.0
       niter=0
@@ -160,13 +149,35 @@ function fit_planet3(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref:
   #  = number of transits - number of model parameters (15):
   # plot(p3/365.25,exp.(-0.5*(chi_p3 .-minimum(chi_p3))))
 
+  open(grid,"w") do io
+    writedlm(io,zip(p3,lprob_p3))
+  end
   fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,true),tt0,tt,weight,p3best)
+  cov=estimate_covar(fit)
+  err=[sqrt(cov[i,j]) for i=1:nparam, j=1:nparam if i==j ]
   best_p3 = fit.param
   ttmodel = ttv_wrapper(tt0,nplanet,ntrans,best_p3,jmax,true)
   lprob_best_p3= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
-  println("Finished global 3-planet fit.")
+  # println("Finished global 3-planet fit.")
   println("New 3-planet chi-square: ",chisquare(tt0,nplanet,ntrans,best_p3,tt,sigtt,jmax,true))
   println("Maximum: ",lprob_best_p3," Param: ",best_p3)
+
+  pname=["mu_1","P_1","t01","ecos1","esin1",
+        "mu_2","P_2","t02","ecos2","esin2",
+        "mu_3","P_3","t03","ecos3","esin3"]
+  mean_mp=[best_p3[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
+  mp_errs=[err[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
+  mean_ecc=[sqrt(best_p3[(iplanet-1)*5+4]^2 + best_p3[(iplanet-1)*5+4]^2) for iplanet=1:nplanet]
+  ecc_errs=[sqrt(err[(iplanet-1)*5+4]^2 + err[(iplanet-1)*5+4]^2) for iplanet=1:nplanet]
+
+  open(results,"w") do io
+    println(io,"Global Fit Results.",'\n',"per 3 range=[",p3in," - ",p3out,", length=",np3,"]")
+    for i=1:nparam
+      println(io,pname[i],": ",best_p3[i]," ± ",err[i])
+    end
+    println(io,"Retrieved Earth masses:",'\n',mean_mp,'\n'," ± ",mp_errs)
+    println(io,"Retrieved eccentricity:",'\n',mean_ecc,'\n'," ± ",ecc_errs)
+  end
   plot_profile(p3,lprob_p3,p3_cur,50,[sigma,nyear],"firebrick","Jupiter")
   title=string("IMAGES/likelihoods/",obs,"Jupiter",sigma,"secs",nyear,"yrs.png")
   savefig(title)
