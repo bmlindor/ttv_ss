@@ -5,9 +5,10 @@ end
 import Main.TTVFaster.ttv_wrapper
 import Main.TTVFaster.chisquare
 include("sim_times.jl")
+include("CGS.jl")
 using DelimitedFiles,JLD2,Optim,LsqFit,Statistics
 
-function fit_planet2(filename::Array{}, jmax::Int,tref::Real,tol::Real)
+function fit_planet2(filename::String, jmax::Int,tref::Real,tol::Real)
   # (::Core.kwftype(typeof(fit_planet2)))(kws, fit_planet2, data_file, jmax)
   # if haskey(kws, :jmax)
   #     jmax = kws.jmax
@@ -17,7 +18,7 @@ function fit_planet2(filename::Array{}, jmax::Int,tref::Real,tol::Real)
   # # etc.
   # Loads .txt datafile with following columns: 
   #body_number (n), initial time of transit (tt0), actual transit times (tt), measurement error (sigtt)
-  # data_file = readdlm(filename,Float64)
+  data_file = readdlm(filename,Float64)
   nt1 = sum(data_file[:,1] .== 1.0)
   nt2 = sum(data_file[:,1] .== 2.0)
   tt1 = vec(data_file[1:nt1,3]) .- tref
@@ -26,8 +27,8 @@ function fit_planet2(filename::Array{}, jmax::Int,tref::Real,tol::Real)
   sigtt2 = data_file[nt1+1:nt1+nt2,4]
   # Okay,let's do a linear fit to the transit times (third column):
   # Guess the planets' period by finding median of transit times
-  p1_est = median(tt1[2:end] - tt1[1:end-1])
-  p2_est = median(tt2[2:end] - tt2[1:end-1])
+  p1est = median(tt1[2:end] - tt1[1:end-1])
+  p2est = median(tt2[2:end] - tt2[1:end-1])
   x1,t01,per1 = linear_fit(tt1,p1est,sigtt1)
   x2,t02,per2 = linear_fit(tt2,p2est,sigtt2)
   t1  = collect(t01 .+ per1 .* range(0,stop=nt1-1,length=nt1)) 
@@ -85,17 +86,17 @@ end
 # If the simulation already exists, can just do 2-planet fit
 function fit_planet2(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,obs::String)
   if obs=="fromEMB"
-    datafile = string("sims/fromEMB/tt_",sigma,"s",nyear,"yrs.txt")
+    datafile = string("INPUTS/tt_",sigma,"sEMB",nyear,"yrs.txt")
     outfile = string("FITS/fromEMB/p2_fit",sigma,"s",nyear,"yrs.jld2")
     results = string("results/fromEMB/p2_fit",sigma,"s",nyear,"yrs.txt")
   elseif obs=="fromEV"
-    datafile = string("sims/tt_",sigma,"s",nyear,"yrs.txt")
+    datafile = string("INPUTS/tt_",sigma,"snoEMB",nyear,"yrs.txt")
     outfile = string("FITS/p2_fit",sigma,"s",nyear,"yrs.jld2")
     results = string("results/p2_fit",sigma,"s",nyear,"yrs.txt")
   end
   @assert isfile(datafile)
   println(datafile," loaded.")
-  data1 = readdlm(datafile,Float64)
+  data1 = readdlm(datafile,Float64,comments=true)
   nt1 = sum(data1[:,1] .== 1.0)
   nt2 = sum(data1[:,1] .== 2.0)
   tt1 = vec(data1[1:nt1,3]) .- tref

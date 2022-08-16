@@ -5,7 +5,7 @@
 import Main.TTVFaster.ttv_wrapper
 import Main.TTVFaster.chisquare
 include("sim_times.jl")
-
+include("CGS.jl")
 using DelimitedFiles,JLD2,LsqFit,Statistics
 
 function fit_planet3(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p3in::Float64,p3out::Float64,np3::Int,nphase::Int,obs::String)
@@ -20,7 +20,7 @@ function fit_planet3(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref:
   end
   @assert isfile(filename)
   println(filename," loaded.")
-  data1 = readdlm(filename,Float64)
+  data1 = readdlm(filename,Float64,comments=true)
   nt1 = sum(data1[:,1] .== 1.0)
   nt2 = sum(data1[:,1] .== 2.0)
   tt1 = vec(data1[1:nt1,3]) .- tref
@@ -139,7 +139,7 @@ function fit_planet3(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref:
       #   param_p3[1:nparam,j] = [fit.param[1:10];10^fit.param[11];p3_cur;fit.param[12:end]]
       # end
     end
-    println("Period: ",p3[j]," log Prob: ",lprob_p3[j]," Param: ",vec(param_p3[1:nparam,j]))
+    # println("Period: ",p3[j]," log Prob: ",lprob_p3[j]," Param: ",vec(param_p3[1:nparam,j]))
   end
   println("Finished 3-planet fit w/ fixed period: ",p3best," in ",niter," iterations")
   # Make likelihood profile continuous???

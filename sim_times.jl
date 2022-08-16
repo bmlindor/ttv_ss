@@ -92,7 +92,7 @@ function find_times(body_id::Int,eph::CALCEPH.Ephem,t0,period::Float64,period_er
   end
   return times
 end
-function fixed_noise(tt::Array{Float64,1},sigma::Real)
+function fixed_noise(tt::Vector{Float64},sigma::Real)
   Random.seed!(42)
   # Add noise to transit times:
   if sigma > 0
@@ -188,7 +188,7 @@ function sim_obs_and_find_times(jd1::Float64,sigma::Real,nyear::Real,obs::String
 
   x1,t01,per1 = linear_fit(tt1,P_venus,sigtt1)
   x2,t02,per2 = linear_fit(tt2,P_earth,sigtt2)
-	#println("coefficients: ",t02," , ",per2)
+	# println("coefficients: ",t02," , ",per2)
 	tt=[tt1;tt2]
 
   # Best-fit linear transit times:
@@ -200,13 +200,15 @@ function sim_obs_and_find_times(jd1::Float64,sigma::Real,nyear::Real,obs::String
   body = zeros((nt1+nt2))
   body[1:nt1] .= 1.0
   body[nt1+1:nt1+nt2] .= 2.0
+  # scatter((t2.-t02)./per2,tt2.-t2)
+  # plot((t2.-t02)./per2,tt2.-t2)
   return body,tt0,tt,sigtt
 end
 
 function test_sim_obs_and_find_times()
   jd1=2.4332825e6
   sigma=30.0
-  nyear=30.0
+  nyear=10.0
   obs="fromEMB"
   body,tt0,tt,sigtt=sim_obs_and_find_times(jd1,sigma,nyear,obs)
 end
@@ -219,7 +221,7 @@ function sim_times(jd1::Float64,sigma::Real,nyear::Real,obs::String)
     name = string("sims/tt_",sigma,"s",nyear,"yrs.txt")
   end
   open(name,"w") do io
-    println(io,"#body",'\t',"tt0",'\t',"tt",'\t',"sigtt")
+    # println(io,"#body",'\t',"tt0",'\t',"tt",'\t',"sigtt")
     for i=1:length(tt)
       println(io,body[i],'\t',tt0[i],'\t',tt[i],'\t',sigtt[i])
     end

@@ -19,7 +19,7 @@ function fit_planet5(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref:
   end
    @assert isfile(filename)
   println(filename," loaded.")
-  data1 = readdlm(filename,Float64)
+  data1 = readdlm(filename,Float64,comments=true)
   nt1 = sum(data1[:,1] .== 1.0)
   nt2 = sum(data1[:,1] .== 2.0)
   tt1 = vec(data1[1:nt1,3]) .- tref

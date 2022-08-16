@@ -6,6 +6,7 @@ import Main.TTVFaster.ttv_wrapper
 import Main.TTVFaster.chisquare
 include("sim_times.jl")
 include("misc.jl")
+include("CGS.jl")
 using DelimitedFiles,JLD2,Optim,LsqFit,Statistics
 
 function fit_planet4(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p3in::Float64,p3out::Float64,np3::Int,nphase::Int,p4in::Float64,p4out::Float64,np4::Int,obs::String)
@@ -20,7 +21,7 @@ function fit_planet4(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref:
   end
   @assert isfile(filename)
   println(filename," loaded.")
-    data1 = readdlm(filename,Float64,comments=true)
+  data1 = readdlm(filename,Float64,comments=true)
   nt1 = sum(data1[:,1] .== 1.0)
   nt2 = sum(data1[:,1] .== 2.0)
   tt1 = vec(data1[1:nt1,3]) .- tref
