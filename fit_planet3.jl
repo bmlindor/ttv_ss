@@ -178,14 +178,33 @@ function fit_planet3(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref:
     println(io,"Retrieved Earth masses:",'\n',mean_mp,'\n'," ± ",mp_errs)
     println(io,"Retrieved eccentricity:",'\n',mean_ecc,'\n'," ± ",ecc_errs)
   end
-  plot_profile(p3,lprob_p3,p3_cur,50,[sigma,nyear],"firebrick","Jupiter")
-  title=string("IMAGES/likelihoods/",obs,"Jupiter",sigma,"secs",nyear,"yrs.png")
-  savefig(title)
+  # plot_profile(p3,lprob_p3,p3_cur,50,[sigma,nyear],"firebrick","Jupiter")
+  # title=string("IMAGES/likelihoods/",obs,"Jupiter",sigma,"secs",nyear,"yrs.png")
+  # savefig(title)
   # Create files
   @save fitfile p3 lprob_p3 best_p3 lprob_best_p3 p3best ntrans nplanet tt0 tt ttmodel sigtt
   return lprob_best_p3,best_p3,lprob_p3,p3
 end
-# If the 2-planet fit already exists, can just do 3-planet search
+
+"""
+    fit_planet3(jd1,sigma,nyear,tref,tol,p3in,p3out,np3,nphase,obs)
+
+ If the 2-planet fit already exists, just do 3-planet fit.
+# Arguments:
+- `jd1::Float64`: starting Julian Ephemeris Date of observations.
+- `sigma::Real`: fixed noised added to observations.
+- `nyear::Real`: time span of observations.
+- `tref::Real`: JED to subtract from transit times to aid fit of low mass planets.
+- `tol::Real`: tolerance level of fit.
+- `p3in::Float64`: starting period to perform seach for Jupiter-like planet (in days)
+- `p3out::Float64`: ending period to perform seach for Jupiter-like planet (in days)
+- `np3::Int`: number of periods to fit
+- `nphase::Int`: number of phases to fit
+- `obs::String`: source of observations for body 2 (EMB or EV).
+# Returns:
+- `best_p2::Vector{Float64}`: list of global best paramters for 3 planets given the observed transit times.
+- `lprob_best_p2::Float64`: log probability of detecting 3 planets with the given properties.
+"""
 function fit_planet3(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p3in::Float64,p3out::Float64,np3::Int,nphase::Int,obs::String)
   if obs=="fromEMB"
     infile = string("FITS/fromEMB/p2_fit",sigma,"s",nyear,"yrs.jld2")
@@ -230,8 +249,8 @@ function fit_planet3(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
     for i=1:nphase 
      # p3 param_names: mass ratio,phase,ecosw,esinw
       param_tmp = [log10(1e-3),phase[i],0.01,0.01] 
-      param3 = [best_p2;param_tmp] #concatenate 2 planet model to 3 planet model params
-      p3_cur = p3[j] #sets jupiter period to global value
+      param3 = [best_p2;param_tmp] 
+      p3_cur = p3[j] 
       param1 = param3 .+ 100.0
       niter=0
       while maximum(abs.(param1 .- param3)) > tol && niter < 20
@@ -250,7 +269,7 @@ function fit_planet3(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
       end
       if lprob_phase[i] > lprob_p3[j] # checks best fit over all phases of jupiter for this particular period
         lprob_p3[j] = lprob_phase[i]
-        param_p3[1:nparam,j] =  [fit.param[1:10];10^fit.param[11];p3_cur;fit.param[12:end]]
+        param_p3[1:nparam,j] = [fit.param[1:10];10^fit.param[11];p3_cur;fit.param[12:end]]
       end
     end
     # println("Period: ",p3[j]," log Prob: ",lprob_p3[j]," Param: ",vec(param_p3[1:nparam,j]))
