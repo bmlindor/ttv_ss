@@ -1,13 +1,7 @@
-if !@isdefined(TTVFaster)
-    include("TTVFaster/src/TTVFaster.jl")
-    using Main.TTVFaster
-end
-import Main.TTVFaster.ttv_wrapper
-import Main.TTVFaster.chisquare
 include("sim_times.jl")
 include("misc.jl")
 include("CGS.jl")
-using DelimitedFiles,JLD2,Optim,LsqFit,Statistics
+using DelimitedFiles,JLD2,LsqFit,Statistics
 
 function fit_planet4(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p3in::Float64,p3out::Float64,np3::Int,nphase::Int,p4in::Float64,p4out::Float64,np4::Int,obs::String)
   if obs=="fromEMB"
@@ -282,17 +276,22 @@ function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
       lprob_phase[i]= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
       if lprob_phase[i] > lprob_best
         lprob_best = lprob_phase[i]
-        p4best = [fit.param[1:10];10^param4[11];p4_cur;fit.param[12:end]]
+        p4best = [fit.param[1:10];10^fit.param[11];p4_cur;fit.param[12:end]]
       end
       if lprob_phase[i] > lprob_p4[j] 
         lprob_p4[j] = lprob_phase[i]
-        param_p4[1:nparam,j] =  [fit.param[1:10];10^param4[11];p4_cur;fit.param[12:end]]
+        param_p4[1:nparam,j] =  [fit.param[1:10];10^fit.param[11];p4_cur;fit.param[12:end]]
       end
     end
     # println("Period: ",p4[j]," log Prob: ",lprob_p4[j]," Param: ",vec(param_p4[1:nparam,j]))
   end
   println("Finished 4-planet fit w/ fixed period: ",p4best," in ",niter," iterations")
 	open(grid,"w") do io
+		for i=1:nparam
+			for j=1:np4
+				println(io, param_p4[i,j])
+			end
+		end	
 	  writedlm(io,zip(p4,lprob_p4))
 	end
 	fig=figure(figsize=(6,6))
@@ -328,10 +327,9 @@ function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
     println(io,"Retrieved Earth masses:",'\n',mean_mp,'\n'," ± ",mp_errs)
     println(io,"Retrieved eccentricity:",'\n',mean_ecc,'\n'," ± ",ecc_errs)
   end
-	peak=second_peak(p4,lprob_p4)
 
   #@save outfile p3 lprob_p3 best_p3 lprob_best_p3 p4 lprob_p4 best_p4 lprob_best_p4 ntrans nplanet tt0 tt ttmodel sigtt nphase
-  return peak 
+  return param_p4,lprob_p4
 end
 # If 3-planet fit with moon already exists, can do 4-planet search
 function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p4in::Float64,p4out::Float64,np4::Int,nphase::Int)

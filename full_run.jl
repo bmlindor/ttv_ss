@@ -3,12 +3,6 @@ function show_args(args)
 end
 using Profile
 using DelimitedFiles,JLD2,LsqFit,Statistics
-if !@isdefined(TTVFaster)
-    include("TTVFaster/src/TTVFaster.jl")
-  using Main.TTVFaster
-end
-import Main.TTVFaster.ttv_wrapper
-import Main.TTVFaster.chisquare
 include("regress.jl")
 include("sim_times.jl")
 include("fit_planet2.jl")

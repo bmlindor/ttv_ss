@@ -1,9 +1,3 @@
-if !@isdefined(TTVFaster)
-    include("TTVFaster/src/TTVFaster.jl")
-    using Main.TTVFaster
-end
-import Main.TTVFaster.ttv_wrapper
-import Main.TTVFaster.chisquare
 include("sim_times.jl")
 using DelimitedFiles,JLD2,Optim,LsqFit,Statistics
 
