@@ -1,7 +1,7 @@
 include("sim_times.jl")
 include("misc.jl")
 include("CGS.jl")
-using DelimitedFiles,JLD2,LsqFit,Statistics
+using DelimitedFiles,JLD2,LsqFit,Statistics,DataFrames
 
 function fit_planet4(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p3in::Float64,p3out::Float64,np3::Int,nphase::Int,p4in::Float64,p4out::Float64,np4::Int,obs::String)
   if obs=="fromEMB"
@@ -216,19 +216,38 @@ function fit_planet4(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref:
   @save fitfile p3 lprob_p3 best_p3 lprob_best_p3 p4 lprob_p4 best_p4 lprob_best_p4 ntrans nplanet tt0 tt ttmodel sigtt
   return best_p3,best_p4 
 end
+
+
+
 # If 3-planet fit already exists, can just do 4-planet search
-function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p4in::Float64,p4out::Float64,np4::Int,nphase::Int,obs::String)
+function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p4in::Float64,p4out::Float64,np4::Int,nphase::Int,options::Array{String})
+obs=options[1]; grid_type=options[2]
+	if grid_type=="accurate"
   if obs=="fromEMB"
     infile = string("FITS/fromEMB/p3_fit",sigma,"s",nyear,"yrs.jld2")
     outfile = string("FITS/fromEMB/p4_fit",sigma,"s",nyear,"yrs.jld2")
     results = string("results/fromEMB/p4_fit",sigma,"s",nyear,"yrs.txt")
-    grid = string("grid/fromEMB/p4_grid",sigma,"s",nyear,"yrs.txt")
+    grid = string("grid/fromEMB/p4_grid",sigma,"s",nyear,"yrs.csv")
   elseif obs=="fromEV"
     infile = string("FITS/p3_fit",sigma,"s",nyear,"yrs.jld2")
     outfile = string("FITS/p4_fit",sigma,"s",nyear,"yrs.jld2")
     results = string("results/p4_fit",sigma,"s",nyear,"yrs.txt")
-    grid = string("grid/p4_grid",sigma,"s",nyear,"yrs.txt")
+    grid = string("grid/p4_grid",sigma,"s",nyear,"yrs.csv")
   end
+	end
+	if grid_type=="wide"
+	if obs=="fromEMB"
+    infile = string("FITS/fromEMB/widep3_fit",sigma,"s",nyear,"yrs.jld2")
+    outfile = string("FITS/fromEMB/widep4_fit",sigma,"s",nyear,"yrs.jld2")
+    results = string("results/fromEMB/widep4_fit",sigma,"s",nyear,"yrs.txt")
+    grid = string("grid/fromEMB/widep4_grid",sigma,"s",nyear,"yrs.txt")
+  elseif obs=="fromEV"
+    infile = string("FITS/widep3_fit",sigma,"s",nyear,"yrs.jld2")
+    outfile = string("FITS/widep4_fit",sigma,"s",nyear,"yrs.jld2")
+    results = string("results/widep4_fit",sigma,"s",nyear,"yrs.txt")
+    grid = string("grid/widep4_grid",sigma,"s",nyear,"yrs.txt")
+  end
+	end
   @assert isfile(infile)
   m = jldopen(String(infile),"r")
   tt0,tt,ttmodel,sigtt=m["tt0"],m["tt"],m["ttmodel"],m["sigtt"]
@@ -286,13 +305,13 @@ function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
     # println("Period: ",p4[j]," log Prob: ",lprob_p4[j]," Param: ",vec(param_p4[1:nparam,j]))
   end
   println("Finished 4-planet fit w/ fixed period: ",p4best," in ",niter," iterations")
+	df=DataFrame(mu_1=param_p4[1,:],P_1=param_p4[2,:],t01=param_p4[3,:],ecos1=param_p4[4,:],esin1=param_p4[5,:],
+								mu_2=param_p4[6,:],P_2=param_p4[7,:],t02=param_p4[8,:],ecos2=param_p4[9,:],esin2=param_p4[10,:],
+								mu_3=param_p4[11,:],P_3=param_p4[12,:],t03=param_p4[13,:],ecos3=param_p4[14,:],esin3=param_p4[15,:],
+								mu_4=param_p4[16,:],P_4=param_p4[17,:],t04=param_p4[18,:],ecos4=param_p4[19,:],esin=param_p4[20,:],
+								lprob=lprob_p4[:])
 	open(grid,"w") do io
-		for i=1:nparam
-			for j=1:np4
-				println(io, param_p4[i,j])
-			end
-		end	
-	  writedlm(io,zip(p4,lprob_p4))
+	  writedlm(io,eachrow(df))
 	end
 	fig=figure(figsize=(6,6))
   subplots_adjust(hspace=0.05,wspace=0.05)
@@ -331,6 +350,9 @@ function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
   #@save outfile p3 lprob_p3 best_p3 lprob_best_p3 p4 lprob_p4 best_p4 lprob_best_p4 ntrans nplanet tt0 tt ttmodel sigtt nphase
   return param_p4,lprob_p4
 end
+
+
+
 # If 3-planet fit with moon already exists, can do 4-planet search
 function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p4in::Float64,p4out::Float64,np4::Int,nphase::Int)
   infile = string("FITS/p3moon_fit",sigma,"s",nyear,"yrs.jld2")

@@ -179,9 +179,14 @@ function fit_planet3(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref:
   @save fitfile p3 lprob_p3 best_p3 lprob_best_p3 p3best ntrans nplanet tt0 tt ttmodel sigtt
   return lprob_best_p3,best_p3,lprob_p3,p3
 end
+
+
+
 # If the 2-planet fit already exists, can just do 3-planet search
-function fit_planet3(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p3in::Float64,p3out::Float64,np3::Int,nphase::Int,obs::String)
-  if obs=="fromEMB"
+function fit_planet3(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p3in::Float64,p3out::Float64,np3::Int,nphase::Int,options::Array{String}=["fromEMB","accurate"])
+obs=options[1]; grid_type=options[2]
+	if grid_type=="accurate"
+	if obs=="fromEMB"
     infile = string("FITS/fromEMB/p2_fit",sigma,"s",nyear,"yrs.jld2")
     outfile = string("FITS/fromEMB/p3_fit",sigma,"s",nyear,"yrs.jld2")
     results = string("results/fromEMB/p3_fit",sigma,"s",nyear,"yrs.txt")
@@ -192,6 +197,20 @@ function fit_planet3(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
     results = string("results/p3_fit",sigma,"s",nyear,"yrs.txt")
     grid = string("grid/p3_grid",sigma,"s",nyear,"yrs.txt")
   end
+	end
+	if grid_type=="wide"
+	if obs=="fromEMB"
+    infile = string("FITS/fromEMB/p2_fit",sigma,"s",nyear,"yrs.jld2")
+    outfile = string("FITS/fromEMB/widep3_fit",sigma,"s",nyear,"yrs.jld2")
+    results = string("results/fromEMB/widep3_fit",sigma,"s",nyear,"yrs.txt")
+    grid = string("grid/fromEMB/widep3_grid",sigma,"s",nyear,"yrs.txt")
+  elseif obs=="fromEV"
+    infile = string("FITS/p2_fit",sigma,"s",nyear,"yrs.jld2")
+    outfile = string("FITS/widep3_fit",sigma,"s",nyear,"yrs.jld2")
+    results = string("results/widep3_fit",sigma,"s",nyear,"yrs.txt")
+    grid = string("grid/widep3_grid",sigma,"s",nyear,"yrs.txt")
+  end
+	end
   @assert isfile(infile)
   p = jldopen(String(infile),"r")
   tt0,tt,ttmodel,sigtt=p["tt0"],p["tt"],p["ttmodel"],p["sigtt"]
