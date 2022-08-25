@@ -77,7 +77,22 @@ function fit_planet2(filename::String, jmax::Int,tref::Real,tol::Real)
   @save outfile chi2 init_param lprob_best ntrans nplanet tt0 tt ttmodel sigtt
   return 
 end
-# If the simulation already exists, can just do 2-planet fit
+
+"""
+    fit_planet2(jd1,sigma,nyear,tref,tol,obs)
+
+ If the observations already exists, do 2-planet fit.
+# Arguments:
+- `jd1::Float64`: starting Julian Ephemeris Date of observations.
+- `sigma::Real`: fixed noised added to observations.
+- `nyear::Real`: time span of observations.
+- `tref::Real`: JED to subtract from transit times to aid fit of low mass planets.
+- `tol::Real`: tolerance level of fit.
+- `obs::String`: source of observations for body 2 (EMB or EV).
+# Returns:
+- `best_p2::Vector{Float64}`: list of global best paramters for 2 planets given the observed transit times.
+- `lprob_best_p2::Float64`: log probability of detecting 2 planets with the given properties.
+"""
 function fit_planet2(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,obs::String)
   if obs=="fromEMB"
     datafile = string("INPUTS/tt_",sigma,"sEMB",nyear,"yrs.txt")
