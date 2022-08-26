@@ -1,7 +1,7 @@
 include("sim_times.jl")
 include("misc.jl")
 include("CGS.jl")
-using DelimitedFiles,JLD2,LsqFit,Statistics,DataFrames
+using TTVFaster,DelimitedFiles,JLD2,LsqFit,Statistics,DataFrames,CSV
 
 function fit_planet4(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p3in::Float64,p3out::Float64,np3::Int,nphase::Int,p4in::Float64,p4out::Float64,np4::Int,obs::String)
   if obs=="fromEMB"
@@ -217,11 +217,27 @@ function fit_planet4(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref:
   return best_p3,best_p4 
 end
 
+"""
+    fit_planet4(jd1,sigma,nyear,tref,tol,p4in,p4out,np4,nphase,options)
 
-
+# Arguments:
+- `jd1::Float64`: starting Julian Ephemeris Date of observations.
+- `sigma::Real`: fixed noised added to observations.
+- `nyear::Real`: time span of observations.
+- `tref::Real`: JED to subtract from transit times to aid fit of low mass planets.
+- `tol::Real`: tolerance level of fit.
+- `p4in::Float64`: starting period to perform seach for Mars-like planet (in days)
+- `p4out::Float64`: ending period to perform seach for Mars-like planet (in days)
+- `np4::Int`: number of periods to fit
+- `nphase::Int`: number of phases to fit
+- `options::Array{String}`:arg 1=source of observations for body 2 (EMB or EV); arg 2=whether grid is accurate or wide)
+# Returns:
+- `best_p3::Array{Float64}`: list of global best paramters for 4 planets given the observed transit times.
+- `lprob_best_p3::Float64`: log probability of detecting 4 planets with the given properties.
+"""
 # If 3-planet fit already exists, can just do 4-planet search
-function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p4in::Float64,p4out::Float64,np4::Int,nphase::Int,options::Array{String})
-obs=options[1]; grid_type=options[2]
+function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p4in::Float64,p4out::Float64,np4::Int,nphase::Int,options::Array{String},save_as_jld2::Bool=false)
+	obs=options[1]; grid_type=options[2]
 	if grid_type=="accurate"
   if obs=="fromEMB"
     infile = string("FITS/fromEMB/p3_fit",sigma,"s",nyear,"yrs.jld2")
@@ -237,15 +253,15 @@ obs=options[1]; grid_type=options[2]
 	end
 	if grid_type=="wide"
 	if obs=="fromEMB"
-    infile = string("FITS/fromEMB/widep3_fit",sigma,"s",nyear,"yrs.jld2")
+    infile = string("FITS/fromEMB/p3_fit",sigma,"s",nyear,"yrs.jld2")
     outfile = string("FITS/fromEMB/widep4_fit",sigma,"s",nyear,"yrs.jld2")
     results = string("results/fromEMB/widep4_fit",sigma,"s",nyear,"yrs.txt")
-    grid = string("grid/fromEMB/widep4_grid",sigma,"s",nyear,"yrs.txt")
+    grid = string("grid/fromEMB/widep4_grid",sigma,"s",nyear,"yrs.csv")
   elseif obs=="fromEV"
-    infile = string("FITS/widep3_fit",sigma,"s",nyear,"yrs.jld2")
+    infile = string("FITS/p3_fit",sigma,"s",nyear,"yrs.jld2")
     outfile = string("FITS/widep4_fit",sigma,"s",nyear,"yrs.jld2")
     results = string("results/widep4_fit",sigma,"s",nyear,"yrs.txt")
-    grid = string("grid/widep4_grid",sigma,"s",nyear,"yrs.txt")
+    grid = string("grid/widep4_grid",sigma,"s",nyear,"yrs.csv")
   end
 	end
   @assert isfile(infile)
@@ -308,21 +324,13 @@ obs=options[1]; grid_type=options[2]
 	df=DataFrame(mu_1=param_p4[1,:],P_1=param_p4[2,:],t01=param_p4[3,:],ecos1=param_p4[4,:],esin1=param_p4[5,:],
 								mu_2=param_p4[6,:],P_2=param_p4[7,:],t02=param_p4[8,:],ecos2=param_p4[9,:],esin2=param_p4[10,:],
 								mu_3=param_p4[11,:],P_3=param_p4[12,:],t03=param_p4[13,:],ecos3=param_p4[14,:],esin3=param_p4[15,:],
-								mu_4=param_p4[16,:],P_4=param_p4[17,:],t04=param_p4[18,:],ecos4=param_p4[19,:],esin=param_p4[20,:],
+								mu_4=param_p4[16,:],P_4=param_p4[17,:],t04=param_p4[18,:],ecos4=param_p4[19,:],esin4=param_p4[20,:],
 								lprob=lprob_p4[:])
-	open(grid,"w") do io
-	  writedlm(io,eachrow(df))
-	end
-	fig=figure(figsize=(6,6))
-  subplots_adjust(hspace=0.05,wspace=0.05)
-	ax1=gca()
-	ax1.plot(p4 ./365.25,exp.(lprob_p4 .- maximum(lprob_p4)))
-  ax1.axvline( 1.88,linestyle="--",color="black") 
-	@show()
+	CSV.write(grid,df)
+
   fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,true),tt0,tt,weight,p4best)
-  cov=estimate_covar(fit)
+  cov=estimate_covar(fit) ;  best_p4 = fit.param 
   err=[sqrt(cov[i,j]) for i=1:nparam, j=1:nparam if i==j ]
-  best_p4 = fit.param
   ttmodel = ttv_wrapper(tt0,nplanet,ntrans,best_p4,jmax,true)
   lprob_best_p4= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
   # println("Finished global 4-planet fit.")
@@ -346,17 +354,45 @@ obs=options[1]; grid_type=options[2]
     println(io,"Retrieved Earth masses:",'\n',mean_mp,'\n'," ± ",mp_errs)
     println(io,"Retrieved eccentricity:",'\n',mean_ecc,'\n'," ± ",ecc_errs)
   end
-
-  #@save outfile p3 lprob_p3 best_p3 lprob_best_p3 p4 lprob_p4 best_p4 lprob_best_p4 ntrans nplanet tt0 tt ttmodel sigtt nphase
+	if save_as_jld2
+  @save outfile p3 lprob_p3 best_p3 lprob_best_p3 p4 lprob_p4 best_p4 lprob_best_p4 ntrans nplanet tt0 tt ttmodel sigtt nphase
+	end
   return param_p4,lprob_p4
 end
 
+"""
+    fit_planet4(jd1,sigma,nyear,tref,tol,p4in,p4out,np4,nphase,options)
 
-
+# Arguments:
+- `jd1::Float64`: starting Julian Ephemeris Date of observations.
+- `sigma::Real`: fixed noised added to observations.
+- `nyear::Real`: time span of observations.
+- `tref::Real`: JED to subtract from transit times to aid fit of low mass planets.
+- `tol::Real`: tolerance level of fit.
+- `p4in::Float64`: starting period to perform seach for Mars-like planet (in days)
+- `p4out::Float64`: ending period to perform seach for Mars-like planet (in days)
+- `np4::Int`: number of periods to fit
+- `nphase::Int`: number of phases to fit
+- `options::Array{String}`:arg 1=source of observations for body 2 (EMB or EV); arg 2=whether grid is accurate or wide)
+# Returns:
+- `best_p3::Array{Float64}`: list of global best paramters for 4 planets given the observed transit times.
+- `lprob_best_p3::Float64`: log probability of detecting 4 planets with the given properties.
+"""
 # If 3-planet fit with moon already exists, can do 4-planet search
-function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p4in::Float64,p4out::Float64,np4::Int,nphase::Int)
+function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p4in::Float64,p4out::Float64,np4::Int,nphase::Int,options::Array{String},save_as_jld2::Bool=false)
+	obs=options[1]; grid_type=options[2]
+	if grid_type=="accurate"
   infile = string("FITS/p3moon_fit",sigma,"s",nyear,"yrs.jld2")
   outfile = string("FITS/moonp4_fit",sigma,"s",nyear,"yrs.jld2")
+  results = string("results/moonp4_fit",sigma,"s",nyear,"yrs.txt")
+  grid = string("grid/moonp4_grid",sigma,"s",nyear,"yrs.csv")
+	end
+	if grid_type=="wide" 
+  infile = string("FITS/widep3moon_fit",sigma,"s",nyear,"yrs.jld2")
+  outfile = string("FITS/widemoonp4_fit",sigma,"s",nyear,"yrs.jld2")
+  results = string("results/widemoonp4_fit",sigma,"s",nyear,"yrs.txt")
+  grid = string("grid/widemoonp4_grid",sigma,"s",nyear,"yrs.csv")
+	end
   @assert isfile(infile)
   m = jldopen(String(infile),"r")
   tt0,tt,ttmodel,sigtt=m["tt0"],m["tt"],m["ttmodel"],m["sigtt"]
@@ -420,13 +456,17 @@ function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
     # println("Period: ",p4[j]," log Prob: ",lprob_p4[j]," Param: ",vec(param_p4[1:nparam,j]))
   end
   println("Finished 4-planet fit w/ fixed period: ",p4best," in ",niter," iterations")
-	open(grid,"w") do io
-	  writedlm(io,zip(p4,lprob_p4))
-	end
+	df=DataFrame(mu_1=param_p4[1,:],P_1=param_p4[2,:],t01=param_p4[3,:],ecos1=param_p4[4,:],esin1=param_p4[5,:],
+								mu_2=param_p4[6,:],P_2=param_p4[7,:],t02=param_p4[8,:],ecos2=param_p4[9,:],esin2=param_p4[10,:],
+								mu_3=param_p4[11,:],P_3=param_p4[12,:],t03=param_p4[13,:],ecos3=param_p4[14,:],esin3=param_p4[15,:],
+								mu_4=param_p4[16,:],P_4=param_p4[17,:],t04=param_p4[18,:],ecos4=param_p4[19,:],esin4=param_p4[20,:],
+								tmaxsinphi=param_p4[end-2,:],tmaxcosphi0=param_p4[end-1,:],deltaphi=param_p4[end,:],
+								lprob=lprob_p4[:])
+	CSV.write(grid,df)
+
   fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,false),tt0,tt,weight,p4best)
-  cov=estimate_covar(fit)
+  cov=estimate_covar(fit) ;  best_p4 = fit.param 
   err=[sqrt(cov[i,j]) for i=1:nparam, j=1:nparam if i==j ]
-  best_p4 = fit.param
   ttmodel = ttv_wrapper(tt0,nplanet,ntrans,best_p4,jmax,false)
   lprob_best_p4= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
   # println("Finished global 4-planet fit.")
@@ -450,6 +490,8 @@ function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
     println(io,"Retrieved Earth masses:",'\n',mean_mp,'\n'," ± ",mp_errs)
     println(io,"Retrieved eccentricity:",'\n',mean_ecc,'\n'," ± ",ecc_errs)
   end
+	if save_as_jld2
   @save outfile p3 lprob_p3 best_p3 dp lprob_dp best_dp lprob_best_p3 p4 lprob_p4 best_p4 lprob_best_p4 ntrans nplanet tt0 tt ttmodel sigtt nphase
+	end
   return best_p4,lprob_best_p4 
 end

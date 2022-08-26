@@ -1,4 +1,4 @@
-using TTVFaster,DataFrames,CSV
+using TTVFaster,DataFrames,CSV,LsqFit
 function chisquare(tt0,nplanet,ntrans,params,tt,sigtt,jmax,EM)
   chisq = 0.0  #check memory allocation >>>>>>>>>>>>
   # println(params,tt[1],sigtt[1])
@@ -26,5 +26,3 @@ function second_peak_params(grid_file::String)
 	#sorted=sort!(data,[:lprob])
 	return new_params,lprob
 end
-
-

@@ -1,6 +1,7 @@
 include("sim_times.jl")
+include("misc.jl")
 include("CGS.jl")
-using DelimitedFiles,JLD2,LsqFit,Statistics
+using TTVFaster,DelimitedFiles,JLD2,LsqFit,Statistics,DataFrames,CSV
 
 function fit_planet3(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p3in::Float64,p3out::Float64,np3::Int,nphase::Int,obs::String)
   if obs=="fromEMB"
@@ -180,19 +181,9 @@ function fit_planet3(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref:
   return lprob_best_p3,best_p3,lprob_p3,p3
 end
 
-<<<<<<< HEAD
-
-
-# If the 2-planet fit already exists, can just do 3-planet search
-function fit_planet3(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p3in::Float64,p3out::Float64,np3::Int,nphase::Int,options::Array{String}=["fromEMB","accurate"])
-obs=options[1]; grid_type=options[2]
-	if grid_type=="accurate"
-	if obs=="fromEMB"
-=======
 """
-    fit_planet3(jd1,sigma,nyear,tref,tol,p3in,p3out,np3,nphase,obs)
+    fit_planet3(jd1,sigma,nyear,tref,tol,p3in,p3out,np3,nphase,options)
 
- If the 2-planet fit already exists, just do 3-planet fit.
 # Arguments:
 - `jd1::Float64`: starting Julian Ephemeris Date of observations.
 - `sigma::Real`: fixed noised added to observations.
@@ -203,23 +194,25 @@ obs=options[1]; grid_type=options[2]
 - `p3out::Float64`: ending period to perform seach for Jupiter-like planet (in days)
 - `np3::Int`: number of periods to fit
 - `nphase::Int`: number of phases to fit
-- `obs::String`: source of observations for body 2 (EMB or EV).
+- `options::Array{String}`:arg 1=source of observations for body 2 (EMB or EV); arg 2=whether grid is accurate or wide)
 # Returns:
-- `best_p2::Vector{Float64}`: list of global best paramters for 3 planets given the observed transit times.
-- `lprob_best_p2::Float64`: log probability of detecting 3 planets with the given properties.
+- `best_p3::Array{Float64}`: list of global best paramters for 3 planets given the observed transit times.
+- `lprob_best_p3::Float64`: log probability of detecting 3 planets with the given properties.
 """
-function fit_planet3(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p3in::Float64,p3out::Float64,np3::Int,nphase::Int,obs::String)
-  if obs=="fromEMB"
->>>>>>> f711240099bad8b30b063620788d2d621b44d013
+# If the 2-planet fit already exists, just do 3-planet fit.
+function fit_planet3(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p3in::Float64,p3out::Float64,np3::Int,nphase::Int,options::Array{String},save_as_jld2::Bool=false)
+	obs=options[1]; grid_type=options[2]
+	if grid_type=="accurate"
+	if obs=="fromEMB"
     infile = string("FITS/fromEMB/p2_fit",sigma,"s",nyear,"yrs.jld2")
     outfile = string("FITS/fromEMB/p3_fit",sigma,"s",nyear,"yrs.jld2")
     results = string("results/fromEMB/p3_fit",sigma,"s",nyear,"yrs.txt")
-    grid = string("grid/fromEMB/p3_grid",sigma,"s",nyear,"yrs.txt")
+    grid = string("grid/fromEMB/p3_grid",sigma,"s",nyear,"yrs.csv")
   elseif obs=="fromEV"
     infile = string("FITS/p2_fit",sigma,"s",nyear,"yrs.jld2")
     outfile = string("FITS/p3_fit",sigma,"s",nyear,"yrs.jld2")
     results = string("results/p3_fit",sigma,"s",nyear,"yrs.txt")
-    grid = string("grid/p3_grid",sigma,"s",nyear,"yrs.txt")
+    grid = string("grid/p3_grid",sigma,"s",nyear,"yrs.csv")
   end
 	end
 	if grid_type=="wide"
@@ -227,12 +220,12 @@ function fit_planet3(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
     infile = string("FITS/fromEMB/p2_fit",sigma,"s",nyear,"yrs.jld2")
     outfile = string("FITS/fromEMB/widep3_fit",sigma,"s",nyear,"yrs.jld2")
     results = string("results/fromEMB/widep3_fit",sigma,"s",nyear,"yrs.txt")
-    grid = string("grid/fromEMB/widep3_grid",sigma,"s",nyear,"yrs.txt")
+    grid = string("grid/fromEMB/widep3_grid",sigma,"s",nyear,"yrs.csv")
   elseif obs=="fromEV"
     infile = string("FITS/p2_fit",sigma,"s",nyear,"yrs.jld2")
     outfile = string("FITS/widep3_fit",sigma,"s",nyear,"yrs.jld2")
     results = string("results/widep3_fit",sigma,"s",nyear,"yrs.txt")
-    grid = string("grid/widep3_grid",sigma,"s",nyear,"yrs.txt")
+    grid = string("grid/widep3_grid",sigma,"s",nyear,"yrs.csv")
   end
 	end
   @assert isfile(infile)
@@ -293,13 +286,15 @@ function fit_planet3(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
     # println("Period: ",p3[j]," log Prob: ",lprob_p3[j]," Param: ",vec(param_p3[1:nparam,j]))
   end
   println("Finished 3-planet fit w/ fixed period: ",p3best," in ",niter," iterations")
-	open(grid,"w") do io
-	  writedlm(io,zip(p3,lprob_p3))
-	end
+	df=DataFrame(mu_1=param_p3[1,:],P_1=param_p3[2,:],t01=param_p3[3,:],ecos1=param_p3[4,:],esin1=param_p3[5,:],
+								mu_2=param_p3[6,:],P_2=param_p3[7,:],t02=param_p3[8,:],ecos2=param_p3[9,:],esin2=param_p3[10,:],
+								mu_3=param_p3[11,:],P_3=param_p3[12,:],t03=param_p3[13,:],ecos3=param_p3[14,:],esin3=param_p3[15,:],
+								lprob=lprob_p3[:])
+	CSV.write(grid,df)
+
   fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,true),tt0,tt,weight,p3best)
-  cov=estimate_covar(fit)
+  cov=estimate_covar(fit) ;  best_p3 = fit.param 
   err=[sqrt(cov[i,j]) for i=1:nparam, j=1:nparam if i==j ]
-  best_p3 = fit.param
   ttmodel = ttv_wrapper(tt0,nplanet,ntrans,best_p3,jmax,true)
   lprob_best_p3= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
   # println("Finished global 3-planet fit.")
@@ -322,6 +317,8 @@ function fit_planet3(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
     println(io,"Retrieved Earth masses:",'\n',mean_mp,'\n'," ± ",mp_errs)
     println(io,"Retrieved eccentricity:",'\n',mean_ecc,'\n'," ± ",ecc_errs)
   end
+	if save_as_jld2
   @save outfile p3 lprob_p3 best_p3 lprob_best_p3 ntrans nplanet tt0 tt ttmodel sigtt nphase
+	end
   return best_p3,lprob_best_p3
 end

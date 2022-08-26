@@ -32,8 +32,7 @@ nplanet,nmoon=parse_model(label)
 # println(nplanet," planets and ", nmoon," moons in model")
 # Initialize variables and period ranges
 jd1=2.4332825e6
-tref=2430000
-tol=1e-5
+tref=2430000; tol=1e-5
 nphase=36 #wide: 100,36,180 
 p3in,p3out,np3=10*365.25,15*365.25,100
 dpin,dpout,ndp=2.1,2.4,100

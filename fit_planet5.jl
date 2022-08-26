@@ -1,5 +1,6 @@
 include("sim_times.jl")
-using DelimitedFiles,JLD2,Optim,LsqFit,Statistics
+include("misc.jl")
+using TTVFaster,DelimitedFiles,JLD2,LsqFit,Statistics
 
 function fit_planet5(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p3in::Float64,p3out::Float64,np3::Int,nphase::Int,p4in::Float64,p4out::Float64,np4::Int,p5in::Float64,p5out::Float64,np5::Int,obs::String)
   if obs=="fromEMB"
@@ -268,9 +269,30 @@ function fit_planet5(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref:
   @save fitfile p4 lprob_p4 best_p4 lprob_best_p4 p5 lprob_p5 best_p5 lprob_best_p5 ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase p4in p4out np4 p5in p5out np5
   return best_p4, best_p5   
 end
+
+"""
+    fit_planet5(jd1,sigma,nyear,tref,tol,p5in,p5out,np5,nphase,options)
+
+# Arguments:
+- `jd1::Float64`: starting Julian Ephemeris Date of observations.
+- `sigma::Real`: fixed noised added to observations.
+- `nyear::Real`: time span of observations.
+- `tref::Real`: JED to subtract from transit times to aid fit of low mass planets.
+- `tol::Real`: tolerance level of fit.
+- `p5in::Float64`: starting period to perform seach for Saturn-like planet (in days)
+- `p5out::Float64`: ending period to perform seach for Saturn-like planet (in days)
+- `np5::Int`: number of periods to fit
+- `nphase::Int`: number of phases to fit
+- `options::Array{String}`:arg 1=source of observations for body 2 (EMB or EV); arg 2=whether grid is accurate or wide)
+# Returns:
+- `best_p3::Array{Float64}`: list of global best paramters for 4 planets given the observed transit times.
+- `lprob_best_p3::Float64`: log probability of detecting 4 planets with the given properties.
+"""
 # If 4-planet fit already exists, can just do 5-planet search
-function fit_planet5(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p5in::Float64,p5out::Float64,np5::Int,nphase::Int,obs::String)
-  if obs=="fromEMB"
+function fit_planet5(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p5in::Float64,p5out::Float64,np5::Int,nphase::Int,options::Array{String},save_as_jld2::Bool=false)
+	obs=options[1]; grid_type=options[2]
+	if grid_type=="accurate"
+	if obs=="fromEMB"
     infile = string("FITS/fromEMB/p4_fit",sigma,"s",nyear,"yrs.jld2")
     outfile = string("FITS/fromEMB/p5_fit",sigma,"s",nyear,"yrs.jld2")
       results = string("results/fromEMB/p5_fit",sigma,"s",nyear,"yrs.txt")
@@ -281,6 +303,20 @@ function fit_planet5(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
     results = string("results/p5_fit",sigma,"s",nyear,"yrs.txt")
     grid = string("grid/p5_grid",sigma,"s",nyear,"yrs.txt")
   end
+	end
+	if grid_type=="wide"
+	if obs=="fromEMB"
+    infile = string("FITS/fromEMB/p4_fit",sigma,"s",nyear,"yrs.jld2")
+    outfile = string("FITS/fromEMB/widep5_fit",sigma,"s",nyear,"yrs.jld2")
+    results = string("results/fromEMB/widep5_fit",sigma,"s",nyear,"yrs.txt")
+    grid = string("grid/fromEMB/widep5_grid",sigma,"s",nyear,"yrs.csv")
+  elseif obs=="fromEV"
+    infile = string("FITS/p4_fit",sigma,"s",nyear,"yrs.jld2")
+    outfile = string("FITS/widep5_fit",sigma,"s",nyear,"yrs.jld2")
+    results = string("results/widep5_fit",sigma,"s",nyear,"yrs.txt")
+    grid = string("grid/widep5_grid",sigma,"s",nyear,"yrs.csv")
+  end
+	end
   @assert isfile(infile)
   m = jldopen(String(infile),"r")
   tt0,tt,ttmodel,sigtt=m["tt0"],m["tt"],m["ttmodel"],m["sigtt"]

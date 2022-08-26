@@ -1,12 +1,7 @@
-if !@isdefined(TTVFaster)
-    include("TTVFaster/src/TTVFaster.jl")
-    using Main.TTVFaster
-end
-import Main.TTVFaster.ttv_wrapper
-import Main.TTVFaster.chisquare
 include("bounds.jl")
 include("CGS.jl")
-using DelimitedFiles,JLD2,Statistics,MCMCDiagnostics
+using TTVFaster,DelimitedFiles,JLD2
+using Statistics,MCMCDiagnostics
 
 # Run a Markov chain:
 function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,nsteps::Int64,nwalkers::Int64,nplanet::Int64,ntrans::Array{Int64,1},tt0::Array{Float64,1},tt::Array{Float64,1},sigtt::Array{Float64,1},use_sigsys::Bool,EM::Bool) 

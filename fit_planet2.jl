@@ -1,6 +1,7 @@
 include("sim_times.jl")
+include("misc.jl")
 include("CGS.jl")
-using DelimitedFiles,JLD2,Optim,LsqFit,Statistics
+using TTVFaster,DelimitedFiles,JLD2,LsqFit,Statistics
 
 function fit_planet2(filename::String, jmax::Int,tref::Real,tol::Real)
   # (::Core.kwftype(typeof(fit_planet2)))(kws, fit_planet2, data_file, jmax)
@@ -79,7 +80,7 @@ function fit_planet2(filename::String, jmax::Int,tref::Real,tol::Real)
 end
 
 """
-    fit_planet2(jd1,sigma,nyear,tref,tol,obs)
+    fit_planet2(jd1,sigma,nyear,tref,tol,options)
 
  If the observations already exists, do 2-planet fit.
 # Arguments:
@@ -88,12 +89,13 @@ end
 - `nyear::Real`: time span of observations.
 - `tref::Real`: JED to subtract from transit times to aid fit of low mass planets.
 - `tol::Real`: tolerance level of fit.
-- `obs::String`: source of observations for body 2 (EMB or EV).
+- `options::Array{String}`:arg 1=source of observations for body 2 (EMB or EV); arg 2=whether grid is accurate or wide)
 # Returns:
 - `best_p2::Vector{Float64}`: list of global best paramters for 2 planets given the observed transit times.
 - `lprob_best_p2::Float64`: log probability of detecting 2 planets with the given properties.
 """
-function fit_planet2(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,obs::String)
+function fit_planet2(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,options::Array{String},save_as_jld2::Bool=false)
+	obs=options[1]
   if obs=="fromEMB"
     datafile = string("INPUTS/tt_",sigma,"sEMB",nyear,"yrs.txt")
     outfile = string("FITS/fromEMB/p2_fit",sigma,"s",nyear,"yrs.jld2")
@@ -165,9 +167,8 @@ function fit_planet2(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,o
   println("New initial 2-planet fit: ",init_param," in ",niter," iterations.")
 
   fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,true),tt0,tt,weight,init_param)
-  cov=estimate_covar(fit)
+  cov=estimate_covar(fit) ;  best_p2 = fit.param ##### is this the global p2 fit???
   err=[sqrt(cov[i,j]) for i=1:nparam, j=1:nparam if i==j ]
-  best_p2 = fit.param ##### is this the global p2 fit???
   ttmodel = ttv_wrapper(tt0,nplanet,ntrans,best_p2,jmax,true)
   lprob_best_p2= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
   # println("Finished 2-planet fit") 
@@ -189,6 +190,9 @@ function fit_planet2(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,o
     println(io,"Retrieved Earth masses:",'\n',mean_mp,'\n'," ± ",mp_errs)
     println(io,"Retrieved eccentricity:",'\n',mean_ecc,'\n'," ± ",ecc_errs)
   end
+	if save_as_jld2
+	#println("saved in:",outfile)
    @save outfile best_p2 lprob_best_p2 ntrans nplanet tt0 tt ttmodel sigtt
+	end
   return best_p2,lprob_best_p2
 end

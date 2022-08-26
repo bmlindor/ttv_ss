@@ -1,12 +1,40 @@
-include("regress.jl")
-using DelimitedFiles,JLD2,Optim,LsqFit,Statistics
+include("sim_times.jl")
+include("misc.jl")
+include("CGS.jl")
+using TTVFaster,DelimitedFiles,JLD2,LsqFit,Statistics,DataFrames,CSV
 
+"""
+    fit_moon(jd1,sigma,nyear,tref,tol,p3in,p3out,np3,nphase,options)
+# Arguments:
+- `jd1::Float64`: starting Julian Ephemeris Date of observations.
+- `sigma::Real`: fixed noised added to observations.
+- `nyear::Real`: time span of observations.
+- `tref::Real`: JED to subtract from transit times to aid fit of low mass planets.
+- `tol::Real`: tolerance level of fit.
+- `dpin::Float64`: starting deltaphi phase to perform seach for Moon
+- `dpout::Float64`: ending deltaphi phase to perform seach for Moon
+- `ndp::Int`: number of phases to fit
+- `nplanets::Real`: number of planets to consider
+- `options::Array{String}`:arg 1=source of observations for body 2 (EMB or EV); arg 2=whether grid is accurate or wide)
+# Returns:
+- `best_dp::Array{Float64}`: list of global best paramters for nplanets+moon given the observed transit times.
+- `lprob_best_dp::Float64`: log probability of detecting nplanets+moon with the given properties.
+"""
 # If planet fit already exists, can just do moon search
-function fit_moon(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,dpin::Float64,dpout::Float64,ndp::Int,nplanets::Real)
+function fit_moon(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,dpin::Float64,dpout::Float64,ndp::Int,nplanets::Real,options::Array{String},save_as_jld2::Bool=false)
+	obs=options[1]; grid_type=options[2]
+	if grid_type=="accurate"
   infile = string("FITS/p",nplanets,"_fit",sigma,"s",nyear,"yrs.jld2")
   outfile = string("FITS/p",nplanets,"moon_fit",sigma,"s",nyear,"yrs.jld2")
-  results = string("results/p",nplanets,"_fit",sigma,"s",nyear,"yrs.txt")
-  grid = string("grid/p",nplanets,"_grid",sigma,"s",nyear,"yrs.txt")
+  results = string("results/p",nplanets,"moon_fit",sigma,"s",nyear,"yrs.txt")
+  grid = string("grid/p",nplanets,"_moongrid",sigma,"s",nyear,"yrs.csv")
+	end
+	if grid_type=="wide" && nplanets>2
+  infile = string("FITS/p",nplanets,"_fit",sigma,"s",nyear,"yrs.jld2")
+  outfile = string("FITS/widep",nplanets,"moon_fit",sigma,"s",nyear,"yrs.jld2")
+  results = string("results/widep",nplanets,"moon_fit",sigma,"s",nyear,"yrs.txt")
+  grid = string("grid/widep",nplanets,"moon_grid",sigma,"s",nyear,"yrs.csv")
+	end
   @assert isfile(infile)
   m = jldopen(String(infile),"r")
   tt0,tt,ttmodel,sigtt=m["tt0"],m["tt"],m["ttmodel"],m["sigtt"]
@@ -57,13 +85,15 @@ function fit_moon(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,dpin
     # println("deltaphi: ",deltaphi[j]," log Prob: ",lprob_dp[j]," Param: ",vec(param_dp[1:nparam,j]))
   end
   println("Finished lunar search: ",dpbest," in ",niter," iterations")
-	open(grid,"w") do io
-	  writedlm(io,zip(deltaphi,lprob_dp))
-	end
+	df=DataFrame(mu_1=param_dp[1,:],P_1=param_dp[2,:],t01=param_dp[3,:],ecos1=param_dp[4,:],esin1=param_dp[5,:],
+								mu_2=param_dp[6,:],P_2=param_dp[7,:],t02=param_dp[8,:],ecos2=param_dp[9,:],esin2=param_dp[10,:],
+								tmaxsinphi=param_dp[end-2,:],tmaxcosphi0=param_dp[end-1,:],deltaphi=param_dp[end,:],
+								lprob=lprob_dp[:])
+	CSV.write(grid,df) #only writes p1,p2,moon params
+
   fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,false),tt0,tt,weight,dpbest)
-  cov=estimate_covar(fit)
+  cov=estimate_covar(fit) ;  best_dp = fit.param 
   err=[sqrt(cov[i,j]) for i=1:nparam, j=1:nparam if i==j ]
-  best_dp = fit.param
   ttmodel = ttv_wrapper(tt0,nplanet,ntrans,best_dp,jmax,false)
   lprob_best_dp = (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
   # println("Finished global moon fit.")
@@ -86,7 +116,9 @@ function fit_moon(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,dpin
     println(io,"Retrieved Earth masses:",'\n',mean_mp,'\n'," ± ",mp_errs)
     println(io,"Retrieved eccentricity:",'\n',mean_ecc,'\n'," ± ",ecc_errs)
   end
+	if save_as_jld2
   @save outfile deltaphi lprob_dp best_dp lprob_best_dp ntrans nplanet tt0 tt ttmodel sigtt
+	end
   return best_dp,lprob_best_dp
 end
 
@@ -106,36 +138,20 @@ function fit_wide(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p3in
   tt2 = vec(data1[nt1+1:nt1+nt2,3]) .- tref
   sigtt1 = data1[1:nt1,4]
   sigtt2 = data1[nt1+1:nt1+nt2,4]
-
   # Okay,let's do a linear fit to the transit times (third column):
-  function find_coeffs(tt,period,sigtt)
-    nt = length(tt)
-    x = zeros(2,nt)
-    x[1,1:nt] .= 1.0
-    x[2,1] = 0.0 
-    for i=2:nt
-      x[2,i] = round((tt[i]-tt[1])/period) 
-    end
-    coeff,covcoeff = regress(x,tt,sigtt)
-    # println(tt,sigtt,std(sigtt))
-    return coeff,covcoeff
-  end
-
+  # Guess the planets' period by finding median of transit times
   p1est = median(tt1[2:end] - tt1[1:end-1])
   p2est = median(tt2[2:end] - tt2[1:end-1])
-  coeff1,covcoeff1 = find_coeffs(tt1,p1est,sigtt1)
-  coeff2,covcoeff2 = find_coeffs(tt2,p2est,sigtt2)
-  sigtt=[sigtt1;sigtt2] 
-  # @assert (sigtt[1] .* (24 * 3600) .= sigma)
-  t01 = coeff1[1]; per1 = coeff1[2]
-  t02 = coeff2[1]; per2 = coeff2[2]
+  x1,t01,per1 = linear_fit(tt1,p1est,sigtt1)
+  x2,t02,per2 = linear_fit(tt2,p2est,sigtt2)
   t1  = collect(t01 .+ per1 .* range(0,stop=nt1-1,length=nt1)) 
   t2  = collect(t02 .+ per2 .* range(0,stop=nt2-1,length=nt2))
   # Best-fit linear transit times:
   tt0 = [t1;t2]
-  weight = ones(nt1+nt2)./ sigtt.^2 #assigns each data point stat weight d.t. noise = 1/σ^2
   # Actual transit times:
   tt=[tt1;tt2]
+  sigtt=[sigtt1;sigtt2] 
+  weight = ones(nt1+nt2)./ sigtt.^2 #assigns each data point stat weight d.t. noise = 1/σ^2
 
   # Okay,now let's do a 2-planet fit:
   # param_names = mass ratio,period,initial transit time,e*cos(omega),e*sin(omega)
