@@ -17,7 +17,7 @@ function find_transit(body_id::Int,eph::CALCEPH.Ephem,jd1::Float64,jd2::Float64,
   pos = zeros(3,N) 
   # Compute functions of position and velocity wrt time:
   function calc_ffs(t)
-    pva = compute(eph,JD_0,t,body_id,10,options,2)
+    pva = compute(eph,JD_0,t,body_id,10,options,2)./AU
     #println(JD_0)
     x = pva[1:3]; v = pva[4:6]; a = pva[7:9];
     f = dot(x,v) - (dot(x,n_obs))*(dot(v,n_obs))
