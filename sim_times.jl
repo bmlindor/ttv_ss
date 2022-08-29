@@ -73,7 +73,8 @@ function find_transit(body_id::Int,eph::CALCEPH.Ephem,jd1::Float64,jd2::Float64,
   end          
   JD_tt = JD_0 + JD_n
   #println("Refined Transit Time: ",JD_tt)
-  return JD_tt
+  #return JD_tt
+	return JD,ff,i_min,pos,JD_tt
 end
 # Find the transit times for given body_id, planetary period estimate,and number of refinement steps N
 function find_times(body_id::Int,eph::CALCEPH.Ephem,t0,period::Float64,period_err::Float64,n_obs::Vector{Float64},N::Int)
@@ -81,15 +82,17 @@ function find_times(body_id::Int,eph::CALCEPH.Ephem,t0,period::Float64,period_er
   t_final = t0[end]
   i=1
   # Initialize & find first transit time:
-  JD_tt = find_transit(body_id,eph,t0[i],t0[i]+period,n_obs,1000) #why did we use 1000 here?
+  JD,ff,i_min,pos,JD_tt = find_transit(body_id,eph,t0[i],t0[i]+period,n_obs,1000) #why did we use 1000 here?
   push!(times,JD_tt)
   # Find subsequent transit times by shifting time frame by 1 planetary period:
   while JD_tt < t_final
     t_start = JD_tt+period-period_err
     t_end = JD_tt+period+period_err
-    JD_tt = find_transit(body_id,eph,t_start,t_end,n_obs,N)
+    JD,ff,i_min,pos,JD_tt = find_transit(body_id,eph,t_start,t_end,n_obs,N)
     push!(times,JD_tt)
   end
+	#plot(pos[1,:],pos[2,:])
+	#plot(pos[1,i_min],pos[2,i_min],"o")
   return times
 end
 function fixed_noise(tt::Vector{Float64},sigma::Real)
@@ -131,7 +134,7 @@ function collect_linear_times(tt::Vector{Float64},period::Float64,sigtt::Vector{
 end
 function calc_ttvs_given_per_est(tt::Vector{Float64},period::Float64,sigtt::Vector{Float64})
   nt=length(tt)
-  x,t0,per=linear_times(tt,period,sigtt)
+  x,t0,per=linear_fit(tt,period,sigtt)
   ttv = tt .- t0.*vec(x[1,1:nt]) .- per.*vec(x[2,1:nt])
   return ttv
 end
@@ -200,15 +203,13 @@ function sim_obs_and_find_times(jd1::Float64,sigma::Real,nyear::Real,obs::String
   body = zeros((nt1+nt2))
   body[1:nt1] .= 1.0
   body[nt1+1:nt1+nt2] .= 2.0
-  # scatter((t2.-t02)./per2,tt2.-t2)
-  # plot((t2.-t02)./per2,tt2.-t2)
   return body,tt0,tt,sigtt
 end
 
 function test_sim_obs_and_find_times()
   jd1=2.4332825e6
-  sigma=30.0
-  nyear=10.0
+  sigma=30
+  nyear=10
   obs="fromEMB"
   body,tt0,tt,sigtt=sim_obs_and_find_times(jd1,sigma,nyear,obs)
 end
@@ -263,7 +264,7 @@ end
   #   ylabel("[AU]")
   #   # savefig("sim_times.eps")
   # end
-  # function plot_ttvs(sigma,obs)
+  # function plot_ttvs(sigma)
   #   P_venus = 225
   #   P_earth = 365
   #   P_err = 2
