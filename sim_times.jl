@@ -8,7 +8,7 @@ include("regress.jl")
 eph = Ephem("INPUTS/DE440.bsp") ; prefetch(eph)
 options = useNaifId+unitKM+unitDay # useNaifId + unitDay + unitAU
 AU = 149597870.700 #km
-
+Random.seed!(42)
 # Compute the local minimum of f(t) and solve for times when f(t) = dot(x_bar, v_bar) == 0
 function find_transit(body_id::Int,eph::CALCEPH.Ephem,jd1::Float64,jd2::Float64,n_obs::Vector{Float64},N::Int)
   JD_0 = 0.0
@@ -96,7 +96,6 @@ function find_times(body_id::Int,eph::CALCEPH.Ephem,t0,period::Float64,period_er
   return times
 end
 function fixed_noise(tt::Vector{Float64},sigma::Real)
-  Random.seed!(42)
   # Add noise to transit times:
   if sigma > 0
       sigtt = ones(length(tt)) * sigma / (24 * 3600) # sigma in seconds,sigtt in days
@@ -217,9 +216,9 @@ end
 function sim_times(jd1::Float64,sigma::Real,nyear::Real,obs::String)
   body,tt0,tt,sigtt=sim_obs_and_find_times(jd1,sigma,nyear,obs)
   if obs=="fromEMB"
-    name = string("sims/fromEMB/tt_",sigma,"s",nyear,"yrs.txt")
+    name = string("INPUTS/EMBtt_",sigma,"s",nyear,"yrs.txt")
   else
-    name = string("sims/tt_",sigma,"s",nyear,"yrs.txt")
+    name = string("INPUTS/tt_",sigma,"s",nyear,"yrs.txt")
   end
   open(name,"w") do io
     # println(io,"#body",'\t',"tt0",'\t',"tt",'\t',"sigtt")

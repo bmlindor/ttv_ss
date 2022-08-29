@@ -97,11 +97,11 @@ end
 function fit_planet2(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,options::Array{String},save_as_jld2::Bool=false)
 	obs=options[1]
   if obs=="fromEMB"
-    datafile = string("INPUTS/tt_",sigma,"sEMB",nyear,"yrs.txt")
+    datafile = string("INPUTS/EMBtt_",sigma,"s",nyear,"yrs.txt")
     outfile = string("FITS/fromEMB/p2_fit",sigma,"s",nyear,"yrs.jld2")
     results = string("results/fromEMB/p2_fit",sigma,"s",nyear,"yrs.txt")
   elseif obs=="fromEV"
-    datafile = string("INPUTS/tt_",sigma,"snoEMB",nyear,"yrs.txt")
+    datafile = string("INPUTS/tt_",sigma,"s",nyear,"yrs.txt")
     outfile = string("FITS/p2_fit",sigma,"s",nyear,"yrs.jld2")
     results = string("results/p2_fit",sigma,"s",nyear,"yrs.txt")
   end
