@@ -1,6 +1,6 @@
 include("sim_times.jl")
 include("misc.jl")
-using TTVFaster,DelimitedFiles,JLD2,LsqFit,Statistics
+using TTVFaster,DelimitedFiles,JLD2,LsqFit,Statistics,DataFrames,CSV
 
 function fit_planet5(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p3in::Float64,p3out::Float64,np3::Int,nphase::Int,p4in::Float64,p4out::Float64,np4::Int,p5in::Float64,p5out::Float64,np5::Int,obs::String)
   if obs=="fromEMB"
@@ -295,13 +295,13 @@ function fit_planet5(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
 	if obs=="fromEMB"
     infile = string("FITS/fromEMB/p4_fit",sigma,"s",nyear,"yrs.jld2")
     outfile = string("FITS/fromEMB/p5_fit",sigma,"s",nyear,"yrs.jld2")
-      results = string("results/fromEMB/p5_fit",sigma,"s",nyear,"yrs.txt")
-    grid = string("grid/fromEMB/p5_grid",sigma,"s",nyear,"yrs.txt")
+    results = string("results/fromEMB/p5_fit",sigma,"s",nyear,"yrs.txt")
+    grid = string("grid/fromEMB/p5_grid",sigma,"s",nyear,"yrs.csv")
   elseif obs=="fromEV"
     infile = string("FITS/p4_fit",sigma,"s",nyear,"yrs.jld2")
     outfile = string("FITS/p5_fit",sigma,"s",nyear,"yrs.jld2")
     results = string("results/p5_fit",sigma,"s",nyear,"yrs.txt")
-    grid = string("grid/p5_grid",sigma,"s",nyear,"yrs.txt")
+    grid = string("grid/p5_grid",sigma,"s",nyear,"yrs.csv")
   end
 	end
 	if grid_type=="wide"
@@ -373,13 +373,17 @@ function fit_planet5(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
     # println("Period: ",p5[j]," log Prob: ",lprob_p5[j]," Param: ",vec(param_p5[1:nparam,j]))
   end
   println("Finished 5-planet fit w/ fixed period: ",p5best," in ",niter," iterations")
-	open(grid,"w") do io
-	  writedlm(io,zip(p5,lprob_p5))
-	end
+	df=DataFrame(mu_1=param_p5[1,:],P_1=param_p5[2,:],t01=param_p5[3,:],ecos1=param_p5[4,:],esin1=param_p5[5,:],
+								mu_2=param_p5[6,:],P_2=param_p5[7,:],t02=param_p5[8,:],ecos2=param_p5[9,:],esin2=param_p5[10,:],
+								mu_3=param_p5[11,:],P_3=param_p5[12,:],t03=param_p5[13,:],ecos3=param_p5[14,:],esin3=param_p5[15,:],
+								mu_4=param_p5[16,:],P_4=param_p5[17,:],t04=param_p5[18,:],ecos4=param_p5[19,:],esin4=param_p5[20,:],
+								mu_5=param_p5[16,:],P_5=param_p5[17,:],t05=param_p5[18,:],ecos5=param_p5[19,:],esin5=param_p5[20,:],
+								lprob=lprob_p5[:])
+	CSV.write(grid,df)
+
   fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,true),tt0,tt,weight,p5best)
-  cov=estimate_covar(fit)
+  cov=estimate_covar(fit) ;  best_p5 = fit.param 
   err=[sqrt(cov[i,j]) for i=1:nparam, j=1:nparam if i==j ]
-  best_p5 = fit.param
   ttmodel = ttv_wrapper(tt0,nplanet,ntrans,best_p5,jmax,true)
   lprob_best_p5= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
   # println("Finished global 5-planet fit.")
@@ -404,6 +408,8 @@ function fit_planet5(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
     println(io,"Retrieved Earth masses:",'\n',mean_mp,'\n'," ± ",mp_errs)
     println(io,"Retrieved eccentricity:",'\n',mean_ecc,'\n'," ± ",ecc_errs)
   end
+	if save_as_jld2
   @save outfile p4 lprob_p4 best_p4 lprob_best_p4 p5 lprob_p5 best_p5 lprob_best_p5 ntrans nplanet tt0 tt ttmodel sigtt nphase
+	end
   return best_p5,lprob_best_p5   
 end

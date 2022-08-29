@@ -1,8 +1,4 @@
-if !@isdefined(TTVFaster)
-    include("TTVFaster/src/TTVFaster.jl")
-    using Main.TTVFaster
-end
-import Main.TTVFaster.ttv_nplanet
+using TTVFaster
 
 function decompose_ttvs(nplanet,ntrans,params)
 	jmax = 5

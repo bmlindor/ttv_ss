@@ -15,7 +15,7 @@ function second_peak_params(grid_file::String)
 	new_params=zeros(nparam)
 	function scond_peak(data)
 	for i=1:pnts
-		if abs(data[i,end] - maximum(data[:,end]))<1 && data[i,end]!=maximum(data[:,end])
+		if abs(data[i,end] - maximum(data[:,end]))<3 && data[i,end]!=maximum(data[:,end])
 			#println("local maximum: ",data[i,end])
 			return i
     end

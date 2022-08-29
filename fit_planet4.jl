@@ -357,7 +357,7 @@ function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
 	if save_as_jld2
   @save outfile p3 lprob_p3 best_p3 lprob_best_p3 p4 lprob_p4 best_p4 lprob_best_p4 ntrans nplanet tt0 tt ttmodel sigtt nphase
 	end
-  return param_p4,lprob_p4
+  return best_p4,lprob_best_p4
 end
 
 """
@@ -373,21 +373,20 @@ end
 - `p4out::Float64`: ending period to perform seach for Mars-like planet (in days)
 - `np4::Int`: number of periods to fit
 - `nphase::Int`: number of phases to fit
-- `options::Array{String}`:arg 1=source of observations for body 2 (EMB or EV); arg 2=whether grid is accurate or wide)
+- `options::String`:whether grid is accurate or wide
 # Returns:
 - `best_p3::Array{Float64}`: list of global best paramters for 4 planets given the observed transit times.
 - `lprob_best_p3::Float64`: log probability of detecting 4 planets with the given properties.
 """
 # If 3-planet fit with moon already exists, can do 4-planet search
-function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p4in::Float64,p4out::Float64,np4::Int,nphase::Int,options::Array{String},save_as_jld2::Bool=false)
-	obs=options[1]; grid_type=options[2]
-	if grid_type=="accurate"
+function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p4in::Float64,p4out::Float64,np4::Int,nphase::Int,options::String,save_as_jld2::Bool=false)
+	if options=="accurate"
   infile = string("FITS/p3moon_fit",sigma,"s",nyear,"yrs.jld2")
   outfile = string("FITS/moonp4_fit",sigma,"s",nyear,"yrs.jld2")
   results = string("results/moonp4_fit",sigma,"s",nyear,"yrs.txt")
   grid = string("grid/moonp4_grid",sigma,"s",nyear,"yrs.csv")
 	end
-	if grid_type=="wide" 
+	if options=="wide" 
   infile = string("FITS/widep3moon_fit",sigma,"s",nyear,"yrs.jld2")
   outfile = string("FITS/widemoonp4_fit",sigma,"s",nyear,"yrs.jld2")
   results = string("results/widemoonp4_fit",sigma,"s",nyear,"yrs.txt")

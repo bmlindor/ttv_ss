@@ -15,21 +15,20 @@ using TTVFaster,DelimitedFiles,JLD2,LsqFit,Statistics,DataFrames,CSV
 - `dpout::Float64`: ending deltaphi phase to perform seach for Moon
 - `ndp::Int`: number of phases to fit
 - `nplanets::Real`: number of planets to consider
-- `options::Array{String}`:arg 1=source of observations for body 2 (EMB or EV); arg 2=whether grid is accurate or wide)
+- `options::String`:whether grid is accurate or wide
 # Returns:
 - `best_dp::Array{Float64}`: list of global best paramters for nplanets+moon given the observed transit times.
 - `lprob_best_dp::Float64`: log probability of detecting nplanets+moon with the given properties.
 """
 # If planet fit already exists, can just do moon search
-function fit_moon(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,dpin::Float64,dpout::Float64,ndp::Int,nplanets::Real,options::Array{String},save_as_jld2::Bool=false)
-	obs=options[1]; grid_type=options[2]
-	if grid_type=="accurate"
+function fit_moon(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,dpin::Float64,dpout::Float64,ndp::Int,nplanets::Real,options::String,save_as_jld2::Bool=false)
+	if options=="accurate"
   infile = string("FITS/p",nplanets,"_fit",sigma,"s",nyear,"yrs.jld2")
   outfile = string("FITS/p",nplanets,"moon_fit",sigma,"s",nyear,"yrs.jld2")
   results = string("results/p",nplanets,"moon_fit",sigma,"s",nyear,"yrs.txt")
   grid = string("grid/p",nplanets,"_moongrid",sigma,"s",nyear,"yrs.csv")
 	end
-	if grid_type=="wide" && nplanets>2
+	if options=="wide" && nplanets>2
   infile = string("FITS/p",nplanets,"_fit",sigma,"s",nyear,"yrs.jld2")
   outfile = string("FITS/widep",nplanets,"moon_fit",sigma,"s",nyear,"yrs.jld2")
   results = string("results/widep",nplanets,"moon_fit",sigma,"s",nyear,"yrs.txt")
