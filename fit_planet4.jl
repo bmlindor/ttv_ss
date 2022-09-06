@@ -334,7 +334,7 @@ function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
   ttmodel = ttv_wrapper(tt0,nplanet,ntrans,best_p4,jmax,true)
   lprob_best_p4= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
   # println("Finished global 4-planet fit.")
-  println("New 4-planet chi-square: ",chisquare(tt0,nplanet,ntrans,best_p4,tt,sigtt,jmax,true))
+  chi2=chisquare(tt0,nplanet,ntrans,best_p4,tt,sigtt,jmax,true)
   println("Maximum: ",lprob_best_p4," Param: ",best_p4)
 	
   pname=["mu_1","P_1","t01","ecos1","esin1",
@@ -347,7 +347,7 @@ function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
   ecc_errs=[sqrt(err[(iplanet-1)*5+4]^2 + err[(iplanet-1)*5+4]^2) for iplanet=1:nplanet]
 	
   open(results,"w") do io
-    println(io,"Global Fit Results.",'\n',"per 4 range=[",p4in," - ",p4out,", length=",np4,"]")
+    println(io,"Global Fit Results.",'\n',"\Chi^2: ",chi2,'\n',"per 4 range=[",p4in," - ",p4out,", length=",np4,"]")
     for i=1:nparam
       println(io,pname[i],": ",best_p4[i]," ± ",err[i])
     end
@@ -469,7 +469,7 @@ function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
   ttmodel = ttv_wrapper(tt0,nplanet,ntrans,best_p4,jmax,false)
   lprob_best_p4= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
   # println("Finished global 4-planet fit.")
-  println("New 4-planet chi-square: ",chisquare(tt0,nplanet,ntrans,best_p4,tt,sigtt,jmax,false))
+  chi=chisquare(tt0,nplanet,ntrans,best_p4,tt,sigtt,jmax,false)
   println("Maximum: ",lprob_best_p4," Param: ",best_p4)
 
   pname=["mu_1","P_1","t01","ecos1","esin1",

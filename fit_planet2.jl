@@ -183,7 +183,7 @@ function fit_planet2(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,o
   ecc_errs=[sqrt(err[(iplanet-1)*5+4]^2 + err[(iplanet-1)*5+4]^2) for iplanet=1:nplanet]
 
   open(results,"w") do io
-    println(io,"Global Fit Results.",'\n',chi2)
+    println(io,"Global Fit Results.",'\n',"\chi^2: ",chi2)
     for i=1:nparam
       println(io,pname[i],": ",best_p2[i]," ± ",err[i])
     end
