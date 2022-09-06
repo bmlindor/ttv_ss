@@ -1,7 +1,7 @@
 function show_args(args)
 @show args
 end
-using Profile
+using Profile,TTVFaster
 using DelimitedFiles,JLD2,LsqFit,Statistics
 include("regress.jl")
 include("sim_times.jl")
@@ -13,7 +13,8 @@ include("fit_moon.jl")
 include("MCMC.jl")
 
 show_args(ARGS)
-label,sigma,nyear,runtype,obs,nsteps=ARGS[1],parse(Float64,ARGS[2]),parse(Float64,ARGS[3]),ARGS[4],ARGS[5],parse(Int64,ARGS[6])
+label,runtype,obs,nsteps=ARGS[1],ARGS[2],ARGS[3],parse(Int64,ARGS[4])
+#parse(Float64,ARGS[2]),parse(Float64,ARGS[3]),ARGS[4],ARGS[5],parse(Int64,ARGS[6])
 function parse_model(label::String)
 	nplanet = 0
 	nmoon = 0
@@ -57,6 +58,7 @@ nwalkers=75
 # 	nsteps=100000
 # end
 # Run markov chains
+sigma=10; nyear=20
 function planet_mcmc(nplanet,nsteps,obs::String)
 	if obs=="fromEMB"
 	fitfile=string("FITS/fromEMB/p",nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
@@ -83,9 +85,23 @@ function moon_mcmc(nplanet,nsteps,label::String)
 end
 # Perform grid searches
 function run_grid(label::String,obs::String)
-	if label=="Hpp"
-		sim_times(jd1,sigma,nyear,obs)
-		fit_planet2(jd1,sigma,nyear,tref,tol,obs)
+even_nyears=[16,18,20,22,24,26,28,30]
+odd_nyears=[15,17,19,21,23,25,27,29]
+sigmas=[10,30,60,80,90,100,110,120]
+	if label=="Hpp" && obs=="even"
+for sig in sigmas
+for yr in even_nyears
+ fit_planet2(jd1,sig,yr,tref,tol,["fromEMB"],true)
+ fit_planet2(jd1,sig,yr,tref,tol,["fromEV"],true)
+end
+end
+	if label=="Hpp" && obs=="odd"
+for sig in sigmas
+for yr in odd_nyears
+ fit_planet2(jd1,sig,yr,tref,tol,["fromEMB"],true)
+ fit_planet2(jd1,sig,yr,tref,tol,["fromEV"],true)
+end
+end
 	elseif label=="Hppp"
 		fit_planet3(jd1,sigma,nyear,tref,tol,p3in,p3out,np3,nphase,obs)
 	elseif label=="Hpppp"

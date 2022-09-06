@@ -299,6 +299,7 @@ function fit_planet3(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
   lprob_best_p3= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
   # println("Finished global 3-planet fit.")
   chi2=chisquare(tt0,nplanet,ntrans,best_p3,tt,sigtt,jmax,true)
+	println("New 3-planet chi-square: ",chi2)
   println("Maximum: ",lprob_best_p3," Param: ",best_p3)
 
   pname=["mu_1","P_1","t01","ecos1","esin1",
@@ -310,7 +311,7 @@ function fit_planet3(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
   ecc_errs=[sqrt(err[(iplanet-1)*5+4]^2 + err[(iplanet-1)*5+4]^2) for iplanet=1:nplanet]
 
   open(results,"w") do io
-    println(io,"Global Fit Results.",'\n',"\Chi^2: ",chi2,'\n',"per 3 range=[",p3in," - ",p3out,", length=",np3,"]")
+    println(io,"Global Fit Results.",'\n',"chi^2: ",chi2,'\n',"per 3 range=[",p3in," - ",p3out,", length=",np3,"]")
     for i=1:nparam
       println(io,pname[i],": ",best_p3[i]," ± ",err[i])
     end
