@@ -8,6 +8,15 @@ function chisquare(tt0,nplanet,ntrans,params,tt,sigtt,jmax,EM)
   end
   return chisq
 end
+avg(x,y)=(x + y)/2
+gaussian(x,mu,sig)=exp.(-((x .- mu).^2) ./ (2 * sig^.2))
+calc_BIC(chi2,Nparams,Nobs) = chi2 + Nparams *ln(Nobs)
+function calc_BIC(tt0,nplanet,ntrans,params,tt,sigtt,jmax,EM)
+	chi2 = chisquare(tt0,nplanet,ntrans,params,tt,sigtt,jmax,EM)
+	N=length(tt0) ; k=length(params)
+	return chi2 + k*ln(N)
+end
+Hill_radius(m_p,M_star,a) = (m_p/(3 * M_star))^1/3 * a
 
 function second_peak_params(grid_file::String)
 	data, header=readdlm(grid_file,',',header=true)

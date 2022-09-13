@@ -22,18 +22,11 @@ using TTVFaster,DelimitedFiles,JLD2,LsqFit,Statistics,DataFrames,CSV
 """
 # If planet fit already exists, can just do moon search
 function fit_moon(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,dpin::Float64,dpout::Float64,ndp::Int,nplanets::Real,options::String,save_as_jld2::Bool=false)
-	if options=="accurate"
+	grid_type=options	
   infile = string("FITS/p",nplanets,"_fit",sigma,"s",nyear,"yrs.jld2")
-  outfile = string("FITS/p",nplanets,"moon_fit",sigma,"s",nyear,"yrs.jld2")
-  results = string("results/p",nplanets,"moon_fit",sigma,"s",nyear,"yrs.txt")
-  grid = string("grid/p",nplanets,"_moongrid",sigma,"s",nyear,"yrs.csv")
-	end
-	if options=="wide" && nplanets>2
-  infile = string("FITS/p",nplanets,"_fit",sigma,"s",nyear,"yrs.jld2")
-  outfile = string("FITS/widep",nplanets,"moon_fit",sigma,"s",nyear,"yrs.jld2")
-  results = string("results/widep",nplanets,"moon_fit",sigma,"s",nyear,"yrs.txt")
-  grid = string("grid/widep",nplanets,"moon_grid",sigma,"s",nyear,"yrs.csv")
-	end
+  outfile = string("FITS/",grid_type,"_fit",sigma,"s",nyear,"yrs.jld2")
+  results = string("results/",grid_type,"_fit",sigma,"s",nyear,"yrs.txt")
+  grid = string("grid/",grid_type,"_grid",sigma,"s",nyear,"yrs.csv")
   @assert isfile(infile)
   m = jldopen(String(infile),"r")
   tt0,tt,ttmodel,sigtt=m["tt0"],m["tt"],m["ttmodel"],m["sigtt"]

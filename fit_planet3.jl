@@ -201,33 +201,18 @@ end
 """
 # If the 2-planet fit already exists, just do 3-planet fit.
 function fit_planet3(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p3in::Float64,p3out::Float64,np3::Int,nphase::Int,options::Array{String},save_as_jld2::Bool=false)
-	obs=options[1]; grid_type=options[2]
-	if grid_type=="accurate"
+	obs=options[1]; grid_type_nplanet=options[2]
 	if obs=="fromEMB"
     infile = string("FITS/fromEMB/p2_fit",sigma,"s",nyear,"yrs.jld2")
-    outfile = string("FITS/fromEMB/p3_fit",sigma,"s",nyear,"yrs.jld2")
-    results = string("results/fromEMB/p3_fit",sigma,"s",nyear,"yrs.txt")
-    grid = string("grid/fromEMB/p3_grid",sigma,"s",nyear,"yrs.csv")
+    outfile = string("FITS/fromEMB/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
+    results = string("results/fromEMB/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.txt")
+    grid = string("grid/fromEMB/",grid_type_nplanet,"_grid",sigma,"s",nyear,"yrs.csv")
   elseif obs=="fromEV"
     infile = string("FITS/p2_fit",sigma,"s",nyear,"yrs.jld2")
-    outfile = string("FITS/p3_fit",sigma,"s",nyear,"yrs.jld2")
-    results = string("results/p3_fit",sigma,"s",nyear,"yrs.txt")
-    grid = string("grid/p3_grid",sigma,"s",nyear,"yrs.csv")
+    outfile = string("FITS/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
+    results = string("results/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.txt")
+    grid = string("grid/",grid_type_nplanet,"_grid",sigma,"s",nyear,"yrs.csv")
   end
-	end
-	if grid_type=="wide"
-	if obs=="fromEMB"
-    infile = string("FITS/fromEMB/p2_fit",sigma,"s",nyear,"yrs.jld2")
-    outfile = string("FITS/fromEMB/widep3_fit",sigma,"s",nyear,"yrs.jld2")
-    results = string("results/fromEMB/widep3_fit",sigma,"s",nyear,"yrs.txt")
-    grid = string("grid/fromEMB/widep3_grid",sigma,"s",nyear,"yrs.csv")
-  elseif obs=="fromEV"
-    infile = string("FITS/p2_fit",sigma,"s",nyear,"yrs.jld2")
-    outfile = string("FITS/widep3_fit",sigma,"s",nyear,"yrs.jld2")
-    results = string("results/widep3_fit",sigma,"s",nyear,"yrs.txt")
-    grid = string("grid/widep3_grid",sigma,"s",nyear,"yrs.csv")
-  end
-	end
   @assert isfile(infile)
   p = jldopen(String(infile),"r")
   tt0,tt,ttmodel,sigtt=p["tt0"],p["tt"],p["ttmodel"],p["sigtt"]

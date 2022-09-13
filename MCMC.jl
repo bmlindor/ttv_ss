@@ -1,10 +1,11 @@
 include("bounds.jl")
 include("CGS.jl")
+include("misc.jl")
 using TTVFaster,DelimitedFiles,JLD2
 using Statistics,MCMCDiagnostics
 
 # Run a Markov chain:
-function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,nsteps::Int64,nwalkers::Int64,nplanet::Int64,ntrans::Array{Int64,1},tt0::Array{Float64,1},tt::Array{Float64,1},sigtt::Array{Float64,1},use_sigsys::Bool,EM::Bool) 
+function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,nsteps::Int64,nwalkers::Int64,nplanet::Int64,ntrans::Array{Int64,1},tt0::Array{Float64,1},tt::Array{Float64,1},sigtt::Array{Float64,1},use_sigsys::Bool,EM::Bool,fresults::String) 
   nparam = length(param)
   println(nparam," parameters from fit: ",param)
   # println("Maximum log Prob from fit: ",lprob_best)
@@ -212,21 +213,22 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,nsteps
   println("Independent Sample Size: ",indepsamples)
 
   # Find mean and standard deviation of posteriors after burn-in:
-  for i=1:nparam
-    println(pname[i], mean(vec(par_mcmc[:,iburn:nsteps,i]))," ± ",std(vec(par_mcmc[:,iburn:nsteps,i])))
-  end
-
   mean_mp = [mean(vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+1])).*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
   mp_errs = [std(vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+1])).*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
-  println("Retrieved Earth masses: ",mean_mp," ± ",mp_errs)
 
   mean_ecc=[mean(sqrt.(vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+4]).^2 .+ vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+5]).^2)) for iplanet=1:nplanet]
   ecc_errs=[std(sqrt.(vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+4]).^2 .+ vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+5]).^2)) for iplanet=1:nplanet]
-  println("Retrieved eccentricities: ",mean_ecc," ± ",ecc_errs)
 
   sigtot=[sqrt((mean(vec(par_mcmc[:,iburn:nsteps,end])).*3600*24)^2 + (mean(sigtt).*3600*24)^2) ]
-  println("Retrieved σ_tot [secs] : ",sigtot)
 
+  open(fresults,"w") do io
+  for i=1:nparam
+    println(io,pname[i], mean(vec(par_mcmc[:,iburn:nsteps,i]))," ± ",std(vec(par_mcmc[:,iburn:nsteps,i])))
+  end
+    println(io,"Retrieved Earth masses:",'\n',mean_mp,'\n'," ± ",mp_errs)
+    println(io,"Retrieved eccentricity:",'\n',mean_ecc,'\n'," ± ",ecc_errs)
+		println(io,"Retrieved σ_tot [secs] : ",sigtot)
+  end
   println("Saved in ",foutput)
   mcmcfile = string(foutput)
   @save mcmcfile par_mcmc lprob_mcmc param nwalkers nsteps accept iburn indepsamples

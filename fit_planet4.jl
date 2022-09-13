@@ -237,33 +237,18 @@ end
 """
 # If 3-planet fit already exists, can just do 4-planet search
 function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p4in::Float64,p4out::Float64,np4::Int,nphase::Int,options::Array{String},save_as_jld2::Bool=false)
-	obs=options[1]; grid_type=options[2]
-	if grid_type=="accurate"
+	obs=options[1]; grid_type_nplanet=options[2]
   if obs=="fromEMB"
     infile = string("FITS/fromEMB/p3_fit",sigma,"s",nyear,"yrs.jld2")
-    outfile = string("FITS/fromEMB/p4_fit",sigma,"s",nyear,"yrs.jld2")
-    results = string("results/fromEMB/p4_fit",sigma,"s",nyear,"yrs.txt")
-    grid = string("grid/fromEMB/p4_grid",sigma,"s",nyear,"yrs.csv")
+    outfile = string("FITS/fromEMB/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
+    results = string("results/fromEMB/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.txt")
+    grid = string("grid/fromEMB/",grid_type_nplanet,"_grid",sigma,"s",nyear,"yrs.csv")
   elseif obs=="fromEV"
     infile = string("FITS/p3_fit",sigma,"s",nyear,"yrs.jld2")
-    outfile = string("FITS/p4_fit",sigma,"s",nyear,"yrs.jld2")
-    results = string("results/p4_fit",sigma,"s",nyear,"yrs.txt")
-    grid = string("grid/p4_grid",sigma,"s",nyear,"yrs.csv")
+    outfile = string("FITS/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
+    results = string("results/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.txt")
+    grid = string("grid/",grid_type_nplanet,"_grid",sigma,"s",nyear,"yrs.csv")
   end
-	end
-	if grid_type=="wide"
-	if obs=="fromEMB"
-    infile = string("FITS/fromEMB/p3_fit",sigma,"s",nyear,"yrs.jld2")
-    outfile = string("FITS/fromEMB/widep4_fit",sigma,"s",nyear,"yrs.jld2")
-    results = string("results/fromEMB/widep4_fit",sigma,"s",nyear,"yrs.txt")
-    grid = string("grid/fromEMB/widep4_grid",sigma,"s",nyear,"yrs.csv")
-  elseif obs=="fromEV"
-    infile = string("FITS/p3_fit",sigma,"s",nyear,"yrs.jld2")
-    outfile = string("FITS/widep4_fit",sigma,"s",nyear,"yrs.jld2")
-    results = string("results/widep4_fit",sigma,"s",nyear,"yrs.txt")
-    grid = string("grid/widep4_grid",sigma,"s",nyear,"yrs.csv")
-  end
-	end
   @assert isfile(infile)
   m = jldopen(String(infile),"r")
   tt0,tt,ttmodel,sigtt=m["tt0"],m["tt"],m["ttmodel"],m["sigtt"]
@@ -381,18 +366,11 @@ end
 """
 # If 3-planet fit with moon already exists, can do 4-planet search
 function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p4in::Float64,p4out::Float64,np4::Int,nphase::Int,options::String,save_as_jld2::Bool=false)
-	if options=="accurate"
+	grid_type_nplanet=options
   infile = string("FITS/p3moon_fit",sigma,"s",nyear,"yrs.jld2")
-  outfile = string("FITS/moonp4_fit",sigma,"s",nyear,"yrs.jld2")
-  results = string("results/moonp4_fit",sigma,"s",nyear,"yrs.txt")
-  grid = string("grid/moonp4_grid",sigma,"s",nyear,"yrs.csv")
-	end
-	if options=="wide" 
-  infile = string("FITS/widep3moon_fit",sigma,"s",nyear,"yrs.jld2")
-  outfile = string("FITS/widemoonp4_fit",sigma,"s",nyear,"yrs.jld2")
-  results = string("results/widemoonp4_fit",sigma,"s",nyear,"yrs.txt")
-  grid = string("grid/widemoonp4_grid",sigma,"s",nyear,"yrs.csv")
-	end
+  outfile = string("FITS/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
+  results = string("results/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.txt")
+  grid = string("grid/",grid_type_nplanet,"_grid",sigma,"s",nyear,"yrs.csv")
   @assert isfile(infile)
   m = jldopen(String(infile),"r")
   tt0,tt,ttmodel,sigtt=m["tt0"],m["tt"],m["ttmodel"],m["sigtt"]

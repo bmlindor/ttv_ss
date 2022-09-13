@@ -290,32 +290,17 @@ end
 """
 # If 4-planet fit already exists, can just do 5-planet search
 function fit_planet5(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p5in::Float64,p5out::Float64,np5::Int,nphase::Int,options::Array{String},save_as_jld2::Bool=false)
-	obs=options[1]; grid_type=options[2]
-	if grid_type=="accurate"
+	obs=options[1]; grid_type_nplanet=options[2]
 	if obs=="fromEMB"
     infile = string("FITS/fromEMB/p4_fit",sigma,"s",nyear,"yrs.jld2")
-    outfile = string("FITS/fromEMB/p5_fit",sigma,"s",nyear,"yrs.jld2")
-    results = string("results/fromEMB/p5_fit",sigma,"s",nyear,"yrs.txt")
-    grid = string("grid/fromEMB/p5_grid",sigma,"s",nyear,"yrs.csv")
+    outfile = string("FITS/fromEMB/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
+    results = string("results/fromEMB/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.txt")
+    grid = string("grid/fromEMB/",grid_type_nplanet,"_grid",sigma,"s",nyear,"yrs.csv")
   elseif obs=="fromEV"
     infile = string("FITS/p4_fit",sigma,"s",nyear,"yrs.jld2")
-    outfile = string("FITS/p5_fit",sigma,"s",nyear,"yrs.jld2")
-    results = string("results/p5_fit",sigma,"s",nyear,"yrs.txt")
-    grid = string("grid/p5_grid",sigma,"s",nyear,"yrs.csv")
-  end
-	end
-	if grid_type=="wide"
-	if obs=="fromEMB"
-    infile = string("FITS/fromEMB/p4_fit",sigma,"s",nyear,"yrs.jld2")
-    outfile = string("FITS/fromEMB/widep5_fit",sigma,"s",nyear,"yrs.jld2")
-    results = string("results/fromEMB/widep5_fit",sigma,"s",nyear,"yrs.txt")
-    grid = string("grid/fromEMB/widep5_grid",sigma,"s",nyear,"yrs.csv")
-  elseif obs=="fromEV"
-    infile = string("FITS/p4_fit",sigma,"s",nyear,"yrs.jld2")
-    outfile = string("FITS/widep5_fit",sigma,"s",nyear,"yrs.jld2")
-    results = string("results/widep5_fit",sigma,"s",nyear,"yrs.txt")
-    grid = string("grid/widep5_grid",sigma,"s",nyear,"yrs.csv")
-  end
+    outfile = string("FITS/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
+    results = string("results/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.txt")
+    grid = string("grid/",grid_type_nplanet,"_grid",sigma,"s",nyear,"yrs.csv")
 	end
   @assert isfile(infile)
   m = jldopen(String(infile),"r")
