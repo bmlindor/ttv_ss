@@ -89,7 +89,8 @@ function run_grid(sigma,nyear,label::String,obs::String)
  end
 
 	if label=="Hpp" 
- 	fit_planet2(jd1,sigma,nyear,tref,tol,obs,true)
+	#sim_times(jd1,sigma,nyear,obs)
+ 	fit_planet2(jd1,sigma,nyear,tref,tol,[obs],true)
 	elseif label=="Hppp"
 	fit_planet3(jd1,sigma,nyear,tref,tol,p3in,p3out,np3,nphase,[obs,"p3"],true)
 	elseif label=="Hpppp"
@@ -98,7 +99,7 @@ function run_grid(sigma,nyear,label::String,obs::String)
   fit_planet5(jd1,sigma,nyear,tref,tol,p5in,p5out,np5,nphase,[obs,"p5"],true)
 	end
 	if label=="Hppm"
- 	fit_planet2(jd1,sigma,nyear,tref,tol,obs,true)
+ 	fit_planet2(jd1,sigma,nyear,tref,tol,[obs],true)
 	fit_moon(jd1,sigma,nyear,tref,tol,dpin,dpout,ndp,2,"p2moon")
 	elseif label=="Hppmp"
 	fit_planet3(jd1,sigma,nyear,tref,tol,p3in,p3out,np3,nphase,[obs,"p3"],true)
@@ -118,10 +119,12 @@ function test_fit(sigma,nyear,label::String,obs::String)
 	dpin,dpout,ndp=2.29,2.35,10
 	p4in,p4out,np4=1.6*365.25,3*365.25,20
 	p5in,p5out,np5=28*365.25,30*365.25,20
+	jd1=2444239.5 ; tref =2444000
 	if label=="Hpp" 
- 	fit_planet2(jd1,sigma,nyear,tref,tol,obs)
+	sim_times(jd1,sigma,nyear,obs)
+ 	best_p2,lprob_best_p2=fit_planet2(jd1,sigma,nyear,tref,tol,[obs],true)
 	elseif label=="Hppp"
-	fit_planet3(jd1,sigma,nyear,tref,tol,p3in,p3out,np3,nphase,[obs,"p3"])
+	fit_planet3(jd1,sigma,nyear,tref,tol,p3in,p3out,np3,nphase,[obs,"p3"],true)
 	elseif label=="Hpppp"
   fit_planet4(jd1,sigma,nyear,tref,tol,p4in,p4out,np4,nphase,[obs,"p4"])
 	elseif label=="Hppppp"
@@ -145,8 +148,7 @@ if runtype=="wide"
   fit_planet5(jd1,sigma,nyear,tref,tol,p5in,p5out,np5,nphase,[obs,"widep5"],true)
 	# @time fit_moon(jd1,sigma,nyear,tref,tol,dpin,dpout,ndp,3)
 end
-nyears=[16,18,20,22,24,26,28,30]
-odd_nyears=[15,17,19,21,23,25,27,29]
+nyears=[16,18,20,22,24,26,28,30,15,17,19,21,23,25,27,29]#,14,13,12,11,10]
 sigmas=[10,30,60,80,90,100,110,120]
 for sig in sigmas
 for yr in nyears
@@ -162,10 +164,13 @@ if runtype=="mcmc" && nmoon==0
 elseif runtype=="mcmc" && nmoon>0
 	@time moon_mcmc(sig,yr,nplanet,nsteps,label)
 end
+if runtype=="grid"
+run_grid(sig,yr,label,obs)
+end
 end
 end
 if runtype=="test"
-nyears=[30]
+nyears=[10]
 sigmas=[10,30]
 for sig in sigmas
 for yr in nyears
