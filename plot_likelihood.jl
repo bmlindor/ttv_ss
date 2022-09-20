@@ -1,27 +1,44 @@
 using PyPlot,Statistics,Distributions,JLD2
 rc("font",family="sans-serif")
 include("histogram.jl")
-avg(x,y)=(x + y)/2
-gaussian(x,mu,sig)=exp.(-((x .- mu).^2) ./ (2 * sig^.2))
-# Plot likelihood/probability of 1 parameter
-function plot_profile(xgrid::Array{Float64,1},lprob::Array{Float64,1},truex::Float64,nbins::Int,color::String,pname::String,sim_obs_label::String)
+
+function plot_profile(xgrid::Array{Float64,1},lprob::Array{Float64,1},truex::Float64,nbins::Int,color::String,pname::String,sim_obs_label::String,label_xloc::Real)
 	fig=figure(figsize=(6,6))
  	subplots_adjust(hspace=0.05,wspace=0.05)
 	  #ax1=gca()
   xprob=exp.(lprob .- maximum(lprob))
-	plot(xgrid ./365.25,xprob,color=color,label=sim_obs_label) 
-	axvline(truex/365.25,linestyle="--",color="black")
+	xgrid_in_yrs =xgrid ./365.25 
+	#scatter(xgrid_in_yrs,xprob)
+	plot(xgrid_in_yrs,xprob,color=color,label=sim_obs_label) 
+	#xbin,xhist,xbin_square,hist_square=histogram(xgrid_in_yrs,nbins)
+	#plot(xbin_square,hist_square./maximum(hist_square),linewidth=2,alpha=0.5)
+	axvline(truex,linestyle="--",color="black")
+	text(truex + truex/100,1.01,pname)
+	text(label_xloc,1.05,sim_obs_label)
+	#legend(loc="upper left")
 	xlabel("Planet Period Search Grid [years]")
-	text(truex/365.25 + .1,1.01,pname)
-		#ax1.text(minimum(xgrid)/365.25,1.05,sim_obs_label)
-	legend(loc="upper left")
+	xlim(minimum(xgrid_in_yrs)-minimum(xgrid_in_yrs)/10,maximum(xgrid_in_yrs)+.05)
 	ylabel("Probability")
-	ylim(0,1.1)
+	ylim(0,1.2)
 	minorticks_on()
 	tick_params(which="both",direction="in")
-	tight_layout()
+	#tight_layout()
 end
 # Create likelihood/probability plots of search grids
+function plot_grid(sigma,nyear,grid_type_nplanet,per_col,true_per,color,pname,case_num,label_xloc)
+	if case_num==1
+	file=string("/astro/users/blindor/research/ttv_ss/grid/fromEMB/",grid_type_nplanet,"_grid",sigma,"s",nyear,"yrs.csv")
+	case_label="Case 1"
+	elseif case_num==2
+	file=string("/astro/users/blindor/research/ttv_ss/grid/",grid_type_nplanet,"_grid",sigma,"s",nyear,"yrs.csv")
+	case_label="Case 2"
+	end
+	data,header=readdlm(file,',',header=true)
+	sim_obs_label= string(case_label," [",nyear," yr span]",'\n',L"$\sigma_{obs}=$",sigma," sec")
+ plot_profile(data[:,per_col],data[:,end],true_per,100,color,pname,sim_obs_label,label_xloc)
+	savefig("IMAGES/case",case_num,"_",grid_type_nplanet,pname,sigma,"secs",year,"yrs.png")
+end
+
 function plot_prob(sigma::Real,nyear::Real,obs::String,fitmodel::String,mcmodel::String,nbins::Int,include_moon::Bool=false)
 	if obs=="fromEMB" && isfile(string("MCMC/fromEMB/",mcmodel,"_mcmc",sigma,"s",nyear,"yrs.jld2")) 
     mcfile=string("MCMC/fromEMB/",mcmodel,"_mcmc",sigma,"s",nyear,"yrs.jld2")

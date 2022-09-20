@@ -16,8 +16,10 @@ function calc_BIC(tt0,nplanet,ntrans,params,tt,sigtt,jmax,EM)
 	N=length(tt0) ; k=length(params)
 	return chi2 + k*ln(N)
 end
-Hill_radius(m_p,M_star,a) = (m_p/(3 * M_star))^1/3 * a
-
+function Hill_radius(m_p,M_star,Per)
+	a = (Per^2*(G*(M_star + m_p)/4*pi^2))^1/3 
+return	(m_p/(3 * M_star))^1/3 * a
+end
 function second_peak_params(grid_file::String)
 	data, header=readdlm(grid_file,',',header=true)
 	pnts=length(data[:,1]) ; nparam=length(data[1,:])-1

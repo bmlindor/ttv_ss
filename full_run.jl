@@ -70,22 +70,26 @@ end
 # Change search grids to accomodate for wider distributions when time spans are shorter
 
 function run_grid(sigma,nyear,label::String,obs::String)
- if nyear>36
- 	p3in,p3out=11.4*365.25,12.2*365.25
-	p4in,p4out=1.8*365.25,2.2*365.25
+ if nyear>=26
+ 	p3in,p3out=11.2*365.25,11.9*365.25
+	p4in,p4out=1.8*365.25,1.95*365.25
  	dpin,dpout=2.25,2.37
- elseif nyear>=30 && nyear<=36
- 	p3in,p3out=11*365.25,12.4*365.25
-	p4in,p4out=1.8*365.25,3*365.25
+ elseif 22<=nyear<26
+ 	p3in,p3out=11.2*365.25,12*365.25
+	p4in,p4out=1.8*365.25,2*365.25
  	dpin,dpout=2.2,2.38
- elseif nyear>=12 && nyear<=29
- 	p3in,p3out=10.6*365.25,14.2*365.25 
-	p4in,p4out=1.6*365.25,3*365.25
+ elseif 18<=nyear<22
+ 	p3in,p3out=11.2*365.25,12.4*365.25
+	p4in,p4out=1.8*365.25,2.2*365.25
+ 	dpin,dpout=2.2,2.38
+ elseif 12<=nyear<18
+ 	p3in,p3out=11*365.25,12.8*365.25 
+	p4in,p4out=1.8*365.25,3.6*365.25
  	dpin,dpout=2.1,2.52
  	nsteps=50000
  elseif nyear<12
- 	p3in,p3out=10*365.25,15*365.25 
-	p4in,p4out=1.5*365.25,5*365.25
+ 	p3in,p3out=11*365.25,13*365.25 
+	p4in,p4out=1.6*365.25,3.8*365.25
  end
 
 	if label=="Hpp" 
@@ -119,7 +123,7 @@ function test_fit(sigma,nyear,label::String,obs::String)
 	dpin,dpout,ndp=2.29,2.35,10
 	p4in,p4out,np4=1.6*365.25,3*365.25,20
 	p5in,p5out,np5=28*365.25,30*365.25,20
-	jd1=2444239.5 ; tref =2444000
+	#jd1=2444239.5 ; tref =2444000
 	if label=="Hpp" 
 	sim_times(jd1,sigma,nyear,obs)
  	best_p2,lprob_best_p2=fit_planet2(jd1,sigma,nyear,tref,tol,[obs],true)
@@ -170,8 +174,8 @@ end
 end
 end
 if runtype=="test"
-nyears=[10]
-sigmas=[10,30]
+nyears=[30]
+sigmas=[10]
 for sig in sigmas
 for yr in nyears
 test_fit(sig,yr,label,obs)
