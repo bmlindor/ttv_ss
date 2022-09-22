@@ -13,7 +13,7 @@ include("fit_moon.jl")
 include("MCMC.jl")
 
 show_args(ARGS)
-label,runtype,obs,nsteps=ARGS[1],ARGS[2],ARGS[3],parse(Int64,ARGS[4])
+label,runtype,obs,nper=ARGS[1],ARGS[2],ARGS[3],parse(Int64,ARGS[4])
 #parse(Float64,ARGS[2]),parse(Float64,ARGS[3]),ARGS[4],ARGS[5],parse(Int64,ARGS[6])
 function parse_model(label::String)
 	nplanet = 0
@@ -35,11 +35,11 @@ nplanet,nmoon=parse_model(label)
 jd1=2.4332825e6
 tref=2430000; tol=1e-5
 nphase=36 #wide: 100,36,180 
-np3,np4,np5=ones(3)*100
-nwalkers=75
+np3,np4,np5=[nper, nper, nper]
 
 # Run markov chains
-sigma=10; nyear=20
+#sigma=10; nyear=20
+nwalkers=75;nsteps=50000
 function planet_mcmc(sigma,nyear,nplanet,nsteps,obs::String)
 	if obs=="fromEMB"
 	fitfile=string("FITS/fromEMB/p",nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
@@ -152,7 +152,7 @@ if runtype=="wide"
   fit_planet5(jd1,sigma,nyear,tref,tol,p5in,p5out,np5,nphase,[obs,"widep5"],true)
 	# @time fit_moon(jd1,sigma,nyear,tref,tol,dpin,dpout,ndp,3)
 end
-nyears=[16,18,20,22,24,26,28,30,15,17,19,21,23,25,27,29]#,14,13,12,11,10]
+nyears=[16,18,20,22,24,26,28,30]#15,17,19,21,23,25,27,29]#,14,13,12,11,10]
 sigmas=[10,30,60,80,90,100,110,120]
 for sig in sigmas
 for yr in nyears
