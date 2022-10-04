@@ -1,4 +1,4 @@
-using TTVFaster,DataFrames,CSV,LsqFit
+using TTVFaster,DataFrames,CSV
 function chisquare(tt0,nplanet,ntrans,params,tt,sigtt,jmax,EM)
   chisq = 0.0  #check memory allocation >>>>>>>>>>>>
   # println(params,tt[1],sigtt[1])

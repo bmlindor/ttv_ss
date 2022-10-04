@@ -11,3 +11,4 @@ MCMC/
 *.pdf
 *.mem
 TTVFaster/src/*.mem
+.DS_Store
