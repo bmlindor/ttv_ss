@@ -2,8 +2,8 @@ using PyPlot,Statistics,Distributions,JLD2
 rc("font",family="sans-serif")
 include("histogram.jl")
 
-function plot_profile(xgrid::Array{Float64,1},lprob::Array{Float64,1},truex::Float64,nbins::Int,color::String,pname::String,sim_obs_label::String,label_xloc::Real)
-	fig=figure(figsize=(6,6))
+function plot_profile(xgrid::Array{Float64,1},lprob::Array{Float64,1},truex::Float64,nbins::Int,color::String,pname::String,sim_obs_label::String,label_xloc::Real,save_as::String)
+	fig=figure(figsize=(6,6))#,dpi=150)
  	subplots_adjust(hspace=0.05,wspace=0.05)
 	  #ax1=gca()
   xprob=exp.(lprob .- maximum(lprob))
@@ -22,7 +22,9 @@ function plot_profile(xgrid::Array{Float64,1},lprob::Array{Float64,1},truex::Flo
 	ylim(0,1.2)
 	minorticks_on()
 	tick_params(which="both",direction="in")
-	#tight_layout()
+	tight_layout()
+	savefig(save_as)
+	close()
 end
 # Create likelihood/probability plots of search grids
 function plot_grid(sigma,nyear,grid_type_nplanet,per_col,true_per,color,pname,case_num,label_xloc)
@@ -35,8 +37,9 @@ function plot_grid(sigma,nyear,grid_type_nplanet,per_col,true_per,color,pname,ca
 	end
 	data,header=readdlm(file,',',header=true)
 	sim_obs_label= string(case_label," [",nyear," yr span]",'\n',L"$\sigma_{obs}=$",sigma," sec")
- plot_profile(data[:,per_col],data[:,end],true_per,100,color,pname,sim_obs_label,label_xloc)
-	savefig("IMAGES/case",case_num,"_",grid_type_nplanet,pname,sigma,"secs",year,"yrs.png")
+	save_as =string("IMAGES/wide_grids/case",case_num,"_",grid_type_nplanet,pname,sigma,"secs",nyear,"yrs.png")
+ plot_profile(data[:,per_col],data[:,end],true_per,100,color,pname,sim_obs_label,label_xloc,save_as)
+
 end
 
 function plot_prob(sigma::Real,nyear::Real,obs::String,fitmodel::String,mcmodel::String,nbins::Int,include_moon::Bool=false)

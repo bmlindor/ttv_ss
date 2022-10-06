@@ -1,3 +1,4 @@
+include("CGS.jl")
 using TTVFaster,DataFrames,CSV,LsqFit
 function chisquare(tt0,nplanet,ntrans,params,tt,sigtt,jmax,EM)
   chisq = 0.0  #check memory allocation >>>>>>>>>>>>
@@ -16,10 +17,15 @@ function calc_BIC(tt0,nplanet,ntrans,params,tt,sigtt,jmax,EM)
 	N=length(tt0) ; k=length(params)
 	return chi2 + k*ln(N)
 end
-function Hill_radius(m_p,M_star,Per)
-	a = (Per^2*(G*(M_star + m_p)/4*pi^2))^1/3 
-return	(m_p/(3 * M_star))^1/3 * a
+G=CGS.GRAV /1e3 #in kms units
+AU=CGS.AU /1e2 #in kms units
+Kepler_law(Per,mp,mstar)= ((G*(mstar + mp)* (Per*24*3600)^2) /(4*pi^2))^(1/3) 
+Hill_radius(Per,mp,ecc,mstar) = Kepler_law(Per,mp,mstar) * (1-ecc)* (mp/(3 * mstar))^(1/3)
+function mutual_Hill(Per1,mp1,mstar,Per2,mp2)
+	a1,a2 = Kepler_law(Per1,mp1,mstar),Kepler_law(Per2,mp2,mstar)	
+	return ((mp1 + mp2)/(3 * mstar))^(1/3) * (a1 + a2)/2
 end
+
 function second_peak_params(grid_file::String)
 	data, header=readdlm(grid_file,',',header=true)
 	pnts=length(data[:,1]) ; nparam=length(data[1,:])-1

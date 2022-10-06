@@ -152,7 +152,7 @@ if runtype=="wide"
   fit_planet5(jd1,sigma,nyear,tref,tol,p5in,p5out,np5,nphase,[obs,"widep5"],true)
 	# @time fit_moon(jd1,sigma,nyear,tref,tol,dpin,dpout,ndp,3)
 end
-nyears=[16,18,20,22,24,26,28,30]#15,17,19,21,23,25,27,29]#,14,13,12,11,10]
+nyears=[15,17,19,21,23,25,27,29]#,14,13,12,11,10]16,18,20,22,24,26,28,30]#
 sigmas=[10,30,60,80,90,100,110,120]
 for sig in sigmas
 for yr in nyears
