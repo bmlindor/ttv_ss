@@ -9,7 +9,7 @@ function plot_profile(xgrid::Array{Float64,1},lprob::Array{Float64,1},truex::Flo
   xprob=exp.(lprob .- maximum(lprob))
 	xgrid_in_yrs =xgrid ./365.25 
 	#scatter(xgrid_in_yrs,xprob)
-	plot(xgrid_in_yrs,xprob,color=color,label=sim_obs_label) 
+	plot(xgrid_in_yrs,xprob,color=color,label=sim_obs_label,linewidth=2) 
 	#xbin,xhist,xbin_square,hist_square=histogram(xgrid_in_yrs,nbins)
 	#plot(xbin_square,hist_square./maximum(hist_square),linewidth=2,alpha=0.5)
 	axvline(truex,linestyle="--",color="black")

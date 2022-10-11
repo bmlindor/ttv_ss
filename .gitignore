@@ -7,7 +7,6 @@ MCMC/
 *.bsp
 */*.bsp
 *.jld2
-*/*.jld2
 *.pdf
 *.mem
 TTVFaster/src/*.mem

@@ -1,4 +1,4 @@
-using PyPlot,Statistics,JLD2,DelimitedFiles
+using TTVFaster,PyPlot,Statistics,JLD2,DelimitedFiles
 rc("font",family="sans-serif")
 include("decompose_ttvs.jl")
 # Plot residuals to best fit TTV models for different configurations
@@ -218,115 +218,61 @@ function plot_moon(sigma::Real,nyear::Real,fitmodel)
   show()
 end
 # Plot timing data observed and observed - calculated (ie TTVs)
-function plot_ex(sigma::Real,nyear::Real,sim,fitmodel,include_moon::Bool=false)
-  fitfile=string("FITS/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
-  label="Earth"
-  bestfit="best_p3"
-  if String(sim)=="EMB" && isfile(string("FITS/fromEMB/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")) 
-    fitfile=string("FITS/fromEMB/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
-    bestfit="best_p3"
+function plot_ttv(sigma::Real,nyear::Real,options::Array{String},include_moon::Bool=false)
+	obs=options[1]; fit_type_nplanet=options[2]; bestfit=options[3]
+  if obs=="fromEMB"
+    fitfile=string("FITS/fromEMB/",fit_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
     label="EMB"
-  elseif String(sim)=="EMB" && fitmodel=="p4" #if isfile(string("FITS/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")) 
-    fitfile=string("FITS/fromEMB",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
-    bestfit="best_p4"
-    label="EMB"
-  elseif fitmodel=="p2" #if isfile(string("FITS/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")) 
-  fitfile=string("FITS/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
-  bestfit="init_param"
-  label="Earth"
-  elseif fitmodel=="p4" #if isfile(string("FITS/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")) 
-    fitfile=string("FITS/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
-    bestfit="best_p4"
-    label="Earth"
-  elseif fitmodel=="p3moon" #if isfile(string("FITS/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")) 
-    fitfile=string("FITS/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
-    bestfit="best_dp"
-    label="Earth"
-  # else 
+  elseif obs=="fromEV"
+  	fitfile=string("FITS/",fit_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
+  	label="Earth"
   #   return  println("FITS file for ",sim," with ",fitmodel," model at ",sigma," secs and ",nyear," yrs doesn't exist!!!!")
   end
   f=jldopen(String(fitfile),"r")
   tt,tt0,sigtt,ttmodel=f["tt"],f["tt0"],f["sigtt"],f["ttmodel"]
   pbest_global=f[bestfit]
   nplanet,ntrans=f["nplanet"],f["ntrans"]
-  # pair_ttvs=decompose_ttvs(nplanet,ntrans,f["best_p3"][1:15]) .* (24 * 60)
-  p2_ttvs=decompose_ttvs(2,ntrans[1:2],pbest_global[1:10]) .* (24 * 60)
-  # p3_ttvs=decompose_ttvs(3,ntrans[1:3],pbest_global[1:15]) .* (24 * 60)
   n1,n2=ntrans[1],ntrans[2]
   mu1,P1,t01,ecos1,esin1=pbest_global[1:5]
   mu2,P2,t02,ecos2,esin2=pbest_global[6:10]
-  time1=collect(t01 .+ range(0,stop=n1-1,length=n1) .* P1)
+  time1=collect(t01 .+ range(0,stop=n1-1,length=n1) .* P1) 	#tcalc
   time2=collect(t02 .+ range(0,stop=n2-1,length=n2) .* P2)
-  tt1,tt2=tt[1:n1],tt[n1+1:n1+n2]
+  tt1,tt2=tt[1:n1],tt[n1+1:n1+n2] 													#tobs
   ttmodel1,ttmodel2 = ttmodel[1:n1],ttmodel[n1+1:n1+n2]
-  ttsim1,ttsim2=(ttmodel1.-t01)./365.25,(ttmodel2.-t02)./365.25 #in years
-  epoch1,epoch2=round.((time1.-t01)./P1),round.((time2.-t02)./P2)
+  ttsim1,ttsim2=(time1.-t01)./365.25,(time2.-t02)./365.25 #in years
+	ttvmodel1,ttvmodel2=(ttmodel1.-time1).*(24*60),(ttmodel2.-time2).*(24*60)
   ttv1,ttv2=(tt1.-time1).* (24*60),(tt2.-time2).* (24 * 60) #in minutes
   sigtt1,sigtt2=sigtt[1:n1].* (24 * 60),sigtt[n1+1:n1+n2].* (24 * 60) #in minutes
-  # for i=1:15
-  #   println("Venus ",L"$ t $",round(tt1[i],digits=5),L"$ & $",round(time1[i],digits=5),L"$ & $",round(ttv1[i],digits=5),L"$ \\$", ttmodel1[i]) 
-  # end
-  # for i=1:length(tt2)
-  #   println("~Earth & ",round(tt2[i],digits=5)," & ",time2[i]," & ",ttv2[i]," \\") 
-  # end 
-  fig=plt.figure(figsize=(7,5))
-  subplots_adjust(hspace=0.0) # Set the vertical spacing between axes
-  subplot(211) # Create the 1st axis of a 3x1 array of axes
-  ax1 = gca()
-  setp(ax1.get_xticklabels(),visible=false) # Disable x tick labels
-  # PyPlot.title(L"Venus; $σ_{ij}=30$ secs")
-  errorbar(ttsim1,ttv1,sigtt1,fmt=".",color="black",mec="black",mfc="white")
-  plot(ttsim1,p2_ttvs[1,2,1:n1],color="red",label=L"$\mathcal{H}_{PP}$")
-  ylabel("TTVs [mins]")
-  ylim(-7,7)
-  legend()
-  minorticks_on()
-  tick_params(which="both",direction="in",top="true",right="true")
-  tick_params(which="major",direction="in",top="true",right="true",length=6)
-  tick_params(which="minor",direction="in",top="true",right="true",length=2)
-  # yticks(0.1:0.2:0.9) # Set the y-tick range and step size, 0.1 to 0.9 in increments of 0.2
-  # ylim(0.0,1.0) # Set the y-limits from 0.0 to 1.0
-  subplot(212,sharex=ax1) # Create the 2nd axis of a 3x1 array of axes
-  ax2 = gca()
-  plot(ttsim1,ttv1-(p2_ttvs[1,2,1:n1]),label=L"$\mathcal{H}_{PP}$",color="black")
-  ylabel("Residuals [mins]")
-  xlabel("Time [yrs]")
-  # yticks(0.1:0.2:0.9)
-  ylim(-7,7)
-  minorticks_on()
-  tick_params(which="both",direction="in",top="true",right="true")
-  tick_params(which="major",direction="in",top="true",right="true",length=6)
-  tick_params(which="minor",direction="in",top="true",right="true",length=2)
-  # savefig("IMAGES/Venus_Hppresiduals.eps")
 
-  fig=plt.figure(figsize=(7,5))
-  subplots_adjust(hspace=0.0) # Set the vertical spacing between axes
-  subplot(211) # Create the 1st axis of a 3x1 array of axes
-  ax1 = gca()
-  setp(ax1.get_xticklabels(),visible=false) # Disable x tick labels
-  # PyPlot.title(L"Earth; $σ_{ij}=30$ secs")
-  errorbar(ttsim2,ttv2,sigtt2,fmt=".",color="black",mec="black",mfc="white")#,label="Earth")
-  plot(ttsim2,p2_ttvs[2,1,1:n2],color="red",label=L"$\mathcal{H}_{PP}$")
+  fig=plt.figure(figsize=(8,6))
+#  subplots_adjust(hspace=0.0)
+  ax1=subplot(211) 
+  #ax1 = gca()
+	ax1.minorticks_on()
+  #setp(ax1.get_xticklabels(),visible=false) # Disable x tick labels
+  errorbar(ttsim1,ttv1,sigtt1,fmt=".",color="black")
+	plot(ttsim1,ttvmodel1,linewidth=2,label="Model fit")
+  tick_params(which="both",direction="in",top=true,right=true)
+  #plot(ttsim1,p2_ttvs[1,2,1:n1],color="salmon")
+	text(1,5,"Venus")
+	ylim(-7,7)
+  ylabel("TTVs [mins]")
+
+  ax2=subplot(212,sharex=ax1) # Create the 1st axis of a 3x1 array of axes
+	plot(ttsim2,ttvmodel2,linewidth=2,label="Model fit")
+  errorbar(ttsim2,ttv2,sigtt2,fmt=".",color="black")#,label="Earth")
+  #plot(ttsim2,p2_ttvs[2,1,1:n2],color="darkcyan")
+	text(1,-5,label)
   ylabel("TTVs [mins]")
   ylim(-7,7)
-  legend()
-  minorticks_on()
-  tick_params(which="both",direction="in",top="true",right="true")
-  tick_params(which="major",direction="in",top="true",right="true",length=6)
-  tick_params(which="minor",direction="in",top="true",right="true",length=2)
+  legend(fontsize=10)
+	ax2.minorticks_on()
+  tick_params(which="both",direction="in",top=true,right=true)
+  tick_params(which="major",direction="in",top=true,right=true,length=6)
+  tick_params(which="minor",direction="in",top=true,right=true,length=2)
   # yticks(0.1:0.2:0.9) # Set the y-tick range and step size, 0.1 to 0.9 in increments of 0.2
   # ylim(0.0,1.0) # Set the y-limits from 0.0 to 1.0
-  subplot(212,sharex=ax1) # Create the 2nd axis of a 3x1 array of axes
-  ax2 = gca()
-  plot(ttsim2,ttv2-(p2_ttvs[2,1,1:n2]),label=L"$\mathcal{H}_{PP}$",color="black")
-  ylabel("Residuals [mins]")
-  xlabel("Time [yrs]")
-  # yticks(0.1:0.2:0.9)
-  ylim(-7,7)
-  minorticks_on()
-  tick_params(which="both",direction="in",top="true",right="true")
-  tick_params(which="major",direction="in",top="true",right="true",length=6)
-  tick_params(which="minor",direction="in",top="true",right="true",length=2)
+
   # savefig("IMAGES/Earth_Hppresiduals.eps")
 
   # ax1=subplot(211)
@@ -341,11 +287,10 @@ function plot_ex(sigma::Real,nyear::Real,sim,fitmodel,include_moon::Bool=false)
   # ax2.set_ylabel("Observed - Calculated")
   # ax1.set_xlabel("Time [yrs]")
     # tight_layout()
-  show()
-
+  #show()
 end
 # Plot observed TTVs vs model fit, with contributions
-function plot_ttvs(sigma::Real,nyear::Real,sim,fitmodel,include_moon::Bool=false)
+function plot_cont(sigma::Real,nyear::Real,sim,fitmodel,include_moon::Bool=false)
   fitfile=string("FITS/",fitmodel,"_fit",sigma,"s",nyear,"yrs.jld2")
   nplanet=3
   label="Earth contribution"
