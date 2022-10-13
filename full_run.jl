@@ -158,10 +158,10 @@ for sig in sigmas
 for yr in nyears
 if runtype=="full" && nmoon==0
 	@time run_grid(sig,yr,label,obs)
-	@time planet_mcmc(sig,yr,nplanet,nsteps,obs)
+	#@time planet_mcmc(sig,yr,nplanet,nsteps,obs)
 elseif runtype=="full" && nmoon>0
 	@time run_grid(sig,yr,label,obs)
-	@time moon_mcmc(sig,yr,nplanet,nsteps,label)
+	#@time moon_mcmc(sig,yr,nplanet,nsteps,label)
 end
 if runtype=="mcmc" && nmoon==0
 	@time planet_mcmc(sig,yr,nplanet,nsteps,obs)
