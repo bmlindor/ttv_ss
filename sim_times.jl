@@ -1,8 +1,7 @@
 # Julia v1.3
-using CALCEPH 
-using DelimitedFiles
-using Statistics,Random,LinearAlgebra
-using PyPlot
+using CALCEPH,PyPlot,Statistics,JLD2,DelimitedFiles,Random,LinearAlgebra
+rc("font",family="sans-serif")
+rc("lines",linewidth=2)
 include("regress.jl")
 # Load JPL ephemerides from data and set units
 eph = Ephem("INPUTS/DE440.bsp") ; prefetch(eph)
@@ -73,21 +72,21 @@ function find_transit(body_id::Int,eph::CALCEPH.Ephem,jd1::Float64,jd2::Float64,
   end          
   JD_tt = JD_0 + JD_n
   #println("Refined Transit Time: ",JD_tt)
-  return JD_tt
-	# return JD,ff,i_min,pos,JD_tt
+  # return JD_tt
+	return JD,ff,i_min,pos,JD_tt
 end
 # Find the transit times for body_id, given planetary period estimate,and number of refinement steps N
 function transit_times(body_id::Int,eph::CALCEPH.Ephem,t0,period::Float64,period_err::Float64,n_obs::Vector{Float64},N::Int)
   TT = Float64[]
   t_final = t0[end]
   # Initialize & find first transit time:
-  JD_tt = find_transit(body_id,eph,t0[1],t0[1]+period,n_obs,1000) #why did we use 1000 here?
+  JD,ff,i_min,pos,JD_tt = find_transit(body_id,eph,t0[1],t0[1]+period,n_obs,1000) #why did we use 1000 here?
   push!(TT,JD_tt)
   # Find subsequent transit times by shifting time frame by 1 planetary period:
   while JD_tt < t_final
     t_start = JD_tt+period-period_err
     t_end = JD_tt+period+period_err
-    JD_tt = find_transit(body_id,eph,t_start,t_end,n_obs,N)
+    JD,ff,i_min,pos,JD_tt = find_transit(body_id,eph,t_start,t_end,n_obs,N)
     push!(TT,JD_tt)
   end
   return TT
@@ -155,12 +154,12 @@ function sim_obs_and_find_times(jd1::Float64,sigma::Real,nyear::Real,obs::String
   pva_venus = zeros(9,jdsize)
   pva_earth = zeros(9,jdsize)
   for i=1:jdsize
-    pva_sun[1:9,i] = compute(eph,t0[i],0.5,10,10,options,2)./AU
-    pva_venus[1:9,i] = compute(eph,t0[i],0.5,2,10,options,2)./AU
+    pva_sun[1:9,i] = compute(eph,t0[i],0.0,10,10,options,2)./AU
+    pva_venus[1:9,i] = compute(eph,t0[i],0.0,2,10,options,2)./AU
     if obs=="fromEMB"
-      pva_earth[1:9,i] = compute(eph,t0[i],0.5,3,10,options,2)./AU 
+      pva_earth[1:9,i] = compute(eph,t0[i],0.0,3,10,options,2)./AU 
     else
-      pva_earth[1:9,i] = compute(eph,t0[i],0.5,399,10,options,2)./AU
+      pva_earth[1:9,i] = compute(eph,t0[i],0.0,399,10,options,2)./AU
       # pva_emb = compute(eph,t0[i],0.5,3,10,options,2)
       # pva_moon = compute(eph,t0[i],0.5,301,10,options,2)
       # println("Earth - EMB: ",norm(pva_earth[1:3,i] .- pva_emb[1:3]))
@@ -205,14 +204,14 @@ function sim_obs_and_find_times(jd1::Float64,sigma::Real,nyear::Real,obs::String
   return body,tt0,tt,sigtt
 end
 
-function test_sim_obs_and_find_times()
+function test_sim_obs()
   jd1=2.4332825e6
   sigma=30
   nyear=10
   obs="fromEMB"
   body,tt0,tt,sigtt=sim_obs_and_find_times(jd1,sigma,nyear,obs)
 end
-
+# Simulate times starting at jd1 for nyear span with sigma Gaussian noise added
 function sim_times(jd1::Float64,sigma::Real,nyear::Real,obs::String)
   body,tt0,tt,sigtt=sim_obs_and_find_times(jd1,sigma,nyear,obs)
   if obs=="fromEMB"
@@ -228,7 +227,7 @@ function sim_times(jd1::Float64,sigma::Real,nyear::Real,obs::String)
   end
 end
   # Plot orbits along ecliptic and top-down,point to observer of Venus and Earth transits
-function plot_orbits(obs)
+function plot_orbits(dimension::Int,obs::String)
   jd1=2.4332825e6 ; nyear=10 ; sigma=30 ;jdsize=1000
   jd2 = nyear*365.25 + jd1
   theta_sun=range(0, stop=2pi, length=100)
@@ -241,81 +240,72 @@ function plot_orbits(obs)
   pva_emb = zeros(6, jdsize)
   pva_moon = zeros(6, jdsize)
   for i=1:jdsize
-    pva_sun[1:6,i] = compute(eph,t0[i],0.5,10,10,options)./AU
-    pva_venus[1:6,i] = compute(eph,t0[i],0.5,2,10,options)./AU
+    pva_sun[1:6,i] = compute(eph,t0[i],0.0,10,10,options)./AU
+    pva_venus[1:6,i] = compute(eph,t0[i],0.0,2,10,options)./AU
     if obs=="fromEMB"
-      pva_emb[1:6,i] = compute(eph,t0[i],0.5,3,10,options) ./AU
+      pva_emb[1:6,i] = compute(eph,t0[i],0.0,3,10,options) ./AU
     else
-      pva_moon = compute(eph,t0[i],0.5,301,10,options)./AU
-      pva_earth[1:6,i] = compute(eph,t0[i],0.5,399,10,options)./AU
+      pva_moon = compute(eph,t0[i],0.0,301,10,options)./AU
+      pva_earth[1:6,i] = compute(eph,t0[i],0.0,399,10,options)./AU
     end
   end
-
   body,tt0,tt,sigtt=sim_obs_and_find_times(jd1,sigma,nyear,obs)
   nt1 = sum(body .== 1.0)
   nt2 = sum(body .== 2.0)
-  trans_pva_sun = zeros(6, 50)
-  trans_pva_venus = zeros(6, 50)
-  trans_pva_earth = zeros(6, 50)
-  trans_pva_emb = zeros(6, 50)
-  trans_pva_moon = zeros(6, 50)
+  trans_pva_venus = zeros(6, jdsize)
+  trans_pva_earth = zeros(6, jdsize)
+  trans_pva_emb = zeros(6, jdsize)
+  trans_pva_moon = zeros(6, jdsize)
   for i=1:length(tt)
-    trans_pva_sun[1:6,i] = compute(eph,tt[i],0.5,10,10,options)./AU
-    trans_pva_venus[1:6,i] = compute(eph,tt[i],0.5,2,10,options)./AU
+    trans_pva_venus[1:6,i] = compute(eph,tt[i],0.0,2,10,options)./AU
     if obs=="fromEMB"
-      trans_pva_emb[1:6,i] = compute(eph,tt[i],0.5,3,10,options) ./AU
+      trans_pva_emb[1:6,i] = compute(eph,tt[i],0.0,3,10,options) ./AU
     else
-      trans_pva_moon = compute(eph,tt[i],0.5,301,10,options)./AU
-      trans_pva_earth[1:6,i] = compute(eph,tt[i],0.5,399,10,options)./AU
+      trans_pva_moon = compute(eph,tt[i],0.0,301,10,options)./AU
+      trans_pva_earth[1:6,i] = compute(eph,tt[i],0.0,399,10,options)./AU
     end
   end
-  n_obs=calc_obs_loc(pva_venus[1:3],pva_venus[4:6],pva_earth[1:3],pva_earth[4:6])
- # fig=figure(figsize=(6,6),dpi=150)
-  plot(xsun,ysun,marker="o",color="yellow",ms=10)
-  plot(pva_venus[1,:],pva_venus[2,:],color="orange",linewidth=0.3,alpha=0.5)
-  plot(pva_earth[1,:],pva_earth[2,:],color="dodgerblue",linewidth=0.3,alpha=0.5)
+  n_obs=calc_obs_loc(trans_pva_venus[1:3],trans_pva_venus[4:6],trans_pva_earth[1:3],trans_pva_earth[4:6])
+  
+  if dimension==2
+  fig=figure(figsize=(5,5))#,dpi=150)
+  # subplot(211)
+  fill(xsun,ysun,color="yellow")
+  plot(xsun,ysun,color="black")
+  plot(pva_venus[1,:],pva_venus[2,:],color="orange",linewidth=0.5,alpha=0.5)
+  plot(pva_earth[1,:],pva_earth[2,:],color="forestgreen",linewidth=0.5,alpha=0.5)
   scatter(trans_pva_venus[1,1:nt1],trans_pva_venus[2,1:nt1],marker=".",color="orange")
-  scatter(trans_pva_earth[1,nt1+1:nt1+nt2],trans_pva_earth[2,nt1+1:nt1+nt2],marker=".",color="dodgerblue")
-  plot([0,n_obs[1]*1.1],[0,n_obs[2]*1.1],"k--")
+  scatter(trans_pva_earth[1,nt1+1:nt1+nt2],trans_pva_earth[2,nt1+1:nt1+nt2],marker=".",color="forestgreen")
+  plot([0,n_obs[1]*1.2],[0,n_obs[2]*1.2],"k--",linewidth=1)
   # arrow(0.0,0.0,n_obs[1],n_obs[2],facecolor="black")
-  #annotate("test",xy=[;], xytext=[n_obs[1]+0.1;n_obs[2]+0.1],xycoords="data") 
-  xlabel("x [AU]")
-  ylabel("y [AU]")
+  # ("to observer",xy=[n_obs[1];n_obs[2]], xytext=[n_obs[1]+0.05;n_obs[2]],xycoords="data") 
+  xlabel("x [au]",fontsize=20)
+  ylabel("y [au]",fontsize=20)
+  ylim(-1,1)
+  # subplot(212)
   tight_layout()
+  end
+
+  if dimension==3
+  fig=figure(figsize=(6,6))
+  PyPlot.scatter3D(xsun,ysun,0,marker="o",color=:yellow)
+  PyPlot.plot3D(vec(pva_venus[1,:]), vec(pva_venus[2,:]), vec(pva_venus[3,:]),alpha=0.25,color=:orange)
+  PyPlot.plot3D(vec(pva_earth[1,:]), vec(pva_earth[2,:]), vec(pva_earth[3,:]),alpha=0.25,color=:dodgerblue)
+  PyPlot.plot3D([0,n_obs[1]*1.2],[0,n_obs[2]*1.2],[0,n_obs[3]*1.2],linestyle="--",color=:grey)
+  # PyPlot.scatter3D(vec(trans_pva_sun[1,:]), vec(trans_pva_sun[2,:]), vec(trans_pva_sun[3,:]),color=:yellow)
+  PyPlot.scatter3D(vec(trans_pva_venus[1,1:nt1]),vec(trans_pva_venus[2,1:nt1]),vec(trans_pva_venus[3,1:nt1]),color=:orange,marker=".")
+  PyPlot.scatter3D(vec(trans_pva_earth[1,nt1+1:nt1+nt2]),vec(trans_pva_earth[2,nt1+1:nt1+nt2]),vec(trans_pva_earth[3,nt1+1:nt1+nt2]),color=:dodgerblue,marker=".")
+  PyPlot.tick_params(which="major",
+      left=false,right=false,top=false,bottom=false)
+  # xlim(-1,1)
+  # ylim(-1,1)
+  xlabel("x [au]",fontsize=20)
+  ylabel("y [au]",fontsize=20)
+  zlabel("z [au]",fontsize=20) 
+  end
+  #   println(n_obs) 
+  # return tt 
 end
-  #   subplot(211)
-  #   title("Orbits Along Ecliptic")
-  #   plot(xsun,ysun,label="Sun")
-  #   plot(vec(pva_venus[2,1:jdsize]),vec(pva_venus[3,1:jdsize]),label="Venus")
-  #   plot(vec(pva_earth[2,1:jdsize]),vec(pva_earth[3,1:jdsize]),label="Earth")
-  #   xlabel("[AU]")
-  #   ylabel("[AU]")
-  #   legend()
-  #   subplot(212)
-  #   title("Top-Down Orbits")
-  #   plot(xsun,ysun,label="Sun")
-  #   plot(vec(pva_venus[1,1:jdsize]),vec(pva_venus[2,1:jdsize]),label="Venus")
-  #   plot(vec(pva_earth[1,1:jdsize]),vec(pva_earth[2,1:jdsize]),label="Earth")
-  #   xlabel("[AU]")
-  #   ylabel("[AU]")
-  #   legend(loc="lower left")
-  #   clf()
-  #   test = 365 
-  #   i=1
-  #   JD_venus,ff_venus,i_min_venus,pos_venus,tt_venus = find_transit(2,eph,t0[i],t0[i]+test,n_obs,test)
-  #   JD_earth,ff_earth,i_min_earth,pos_earth,tt_earth = find_transit(3,eph,t0[i],t0[i]+test,n_obs,test)
-  #   # title("Top-Down Orbits w/ Observer")
-  #   figsize=(8,8)
-  #   plot(pos_venus[1,i_min_venus],pos_venus[2,i_min_venus],"o",label="Venus Transit",color=:orange)
-  #   plot(pos_earth[1,i_min_earth],pos_earth[2,i_min_earth],"o",label="Earth Transit")
-  #   plot(xsun,ysun,"o",label="Sun",color=:yellow)
-  #   plot(pos_venus[1,:],pos_venus[2,:],color=:grey)
-  #   plot(pos_earth[1,:],pos_earth[2,:],color=:grey)
-  #   plot([0,x_obs*1.1],[0,y_obs*1.1],"k--")
-  #   legend(loc="upper left")
-  #   xlabel("[AU]")
-  #   ylabel("[AU]")
-  #   # savefig("sim_times.eps")
 
   # function plot_ttvs(sigma)
   #   P_venus = 225
