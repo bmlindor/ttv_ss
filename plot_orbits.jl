@@ -1,79 +1,88 @@
 using CALCEPH,PyPlot
+include("CGS.jl")
 rc("font",family="sans-serif")
 include("sim_times.jl")
 
-function plot_orbits(jd1::Float64,sigma::Real,nyear::Real,dimension::Int64,EMB::Bool=false)
+function plot_orbits(dimension::Int,obs::String)
+  jd1=2.4332825e6 ; nyear=10 ; sigma=30 ;jdsize=1000
+  eph = Ephem("INPUTS/DE440.bsp") ; prefetch(eph)
+  options = useNaifId+unitKM+unitDay # useNaifId + unitDay + unitAU
+  AU = 149597870.700 #km
+  jd2 = nyear*365.25 + jd1
+  theta_sun=range(0, stop=2pi, length=100)
+  xsun = CGS.RSUN/CGS.AU * cos.(theta_sun)
+  ysun = CGS.RSUN/CGS.AU * sin.(theta_sun)
+  t0 = range(jd1,stop=jd2-1,length = jdsize)
+  pva_sun = zeros(6, jdsize)
+  pva_venus = zeros(6, jdsize)
+  pva_earth = zeros(6, jdsize)
+  pva_emb = zeros(6, jdsize)
+  pva_moon = zeros(6, jdsize)
+  for i=1:jdsize
+    pva_sun[1:6,i] = compute(eph,t0[i],0.0,10,10,options)./AU
+    pva_venus[1:6,i] = compute(eph,t0[i],0.0,2,10,options)./AU
+    if obs=="fromEMB"
+      pva_emb[1:6,i] = compute(eph,t0[i],0.0,3,10,options) ./AU
+    else
+      pva_moon = compute(eph,t0[i],0.0,301,10,options)./AU
+      pva_earth[1:6,i] = compute(eph,t0[i],0.0,399,10,options)./AU
+    end
+  end
+  body,tt0,tt,sigtt=sim_obs_and_find_times(jd1,sigma,nyear,obs)
+  nt1 = sum(body .== 1.0)
+  nt2 = sum(body .== 2.0)
+  trans_pva_venus = zeros(6, jdsize)
+  trans_pva_earth = zeros(6, jdsize)
+  trans_pva_emb = zeros(6, jdsize)
+  trans_pva_moon = zeros(6, jdsize)
+  for i=1:length(tt)
+    trans_pva_venus[1:6,i] = compute(eph,tt[i],0.0,2,10,options)./AU
+    if obs=="fromEMB"
+      trans_pva_emb[1:6,i] = compute(eph,tt[i],0.0,3,10,options) ./AU
+    else
+      trans_pva_moon = compute(eph,tt[i],0.0,301,10,options)./AU
+      trans_pva_earth[1:6,i] = compute(eph,tt[i],0.0,399,10,options)./AU
+    end
+  end
+  n_obs=calc_obs_loc(trans_pva_venus[1:3],trans_pva_venus[4:6],trans_pva_earth[1:3],trans_pva_earth[4:6])
+  
+  if dimension==2
+  fig=figure(figsize=(5,5))#,dpi=150)
+  # subplot(211)
+  fill(xsun,ysun,color="yellow")
+  plot(xsun,ysun,color="black")
+  plot(pva_venus[1,:],pva_venus[2,:],color="orange",linewidth=0.3,alpha=0.5)
+  plot(pva_earth[1,:],pva_earth[2,:],color="dodgerblue",linewidth=0.3,alpha=0.5)
+  scatter(trans_pva_venus[1,1:nt1],trans_pva_venus[2,1:nt1],marker=".",color="orange")
+  scatter(trans_pva_earth[1,nt1+1:nt1+nt2],trans_pva_earth[2,nt1+1:nt1+nt2],marker=".",color="dodgerblue")
+  plot([0,n_obs[1]*1.1],[0,n_obs[2]*1.1],"k--")
+  # arrow(0.0,0.0,n_obs[1],n_obs[2],facecolor="black")
+  annotate("to observer",xy=[n_obs[1];n_obs[2]], xytext=[n_obs[1]+0.05;n_obs[2]],xycoords="data") 
+  xlabel("x [AU]")
+  ylabel("y [AU]")
+  # subplot(212)
+  tight_layout()
+  end
 
-jd1 = 2.4332825e6
-# nyear = 40.0
-jd2 = nyear*365.25 + jd1
-jdsize = 1000
-# sigma = 30.0
-t0 = range(jd1,stop=jd2-1,length = jdsize)
-
-# pva_sun,pva_venus,pva_earth are the body positions,velocities,and ang. momentum computed for the jd1--jd2 range
-#sim_times(jd1::Float64,nyear::Float64,addnoise::Bool=false,sigma::Float64=0.0,EMB::Bool=true,seed::Int=42)
-tt1,tt2,n_obs,pva_sun,pva_venus,pva_earth = sim_times(jd1,sigma,nyear,EMB)
-
-eph = Ephem("INPUTS/DE440.bsp") ; prefetch(eph)
-options = useNaifId+unitKM+unitDay # useNaifId + unitDay + unitAU
-AU = 149597870.700 #km
-
-theta_sun = range(0,stop = 2pi,length = 100)
-xsun = CGS.RSUN/CGS.AU * cos.(theta_sun)
-ysun = CGS.RSUN/CGS.AU * sin.(theta_sun)
-# pva0,pva1,and pva2 are the body positions,velocities,and ang. momentum computed at the transit times found
-pva0 = zeros(9,length(tt2))
-pva1 = zeros(9,length(tt2))
-pva2 = zeros(9,length(tt2))
-for i=1:length(tt2)
-pva0[1:9,i] = compute(eph,tt1[i],0.5,10,10,options,2)./AU
-pva1[1:9,i] = compute(eph,tt1[i],0.5,2,10,options,2)./AU
-	if EMB
-	  pva_2[1:9,i] = compute(eph,t0[i],0.5,3,10,options,2)./AU
-	else
-		pva2[1:9,i] = compute(eph,tt2[i],0.5,399,10,options,2)./AU
-	end
-end
-
-if dimension==2
-fig = plt.figure(figsize=(6, 6))
-ax1 = fig.add_subplot(111)
-# ax1.plot(vec(pva_sun[2,:]),vec(pva_sun[3,:]),color=:yellow,marker="o",mec="black")
-ax1.plot(vec(pva_venus[1,:]),vec(pva_venus[2,:]),alpha=0.25)
-ax1.plot(vec(pva_earth[1,:]),vec(pva_earth[2,:]),alpha=0.25)
-ax1.plot(vec(pva1[1,:]),vec(pva1[2,:]),label="Venus Transit",marker="o")
-ax1.plot(vec(pva2[1,:]),vec(pva2[2,:]),color=:orange,label="Earth Transit",marker="o")
-ax1.plot([0,n_obs[1]*1.1],[0,n_obs[2]*1.1],color=:grey,linestyle="--",alpha=0.5)
-ax1.plot(xsun,ysun,color=:yellow,marker="o",ms=5,mec=:gold)
-# ax1.plot(vec(pva_sun[2,:]),vec(pva_sun[3,:]),label="Sun",color=:yellow,marker="o",ms=10,mec="gold")
-ax1.tick_params(which="major",direction="in",length=6,
-    left="false",right="false",top="false",bottom="false",
-    labelbottom="true",labeltop="false",labelleft="true",labelright="false")
-# legend()
-xlabel("x-position [AU]")
-ylabel("y-position [AU]")
-# legend(loc="lower left")
-end
-
-if dimension==3
-fig=figure(figsize=(8,6))
-# PyPlot.scatter3D(xsun,ysun,0,marker="o",color=:yellow,ms=20)
-PyPlot.plot3D(vec(pva_venus[1,:]), vec(pva_venus[2,:]), vec(pva_venus[3,:]),alpha=0.25)
-PyPlot.plot3D(vec(pva_earth[1,:]), vec(pva_earth[2,:]), vec(pva_earth[3,:]),alpha=0.25)
-PyPlot.plot3D([0,n_obs[1]*1.2],[0,n_obs[2]*1.2],[0,n_obs[3]*1.2],linestyle="--",color=:grey,alpha=0.5)
-PyPlot.plot3D(vec(pva0[1,:]), vec(pva0[2,:]), vec(pva0[3,:]),color=:yellow,marker="o",ms=10,mec=:gold)
-PyPlot.plot3D(vec(pva1[1,:]),vec(pva1[2,:]),vec(pva1[3,:]),label="Venus",marker="o")
-PyPlot.plot3D(vec(pva2[1,:]),vec(pva2[2,:]),vec(pva2[3,:]),color=:orange,label="Earth",marker="o")
-PyPlot.tick_params(which="major",
-    left="false",right="false",top="false",bottom="false")
-legend()
-# xlim(-1,1)
-# ylim(-1,1)
-xlabel("x [AU]")
-ylabel("y [AU]")
-zlabel("z [AU]")    
-end
+  if dimension==3
+  fig=figure(figsize=(6,6))
+  PyPlot.scatter3D(xsun,ysun,0,marker="o",color=:yellow)
+  PyPlot.plot3D(vec(pva_venus[1,:]), vec(pva_venus[2,:]), vec(pva_venus[3,:]),alpha=0.25,color=:orange)
+  PyPlot.plot3D(vec(pva_earth[1,:]), vec(pva_earth[2,:]), vec(pva_earth[3,:]),alpha=0.25,color=:dodgerblue)
+  PyPlot.plot3D([0,n_obs[1]*1.2],[0,n_obs[2]*1.2],[0,n_obs[3]*1.2],linestyle="--",color=:grey)
+  # PyPlot.scatter3D(vec(trans_pva_sun[1,:]), vec(trans_pva_sun[2,:]), vec(trans_pva_sun[3,:]),color=:yellow)
+  PyPlot.scatter3D(vec(trans_pva_venus[1,1:nt1]),vec(trans_pva_venus[2,1:nt1]),vec(trans_pva_venus[3,1:nt1]),color=:orange,marker=".")
+  PyPlot.scatter3D(vec(trans_pva_earth[1,nt1+1:nt1+nt2]),vec(trans_pva_earth[2,nt1+1:nt1+nt2]),vec(trans_pva_earth[3,nt1+1:nt1+nt2]),color=:dodgerblue,marker=".")
+  PyPlot.tick_params(which="major",
+      left=false,right=false,top=false,bottom=false)
+  # xlim(-1,1)
+  # ylim(-1,1)
+  xlabel("x [AU]")
+  ylabel("y [AU]")
+  zlabel("z [AU]")  
+  end
+  #   println(n_obs) 
+  # return tt 
 end
 
 

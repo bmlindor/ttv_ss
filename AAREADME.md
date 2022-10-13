@@ -16,7 +16,6 @@ Note: positions are integrated in astronomical units (AU), fixed AU = 149597870.
 but with polynomials stored in units of kilometers. 
 The integration time units are days of barycentric dynamical time (TDB)
 
-
 CALCEPH: https://github.com/JuliaAstro/CALCEPH.jl
 retrieves the position, velocity and acceleration of Earth (geocenter) relative
 to the Earth-Moon system barycenter in kilometers, kilometers per second and
@@ -24,8 +23,17 @@ kilometers per second square at JD= 2451624.5 TDB timescale
 For best accuracy the first time argument should be the integer part 
 and the delta the fractional part (step through day).
 
-Note: For planets without moons, Mercury and Venus, 
-the barycenter location coincides with the body center of mass. 
+compute(eph,jd0,time,target,center)
+
+Compute position and velocity of target with respect to center at epoch
+jd0+time. This method does not support the NAIF numbering scheme.
+To get the best precision for the interpolation, the time is split in two
+floating-point numbers. The argument jd0 should be an integer and time should
+be a fraction of the day. But you may call this function with time=0 and jd0,
+the desired time, if you don't care about precision.
+
+Note: For planets without moons, Mercury and Venus, the barycenter location 
+coincides with the body center of mass. compute(...) doesn't accept all NaifIDs
 NaifID: 
     10          'SUN'
     0           'SOLAR SYSTEM BARYCENTER'
