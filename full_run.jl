@@ -35,7 +35,7 @@ nplanet,nmoon=parse_model(label)
 jd1=2.4332825e6
 tref=2430000; tol=1e-5
 nphase=36 #wide: 100,36,180 
-np3,np4,np5=[nper, nper, nper]
+np3,np4,dp,np5=[nper, nper, nper,nper]
 
 # Run markov chains
 #sigma=10; nyear=20
@@ -103,18 +103,18 @@ function run_grid(sigma,nyear,label::String,obs::String)
   fit_planet5(jd1,sigma,nyear,tref,tol,p5in,p5out,np5,nphase,[obs,"p5"],true)
 	end
 	if label=="Hppm"
- 	fit_planet2(jd1,sigma,nyear,tref,tol,[obs],true)
-	fit_moon(jd1,sigma,nyear,tref,tol,dpin,dpout,ndp,2,"p2moon")
+ 	#fit_planet2(jd1,sigma,nyear,tref,tol,[obs],true)
+	fit_moon(jd1,sigma,nyear,tref,tol,dpin,dpout,ndp,["p2moon"],true,2)
 	elseif label=="Hppmp"
-	fit_planet3(jd1,sigma,nyear,tref,tol,p3in,p3out,np3,nphase,[obs,"p3"],true)
-	fit_moon(jd1,sigma,nyear,tref,tol,dpin,dpout,ndp,3,"p3moon",true)
+	#fit_planet3(jd1,sigma,nyear,tref,tol,p3in,p3out,np3,nphase,[obs,"p3"],true)
+	fit_moon(jd1,sigma,nyear,tref,tol,dpin,dpout,ndp,["p3moon"],true)
 	elseif label=="Hppmpp"
   #fit_planet4(jd1,sigma,nyear,tref,tol,p4in,p4out,np4,nphase,[obs,"p4"],true)
 	# fit_moon(jd1,sigma,nyear,tref,tol,dpin,dpout,ndp,4,"p4moon",true)
-	fit_planet4(jd1,sigma,nyear,tref,tol,p4in,p4out,np4,nphase,"p3moonp4",true)
+	fit_moon(jd1,sigma,nyear,tref,tol,p4in,p4out,np4,nphase,["p3moonp4"],true)
 	elseif label=="Hppmppp"
   fit_planet5(jd1,sigma,nyear,tref,tol,p5in,p5out,np5,nphase,[obs,"p5"],true)
-	fit_moon(jd1,sigma,nyear,tref,tol,dpin,dpout,ndp,5,"p5moon",true)
+	fit_moon(jd1,sigma,nyear,tref,tol,dpin,dpout,ndp,["p5moon"],true,5)
 	end
 end
 function test_fit(sigma,nyear,label::String,obs::String)
@@ -133,10 +133,8 @@ function test_fit(sigma,nyear,label::String,obs::String)
   fit_planet4(jd1,sigma,nyear,tref,tol,p4in,p4out,np4,nphase,[obs,"p4"])
 	elseif label=="Hppppp"
   fit_planet5(jd1,sigma,nyear,tref,tol,p5in,p5out,np5,nphase,[obs,"p5"])
-	end
-	if label=="Hppmpp" 
-	fit_moon(jd1,sigma,nyear,tref,tol,dpin,dpout,ndp,3,"p3moon")
-	fit_planet4(jd1,sigma,nyear,tref,tol,p4in,p4out,np4,nphase,"p3moonp4")
+	elseif label=="Hppmpp" 
+	fit_moon(jd1,sigma,nyear,tref,tol,p4in,p4out,np4,nphase,["p3moonp4"],true)
 	end
 end
 

@@ -80,7 +80,7 @@ function fit_moon(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,dpin
 	df=DataFrame(mu_1=param_dp[1,:],P_1=param_dp[2,:],t01=param_dp[3,:],ecos1=param_dp[4,:],esin1=param_dp[5,:],
 								mu_2=param_dp[6,:],P_2=param_dp[7,:],t02=param_dp[8,:],ecos2=param_dp[9,:],esin2=param_dp[10,:],
 								mu_3=param_dp[11,:],P_3=param_dp[12,:],t03=param_dp[13,:],ecos3=param_dp[14,:],esin3=param_dp[15,:],
-								tmaxsinphi=param_dp[end-2,:],tmaxcosphi0=param_dp[end-1,:],deltaphi=param_dp[end,:],
+								tcos=param_dp[end-2,:],tsin=param_dp[end-1,:],dphi=param_dp[end,:],
 								lprob=lprob_dp[:])
 	CSV.write(grid,df) 
 
@@ -202,7 +202,7 @@ function fit_moon(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p4in
 								mu_2=param_p4[6,:],P_2=param_p4[7,:],t02=param_p4[8,:],ecos2=param_p4[9,:],esin2=param_p4[10,:],
 								mu_3=param_p4[11,:],P_3=param_p4[12,:],t03=param_p4[13,:],ecos3=param_p4[14,:],esin3=param_p4[15,:],
 								mu_4=param_p4[16,:],P_4=param_p4[17,:],t04=param_p4[18,:],ecos4=param_p4[19,:],esin4=param_p4[20,:],
-								tmaxsinphi=param_p4[end-2,:],tmaxcosphi0=param_p4[end-1,:],deltaphi=param_p4[end,:],
+								tcos=param_p4[end-2,:],tsin=param_p4[end-1,:],dphi=param_p4[end,:],
 								lprob=lprob_p4[:])
 	CSV.write(grid,df)
 
@@ -219,7 +219,8 @@ function fit_moon(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p4in
   pname=["mu_1","P_1","t01","ecos1","esin1",
         "mu_2","P_2","t02","ecos2","esin2",
         "mu_3","P_3","t03","ecos3","esin3",
-        "mu_4","P_4","t04","ecos4","esin4"]
+        "mu_4","P_4","t04","ecos4","esin4",
+				"tsin","tcos","dphi"]
   mean_mp=[best_p4[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
   mp_errs=[err[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
   mean_ecc=[sqrt(best_p4[(iplanet-1)*5+4]^2 + best_p4[(iplanet-1)*5+4]^2) for iplanet=1:nplanet]
