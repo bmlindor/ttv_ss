@@ -214,7 +214,7 @@ function plot_ttv(sigma::Real,nyear::Real,options::Array{String},include_moon::B
   ttv1,ttv2=(tt1.-time1).* (24*60),(tt2.-time2).* (24 * 60) #in minutes
   sigtt1,sigtt2=sigtt[1:n1].* (24 * 60),sigtt[n1+1:n1+n2].* (24 * 60) #in minutes
     
-  fig=plt.figure(figsize=(8,6),dpi=150)
+  fig=plt.figure(figsize=(8,6))
   subplots_adjust(hspace=0.0)
   ax1=subplot(211) 
 	ax1.minorticks_on()
@@ -308,7 +308,7 @@ function plot_contrib(sigma::Real,nyear::Real,options::Array{String},include_moo
     plot(ttsim2,moon,linestyle="-.",color="purple",label="Moon")
     errorbar(ttsim2,ttv2,sigtt2,fmt=".",color="black",capsize=3,ms=5)#,label="Earth")
     text(0,-5.5,label,fontsize="xx-large")
-    # xlabel("Time [years]",fontsize=20)
+    xlabel("Time [years]",fontsize=20)
     ylabel("TTV [min]",fontsize=20)
     ylim(-7,7)
     ax2.minorticks_on()
@@ -325,18 +325,20 @@ function plot_contrib(sigma::Real,nyear::Real,options::Array{String},include_moo
   tick_params(which="both",direction="in",top=true,right=true)
   end
   if f["nplanet"]==4
-    # ax1.plot(ttsim1,pair_ttvs[1,3,1:n1]+pair_ttvs[1,2,1:n1]+pair_ttvs[1,4,1:n1],linewidth=2,color="grey")
-    ax1.plot(ttsim1,pair_ttvs[1,3,1:n1],linestyle="--",color="orange",label="'Mars'",alpha=0.9)
+    ax1.plot(ttsim1,pair_ttvs[1,3,1:n1]+pair_ttvs[1,2,1:n1]+pair_ttvs[1,4,1:n1],linewidth=1.5,color="grey")
+    ax1.plot(ttsim1,pair_ttvs[1,3,1:n1],linestyle="--",color="orange",label="Mars",alpha=0.9)
     ax1.plot(ttsim1,pair_ttvs[1,4,1:n1],color="firebrick",label="Jupiter")
-    # ax2.plot(ttsim2,pair_ttvs[2,3,1:n2]+pair_ttvs[2,1,1:n2]+pair_ttvs[2,4,1:n2],linewidth=2,color="grey")
-    ax2.plot(ttsim2,pair_ttvs[2,3,1:n2],linestyle="--",color="orange",label="'Mars'",alpha=0.9)
+
+    ax2.plot(ttsim2,pair_ttvs[2,3,1:n2]+pair_ttvs[2,1,1:n2]+pair_ttvs[2,4,1:n2],linewidth=1.5,color="grey")
+    ax2.plot(ttsim2,pair_ttvs[2,3,1:n2],linestyle="--",color="orange",label="Mars",alpha=0.9)
     ax2.plot(ttsim2,pair_ttvs[2,4,1:n2],color="firebrick",label="Jupiter")
   elseif f["nplanet"]==5
-    # ax1.plot(ttsim1,pair_ttvs[1,3,1:n1]+pair_ttvs[1,2,1:n1]+pair_ttvs[1,4,1:n1]+pair_ttvs[1,5,1:n1],linewidth=2,color="grey")
+    ax1.plot(ttsim1,pair_ttvs[1,3,1:n1]+pair_ttvs[1,2,1:n1]+pair_ttvs[1,4,1:n1]+pair_ttvs[1,5,1:n1],linewidth=1.5,color="grey")
     ax1.plot(ttsim1,pair_ttvs[1,3,1:n1],linestyle="--",color="orange",label="'Mars'",alpha=0.9)
     ax1.plot(ttsim1,pair_ttvs[1,4,1:n1],color="firebrick",label="Jupiter")
     ax1.plot(ttsim1,pair_ttvs[1,5,1:n1],linestyle="--",color="tan",label="'Saturn'")
-    # ax2.plot(ttsim2,pair_ttvs[2,3,1:n2]+pair_ttvs[2,1,1:n2]+pair_ttvs[2,4,1:n2]+pair_ttvs[2,5,1:n2],linewidth=2,color="grey")
+
+    ax2.plot(ttsim2,pair_ttvs[2,3,1:n2]+pair_ttvs[2,1,1:n2]+pair_ttvs[2,4,1:n2]+pair_ttvs[2,5,1:n2],linewidth=1.5,color="grey")
     ax2.plot(ttsim2,pair_ttvs[2,3,1:n2],linestyle="--",color="orange",label="'Mars'",alpha=0.9)
     ax2.plot(ttsim2,pair_ttvs[2,4,1:n2],color="firebrick",label="Jupiter")
     ax2.plot(ttsim2,pair_ttvs[2,5,1:n2],linestyle="--",color="tan",label="'Saturn'")
@@ -350,8 +352,10 @@ function plot_contrib(sigma::Real,nyear::Real,options::Array{String},include_moo
   ax1.text(maximum(ttsim1)-5,5,sim_obs_label)
   # ax1.legend(title="Source of contributions to TTV",fontsize="medium",title_fontsize="medium",markerscale=1.5,bbox_to_anchor=(0.,1.02,1.,.102),loc="lower left",
   #     ncol=3,mode="expand",borderaxespad=0.0)
+  ax1.legend(bbox_to_anchor=(0.,1.02,1.,.102),loc="lower left",
+      ncol=3,mode="expand",borderaxespad=0.0,fontsize="large")
   ax2.legend(bbox_to_anchor=(0.,1.02,1.,.102),loc="lower left",
-      ncol=3,mode="expand",borderaxespad=0.0)
+      ncol=3,mode="expand",borderaxespad=0.0,fontsize="large")
   # tight_layout()
   # legend(loc="upper right")
   # title=string("IMAGES/ttvs/",sim,fitmodel,"ttvs-",sigma,"secs",nyear,"yrs.png")
