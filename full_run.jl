@@ -39,7 +39,7 @@ np3,np4,ndp,np5=[nper, nper, nper,nper]
 
 # Run markov chains
 #sigma=10; nyear=20
-nwalkers=75;nsteps=50000
+
 function planet_mcmc(sigma,nyear,nplanet,nsteps,obs::String)
 	if obs=="fromEMB"
 	fitfile=string("FITS/fromEMB/p",nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
@@ -51,17 +51,17 @@ function planet_mcmc(sigma,nyear,nplanet,nsteps,obs::String)
 	results=string("MCMC/p",nplanet,"_results",sigma,"s",nyear,"yrs.txt")
 	end
 	p=jldopen(String(fitfile),"r")
-	MCMC(foutput,p[string("best_p",nplanet)],p[string("lprob_best_p",nplanet)],nsteps,nwalkers,nplanet,p["ntrans"][1:nplanet],p["tt0"],p["tt"],p["sigtt"],true,true,results)
+	MCMC(foutput,p[string("best_p",nplanet)],p[string("lprob_best_p",nplanet)],nsteps,nwalkers,nplanet,p["ntrans"][1:nplanet],p["tt0"],p["tt"],p["sigtt"],true,true)
 end 
 function moon_mcmc(sigma,nyear,nplanet,nsteps,label::String)
 	if label=="Hppmpp" # load p4 search after moon fit
-	fitfile=string("FITS/moonp4_fit",sigma,"s",nyear,"yrs.jld2")
-	foutput=string("MCMC/moonp4_mcmc",sigma,"s",nyear,"yrs.jld2")
+	fitfile=string("FITS/p3moonp4_fit",sigma,"s",nyear,"yrs.jld2")
+	foutput=string("MCMC/p3moonp4_mcmc",sigma,"s",nyear,"yrs.jld2")
 	m=jldopen(String(fitfile),"r")
 	MCMC(foutput,m["best_p4"],m["lprob_best_p4"],nsteps,nwalkers,4,m["ntrans"][1:4],m["tt0"],m["tt"],m["sigtt"],true,false)
 	else
-	fitfile=string("FITS/p",nplanet,"moon_fit",sigma,"s",nyear,"yrs.jld2")
-	foutput=string("MCMC/p",nplanet,"moon_mcmc",sigma,"s",nyear,"yrs.jld2")
+	fitfile=string("FITS/p",nplanet,"p3moon_fit",sigma,"s",nyear,"yrs.jld2")
+	foutput=string("MCMC/p",nplanet,"p3moon_mcmc",sigma,"s",nyear,"yrs.jld2")
 	m=jldopen(String(fitfile),"r")
 	MCMC(foutput,m["best_dp"],m["lprob_best_dp"],nsteps,nwalkers,nplanet,m["ntrans"][1:nplanet],m["tt0"],m["tt"],m["sigtt"],true,false)	
 	end
@@ -93,7 +93,7 @@ function run_grid(sigma,nyear,label::String,obs::String)
  end
 
 	if label=="Hpp" 
-	#sim_times(jd1,sigma,nyear,obs)
+	sim_times(jd1,sigma,nyear,obs)
  	fit_planet2(jd1,sigma,nyear,tref,tol,[obs],true)
 	elseif label=="Hppp"
 	fit_planet3(jd1,sigma,nyear,tref,tol,p3in,p3out,np3,nphase,[obs,"p3"],true)
@@ -150,18 +150,14 @@ if runtype=="wide"
   fit_planet5(jd1,sigma,nyear,tref,tol,p5in,p5out,np5,nphase,[obs,"widep5"],true)
 	# @time fit_moon(jd1,sigma,nyear,tref,tol,dpin,dpout,ndp,3)
 end
-#nyears=[15,17,19,21,23,25,27,29]#,14,13,12,11,10]
-nyears=[16,18,20,22,24,26,28,30]#
-sigmas=[10,30,60,80,90,100,110,120]
+#nyears=[15,17,19,21,23,25,27,29,16,18,20,22,24,26,28,30]#,14,13,12,11,10]
+#nyears=[30,25,20]
+nyears=[14,13,12,11,10]
+sigmas=[10,30,60]
+nwalkers=75
+nsteps=50000
 for sig in sigmas
 for yr in nyears
-if runtype=="full" && nmoon==0
-	@time run_grid(sig,yr,label,obs)
-	#@time planet_mcmc(sig,yr,nplanet,nsteps,obs)
-elseif runtype=="full" && nmoon>0
-	@time run_grid(sig,yr,label,obs)
-	#@time moon_mcmc(sig,yr,nplanet,nsteps,label)
-end
 if runtype=="mcmc" && nmoon==0
 	@time planet_mcmc(sig,yr,nplanet,nsteps,obs)
 elseif runtype=="mcmc" && nmoon>0
@@ -173,7 +169,7 @@ end
 end
 end
 if runtype=="test"
-nyears=[30]
+nyears=[15]
 sigmas=[10]
 for sig in sigmas
 for yr in nyears

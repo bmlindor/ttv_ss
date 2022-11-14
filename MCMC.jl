@@ -2,13 +2,14 @@ include("bounds.jl")
 include("CGS.jl")
 include("misc.jl")
 using TTVFaster,DelimitedFiles,JLD2
-using Statistics,MCMCDiagnostics
+using Statistics,StatsBase,MCMCDiagnostics
 
 # Run a Markov chain:
-function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,nsteps::Int64,nwalkers::Int64,nplanet::Int64,ntrans::Array{Int64,1},tt0::Array{Float64,1},tt::Array{Float64,1},sigtt::Array{Float64,1},use_sigsys::Bool,EM::Bool,fresults::String) 
+function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,nsteps::Int64,nwalkers::Int64,nplanet::Int64,ntrans::Array{Int64,1},tt0::Array{Float64,1},tt::Array{Float64,1},sigtt::Array{Float64,1},use_sigsys::Bool,EM::Bool) 
   nparam = length(param)
   println(nparam," parameters from fit: ",param)
-  # println("Maximum log Prob from fit: ",lprob_best)
+  println("Maximum log Prob from fit: ",lprob_best)
+	println("No Walkers: ",nwalkers," No. steps: ",nsteps)
   jmax = 5
   errors = [1e-7,1e-5,1e-5,1e-2,1e-2,
             1e-7,1e-5,1e-5,1e-2,1e-2,
@@ -29,7 +30,7 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,nsteps
     errors=errors[1:10]
     pname=pname[1:10]
   end
-  if (nparam%5 == 3) # if there's a remainder of 3 when nparam/5
+  if mod(nparam,5) == 3 
     moon_errors = [1e-4,1e-4,1e-5]
     moon_name = ["tmax sin(phi0)","tmax cos(phi0)","deltaphi"]
     append!(errors,moon_errors)
@@ -78,7 +79,7 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,nsteps
         lprior += -Inf
       end
     end
-    if (nparam%5 == 3)
+		if mod(nparam,5) == 3
     # Force the deltaphi to be between 0 and pi (to account for aliasing):
       dpmin = 0.0; dpmax = pi
       deltaphi = param[18]
@@ -106,11 +107,11 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,nsteps
     return lprior
   end
 
-  Nobs = sum(ntrans) - 2
+  Nobs = sum(ntrans) - 2*(nplanet - 2)
   for j=1:nwalkers
   # Select from within uncertainties:
     lprob_trial = -1e100
-  # Only initiate models with reasonable chi-square values:
+  # Only initiate models with reasonable Log Prob values:
     while lprob_trial < lprob_best - 1000 #since logProb, maybe 1000 is too large
       par_trial[1:nparam] .= param .+ errors .* randn(nparam) 
       if use_sigsys
@@ -150,11 +151,10 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,nsteps
   # Now,choose a new set of parameters for the trial step:
       z=(rand()*(sqrt(ascale)-1.0/sqrt(ascale))+1.0/sqrt(ascale))^2 # draws from 1=sqrt(z....)
       par_trial=vec(z*par_mcmc[j,i-1,:]+(1.0-z)*par_mcmc[ipartner,i-1,:])
-  # Compute model & chi-square:  
+  # Compute model & Log Prob for trial step:  
       lprob_trial = calc_lprior(par_trial)  
       if lprob_trial > -Inf
           model_trial = ttv_wrapper(tt0,nplanet,ntrans,par_trial[1:nparam],jmax,EM)
-    # model_trial = ttv_wrapper(tt0,nplanet,ntrans,par_trial[1:nparam],false)
     # ll = -.5 *sum((tt-model_trial).^2 ./(sigtt.^2 .+ par_trial[end]) .+ log.(sigtt.^2 .+ par_trial[end]))
     # ll =  log(sum((tt-model_trial).^2 ./sigtt.^2))
     # lprob_trial = calc_lprior(par_trial) + ll*(1 - Nobs/2) 
@@ -165,7 +165,8 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,nsteps
         end 
       end   
   # Next,determine whether to accept this trial step:
-      alp = z^(nsize-1)*exp((lprob_trial - lprob_mcmc[j,i-1])) #prob ratio between current trial and previous prob
+	# Calculate ratio between Log Prob of trial step and previous step:
+      alp = z^(nsize-1)*exp((lprob_trial - lprob_mcmc[j,i-1])) 
       if rand() < 0.0001
         println("Step: ",i," Walker: ",j," Trial Log Prob: " ,lprob_trial," Prob: ",alp," Frac: ",accept/(mod(i-1,1000)*nwalkers+j))
       end
@@ -202,7 +203,7 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,nsteps
   end
   println("Burn-in Number (ends): ",iburn)
 
-  # Now,calculate the minimum number of effective samples over all parameters:
+  # Calculate the minimum number of effective samples over all parameters:
   samplesize = zeros(nparam)
   for j=1:nwalkers
     for i=1:nparam
@@ -212,25 +213,38 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,nsteps
   indepsamples = minimum(samplesize)
   println("Independent Sample Size: ",indepsamples)
 
+	# Calculate the auto-correlation function for each parameter:
+	acf=zeros(nparam)
+	#for i=1:nparam
+		#acf[i]=autocor(par_mcmc[:,iburn:nsteps,i],demean=true)
+	#end
+	println("Auto-Cor Function: ",acf)
+
   # Find mean and standard deviation of posteriors after burn-in:
+	mean_posteriors=[mean(par_mcmc[:,iburn:nsteps,i]) for i=1:nparam]
+	println("Mean posteriors after burn-in: ",mean_posteriors)
+	chi2=chisquare(tt0,nplanet,ntrans,mean_posteriors,tt,sigtt,jmax,EM)
+  sigtot=[sqrt((mean(vec(par_mcmc[:,iburn:nsteps,end])).*3600*24)^2 + (mean(sigtt).*3600*24)^2) ]
+	println("MCMC chi-square: ",chi2," for total timing uncertainty of: ",sigtot," secs.")
+
+
   mean_mp = [mean(vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+1])).*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
   mp_errs = [std(vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+1])).*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
 
   mean_ecc=[mean(sqrt.(vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+4]).^2 .+ vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+5]).^2)) for iplanet=1:nplanet]
-  ecc_errs=[std(sqrt.(vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+4]).^2 .+ vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+5]).^2)) for iplanet=1:nplanet]
+  #ecc_errs=[std(sqrt.(vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+4]).^2 .+ vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+5]).^2)) for iplanet=1:nplanet]
 
-  sigtot=[sqrt((mean(vec(par_mcmc[:,iburn:nsteps,end])).*3600*24)^2 + (mean(sigtt).*3600*24)^2) ]
-
-  open(fresults,"w") do io
-  for i=1:nparam
-    println(io,pname[i], mean(vec(par_mcmc[:,iburn:nsteps,i]))," ± ",std(vec(par_mcmc[:,iburn:nsteps,i])))
-  end
-    println(io,"Retrieved Earth masses:",'\n',mean_mp,'\n'," ± ",mp_errs)
-    println(io,"Retrieved eccentricity:",'\n',mean_ecc,'\n'," ± ",ecc_errs)
-		println(io,"Retrieved σ_tot [secs] : ",sigtot)
-  end
-  println("Saved in ",foutput)
+  #open(fresults,"w") do io
+	#println(io,"MC chi-square after burn-in: ",chi2)
+  #for i=1:nparam
+  #  println(io,pname[i], mean(vec(par_mcmc[:,iburn:nsteps,i]))," ± ",std(vec(par_mcmc[:,iburn:nsteps,i])))
+  #end
+  #  println(io,"Retrieved Earth masses:",'\n',mean_mp,'\n'," ± ",mp_errs)
+  #  println(io,"Retrieved eccentricity:",'\n',mean_ecc,'\n'," ± ",ecc_errs)
+	#	println(io,"Retrieved σ_tot [secs] : ",sigtot)
+  #end
+  #println("Saved in ",foutput)
   mcmcfile = string(foutput)
-  @save mcmcfile par_mcmc lprob_mcmc param nwalkers nsteps accept iburn indepsamples
-  return lprob_mcmc,par_mcmc #, param, nwalkers, nsteps, accept, iburn, indepsamples
+  @save mcmcfile par_mcmc lprob_mcmc param nwalkers nsteps accept iburn indepsamples 
+  return lprob_mcmc #, param, nwalkers, nsteps, accept, iburn, indepsamples
 end
