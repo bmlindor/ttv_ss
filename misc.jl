@@ -20,7 +20,8 @@ end
 G=CGS.GRAV /1e3 #in kms units
 AU=CGS.AU /1e2 #in kms units
 Kepler_law(Per,mp,mstar)= ((G*(mstar + mp)* (Per*24*3600)^2) /(4*pi^2))^(1/3) 
-Hill_radius(Per,mp,ecc,mstar) = Kepler_law(Per,mp,mstar) * (1-ecc)* (mp/(3 * mstar))^(1/3)
+Hill_radius(Per,mp,ecc,mstar) = (Kepler_law(Per,mp,mstar) * (1-ecc) * (mp/(3 * mstar))^(1/3)) / AU
+#Hill_radius((1733*24*3600),(27*5.9742e24),0.4,1.99e30)
 function mutual_Hill(Per1,mp1,mstar,Per2,mp2)
 	a1,a2 = Kepler_law(Per1,mp1,mstar),Kepler_law(Per2,mp2,mstar)	
 	return ((mp1 + mp2)/(3 * mstar))^(1/3) * (a1 + a2)/2

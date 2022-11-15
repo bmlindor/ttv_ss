@@ -1,5 +1,5 @@
 # Julia v1.3
-using CALCEPH,PyPlot,Statistics,JLD2,DelimitedFiles,Random,LinearAlgebra
+using CALCEPH,PyPlot,Statistics,JLD2,DelimitedFiles,Random,LinearAlgebra,Distributions
 rc("font",family="sans-serif")
 rc("lines",linewidth=2)
 include("regress.jl")
@@ -81,7 +81,7 @@ function transit_times(body_id::Int,eph::CALCEPH.Ephem,t0,period::Float64,period
   TT = Float64[]
   t_final = t0[end]
   # Initialize & find first transit time:
-  JD,ff,i_min,pos,JD_tt = find_transit(body_id,eph,t0[1],t0[1]+period,n_obs,1000) #why did we use 1000 here?
+  JD,ff,i_min,pos,JD_tt = find_transit(body_id,eph,t0[1],t0[1]+period,n_obs,1000) #why did we use 1000 here? want first time to be precise
   push!(TT,JD_tt)
   # Find subsequent transit times by shifting time frame by 1 planetary period:
   while JD_tt < t_final
@@ -92,17 +92,21 @@ function transit_times(body_id::Int,eph::CALCEPH.Ephem,t0,period::Float64,period
   end
   return TT
 end
-# Add Gaussian sigma noise to transit times
+# Add Gaussian sigma noise level (in seconds) to transit times (in days)
 function fixed_noise(tt::Vector{Float64},sigma::Real)
   if sigma > 0
-      sigtt = ones(length(tt)) * sigma / (24 * 3600) # sigma in seconds,sigtt in days
-      noise = randn(length(tt)) .* sigtt  
+    # Draw a random number from a Normal distribution: 
+      # dist=Normal(0,sigma / (24 * 3600))
+      # noise=rand(dist, length(tt))
+    # Since we're assuming that all σ_i are identical:  
+      sigtt = ones(length(tt)) * sigma / (24 * 3600) 
+      noise = sigtt .* randn(length(tt))
       # println("Noise added with σ of ",string(sigma)," seconds.")
   else
       sigtt=0
       println("No noise added.")
   end
-  return sigtt 
+  return sigtt,noise 
 end
 # Do linear regression of transit times, given mean orbital period
 function linear_fit(tt::Vector{Float64},period::Float64,sigtt::Vector{Float64})
@@ -192,8 +196,9 @@ function sim_obs_and_find_times(jd1::Float64,sigma::Real,nyear::Real,obs::String
     tt2 = transit_times(399,eph,t0,P_earth,P_err,n_obs,10)
   end
   nt2=length(tt2)
-	sigtt1=fixed_noise(tt1,sigma)
-	sigtt2=fixed_noise(tt2,sigma)
+  # println("Venus Transit Times: ",tt1,'\n',"Earth Transit Times: ",tt2)
+	sigtt1,noise1=fixed_noise(tt1,sigma)
+	sigtt2,noise2=fixed_noise(tt2,sigma)
 
   x1,t01,per1 = linear_fit(tt1,P_venus,sigtt1)
   x2,t02,per2 = linear_fit(tt2,P_earth,sigtt2)
@@ -217,7 +222,7 @@ function test_sim_obs()
   sigma=30
   nyear=10
   obs="fromEMB"
-  body,tt0,tt,sigtt=sim_obs_and_find_times(jd1,sigma,nyear,obs)
+sim_obs_and_find_times(jd1,sigma,nyear,obs)
 end
 # Simulate times starting at jd1 for nyear span with sigma Gaussian noise added, save to .txt
 function sim_times(jd1::Float64,sigma::Real,nyear::Real,obs::String)
@@ -326,6 +331,7 @@ function plot_orbits(dimension::Int,obs::String)
   #   println(n_obs) 
   # return tt 
   savefig("IMAGES/orbits.pdf")
+  # close()
 end
 
   # function plot_ttvs(sigma)
