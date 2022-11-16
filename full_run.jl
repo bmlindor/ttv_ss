@@ -60,8 +60,8 @@ function moon_mcmc(sigma,nyear,nplanet,nsteps,label::String)
 	m=jldopen(String(fitfile),"r")
 	MCMC(foutput,m["best_p4"],m["lprob_best_p4"],nsteps,nwalkers,4,m["ntrans"][1:4],m["tt0"],m["tt"],m["sigtt"],true,false)
 	else
-	fitfile=string("FITS/p",nplanet,"p3moon_fit",sigma,"s",nyear,"yrs.jld2")
-	foutput=string("MCMC/p",nplanet,"p3moon_mcmc",sigma,"s",nyear,"yrs.jld2")
+	fitfile=string("FITS/p",nplanet,"moon_fit",sigma,"s",nyear,"yrs.jld2")
+	foutput=string("MCMC/p",nplanet,"moon_mcmc",sigma,"s",nyear,"yrs.jld2")
 	m=jldopen(String(fitfile),"r")
 	MCMC(foutput,m["best_dp"],m["lprob_best_dp"],nsteps,nwalkers,nplanet,m["ntrans"][1:nplanet],m["tt0"],m["tt"],m["sigtt"],true,false)	
 	end
@@ -151,9 +151,9 @@ if runtype=="wide"
 	# @time fit_moon(jd1,sigma,nyear,tref,tol,dpin,dpout,ndp,3)
 end
 #nyears=[15,17,19,21,23,25,27,29,16,18,20,22,24,26,28,30]#,14,13,12,11,10]
-#nyears=[30,25,20]
-nyears=[14,13,12,11,10]
-sigmas=[10,30,60]
+nyears=[30,29,28,27,26,25,24,23,22,21,20,19,18]
+#nyears=[14,13,12,11]#,10]
+sigmas=[30,10]
 nwalkers=75
 nsteps=50000
 for sig in sigmas

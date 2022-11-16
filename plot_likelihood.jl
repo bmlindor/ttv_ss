@@ -3,20 +3,7 @@ rc("font",family="sans-serif")
 rc("lines",linewidth=2)
 include("histogram.jl")
 xprob(lprob)=exp.(lprob .- maximum(lprob))
-function plot_profile(xgrid::Array{Float64,1},lprob::Array{Float64,1},truex::Float64,nbins::Int,color::String,pname::String,sim_obs_label::String)
 
-	  #ax1=gca()
-  xprob=exp.(lprob .- maximum(lprob))
-	xgrid_in_yrs =xgrid ./365.25 
-	#scatter(xgrid_in_yrs,xprob)
-	if color=="salmon"
-	plot(xgrid_in_yrs,xprob,color=color) 
-	else
-	plot(xgrid_in_yrs,xprob,label=sim_obs_label)
-	end
-	#xbin,xhist,xbin_square,hist_square=histogram(xgrid_in_yrs,nbins)
-	#plot(xbin_square,hist_square./maximum(hist_square),alpha=0.5)
-end
 # Create likelihood/probability plots of search grids
 function per_grid(sigma,nyear,grid_type_nplanet,per_col,true_per,color,pname,case_num,label_xloc)
 	if case_num==1
@@ -56,7 +43,25 @@ function moon_grid(sigma,nyear,grid_type_nplanet,per_col,true_per,color,pname,ca
  	ylabel("Probability",fontsize="x-large")
  	ylim(0,1.2)
 end
-
+function wide_grid(sigma,nyear,grid_type_nplanet,per_col,true_per,color,pname,case_num,label_xloc)
+	if case_num==1
+	file=string("grid_wide/fromEMB/",grid_type_nplanet,"_grid",sigma,"s",nyear,"yrs.csv")
+	case_label="Case 1"
+	elseif case_num==2
+	file=string("grid_wide/",grid_type_nplanet,"_grid",sigma,"s",nyear,"yrs.csv")
+	case_label="Case 2"
+	end
+	data,header=readdlm(file,',',header=true)
+	sim_obs_label= string(case_label," [",nyear," yr span]",'\n',L"$\sigma_{obs}=$",sigma," sec")
+	# save_as =string("IMAGES/wide_grids/case",case_num,"_",grid_type_nplanet,pname,sigma,"secs",nyear,"yrs.png")
+	axvline(true_per,linestyle="--",color="black")
+	text(true_per + true_per/100,1.01,pname,fontsize="large")
+	text(label_xloc,1.05,sim_obs_label,fontsize="medium")
+ 	plot(data[:,per_col]./365.25,xprob(data[:,end]),color)
+ 	xlabel("Planet Period Search Grid",fontsize="x-large")
+ 	ylabel("Probability",fontsize="x-large")
+ 	ylim(0,1.2)
+end
 function compare_grid(nyear,grid_type_nplanet,per_col,true_per,color,pname,case_num)
 	sigma=30
 	if case_num==1

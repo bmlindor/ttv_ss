@@ -245,6 +245,6 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,nsteps
   #end
   #println("Saved in ",foutput)
   mcmcfile = string(foutput)
-  @save mcmcfile par_mcmc lprob_mcmc param nwalkers nsteps accept iburn indepsamples 
+  @save mcmcfile par_mcmc lprob_mcmc param nwalkers nsteps accept iburn indepsamples pname
   return lprob_mcmc #, param, nwalkers, nsteps, accept, iburn, indepsamples
 end
