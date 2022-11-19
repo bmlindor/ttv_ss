@@ -32,13 +32,13 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,nsteps
   end
   if mod(nparam,5) == 3 
     moon_errors = [1e-4,1e-4,1e-5]
-    moon_name = ["tmax sin(phi0)","tmax cos(phi0)","deltaphi"]
+    moon_name = ["tcosϕ","tsinϕ","Δϕ"]
     append!(errors,moon_errors)
     append!(pname,moon_name)
   end
   # Initialize walkers:
   if use_sigsys
-    # pname=[pname;"sigsys"]
+    pname=[pname;"σ_sys"]
     par_trial = [param[1:end];1e-8]
     nsize = nparam+1
   else
@@ -50,6 +50,9 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,nsteps
   # Set up arrays to hold the results:
   par_mcmc = zeros(nwalkers,nsteps,nsize)
   lprob_mcmc = zeros(nwalkers,nsteps)
+	thinning=1000
+	thin_chain = zeros(nwalkers, div(nsteps,thinning), nsize)
+	thin_lprob = zeros(nwalkers,div(nsteps,thinning))
 
   function calc_lprior(param) 
   # We will place a joint prior on eccentricity vector
@@ -166,10 +169,15 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,nsteps
       end   
   # Next,determine whether to accept this trial step:
 	# Calculate ratio between Log Prob of trial step and previous step:
-      alp = z^(nsize-1)*exp((lprob_trial - lprob_mcmc[j,i-1])) 
-      if rand() < 0.0001
-        println("Step: ",i," Walker: ",j," Trial Log Prob: " ,lprob_trial," Prob: ",alp," Frac: ",accept/(mod(i-1,1000)*nwalkers+j))
-      end
+      alp = z^(nsize-1)*exp((lprob_trial - lprob_mcmc[j,i-1]))
+			#logratio= log(z)*(nsize-1)+lprob_trial - lprob_mcmc[j,i-1]
+			#if log(rand()) < logratio # if rejected, last values equal new values
+			#  par_mcmc[j,i,:] = par_trial
+      #  lprob_mcmc[j,i] = lprob_trial
+			#end
+     # if rand() < 0.0001 
+     #   println("Step: ",i," Walker: ",j," Trial Log Prob: " ,lprob_trial," Prob: ",alp," Frac: ",accept/(mod(i-1,1000)*nwalkers+j))
+     # end
       if alp >= rand()
   # If step is accepted,add it to the chains!
         par_mcmc[j,i,:] = par_trial
@@ -181,10 +189,11 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,nsteps
         lprob_mcmc[j,i] = lprob_mcmc[j,i-1]
       end
     end
-    if mod(i,1000) == 0
-      println("Number of steps: ",i," Acceptance Rate: ",accept/(1000*nwalkers))
-      accept = 0
-    end
+    if mod(i,thinning) == 0
+      println("Number of steps: ",i," Acceptance Rate: ",accept/(thinning*nwalkers))
+			#thin_chain[j,div(i,thinning),:] = par_mcmc[j,i,:]
+      #thin_lprob[j,div(i,thinning)] = lprob_mcmc[j,i]
+ 		end
   end
 
   # Now,determine time of burn-in by calculating first time median is crossed:
@@ -214,11 +223,11 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,nsteps
   println("Independent Sample Size: ",indepsamples)
 
 	# Calculate the auto-correlation function for each parameter:
-	acf=zeros(nparam)
+	#acf=zeros(nparam)
 	#for i=1:nparam
-		#acf[i]=autocor(par_mcmc[:,iburn:nsteps,i],demean=true)
+		#acf=autocorrelation(par_mcmc[:,iburn:nsteps,i],, )
 	#end
-	println("Auto-Cor Function: ",acf)
+	#println("Auto-Cor Function: ",acf)
 
   # Find mean and standard deviation of posteriors after burn-in:
 	mean_posteriors=[mean(par_mcmc[:,iburn:nsteps,i]) for i=1:nparam]
@@ -228,11 +237,12 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,nsteps
 	println("MCMC chi-square: ",chi2," for total timing uncertainty of: ",sigtot," secs.")
 
 
-  mean_mp = [mean(vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+1])).*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
-  mp_errs = [std(vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+1])).*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
+  #mean_mp = [mean(vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+1])).*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
+  #mp_errs = [std(vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+1])).*abs(CGS.MSUN/CGS.MEARTH) for iplanet=1:nplanet]
 
-  mean_ecc=[mean(sqrt.(vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+4]).^2 .+ vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+5]).^2)) for iplanet=1:nplanet]
-  #ecc_errs=[std(sqrt.(vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+4]).^2 .+ vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+5]).^2)) for iplanet=1:nplanet]
+  #mean_ecc=[mean(sqrt.(vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+4]).^2 .+ vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+5]).^2)) for iplanet=1:nplanet]
+	#ecc_errs= [sqrt((vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+4]).^2 .* (std(vec((par_mcmc[:,iburn:nsteps,(iplanet-1)*5+4])).^2))  / (vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+4]).^2 .+ vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+5]).^2)) .+ (vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+5]).^2 .* (std(vec((par_mcmc[:,iburn:nsteps,(iplanet-1)*5+5])).^2))  / (vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+4]).^2 .+ vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+5]).^2))) for iplanet=1:nplanet]
+
 
   #open(fresults,"w") do io
 	#println(io,"MC chi-square after burn-in: ",chi2)
@@ -245,6 +255,6 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,nsteps
   #end
   #println("Saved in ",foutput)
   mcmcfile = string(foutput)
-  @save mcmcfile par_mcmc lprob_mcmc param nwalkers nsteps accept iburn indepsamples pname
+  @save mcmcfile par_mcmc lprob_mcmc param nwalkers nsteps iburn indepsamples pname
   return lprob_mcmc #, param, nwalkers, nsteps, accept, iburn, indepsamples
 end

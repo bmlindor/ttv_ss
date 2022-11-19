@@ -13,7 +13,7 @@ include("fit_moon.jl")
 include("MCMC.jl")
 
 show_args(ARGS)
-label,runtype,obs,nper=ARGS[1],ARGS[2],ARGS[3],parse(Int64,ARGS[4])
+label,runtype,obs,opt=ARGS[1],ARGS[2],ARGS[3],parse(Int64,ARGS[4])
 #parse(Float64,ARGS[2]),parse(Float64,ARGS[3]),ARGS[4],ARGS[5],parse(Int64,ARGS[6])
 function parse_model(label::String)
 	nplanet = 0
@@ -34,7 +34,14 @@ nplanet,nmoon=parse_model(label)
 # Initialize variables and period ranges
 jd1=2.4332825e6
 tref=2430000; tol=1e-5
-nphase=36 #wide: 100,36,180 
+nphase=36 #wide: 100,36,180
+if opt < 1000 
+nper=opt
+nsteps=10000
+else
+nsteps=opt
+nper=100#200
+end
 np3,np4,ndp,np5=[nper, nper, nper,nper]
 
 # Run markov chains
@@ -151,42 +158,26 @@ if runtype=="wide"
 	# @time fit_moon(jd1,sigma,nyear,tref,tol,dpin,dpout,ndp,3)
 end
 #nyears=[15,17,19,21,23,25,27,29,16,18,20,22,24,26,28,30]#,14,13,12,11,10]
-nyears=[30,29,28,27,26,25,24,23,22,21,20,19,18]
-#nyears=[14,13,12,11]#,10]
-sigmas=[30,10]
+#nyears=[30,29,28,27,26,25,24,23,22,21,20,19,18,17,16,15,14,13,12,11,10]
+#if nplanet==2 || nplanet==3
+#nyears=[30,29,28,27,26,25,24,23,22,21,20,19,18]
+#sigmas=[30,10,60]
+#elseif nplanet>3
+nyears=[30,29,28,27,26,25,24,23,22,21]
+sigmas=[30,10,60]
+#end
 nwalkers=75
-nsteps=50000
+#nsteps=50000
 for sig in sigmas
 for yr in nyears
-if runtype=="mcmc" && nmoon==0
+	if runtype=="mcmc" && nmoon==0
 	@time planet_mcmc(sig,yr,nplanet,nsteps,obs)
-elseif runtype=="mcmc" && nmoon>0
+	elseif runtype=="mcmc" && nmoon>0
 	@time moon_mcmc(sig,yr,nplanet,nsteps,label)
-end
-if runtype=="grid"
-run_grid(sig,yr,label,obs)
-end
-end
-end
-if runtype=="test"
-nyears=[15]
-sigmas=[10]
-for sig in sigmas
-for yr in nyears
-test_fit(sig,yr,label,obs)
+	end
+	if runtype=="grid"
+	run_grid(sig,yr,label,obs)
+	end
 end
 end
-end
-# elseif runtype=="wide" && label=="test"
-# 	wide_run(true,36,3*365.25,30*365.25,200,0.0,2pi,180)
-# 	println("No routine available with that runtype and/or label.")
 
-# function full_moonrun()
-# # label=["mtry1","mtry2","mtry3","mtry4","mtry5","mtry6","mtry7"]
-# # sigma=[10.0, 15.0, 30.0, 45.0, 60.0, 120.0, 240.0]
-# for i=1:length(sigma)
-# 	@time sim=sim_times(jd1,jd2,jdsize,true,sigma[i],false)
-# 	file=string("INPUTS/tt_data",sigma[i],"snoEMB.txt")
-# 	@time lprobfit,bestfit=fit_moon(file,label[i],jd1,jd2,jdsize,p3in,p3out,np3,nphase,dpin,dpout,ndp,true,sigma[i],false)
-# end
-# end
