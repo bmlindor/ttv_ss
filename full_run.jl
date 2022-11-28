@@ -37,7 +37,7 @@ tref=2430000; tol=1e-5
 nphase=36 #wide: 100,36,180
 if opt < 1000 
 nper=opt
-nsteps=10000
+nsteps=50000
 else
 nsteps=opt
 nper=100#200
@@ -45,8 +45,6 @@ end
 np3,np4,ndp,np5=[nper, nper, nper,nper]
 
 # Run markov chains
-#sigma=10; nyear=20
-
 function planet_mcmc(sigma,nyear,nplanet,nsteps,obs::String)
 	if obs=="fromEMB"
 	fitfile=string("FITS/fromEMB/p",nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
@@ -80,14 +78,17 @@ function run_grid(sigma,nyear,label::String,obs::String)
  if nyear>=26
  	p3in,p3out=11.2*365.25,11.9*365.25
 	p4in,p4out=1.8*365.25,1.95*365.25
+	p5in,p5out=28*365.25,30*365.25
  	dpin,dpout=2.25,2.37
  elseif 22<=nyear<26
  	p3in,p3out=11.2*365.25,12*365.25
 	p4in,p4out=1.8*365.25,2*365.25
+	p5in,p5out=28*365.25,32*365.25
  	dpin,dpout=2.2,2.38
  elseif 18<=nyear<22
  	p3in,p3out=11.2*365.25,12.4*365.25
 	p4in,p4out=1.8*365.25,2.2*365.25
+	p5in,p5out=26*365.25,34*365.25
  	dpin,dpout=2.2,2.38
  elseif 12<=nyear<18
  	p3in,p3out=11*365.25,12.8*365.25 
@@ -144,7 +145,7 @@ function test_fit(sigma,nyear,label::String,obs::String)
 	fit_moon(jd1,sigma,nyear,tref,tol,p4in,p4out,np4,nphase,["p3moonp4"],true)
 	end
 end
-
+sigma=30; nyear=30
 if runtype=="wide"
 	nphase=36 #wide: 100,36,180 
 	p3in,p3out,np3=5*365.25,22*365.25,500
@@ -163,7 +164,7 @@ end
 #nyears=[30,29,28,27,26,25,24,23,22,21,20,19,18]
 #sigmas=[30,10,60]
 #elseif nplanet>3
-nyears=[30,29,28,27,26,25,24,23,22,21]
+nyears=[30,29,28,27,26,25,24,23,22]
 sigmas=[30,10,60]
 #end
 nwalkers=75
