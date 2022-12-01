@@ -165,7 +165,7 @@ end
 #sigmas=[30,10,60]
 #elseif nplanet>3
 nyears=[30,29,28,27,26,25,24,23,22]
-sigmas=[30,10,60]
+sigmas=[30,10]#,60]
 #end
 nwalkers=75
 #nsteps=50000
