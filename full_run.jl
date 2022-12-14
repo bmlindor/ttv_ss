@@ -148,14 +148,14 @@ end
 sigma=30; nyear=30
 if runtype=="wide"
 	nphase=36 #wide: 100,36,180 
-	p3in,p3out,np3=5*365.25,22*365.25,500
+	p3in,p3out,np3=5*365.25,22*365.25,200
 	dpin,dpout,ndp=0.0,2*pi,100
-	p4in,p4out,np4=1.5*365.25,5*365.25,200
-	p5in,p5out,np5=22*365.25,36*365.25,200
-  fit_planet2(jd1,sigma,nyear,tref,tol,[obs])
-  fit_planet3(jd1,sigma,nyear,tref,tol,p3in,p3out,np3,nphase,[obs,"widep3"],true)
+	p4in,p4out,np4=1.5*365.25,5*365.25,500
+#	p5in,p5out,np5=22*365.25,36*365.25,200
+#  fit_planet2(jd1,sigma,nyear,tref,tol,[obs])
+ # fit_planet3(jd1,sigma,nyear,tref,tol,p3in,p3out,np3,nphase,[obs,"widep3"],true)
   fit_planet4(jd1,sigma,nyear,tref,tol,p4in,p4out,np4,nphase,[obs,"widep4"],true)
-  fit_planet5(jd1,sigma,nyear,tref,tol,p5in,p5out,np5,nphase,[obs,"widep5"],true)
+ # fit_planet5(jd1,sigma,nyear,tref,tol,p5in,p5out,np5,nphase,[obs,"widep5"],true)
 	# @time fit_moon(jd1,sigma,nyear,tref,tol,dpin,dpout,ndp,3)
 end
 #nyears=[15,17,19,21,23,25,27,29,16,18,20,22,24,26,28,30]#,14,13,12,11,10]
