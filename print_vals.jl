@@ -12,11 +12,15 @@ function print_vals(sigma::Real,nyear::Real,sim::String,model::String,nplanet::I
         return println("MCMC file for ",sim," with ",model," model at ",sigma," secs and ",nyear," yrs doesn't exist!!!!")
     end
     jldmc=jldopen(String(mcfile),"r")
-    par_mcmc,lprob_mcmc=jldmc["par_mcmc"],jldmc["lprob_mcmc"]
+    par_mcmc,lprob_mcmc=f["par_mcmc"],f["lprob_mcmc"]
     iburn,samples=jldmc["iburn"], jldmc["indepsamples"]
     nwalkers,nsteps=jldmc["nwalkers"],jldmc["nsteps"]
-    param=jldmc["param"]
-    pname=["mu_1","P_1","t01","ecos1","esin1",
+    param=f["param"]
+    pname=Array{String,length(param)}
+    for i=1:length(param)
+        if mod(i,5)
+        pname[i] =
+    prefix=["mu_","P_","t0","ecos","esin",]
           "mu_2","P_2","t02","ecos2","esin2",
           "mu_3","P_3","t03","ecos3","esin3", 
           "mu_4","P_4","t04","ecos4","esin4", 
@@ -51,7 +55,12 @@ function print_vals(sigma::Real,nyear::Real,sim::String,model::String,nplanet::I
 end
 # Print results from likelihood fit
 function print_fits(sigma::Float64,nyear::Float64,sim::String,model::String,no_moon::Bool=true)
-    fitfile=string("FITS/",model,"_fit",sigma,"s",nyear,"yrs.jld2")
+    model="p4"
+    sigma=30.0;nyear=30.0
+    fitfile=string("FITS/fromEMB/",model,"_fit30s30yrs.jld2")
+    mcfile=string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+    m=jldopen(mcfile,"r")
+    f=jldopen(fitfile,"r")
     if String(sim)=="EMB" && isfile(string("FITS/fromEMB/",model,"_fit",sigma,"s",nyear,"yrs.jld2"))
         fitfile=string("FITS/fromEMB/",model,"_fit",sigma,"s",nyear,"yrs.jld2")
     elseif isfile(string("FITS/",model,"_fit",sigma,"s",nyear,"yrs.jld2"))
@@ -122,8 +131,8 @@ function get_vals(sigma::Real,nyear::Real,obs::String,model::String)
     mass_errs=[std(vec(par_mcmc[:,iburn:nsteps,i-4])).*CGS.MSUN/CGS.MEARTH for i in 1:length(param) if i%5==0]
     periods=[mean(vec(par_mcmc[:,iburn:nsteps,i-3])) for i in 1:length(param) if i%5==0]
     per_errs=[std(vec(par_mcmc[:,iburn:nsteps,i-3])) for i in 1:length(param) if i%5==0]
-    ecc=[mean(sqrt.(vec(par_mcmc[:,iburn:nsteps,i]).^2 .+ vec(par_mcmc[:,iburn:nsteps,i-1]).^2)) for i in 1:length(param) if i%5==0]
-    ecc_errs=[std(sqrt.(vec(par_mcmc[:,iburn:nsteps,i]).^2 .+ vec(par_mcmc[:,iburn:nsteps,i-1]).^2)) for i in 1:length(param) if i%5==0]
+    mean_ecc=[mean(sqrt.(vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+4]).^2 .+ vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+5]).^2)) for iplanet=1:nplanet]
+    ecc_errs= [sqrt((vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+4]).^2 .* (std(vec((par_mcmc[:,iburn:nsteps,(iplanet-1)*5+4])).^2))  / (vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+4]).^2 .+ vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+5]).^2)) .+ (vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+5]).^2 .* (std(vec((par_mcmc[:,iburn:nsteps,(iplanet-1)*5+5])).^2))  / (vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+4]).^2 .+ vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+5]).^2))) for iplanet=1:nplanet]
     sigtot=[sqrt((sqrt(mean(vec(par_mcmc[:,iburn:nsteps,end]))).*3600*24)^2 + sigma^2) ]
     println("Retrieved masses.")
     println(masses," +/- ",mass_errs)

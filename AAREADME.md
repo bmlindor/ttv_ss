@@ -99,7 +99,7 @@ np3 = [fine=200, medium=100, coarse=50]     <!-- test=10 -->
 nphase = [fine=72, medium=36, coarse=18]    <!-- test=10 -->
 ndp = [fine=180, medium=72, coarse=36]      <!-- test=10 -->
 steps=[short=10000, med=50000, long=100000] <!-- test=1000 -->
-sigmas = [10, 30, 45, 60, 75, 90, 105, 120, 135] <!-- which of these are realistic? -->
+sigmas = [10, 30, 45, 60, 75, 90, 105, 120] <!-- which of these are realistic? -->
 years = [10, 12, 15, 18, 20, 23, 25, 28, 30, 40] <!-- how often to check results? -->
 ......
 
@@ -109,7 +109,10 @@ years = [10, 12, 15, 18, 20, 23, 25, 28, 30, 40] <!-- how often to check results
 1). With transit times of Earth & Venus, can infer both of
 their masses, as well as existence of Jupiter first then Moon
 1a). clear gaussians in likelihood profiles, agrees with posterior dist.
-2). For 30 sec noise, <25 years is enough to constrain jupiter period
+2). For 30 sec noise, ~18 years is enough to constrain Jupiter period from E+V 
+        (mass?)
+    For 30 sec noise, ~22 years is enough to constrain Mars period from E+V
+        (mass?)
     For 60secs and 90 secs, 30 years is enough
         limits/constraints make sense based on TTVs
 3). Less time span or more noise overestimate (or underestimate?) Jupiter period
@@ -118,7 +121,7 @@ their masses, as well as existence of Jupiter first then Moon
     Correlation betweem deltaphi and t_maxsinphi --> posterior broader than likelihood
 5). Four planet model preferred over model with moon and 3 planets. 
         can't tell difference b/w Hppmp and Hpppp
-6). If wrong four planet params, wrong Jupiter params.
+6). If wrong four planet params, wrong Jupiter params due to long term Mars TTV signal.
 
 Q). Degenaracy b/w Jupiter and Moon? <--tail on Jupiter period with moon
         if you don't have enough time spans
@@ -144,7 +147,7 @@ Make likelihood profiles continuous [ ]
 7). Figure out whether the Earth-Moon barycenter offset causes
 bias in measurements and if so, why.
 6). Add in 4th planet. Fit for best params [ x ]
-6a). Search for second peak in likelihood profile to fit. [  ]
+6a). Search for second peak in likelihood profile to fit. [ x ]
 5). Analyze chain results: trace plots, uncertainties, etc.
 5a). See how many observations would be needed (minimum number of years required). [ x ]
 5b). See what the necessary precision would be (vary noise added to simulations). [ x ]

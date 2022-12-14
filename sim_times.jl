@@ -103,7 +103,7 @@ function fixed_noise(tt::Vector{Float64},sigma::Real)
       noise = sigtt .* randn(length(tt))
       # println("Noise added with σ of ",string(sigma)," seconds.")
   else
-      sigtt=0
+      sigtt=zeros(length(tt))
       println("No noise added.")
   end
   return sigtt,noise 
@@ -200,14 +200,21 @@ function sim_obs_and_find_times(jd1::Float64,sigma::Real,nyear::Real,obs::String
 	sigtt1,noise1=fixed_noise(tt1,sigma)
 	sigtt2,noise2=fixed_noise(tt2,sigma)
 
-  x1,t01,per1 = linear_fit(tt1,P_venus,sigtt1)
-  x2,t02,per2 = linear_fit(tt2,P_earth,sigtt2)
-	# println("coefficients: ",t02," , ",per2)
-	tt=[tt1;tt2]
-
-  # Best-fit linear transit times:
+  # println("noise to add: ",noise2)
+  # for i=1:length(tt2)
+  #   println(tt2[i], " ",tt2[i]+noise2[i])
+  # end
+  x1,t01,per1 = linear_fit(tt1+noise1,P_venus,sigtt1)
+  x2,t02,per2 = linear_fit(tt2+noise2,P_earth,sigtt2)
+  # println("coefficients: ",t02," , ",per2)
+  # println(linear_fit(tt2.+noise2,P_earth,sigtt2))
+	tt=[tt1+noise1;tt2+noise2]
+  # println("t0= ",t01)
+  # println("per= ",per1)
+  # # Best-fit linear transit times:
   t1  = collect(t01 .+ per1 .* range(0,stop=nt1-1,length=nt1)) 
   t2  = collect(t02 .+ per2 .* range(0,stop=nt2-1,length=nt2))
+  # println(t1)
   tt0 = [t1;t2]
 	sigtt=[sigtt1;sigtt2]
 
@@ -215,14 +222,15 @@ function sim_obs_and_find_times(jd1::Float64,sigma::Real,nyear::Real,obs::String
   body[1:nt1] .= 1.0
   body[nt1+1:nt1+nt2] .= 2.0
   return body,tt0,tt,sigtt
+  return body,tt
 end
 
 function test_sim_obs()
-  jd1=2.4332825e6
+  jd1=2.445005e6
   sigma=30
   nyear=10
-  obs="fromEMB"
-sim_obs_and_find_times(jd1,sigma,nyear,obs)
+  obs="fromEV"
+body,tt0,tt,sigtt=sim_obs_and_find_times(jd1,sigma,nyear,obs)
 end
 # Simulate times starting at jd1 for nyear span with sigma Gaussian noise added, save to .txt
 function sim_times(jd1::Float64,sigma::Real,nyear::Real,obs::String)
@@ -238,6 +246,17 @@ function sim_times(jd1::Float64,sigma::Real,nyear::Real,obs::String)
       println(io,body[i],'\t',tt0[i],'\t',tt[i],'\t',sigtt[i])
     end
   end
+end
+function sim_times(jd1,nyear,obs)
+  body,tt=sim_obs_and_find_times(jd1,0.0,nyear,obs)
+  name= string("SS_transit_times.txt")
+  open(name,"w") do io
+    println(io,"## ",nyear," year long observations starting at ",jd1," JED")
+    println(io,"## body_num",'\t',"TT")
+  for i=1:length(tt)
+    println(io,body[i],'\t',tt[i])
+  end
+  end  
 end
   # Plot orbits along ecliptic and top-down,point to observer of Venus and Earth transits
 function plot_orbits(dimension::Int,obs::String)
