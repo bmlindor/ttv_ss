@@ -181,7 +181,6 @@ function fit_planet2(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,o
   mean_mp=[best_p2[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
   mp_errs=[err[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
   mean_ecc=[sqrt(best_p2[(iplanet-1)*5+4]^2 + best_p2[(iplanet-1)*5+4]^2) for iplanet=1:nplanet]
-  ecc_errs=[sqrt(err[(iplanet-1)*5+4]^2 + err[(iplanet-1)*5+4]^2) for iplanet=1:nplanet]
 
   open(results,"w") do io
     println(io,"Global Fit Results.",'\n',"chi^2: ",chi2)
@@ -189,7 +188,7 @@ function fit_planet2(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,o
       println(io,pname[i],": ",best_p2[i]," ± ",err[i])
     end
     println(io,"Retrieved Earth masses:",'\n',mean_mp,'\n'," ± ",mp_errs)
-    println(io,"Retrieved eccentricity:",'\n',mean_ecc,'\n'," ± ",ecc_errs)
+    println(io,"Retrieved eccentricity:",'\n',mean_ecc)
   end
 	if save_as_jld2
 	#println("saved in:",outfile)

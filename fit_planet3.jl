@@ -163,7 +163,6 @@ function fit_planet3(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref:
   mean_mp=[best_p3[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
   mp_errs=[err[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
   mean_ecc=[sqrt(best_p3[(iplanet-1)*5+4]^2 + best_p3[(iplanet-1)*5+4]^2) for iplanet=1:nplanet]
-  ecc_errs=[sqrt(err[(iplanet-1)*5+4]^2 + err[(iplanet-1)*5+4]^2) for iplanet=1:nplanet]
 
   open(results,"w") do io
     println(io,"Global Fit Results.",'\n',"per 3 range=[",p3in," - ",p3out,", length=",np3,"]")
@@ -171,7 +170,7 @@ function fit_planet3(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref:
       println(io,pname[i],": ",best_p3[i]," ± ",err[i])
     end
     println(io,"Retrieved Earth masses:",'\n',mean_mp,'\n'," ± ",mp_errs)
-    println(io,"Retrieved eccentricity:",'\n',mean_ecc,'\n'," ± ",ecc_errs)
+    println(io,"Retrieved eccentricity:",'\n',mean_ecc)
   end
   # plot_profile(p3,lprob_p3,p3_cur,50,[sigma,nyear],"firebrick","Jupiter")
   # title=string("IMAGES/likelihoods/",obs,"Jupiter",sigma,"secs",nyear,"yrs.png")
@@ -293,7 +292,6 @@ function fit_planet3(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
   mean_mp=[best_p3[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
   mp_errs=[err[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
   mean_ecc=[sqrt(best_p3[(iplanet-1)*5+4]^2 + best_p3[(iplanet-1)*5+5]^2) for iplanet=1:nplanet]
-  ecc_errs=[sqrt(err[(iplanet-1)*5+4]^2 + err[(iplanet-1)*5+5]^2) for iplanet=1:nplanet]
 
   open(results,"w") do io
     println(io,"Global Fit Results.",'\n',"chi^2: ",chi2,'\n',"per 3 range=[",p3in," - ",p3out,", length=",np3,"]")
@@ -301,7 +299,7 @@ function fit_planet3(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
       println(io,pname[i],": ",best_p3[i]," ± ",err[i])
     end
     println(io,"Retrieved Earth masses:",'\n',mean_mp,'\n'," ± ",mp_errs)
-    println(io,"Retrieved eccentricity:",'\n',mean_ecc,'\n'," ± ",ecc_errs)
+    println(io,"Retrieved eccentricity:",'\n',mean_ecc)
   end
 	if save_as_jld2
   @save outfile p3 lprob_p3 best_p3 lprob_best_p3 ntrans nplanet tt0 tt ttmodel sigtt nphase

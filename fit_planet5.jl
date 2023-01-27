@@ -256,7 +256,6 @@ function fit_planet5(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref:
   mean_mp=[best_p5[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
   mp_errs=[err[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
   mean_ecc=[sqrt(best_p5[(iplanet-1)*5+4]^2 + best_p5[(iplanet-1)*5+4]^2) for iplanet=1:nplanet]
-  ecc_errs=[sqrt(err[(iplanet-1)*5+4]^2 + err[(iplanet-1)*5+4]^2) for iplanet=1:nplanet]
 
   open(results,"w") do io
     println(io,"Global Fit Results.",'\n',"per 5 range=[",p5in," - ",p5out,", length=",np5,"]")
@@ -264,7 +263,7 @@ function fit_planet5(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref:
       println(io,pname[i],": ",best_p5[i]," ± ",err[i])
     end
     println(io,"Retrieved Earth masses:",'\n',mean_mp,'\n'," ± ",mp_errs)
-    println(io,"Retrieved eccentricity:",'\n',mean_ecc,'\n'," ± ",ecc_errs)
+    println(io,"Retrieved eccentricity:",'\n',mean_ecc)
   end
   @save fitfile p4 lprob_p4 best_p4 lprob_best_p4 p5 lprob_p5 best_p5 lprob_best_p5 ntrans nplanet tt0 tt ttmodel sigtt p3in p3out np3 nphase p4in p4out np4 p5in p5out np5
   return best_p4, best_p5   

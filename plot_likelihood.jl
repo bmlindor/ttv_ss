@@ -43,6 +43,27 @@ function moon_grid(sigma,nyear,grid_type_nplanet,per_col,true_per,color,pname,ca
  	ylabel("Probability",fontsize="x-large")
  	ylim(0.98,1.2)
 end
+function wide_grid(sigma,nyear,grid_type_nplanet,per_col,true_per,color,pname,case_num,label_xloc)
+	if case_num==1
+	file=string("grid_wide/fromEMB/",grid_type_nplanet,"_grid",sigma,"s",nyear,"yrs.csv")
+	case_label="Case 1"
+	elseif case_num==2
+	file=string("grid_wide/",grid_type_nplanet,"_grid",sigma,"s",nyear,"yrs.csv")
+	case_label="Case 2"
+	end
+	fit,header=readdlm(file,',',header=true)
+	sim_obs_label= string(case_label," [",nyear," yr span]",'\n',L"$\sigma_{obs}=$",sigma," sec")
+	# save_as =string("IMAGES/wide_grids/case",case_num,"_",grid_type_nplanet,pname,sigma,"secs",nyear,"yrs.png")
+	axvline(true_per,linestyle="--",color="black")
+	text(true_per + true_per/100,1.01,pname,fontsize="large")
+	text(label_xloc,1.05,sim_obs_label,fontsize="medium")
+ 	plot(fit[:,per_col]./365.25,xprob(fit[:,end]),color)
+	 	plot(fit[:,per_col]./365.25,xprob(fit[:,end]),".",label="pts")
+legend()
+ 	xlabel("Planet Period Search Grid",fontsize="x-large")
+ 	ylabel("Probability",fontsize="x-large")
+ 	ylim(0,1.2)
+end
 function plot_grid(sigma,nyear,grid_type_nplanet,per_col,true_per,pname,case_num,label_xloc)
 	if case_num==1
 	file=string("grid/fromEMB/",grid_type_nplanet,"_grid",sigma,"s",nyear,"yrs.csv")
