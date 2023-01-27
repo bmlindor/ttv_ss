@@ -101,15 +101,14 @@ function fit_moon(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,dpin
   mean_mp=[best_dp[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
   mp_errs=[err[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
   mean_ecc=[sqrt(best_dp[(iplanet-1)*5+4]^2 + best_dp[(iplanet-1)*5+4]^2) for iplanet=1:nplanet]
-  ecc_errs=[sqrt(err[(iplanet-1)*5+4]^2 + err[(iplanet-1)*5+4]^2) for iplanet=1:nplanet]
-
+  
   open(results,"w") do io
     println(io,"Global Fit Results.",'\n',"chi^2: ",chi2,'\n',"Δϕ range=[",dpin," - ",dpout,", length=",ndp,"]")
     for i=1:nparam
       println(io,pname[i],": ",best_dp[i]," ± ",err[i])
     end
     println(io,"Retrieved Earth masses:",'\n',mean_mp,'\n'," ± ",mp_errs)
-    println(io,"Retrieved eccentricity:",'\n',mean_ecc,'\n'," ± ",ecc_errs)
+    println(io,"Retrieved eccentricity:",'\n',mean_ecc)
   end
 	if save_as_jld2
   @save outfile dp lprob_dp best_dp lprob_best_dp ntrans nplanet tt0 tt ttmodel sigtt
@@ -224,7 +223,6 @@ function fit_moon(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p4in
   mean_mp=[best_p4[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
   mp_errs=[err[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
   mean_ecc=[sqrt(best_p4[(iplanet-1)*5+4]^2 + best_p4[(iplanet-1)*5+5]^2) for iplanet=1:nplanet]
-  ecc_errs=[sqrt(err[(iplanet-1)*5+4]^2 + err[(iplanet-1)*5+5]^2) for iplanet=1:nplanet]
 
   open(results,"w") do io
     println(io,"Global Fit Results.",'\n',"chi^2: ",chi2,'\n',"per 4 range=[",p4in," - ",p4out,", length=",np4,"]")
@@ -232,7 +230,7 @@ function fit_moon(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p4in
       println(io,pname[i],": ",best_p4[i]," ± ",err[i])
     end
     println(io,"Retrieved Earth masses:",'\n',mean_mp,'\n'," ± ",mp_errs)
-    println(io,"Retrieved eccentricity:",'\n',mean_ecc,'\n'," ± ",ecc_errs)
+    println(io,"Retrieved eccentricity:",'\n',mean_ecc)
   end
 	if save_as_jld2
   @save outfile dp lprob_dp best_dp lprob_best_dp p4 lprob_p4 best_p4 lprob_best_p4 ntrans nplanet tt0 tt ttmodel sigtt nphase
