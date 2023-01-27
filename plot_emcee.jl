@@ -1,23 +1,23 @@
 using PyPlot,Statistics,JLD2
 # Plot MCMC mass vs period traces 
-function plot_trace(sigma::Real,nyear::Real,sim::String,model::String,include_moon::Bool=false)
-  if String(sim)=="EMB" && isfile(string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jl"))
-    mcfile=string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
-  elseif isfile(string("MCMC/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
-    mcfile=string("MCMC/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+function plot_trace(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num,include_moon::Bool=false)
+  if case_num==1 && isfile(string("MCMC/fromEMB/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jl"))
+    mcfile=string("MCMC/fromEMB/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+  elseif case_num==2 && isfile(string("MCMC/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
+    mcfile=string("MCMC/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
   else 
-    return  println("MCMC file for ",sim," with ",model," model at ",sigma," secs and ",nyear," yrs doesn't exist!!!!")
+    return  println("MCMC file for ",grid_type_nplanet," model at ",sigma," secs and ",nyear," yrs doesn't exist!!!!")
   end
   m=jldopen(String(mcfile),"r")
   par_mcmc= m["par_mcmc"]
   lprob_mcmc=m["lprob_mcmc"]
   nwalkers=m["nwalkers"]
   nsteps=m["nsteps"]
-  accept=m["accept"]
+  # accept=m["accept"]
   iburn=m["iburn"]
   indepsamples=m["indepsamples"]
 
-  if include_moon || String(sim)=="p4"
+  if include_moon 
     fig=figure(figsize=(8,6))
     subplot(421)
   else
@@ -29,7 +29,7 @@ function plot_trace(sigma::Real,nyear::Real,sim::String,model::String,include_mo
   ax1.plot(vec(par_mcmc[j,iburn:nsteps,1]).* CGS.MSUN/CGS.MEARTH)
   end
   ax1.set_ylabel(L"$μ_1$ [$M_{⋆}$]")
-  if include_moon || String(sim)=="p4"
+  if include_moon || grid_type_nplanet=="p4" || grid_type_nplanet=="widep4"
     subplot(422)
   else 
     subplot(322)
@@ -39,7 +39,7 @@ function plot_trace(sigma::Real,nyear::Real,sim::String,model::String,include_mo
     ax2.plot(vec(par_mcmc[j,iburn:nsteps,2]))  
   end
   ax2.set_ylabel(L"$P_1$ [days]")
-  if include_moon || String(sim)=="p4"
+  if include_moon || grid_type_nplanet=="p4" || grid_type_nplanet=="widep4"
     subplot(423)
   else 
     subplot(323)
@@ -49,7 +49,7 @@ function plot_trace(sigma::Real,nyear::Real,sim::String,model::String,include_mo
     ax3.plot(vec(par_mcmc[j,iburn:nsteps,6]).* CGS.MSUN/CGS.MEARTH)
   end
   ax3.set_ylabel(L"$μ_2$ [$M_{⋆}$]")
-  if include_moon || String(sim)=="p4"
+  if include_moon || grid_type_nplanet=="p4" || grid_type_nplanet=="widep4"
     subplot(424)
   else 
     subplot(324)
@@ -59,7 +59,7 @@ function plot_trace(sigma::Real,nyear::Real,sim::String,model::String,include_mo
     ax4.plot(vec(par_mcmc[j,iburn:nsteps,7]))
   end
   ax4.set_ylabel(L"$P_2$ [days]")
-  if include_moon || String(sim)=="p4"
+  if include_moon || grid_type_nplanet=="p4" || grid_type_nplanet=="widep4"
     subplot(425)
   else
     subplot(325)
@@ -69,7 +69,7 @@ function plot_trace(sigma::Real,nyear::Real,sim::String,model::String,include_mo
       ax5.plot(vec(par_mcmc[j,iburn:nsteps,11]).* CGS.MSUN/CGS.MEARTH)
     end
     ax5.set_ylabel(L"$μ_3$ [$M_{⋆}$]")
-  if include_moon || String(sim)=="p4"
+  if include_moon || grid_type_nplanet=="p4" || grid_type_nplanet=="widep4"
     subplot(426)
   else
     subplot(326)
