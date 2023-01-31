@@ -165,7 +165,7 @@ if runtype=="wide"
 	elseif label=="Hppppp"
   fit_planet5(jd1,sigma,nyear,tref,tol,p5in,p5out,np5,nphase,[obs,"widep5"],true)
 	elseif label=="Hppmpp" 
-	fit_moon(jd1,sigma,nyear,tref,tol,p4in,p4out,np4,nphase,["p3moonp4"],true)
+	fit_moon(jd1,sigma,nyear,tref,tol,p4in,p4out,np4,nphase,["widep3moonp4"],true)
 	end
 #  fit_planet2(jd1,sigma,nyear,tref,tol,[obs])
 	# @time fit_moon(jd1,sigma,nyear,tref,tol,dpin,dpout,ndp,3)
@@ -176,7 +176,7 @@ end
 #nyears=[30,29,28,27,26,25,24,23,22,21,20,19,18]
 #sigmas=[30,10,60]
 #elseif nplanet>3
-nyears=[30,29,28,27,26,25,24,23,22,21,20,19,18,17,16,15]#
+nyears=[30,26,22]#[30,29,28,27,26,25,24,23,22,21,20,19,18,17,16,15]#
 sigmas=[30,10]#,60]
 #end
 nwalkers=75
