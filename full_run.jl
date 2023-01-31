@@ -78,22 +78,22 @@ end
 
 function run_grid(sigma,nyear,label::String,obs::String)
  if nyear>=26
- 	p3in,p3out=11.2*365.25,11.9*365.25
+ 	p3in,p3out=11*365.25,13*365.25
 	p4in,p4out=1.8*365.25,1.95*365.25
 	p5in,p5out=28*365.25,30*365.25
  	dpin,dpout=2.25,2.37
  elseif 22<=nyear<26
- 	p3in,p3out=11.2*365.25,12*365.25
+ 	p3in,p3out=11*365.25,13*365.25
 	p4in,p4out=1.8*365.25,2*365.25
 	p5in,p5out=28*365.25,32*365.25
  	dpin,dpout=2.2,2.38
  elseif 18<=nyear<22
- 	p3in,p3out=11.2*365.25,12.4*365.25
+ 	p3in,p3out=11*365.25,13*365.25
 	p4in,p4out=1.8*365.25,2.2*365.25
 	p5in,p5out=26*365.25,34*365.25
  	dpin,dpout=2.2,2.38
  elseif 12<=nyear<18
- 	p3in,p3out=11*365.25,12.8*365.25 
+ 	p3in,p3out=11*365.25,13*365.25 
 	p4in,p4out=1.8*365.25,3.6*365.25
  	dpin,dpout=2.1,2.52
  	nsteps=50000
