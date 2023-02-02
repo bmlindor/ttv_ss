@@ -44,3 +44,8 @@ function second_peak_params(grid_file::String)
 	#sorted=sort!(data,[:lprob])
 	return new_params,lprob
 end
+function calc_quad_errs(xcos,xcos_err,xsin,xsin_err)
+	x = sqrt(xcos^2 .+ xsin^2)
+	return sqrt(((xcos^2 * xcos_err^2) + (xsin^2 * xsin_err^2))/x^2)
+end
+
