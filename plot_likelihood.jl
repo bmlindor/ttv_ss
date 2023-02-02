@@ -66,19 +66,21 @@ function wide_grid(sigma,nyear,grid_type_nplanet,per_col,true_per,color,pname,ca
 	wide,header=readdlm(widefit,',',header=true)
 	sim_obs_label= string(case_label," [",nyear," yr span]",'\n',L"$\sigma_{obs}=$",sigma," sec")
 	fig=figure(figsize=(6,6))
-	subplot(211)
-	text(label_xloc,1.05,sim_obs_label,fontsize="small")
-	axvline(true_per,linestyle="--",color="black")
- 	plot(wide[:,12]./365.25,xprob(wide[:,end]),color="black")
- 	subplot(212)
-	axvline(true_per,linestyle="--",color="black")
-	text(true_per + true_per/100,1.01,pname,fontsize="large")
- 	plot(fit[:,per_col]./365.25,xprob(fit[:,end]),color)
+	ax1=subplot(211)
+	ax1.set_title(string(title),fontsize="x-large")
+	ax1.text(label_xloc,0.86,sim_obs_label,fontsize="small")
+	ax1.axvline(true_per,linestyle="--",color="black")
+ 	ax1.plot(wide[:,12]./365.25,xprob(wide[:,end]),color="black")
+ 	ax2=subplot(212)
+	ax2.axvline(true_per,linestyle="--",color="black")
+	ax2.text(true_per - true_per/100,0.96,pname,fontsize="large")
+ 	ax2.plot(fit[:,per_col]./365.25,xprob(fit[:,end]),color,label=string(grid_type_nplanet))
 	# plot(fit[:,per_col]./365.25,xprob(fit[:,end]),".",label="pts")
-	legend()
+	ax2.legend()
  	xlabel("Planet Period Search Grid",fontsize="x-large")
  	ylabel("Probability",fontsize="x-large")
- 	xlim(1.8,1.95)
+ 	# xlim(1.8,1.95)
+ 	# xlim(11,12.5)
 end
 
 function plot_grid(sigma,nyear,grid_type_nplanet,per_col,true_per,pname,case_num,label_xloc)
@@ -101,12 +103,12 @@ function plot_grid(sigma,nyear,grid_type_nplanet,per_col,true_per,pname,case_num
  	legend()
  	ylim(0,1.2)
 end
-sigma,nyear=30,30
-grid_type_nplanet="p3moonp4"
-case_num=2
-per_col=12
-per_col,true_per3,pname=12,11.862615,"Jupiter"#,"firebrick"
-per_col,true_per4,pname=12,1.8808476,"Mars"#,"orange"
+# sigma,nyear=30,30
+# grid_type_nplanet="p3moonp4"
+# case_num=2
+# per_col=12
+# per_col,true_per3,pname=12,11.862615,"Jupiter"#,"firebrick"
+# per_col,true_per4,pname=12,1.8808476,"Mars"#,"orange"
 
 #### plot_profile(sigma,nyear,grid_type_nplanet,per_col,true_per,pname,case_num)
 function plot_profile(sigma::Real,nyear::Real,label_xloc::Real,case_num::Int,include_moon=false)

@@ -1,15 +1,18 @@
-using PyPlot,JLD2,Statistics,LsqFit
+using PyPlot,JLD2,Statistics,LsqFit,TTVFaster
 # import Main.TTVFaster.ttv_wrapper
 include("CGS.jl")
+include("misc.jl")
 # Print results from MCMC run after burn-in
-function print_vals(sigma::Real,nyear::Real,sim::String,model::String,nplanet::Int64)
-    mcfile=string("MCMC/",model,"_fit",sigma,"s",nyear,"yrs.jld2")
-    if String(sim)=="EMB" && isfile(string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
-        mcfile=string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
-    elseif isfile(string("MCMC/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
-        mcfile=string("MCMC/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+function print_vals(sigma::Real,nyear::Real,grid_type_nplanet::String,nplanet::Int64,case_num::Int64)
+    mcfile=string("MCMC/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
+    if case_num==1 && isfile(string("MCMC/fromEMB/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
+        mcfile=string("MCMC/fromEMB/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+        case_label="Case 1"
+    elseif case_num==2 && isfile(string("MCMC/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
+        mcfile=string("MCMC/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+        case_label="Case 2"
     else
-        return println("MCMC file for ",sim," with ",model," model at ",sigma," secs and ",nyear," yrs doesn't exist!!!!")
+        return println("MCMC file for case ",case_num," with ",grid_type_nplanet," model at ",sigma," secs and ",nyear," yrs doesn't exist!!!!")
     end
     jldmc=jldopen(String(mcfile),"r")
     par_mcmc,lprob_mcmc=f["par_mcmc"],f["lprob_mcmc"]
@@ -17,14 +20,14 @@ function print_vals(sigma::Real,nyear::Real,sim::String,model::String,nplanet::I
     nwalkers,nsteps=jldmc["nwalkers"],jldmc["nsteps"]
     param=f["param"]
     pname=Array{String,length(param)}
-    for i=1:length(param)
-        if mod(i,5)
-        pname[i] =
-    prefix=["mu_","P_","t0","ecos","esin",]
-          "mu_2","P_2","t02","ecos2","esin2",
-          "mu_3","P_3","t03","ecos3","esin3", 
-          "mu_4","P_4","t04","ecos4","esin4", 
-          "mu_5","P_5","t05","ecos5","esin5"]
+    # for i=1:length(param)
+    #     if mod(i,5)
+    #     pname[i] =
+    # prefix=["mu_","P_","t0","ecos","esin",
+    #       "mu_2","P_2","t02","ecos2","esin2",
+    #       "mu_3","P_3","t03","ecos3","esin3", 
+    #       "mu_4","P_4","t04","ecos4","esin4", 
+    #       "mu_5","P_5","t05","ecos5","esin5"]
     if model=="p3"
         pname=pname[1:15]
     elseif model=="p4"
@@ -54,36 +57,36 @@ function print_vals(sigma::Real,nyear::Real,sim::String,model::String,nplanet::I
     println("σ_tot : ",sigtot)
 end
 # Print results from likelihood fit
-function print_fits(sigma::Float64,nyear::Float64,sim::String,model::String,no_moon::Bool=true)
-    model="p4"
-    sigma=30.0;nyear=30.0
-    fitfile=string("FITS/fromEMB/",model,"_fit30s30yrs.jld2")
-    mcfile=string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
-    m=jldopen(mcfile,"r")
-    f=jldopen(fitfile,"r")
-    if String(sim)=="EMB" && isfile(string("FITS/fromEMB/",model,"_fit",sigma,"s",nyear,"yrs.jld2"))
-        fitfile=string("FITS/fromEMB/",model,"_fit",sigma,"s",nyear,"yrs.jld2")
-    elseif isfile(string("FITS/",model,"_fit",sigma,"s",nyear,"yrs.jld2"))
-        fitfile=fitfile
+function fit_vals(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num::Int,include_moon::Bool=false)
+
+    if case_num==1 && isfile(string("FITS/fromEMB/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2"))
+        fitfile=string("FITS/fromEMB/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
+        mcfile=string("MCMC/fromEMB/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+    elseif case_num==2 && isfile(string("FITS/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2"))
+        fitfile=string("FITS/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
+        # mcfile=string("MCMC/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
     else
-        return println("FITS file for ",sim," with ",model," model at ",sigma," secs and ",nyear," yrs doesn't exist!!!!")
+        return println("FITS file for case ",case_num," with ",grid_type_nplanet," model at ",sigma," secs and ",nyear," yrs doesn't exist!!!!")
     end
+    # jldmc=jldopen(mcfile,"r")
     jldfit=jldopen(String(fitfile),"r")
-    param=jldfit["best_p3"]
-    lprob=jldfit["lprob_best_p3"]
     pname=["mu_1","P_1","t01","ecos1","esin1",
           "mu_2","P_2","t02","ecos2","esin2",
           "mu_3","P_3","t03","ecos3","esin3", 
             "tcosϕ","tsinϕ","Δϕ","σ_sys2"]
-    if model=="p4"
+ 
+    if grid_type_nplanet=="p4" || grid_type_nplanet=="p3moonp4"
         param=jldfit["best_p4"]
         lprob=jldfit["lprob_best_p4"]
         pname=[pname[1:15];"mu_4";"P_4";"t04";"ecos4";"esin4";pname[end]]
+    elseif grid_type_nplanet=="p3"
+        param=jldfit["best_p3"]
+        lprob=jldfit["lprob_best_p3"]
     end
-    if sim=="noEMB" && model=="moon"
-            param=jldfit["best_p3"]
-            lprob=jldfit["lprob_best_p3"]
-    elseif model=="moon" 
+    # if sim=="noEMB" && model=="moon"
+    #         param=jldfit["best_p3"]
+    #         lprob=jldfit["lprob_best_p3"]
+    if include_moon
             param=jldfit["best_dp"]
             lprob=jldfit["lprob_best_dp"]
     end
@@ -94,30 +97,38 @@ function print_fits(sigma::Float64,nyear::Float64,sim::String,model::String,no_m
     jmax=5
     weight=ones(nt1+nt2)./ sigtt.^2 
     # println(param)
+    chi2=0
     # Perform fit with best params, and calculate parameters covariances
-    fit=curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,no_moon),tt0,tt,weight,param)
+    if include_moon
+    fit=curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,false),tt0,tt,weight,param)
+    chi2=chisquare(tt0,nplanet,ntrans,param,tt,sigtt,jmax,false)
+    else
+    fit=curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,true),tt0,tt,weight,param)
+    chi2=chisquare(tt0,nplanet,ntrans,param,tt,sigtt,jmax,true)
+    end
     cov=estimate_covar(fit)
     err=[sqrt(cov[i,j]) for i in 1:length(param), j in 1:length(param) if i==j ]
     println("           Fitted params from ",fitfile)
     for i=1:length(param)
         println(pname[i]," : ",param[i]," ± ",err[i])
     end
-    println("Derived Parameters")
-    for i=1:length(param)
-        if i%5 == 0
-            println(pname[i-4]," * M_star: ",param[i-4].* CGS.MSUN/CGS.MEARTH," ± ",err[i-4] .* CGS.MSUN/CGS.MEARTH)
-            println("ecc : ",sqrt.(param[i].^2 .+ param[i-1].^2)," ± ",sqrt.(err[i].^2 .+ err[i-1].^2))
-        end
-    end
     println(" lprob: ",lprob)
+    println(" chi: ",chi2)
+    println("           Derived Parameters")
+    masses = [param[i-4].* CGS.MSUN/CGS.MEARTH for i in 1:length(param) if i%5==0]
+    mass_errs=[err[i-4] .* CGS.MSUN/CGS.MEARTH for i in 1:length(param) if i%5==0]
+    ecc = [sqrt.(param[i].^2 .+ param[i-1].^2) for i in 1:length(param) if i%5==0]
+    ecc_errs=[sqrt.(((param[i].^2 .* err[i].^2)./(param[i].^2 .+ param[i-1].^2)) .+ ((param[i].^2 * err[i-1].^2)./(param[i].^2 .+ param[i-1].^2))) for i in 1:length(param) if i%5==0 ]
+    println("M_p[M⊕]=",masses," +/- ",mass_errs)
+    println("eccen. =",ecc," +/- ",ecc_errs)
 end
 # Retrieve MCMC results after burn-in
-function get_vals(sigma::Real,nyear::Real,obs::String,model::String)
+function mc_vals(sigma::Real,nyear::Real,model::String,case_num=Int)
     # mcfile=string("MCMC/",model,"_fit",sigma,"s",nyear,"yrs.jld2")
-    if obs=="fromEMB" && isfile(string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
-        mcfile=string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
-    elseif obs=="fromEV" && isfile(string("MCMC/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
-        mcfile=string("MCMC/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+    if case_num==1 && isfile(string("MCMC/fromEMB/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
+        mcfile=string("MCMC/fromEMB/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+    elseif case_num==2 && isfile(string("MCMC/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
+        mcfile=string("MCMC/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
     else
         return println("MCMC file for ",obs," with ",model," model at ",sigma," secs and ",nyear," yrs doesn't exist!!!!")
     end
@@ -126,21 +137,30 @@ function get_vals(sigma::Real,nyear::Real,obs::String,model::String)
     iburn,samples=jldmc["iburn"], jldmc["indepsamples"]
     nwalkers,nsteps=jldmc["nwalkers"],jldmc["nsteps"]
     param=jldmc["param"]
-    # Build arrays of params
+    println("           Posterior Parameters from ",mcfile)
     masses=[mean(vec(par_mcmc[:,iburn:nsteps,i-4])).*CGS.MSUN/CGS.MEARTH for i in 1:length(param) if i%5==0]
     mass_errs=[std(vec(par_mcmc[:,iburn:nsteps,i-4])).*CGS.MSUN/CGS.MEARTH for i in 1:length(param) if i%5==0]
     periods=[mean(vec(par_mcmc[:,iburn:nsteps,i-3])) for i in 1:length(param) if i%5==0]
     per_errs=[std(vec(par_mcmc[:,iburn:nsteps,i-3])) for i in 1:length(param) if i%5==0]
-    mean_ecc=[mean(sqrt.(vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+4]).^2 .+ vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+5]).^2)) for iplanet=1:nplanet]
+    ecc=[mean(sqrt.(vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+4]).^2 .+ vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+5]).^2)) for iplanet=1:nplanet]
     ecc_errs= [sqrt((vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+4]).^2 .* (std(vec((par_mcmc[:,iburn:nsteps,(iplanet-1)*5+4])).^2))  / (vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+4]).^2 .+ vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+5]).^2)) .+ (vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+5]).^2 .* (std(vec((par_mcmc[:,iburn:nsteps,(iplanet-1)*5+5])).^2))  / (vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+4]).^2 .+ vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+5]).^2))) for iplanet=1:nplanet]
-    sigtot=[sqrt((sqrt(mean(vec(par_mcmc[:,iburn:nsteps,end]))).*3600*24)^2 + sigma^2) ]
+    sigsys=(sqrt(mean(vec(par_mcmc[:,iburn:nsteps,end]))).*3600*24)
+    sigtot=[sqrt(sigsys^2 + sigma^2) ]
+
     println("Retrieved masses.")
-    println(masses," +/- ",mass_errs)
-    println("Retrieved periods.")
-    println(periods," +/- ",per_errs)
-    println("Retrieved eccentricities.")
-    println(ecc," +/- ",ecc_errs)
-    println("Retrieved σ_tot.")
-    println(sigtot)
+    println("M_p[M⊕]=",masses," +/- ",mass_errs)
+    println("eccen. =",ecc," +/- ",ecc_errs)
+    println("Per [d]=",periods," +/- ",per_errs)
+    println("σsys[s]=",sigsys)
+    println("σtot[s]=",sigtot)
     return masses, mass_errs, periods, per_errs, sigtot
+end
+function test_print()
+    model="p4" ; case_num=2
+    sigma=30 ;   nyear=30
+    include_moon=false
+    fit_vals(sigma,nyear,model,case_num,include_moon)
+    # mc_vals(sigma,nyear,model,case_num)
+    # fitfile=string("FITS/fromEMB/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
+    # mcfile=string("MCMC/fromEMB/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
 end

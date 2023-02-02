@@ -1,4 +1,4 @@
-include("CGS.jl")
+# include("CGS.jl")
 using TTVFaster,DataFrames,CSV,LsqFit
 function chisquare(tt0,nplanet,ntrans,params,tt,sigtt,jmax,EM)
   chisq = 0.0  #check memory allocation >>>>>>>>>>>>
