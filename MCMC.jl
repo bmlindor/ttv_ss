@@ -258,3 +258,78 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,nsteps
   @save mcmcfile par_mcmc lprob_mcmc param nwalkers nsteps iburn indepsamples pname
   return lprob_mcmc #, param, nwalkers, nsteps, accept, iburn, indepsamples
 end
+
+function BIC(tt0,nplanet,ntrans,par_mcmc,tt,sigtt,jmax,EM)
+    params=[median(par_mcmc[:,:,i]) for i=1:length(par_mcmc[1,end,:])]
+  function chi_mcmc(tt0,nplanet,ntrans,params,tt,sigtt,jmax,EM)
+    chisq = 0.0  
+    tt_model = TTVFaster.ttv_wrapper(tt0,nplanet,ntrans,params[1:end-1],jmax,EM) 
+    for j=1:length(tt)
+      chisq += -.5 * (tt[j]-tt_model[j])^2/(sigtt[j]^2 + params[end]^2)
+    end
+    return chisq
+  end
+  chi2 = chi_mcmc(tt0,nplanet,ntrans,params[1:end-1],tt,sigtt,jmax,EM)
+  N=length(tt0) ; k=length(params)
+  BIC=chi2 + k*ln(N)
+  return chi2
+end
+
+function mc_vals(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num=Int)
+    # mcfile=string("MCMC/",model,"_fit",sigma,"s",nyear,"yrs.jld2")
+    if case_num==1 && isfile(string("MCMC/fromEMB/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
+        mcfile=string("MCMC/fromEMB/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+    elseif case_num==2 && isfile(string("MCMC/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
+        mcfile=string("MCMC/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+    else
+        return println("MCMC file for case ",case_num," with ",grid_type_nplanet," model at ",sigma," secs and ",nyear," yrs doesn't exist!!!!")
+    end
+    jldmc=jldopen(String(mcfile),"r")
+    nwalkers,nsteps=jldmc["nwalkers"],jldmc["nsteps"]
+    iburn,samples=jldmc["iburn"], jldmc["indepsamples"]
+    par_mcmc=jldmc["par_mcmc"]; lprob_mcmc=jldmc["lprob_mcmc"]  ; param=jldmc["param"]
+    # Percentage of walkers where diff. between median and quantile value is >100
+    bad_walk=0
+    for i in 1:nwalkers
+       med,sig1,quant=quantile!(p4m["par_mcmc"][i,p4m["iburn"]:end,12],[0.5,0.68,0.9])
+       if abs(quant-med)>100
+       bad_walk+=1
+       end
+    end
+    println("Bad walkers: ",bad_walk/nwalkers)
+    
+    println("           Posterior Parameters from ",mcfile)
+    # masses=[mean(vec(jldmc["par_mcmc"][:,iburn:end,i-4])) for i in 1:length(param) if i%5==0] .*CGS.MSUN/CGS.MEARTH
+    # mass_errs=[std(vec(jldmc["par_mcmc"][:,iburn:end,i-4])) for i in 1:length(param) if i%5==0] .*CGS.MSUN/CGS.MEARTH
+    # periods=[mean(vec(jldmc["par_mcmc"][:,iburn:end,i-3])) for i in 1:length(param) if i%5==0] 
+    # per_errs=[std(vec(jldmc["par_mcmc"][:,iburn:end,i-3])) for i in 1:length(param) if i%5==0] 
+    # ecc=[mean(sqrt.(vec(jldmc["par_mcmc"][:,iburn:nsteps,(i-1)]).^2 .+ vec(jldmc["par_mcmc"][:,iburn:nsteps,(i)]).^2)) for i in 1:length(param) if i%5==0]
+
+  #   ecc_err1 = calc_quad_errs(mean(jldmc["par_mcmc"][:,iburn:end,4]),std(jldmc["par_mcmc"][:,iburn:end,4]),mean(jldmc["par_mcmc"][:,iburn:end,5]),std(jldmc["par_mcmc"][:,iburn:end,5]))
+  #   ecc_err2 = calc_quad_errs(mean(jldmc["par_mcmc"][:,iburn:end,9]),std(jldmc["par_mcmc"][:,iburn:end,9]),mean(jldmc["par_mcmc"][:,iburn:end,10]),std(jldmc["par_mcmc"][:,iburn:end,10]))
+  #   ecc_errs = [ecc_err1,ecc_err2]
+
+    # if grid_type_nplanet=="p3" || grid_type_nplanet=="p3moon"
+  #     ecc_err3=calc_quad_errs(mean(jldmc["par_mcmc"][:,iburn:end,14]),std(jldmc["par_mcmc"][:,iburn:end,14]),mean(jldmc["par_mcmc"][:,iburn:end,15]),std(jldmc["par_mcmc"][:,iburn:end,15]))
+  #     ecc_errs=[ecc_errs;ecc_err3]
+    # elseif grid_type_nplanet=="p4" || grid_type_nplanet=="p3moonp4"
+  #     ecc_err4=calc_quad_errs(mean(jldmc["par_mcmc"][:,iburn:end,14]),std(jldmc["par_mcmc"][:,iburn:end,14]),mean(jldmc["par_mcmc"][:,iburn:end,15]),std(jldmc["par_mcmc"][:,iburn:end,15]))
+  #     ecc_err3=calc_quad_errs(mean(jldmc["par_mcmc"][:,iburn:end,19]),std(jldmc["par_mcmc"][:,iburn:end,19]),mean(jldmc["par_mcmc"][:,iburn:end,20]),std(jldmc["par_mcmc"][:,iburn:end,20]))
+  #     ecc_errs=[ecc_errs;ecc_err4;ecc_err3]
+    # end
+    #if grid_type_nplanet=="p3moon" || grid_type_nplanet=="p3moonp4"
+      #tmax_errs=calc_quad_errs(mean(jldmc["par_mcmc"][:,iburn:end,19]),std(jldmc["par_mcmc"][:,iburn:end,19]),mean(jldmc["par_mcmc"][:,iburn:end,20]),std(jldmc["par_mcmc"][:,iburn:end,20]))
+    #end
+
+    sigsys=(mean(vec(jldmc["par_mcmc"][:,iburn:end,end]))).* 3600*24
+  sigsys_err=(std(vec(jldmc["par_mcmc"][:,iburn:end,end]))).* 3600*24
+    sigtot=sqrt(sigsys^2 + sigma^2) 
+
+    println("Retrieved values.")
+    println("M_p[M⊕]=",masses," +/- ",mass_errs)
+    println("eccen. =",ecc," +/- ",ecc_errs)
+    println("Per [d]=",periods," +/- ",per_errs)
+    println("σsys[s]=",sigsys," +/- ",sigsys_err)
+    println("σtot[s]=",sigtot)
+    # return masses, mass_errs, periods, per_errs, sigtot
+end

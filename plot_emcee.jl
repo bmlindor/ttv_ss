@@ -1,11 +1,19 @@
 using PyPlot,Statistics,JLD2
+include("CGS.jl")
 # Plot MCMC mass vs period traces 
 function plot_trace(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num,include_moon::Bool=false)
-  if case_num==1 && isfile(string("MCMC/fromEMB/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jl"))
+  if case_num==1 #&& isfile(string("MCMC/fromEMB/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jl"))
     mcfile=string("MCMC/fromEMB/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
-  elseif case_num==2 && isfile(string("MCMC/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
+    case_label="Case 1"
+    title="Search from Venus + EMB TTVs"
+  elseif case_num==2 #&& isfile(string("MCMC/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
     mcfile=string("MCMC/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
-  else 
+    case_label="Case 2"
+    title="Search from Venus + Earth TTVs"
+  elseif case_num==3
+    mcfile=string("MCMC/no_noise/fromEMB/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+    title="Search from Venus + Earth TTVs -- no noise"
+  else
     return  println("MCMC file for ",grid_type_nplanet," model at ",sigma," secs and ",nyear," yrs doesn't exist!!!!")
   end
   m=jldopen(String(mcfile),"r")
@@ -16,83 +24,107 @@ function plot_trace(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num,i
   # accept=m["accept"]
   iburn=m["iburn"]
   indepsamples=m["indepsamples"]
-
-  if include_moon 
-    fig=figure(figsize=(8,6))
-    subplot(421)
-  else
-    fig=figure(figsize=(7,5))
-    subplot(321)
-  end
-  ax1=gca()
-  for j=1:nwalkers
-  ax1.plot(vec(par_mcmc[j,iburn:nsteps,1]).* CGS.MSUN/CGS.MEARTH)
-  end
-  ax1.set_ylabel(L"$μ_1$ [$M_{⋆}$]")
-  if include_moon || grid_type_nplanet=="p4" || grid_type_nplanet=="widep4"
-    subplot(422)
-  else 
-    subplot(322)
-  end
-  ax2=gca()
-  for j=1:nwalkers
-    ax2.plot(vec(par_mcmc[j,iburn:nsteps,2]))  
-  end
-  ax2.set_ylabel(L"$P_1$ [days]")
-  if include_moon || grid_type_nplanet=="p4" || grid_type_nplanet=="widep4"
-    subplot(423)
-  else 
-    subplot(323)
-  end
-  ax3=gca()
-  for j=1:nwalkers
-    ax3.plot(vec(par_mcmc[j,iburn:nsteps,6]).* CGS.MSUN/CGS.MEARTH)
-  end
-  ax3.set_ylabel(L"$μ_2$ [$M_{⋆}$]")
-  if include_moon || grid_type_nplanet=="p4" || grid_type_nplanet=="widep4"
-    subplot(424)
-  else 
-    subplot(324)
-  end
-  ax4=gca()
-  for j=1:nwalkers
-    ax4.plot(vec(par_mcmc[j,iburn:nsteps,7]))
-  end
-  ax4.set_ylabel(L"$P_2$ [days]")
-  if include_moon || grid_type_nplanet=="p4" || grid_type_nplanet=="widep4"
-    subplot(425)
-  else
-    subplot(325)
-  end
-    ax5=gca()
+  sigsys=(mean(vec(m["par_mcmc"][:,iburn:end,end]))).* 3600*24
+  sigsys_err=(std(vec(m["par_mcmc"][:,iburn:end,end]))).* 3600*24
+  sigtot=sqrt(sigsys^2 + sigma^2) 
+  fig=figure(figsize=(6,6))
+  function main_traces()
+    ax1=subplot(421) #trace plot
+    ax1.set_title(string(title,'\n'," [",nyear," yr span] ",L"$\sigma_{obs}=$",sigma," sec ",L"$\sigma_{sys}=$",sigsys," sec"))
     for j=1:nwalkers
-      ax5.plot(vec(par_mcmc[j,iburn:nsteps,11]).* CGS.MSUN/CGS.MEARTH)
+      ax1.plot(vec(par_mcmc[j,iburn:nsteps,1]).* CGS.MSUN/CGS.MEARTH)
     end
-    ax5.set_ylabel(L"$μ_3$ [$M_{⋆}$]")
-  if include_moon || grid_type_nplanet=="p4" || grid_type_nplanet=="widep4"
-    subplot(426)
-  else
-    subplot(326)
+    ax1.set_ylabel(L"$μ_1$ [$M_{⋆}$]")
+    ax2=subplot(422)
+      for j=1:nwalkers
+        ax2.plot(vec(par_mcmc[j,iburn:nsteps,2]))  
+      end
+      ax2.set_ylabel(L"$P_1$ [days]")
+    ax3=subplot(423)
+      for j=1:nwalkers
+        ax3.plot(vec(par_mcmc[j,iburn:nsteps,6]).* CGS.MSUN/CGS.MEARTH)
+      end
+      ax3.set_ylabel(L"$μ_2$ [$M_{⋆}$]")
+    ax4=subplot(424)
+      for j=1:nwalkers
+        ax4.plot(vec(par_mcmc[j,iburn:nsteps,7]))
+      end
+      ax4.set_ylabel(L"$P_2$ [days]")
+    ax5=subplot(425)
+      for j=1:nwalkers
+        ax5.plot(vec(par_mcmc[j,iburn:nsteps,16]).* CGS.MSUN/CGS.MEARTH)
+      end
+      ax5.set_ylabel(L"$μ_3$ [$M_{⋆}$]")
+    ax6=subplot(426)
+      for j=1:nwalkers
+        ax6.plot(vec(par_mcmc[j,iburn:nsteps,17]))
+      end
+      ax6.set_ylabel(L"$P_3$ [days]")
+    ax7=subplot(427)
+      for j=1:nwalkers
+        ax7.plot(vec(par_mcmc[j,iburn:nsteps,11]).* CGS.MSUN/CGS.MEARTH)
+      end
+      ax7.set_ylabel(L"$μ_4$ [$M_{⋆}$]")
+    ax8=subplot(428)
+        for j=1:nwalkers
+        plot(vec(par_mcmc[j,iburn:nsteps,12]))
+      end
+      ax8.set_ylabel(L"$P_4$ [days]")
   end
-    ax6=gca()
-    for j=1:nwalkers
-      ax6.plot(vec(par_mcmc[j,iburn:nsteps,12]))
-    end
-    ax6.set_ylabel(L"$P_3$ [days]")
-
-  #   subplot(427)
-  #   ax7=gca()
-  #   for j=1:nwalkers
-  #     ax7.plot(vec(par_mcmc[j,iburn:nsteps,16]).* CGS.MSUN/CGS.MEARTH)
-  #   end
-  #   ax7.set_ylabel(L"$μ_4$ [$M_{⋆}$]")
-  #   subplot(428)
-  #   ax8=gca()
-  #   for j=1:nwalkers
-  #     ax8.plot(vec(par_mcmc[j,iburn:nsteps,16]))
-  #   end
-  #   ax8.set_ylabel(L"$P_4$ [days]")
-  # end
+##plotting vs prob
+  function jup_traces()
+    ax1=subplot(221) # planet 4 probability traces
+    suptitle(string(title,'\n'," [",nyear," yr span] ",L"$\sigma_{obs}=$",sigma," sec ",L"$\sigma_{sys}=$",round(sigsys,sigdigits=3)," sec"))
+      for j=1:nwalkers
+      plot(vec(par_mcmc[j,iburn:nsteps,end]).* 3600*24,lprob_mcmc[j,iburn:nsteps])
+      xlabel(L"$\sigma_{sys}$ [min]")
+        # plot(vec(lprob_mcmc[j,iburn:nsteps]),label=string("walker=",j))
+      end
+      subplot(222)
+      for j=1:nwalkers
+      plot(vec(par_mcmc[j,iburn:nsteps,16]).* CGS.MSUN/CGS.MEARTH,lprob_mcmc[j,iburn:nsteps])
+      xlabel(L"Mass [M$\oplus$]")
+      end
+      subplot(223)
+      for j=1:nwalkers
+      plot(vec(par_mcmc[j,iburn:nsteps,17]),lprob_mcmc[j,iburn:nsteps])
+      xlabel("Period [days]")
+      end
+      subplot(224)
+      for j=1:nwalkers
+      ecc=vec(sqrt.(par_mcmc[j,iburn:nsteps,19].^2 .+ par_mcmc[j,iburn:nsteps,20].^2))
+      plot(ecc,lprob_mcmc[j,iburn:nsteps])
+      xlabel("Eccentricity")
+      end
+    tight_layout()
+    name=string("IMAGES/trace/case",case_num,"Jup",grid_type_nplanet,sigma,"secs",nyear,"yrs.png")
+  end
+##plotting vs prob
+  function mars_traces()
+    ax1=subplot(221) #planet 3 probabbility traces
+    suptitle(string(title,'\n'," [",nyear," yr span] ",L"$\sigma_{obs}=$",sigma," sec ",L"$\sigma_{sys}=$",round(sigsys,sigdigits=3)," sec"))
+      for j=1:nwalkers
+      plot(vec(par_mcmc[j,iburn:nsteps,end]).* 3600*24,lprob_mcmc[j,iburn:nsteps])
+      xlabel(L"$\sigma_{sys}$ [min]")
+      end
+      subplot(222)
+      for j=1:nwalkers
+      plot(vec(par_mcmc[j,iburn:nsteps,11]).* CGS.MSUN/CGS.MEARTH,lprob_mcmc[j,iburn:nsteps])
+      xlabel(L"Mass [M$\oplus$]")
+      end
+      subplot(223)
+      for j=1:nwalkers
+      plot(vec(par_mcmc[j,iburn:nsteps,12]),lprob_mcmc[j,iburn:nsteps])
+      xlabel("Period [days]")
+      end
+      subplot(224)
+      for j=1:nwalkers
+      ecc=vec(sqrt.(par_mcmc[j,iburn:nsteps,14].^2 .+ par_mcmc[j,iburn:nsteps,15].^2))
+      plot(ecc,lprob_mcmc[j,iburn:nsteps])
+      xlabel("Eccentricity")
+      end
+    name=string("IMAGES/trace/case",case_num,"Mar",grid_type_nplanet,sigma,"secs",nyear,"yrs.png")
+  end
   # if include_moon 
   #   subplot(425)
   # else 
@@ -125,10 +157,10 @@ function plot_trace(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num,i
   #   end
   #   ax8.set_ylabel(L"$t_{max}$ [days]")
   # end
-  # # ax3.set_ylabel(L"$σ_{sys}^2$ [days]")
-  # tight_layout()
-  # title=string("IMAGES/traces/",sim,model,"traces-",sigma,"secs",nyear,"yrs.png")
-  # savefig(title)
+  tight_layout()
+  mars_traces()
+  savefig(name)
+    # clf()
 end 
 # Plot MCMC traces of individual walkers
 function plot_emcee(sigma::Real,nyear::Real,sim::String,model::String,include_moon::Bool=false)

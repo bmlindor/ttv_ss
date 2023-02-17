@@ -3,13 +3,13 @@ include("misc.jl")
 include("CGS.jl")
 using TTVFaster,DelimitedFiles,JLD2,LsqFit,Statistics,DataFrames,CSV
 
-function fit_planet4(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p3in::Float64,p3out::Float64,np3::Int,nphase::Int,p4in::Float64,p4out::Float64,np4::Int,obs::String)
+function fit_planet4(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p3in::Float64,p3out::Float64,np3::Int,nphase::Int,p4in::Float64,p4out::Float64,np4::Int,obs::String,dir::String="FITS")
   if obs=="fromEMB"
-    fitfile = string("FITS/fromEMB/p4_fittest",sigma,"s",nyear,"yrs.jld2")
+    fitfile = string(dir,"/fromEMB/p4_fittest",sigma,"s",nyear,"yrs.jld2")
     results = string("results/fromEMB/p4_fittest",sigma,"s",nyear,"yrs.txt")
     grid = string("grid/fromEMB/p4_gridtest",sigma,"s",nyear,"yrs.txt")
   elseif obs=="fromEV"
-    fitfile = string("FITS/p4_fittest",sigma,"s",nyear,"yrs.jld2")
+    fitfile = string(dir,"/p4_fittest",sigma,"s",nyear,"yrs.jld2")
     results = string("results/p4_fittest",sigma,"s",nyear,"yrs.txt")
     grid = string("grid/p4_gridtest",sigma,"s",nyear,"yrs.txt")
   end

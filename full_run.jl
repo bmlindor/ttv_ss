@@ -127,26 +127,7 @@ function run_grid(sigma,nyear,label::String,obs::String)
 	fit_moon(jd1,sigma,nyear,tref,tol,dpin,dpout,ndp,["p5moon"],true,5)
 	end
 end
-function test_fit(sigma,nyear,label::String,obs::String)
-	nphase=36 #wide: 100,36,180 
-	p3in,p3out,np3=11.4*365.25,12.2*365.25,20
-	dpin,dpout,ndp=2.29,2.35,10
-	p4in,p4out,np4=1.6*365.25,3*365.25,20
-	p5in,p5out,np5=28*365.25,30*365.25,20
-	#jd1=2444239.5 ; tref =2444000
-	if label=="Hpp" 
-	sim_times(jd1,sigma,nyear,obs)
- 	best_p2,lprob_best_p2=fit_planet2(jd1,sigma,nyear,tref,tol,[obs],true)
-	elseif label=="Hppp"
-	fit_planet3(jd1,sigma,nyear,tref,tol,p3in,p3out,np3,nphase,[obs,"p3"],true)
-	elseif label=="Hpppp"
-  fit_planet4(jd1,sigma,nyear,tref,tol,p4in,p4out,np4,nphase,[obs,"p4"])
-	elseif label=="Hppppp"
-  fit_planet5(jd1,sigma,nyear,tref,tol,p5in,p5out,np5,nphase,[obs,"p5"])
-	elseif label=="Hppmpp" 
-	fit_moon(jd1,sigma,nyear,tref,tol,p4in,p4out,np4,nphase,["p3moonp4"],true)
-	end
-end
+
 sigma=30;# nyear=30
 if runtype=="wide"
 	nyear=parse(Int,ARGS[5])

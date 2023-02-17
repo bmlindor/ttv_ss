@@ -3,14 +3,12 @@ include("misc.jl")
 include("CGS.jl")
 using TTVFaster,DelimitedFiles,JLD2,LsqFit,Statistics
 
-function fit_planet2(filename::String, jmax::Int,tref::Real,tol::Real)
-  # (::Core.kwftype(typeof(fit_planet2)))(kws, fit_planet2, data_file, jmax)
-  # if haskey(kws, :jmax)
-  #     jmax = kws.jmax
-  # else
-  #     jmax = 5
-  # end
-  # # etc.
+function fit_planet2(filename::String, jmax::Int,tref::Real,tol::Real,obs::String,dir::String="FITS")
+  if obs=="fromEMB"
+    fitfile = string(dir,"/fromEMB/p2_fit",sigma,"s",nyear,"yrs.jld2")
+  elseif obs=="fromEV"
+    fitfile = string(dir,"/p2_fit",sigma,"s",nyear,"yrs.jld2")
+  end
   # Loads .txt datafile with following columns: 
   #body_number (n), initial time of transit (tt0), actual transit times (tt), measurement error (sigtt)
   data_file = readdlm(filename,Float64)
@@ -73,9 +71,7 @@ function fit_planet2(filename::String, jmax::Int,tref::Real,tol::Real)
   lprob_best= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
   chi2=chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt,jmax,true)
   println("New 2-planet chi-square: ",chi2) 
-  println("Output file in Fitfromdatafile.jld2")
-  outfile = string("Fitfromdatafile.jld2")
-  @save outfile chi2 init_param lprob_best ntrans nplanet tt0 tt ttmodel sigtt
+  @save fitfile chi2 init_param lprob_best ntrans nplanet tt0 tt ttmodel sigtt
   return 
 end
 
