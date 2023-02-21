@@ -1,0 +1,60 @@
+args = ["Hpppp", "mcmc", "fromEMB", "50000"]
+JLDFile /astro/users/blindor/research/ttv_ss/FITS/fromEMB/p4_fit30s30yrs.jld2 (read-only) loaded.
+20 parameters from fit: [2.4797432646168424e-6, 224.70077540770214, 3503.7654467135444, -0.00591685166338399, 0.005920372205490785, 2.978150537417523e-6, 365.2564548149327, 3624.402156488645, 0.008847329207593553, 0.008152049268329872, 3.9885467435250823e-7, 687.2013753157837, 418.791946217515, -0.10250950169138612, -0.07880337696311002, 0.0010011234682683347, 4355.604509557177, 266.97252288780214, 0.026285726164548374, -0.045583012923914666]
+Maximum log Prob from fit: -169.6047033181992
+No Walkers: 75 No. steps: 50000
+Number of steps: 1000 Acceptance Rate: 0.2783333333333333
+Number of steps: 2000 Acceptance Rate: 0.54336
+Number of steps: 3000 Acceptance Rate: 0.7994266666666666
+Number of steps: 4000 Acceptance Rate: 1.0535466666666666
+Number of steps: 5000 Acceptance Rate: 1.3066
+Number of steps: 6000 Acceptance Rate: 1.5538533333333333
+Number of steps: 7000 Acceptance Rate: 1.8048666666666666
+Number of steps: 8000 Acceptance Rate: 2.052173333333333
+Number of steps: 9000 Acceptance Rate: 2.296386666666667
+Number of steps: 10000 Acceptance Rate: 2.5383733333333334
+Number of steps: 11000 Acceptance Rate: 2.7801466666666665
+Number of steps: 12000 Acceptance Rate: 3.0210133333333333
+Number of steps: 13000 Acceptance Rate: 3.2639066666666667
+Number of steps: 14000 Acceptance Rate: 3.5138933333333333
+Number of steps: 15000 Acceptance Rate: 3.7515066666666668
+Number of steps: 16000 Acceptance Rate: 3.99652
+Number of steps: 17000 Acceptance Rate: 4.242826666666667
+Number of steps: 18000 Acceptance Rate: 4.484426666666667
+Number of steps: 19000 Acceptance Rate: 4.727546666666667
+Number of steps: 20000 Acceptance Rate: 4.96532
+Number of steps: 21000 Acceptance Rate: 5.19368
+Number of steps: 22000 Acceptance Rate: 5.418213333333333
+Number of steps: 23000 Acceptance Rate: 5.641346666666666
+Number of steps: 24000 Acceptance Rate: 5.858986666666667
+Number of steps: 25000 Acceptance Rate: 6.074413333333333
+Number of steps: 26000 Acceptance Rate: 6.275773333333333
+Number of steps: 27000 Acceptance Rate: 6.481586666666667
+Number of steps: 28000 Acceptance Rate: 6.684213333333333
+Number of steps: 29000 Acceptance Rate: 6.87072
+Number of steps: 30000 Acceptance Rate: 7.055173333333333
+Number of steps: 31000 Acceptance Rate: 7.23948
+Number of steps: 32000 Acceptance Rate: 7.414546666666666
+Number of steps: 33000 Acceptance Rate: 7.572613333333333
+Number of steps: 34000 Acceptance Rate: 7.7261066666666665
+Number of steps: 35000 Acceptance Rate: 7.8753866666666665
+Number of steps: 36000 Acceptance Rate: 8.010693333333334
+Number of steps: 37000 Acceptance Rate: 8.133186666666667
+Number of steps: 38000 Acceptance Rate: 8.237013333333334
+Number of steps: 39000 Acceptance Rate: 8.330413333333333
+Number of steps: 40000 Acceptance Rate: 8.42264
+Number of steps: 41000 Acceptance Rate: 8.493146666666666
+Number of steps: 42000 Acceptance Rate: 8.55872
+Number of steps: 43000 Acceptance Rate: 8.626533333333333
+Number of steps: 44000 Acceptance Rate: 8.687053333333333
+Number of steps: 45000 Acceptance Rate: 8.746253333333334
+Number of steps: 46000 Acceptance Rate: 8.795826666666667
+Number of steps: 47000 Acceptance Rate: 8.843706666666666
+Number of steps: 48000 Acceptance Rate: 8.897746666666666
+Number of steps: 49000 Acceptance Rate: 8.94516
+Number of steps: 50000 Acceptance Rate: 8.990733333333333
+Burn-in Number (ends): 5088
+Independent Sample Size: 921.4787656287339
+Mean posteriors after burn-in: [2.501955815023163e-6, 224.7007782627157, 3503.765378732578, -0.001299874164970839, 0.002186512975153211, 3.0158003721097455e-6, 365.25645491607065, 3624.4021576085743, 0.012777635264161716, 0.004451787582749087, 9.236509279418866e-6, 1276.22409129924, -5.554883407419915e7, -0.02523541344612963, -0.060525486198095654, 0.0008177083211239632, 4294.544524880991, 474.4775929893254, 0.003862578797688211, -0.039508890329024465]
+MCMC chi-square: 159.28552961186477 for total timing uncertainty of: [35.044150089623464] secs.
+11113.336158 seconds (239.66 M allocations: 3.431 TiB, 0.92% gc time)

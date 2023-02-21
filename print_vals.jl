@@ -64,7 +64,7 @@ function fit_vals(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num::In
         mcfile=string("MCMC/fromEMB/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
     elseif case_num==2 && isfile(string("FITS/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2"))
         fitfile=string("FITS/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
-        # mcfile=string("MCMC/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+        mcfile=string("MCMC/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
     else
         return println("FITS file for case ",case_num," with ",grid_type_nplanet," model at ",sigma," secs and ",nyear," yrs doesn't exist!!!!")
     end
@@ -170,18 +170,25 @@ function mc_vals(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num=Int)
     # mass_errs=[std(vec(par_mcmc[:,iburn:nsteps,i-4])).*CGS.MSUN/CGS.MEARTH for i in 1:length(param) if i%5==0]
     # periods=[mean(vec(par_mcmc[:,iburn:nsteps,i-3])) for i in 1:length(param) if i%5==0]
     # per_errs=[std(vec(par_mcmc[:,iburn:nsteps,i-3])) for i in 1:length(param) if i%5==0]
-
     
     sigsys=(mean(vec(jldmc["par_mcmc"][:,iburn:end,end]))).* 3600*24
 		sigsys_err=(std(vec(jldmc["par_mcmc"][:,iburn:end,end]))).* 3600*24
     sigtot=sqrt(sigsys^2 + sigma^2) 
 
+		mc_params=[mean(par_mcmc[:,iburn:nsteps,i]) for i in 1:length(param)]
+		chi2=0
+    #if include_moon
+    #chi2=chisquare(tt0,nplanet,ntrans,mc_params,tt,ones(length(tt)).*sigtot,jmax,false)
+    #else
+    #chi2=chisquare(tt0,nplanet,ntrans,mc_params,tt,ones(length(tt)).*sigtot,jmax,true)
+    #end
     println("Retrieved values.")
     println("M_p[M⊕]=",masses," +/- ",mass_errs)
     println("eccen. =",ecc," +/- ",ecc_errs)
     println("Per [d]=",periods," +/- ",per_errs)
     println("σsys[s]=",sigsys," +/- ",sigsys_err)
     println("σtot[s]=",sigtot)
+    #println(" chi: ",chi2)
     # return masses, mass_errs, periods, per_errs, sigtot
 end
 function test_print()

@@ -147,7 +147,7 @@ function test_fit(sigma,nyear,label::String,obs::String)
 	fit_moon(jd1,sigma,nyear,tref,tol,p4in,p4out,np4,nphase,["p3moonp4"],true)
 	end
 end
-sigma=30;# nyear=30
+sigma=10;# nyear=30
 if runtype=="wide"
 	nyear=parse(Int,ARGS[5])
 	nphase=36 #wide: 100,36,180 
@@ -176,8 +176,8 @@ end
 #nyears=[30,29,28,27,26,25,24,23,22,21,20,19,18]
 #sigmas=[30,10,60]
 #elseif nplanet>3
-nyears=[30,26]#[30,29,28,27,26,25,24,23,22,21,20,19,18,17,16,15]#
-sigmas=[30,10]#,60]
+nyears=[30,29,28,27,26,25,24,23,22]#,21,20,19,18,17,16,15]#
+sigmas=[60]#,60]
 #end
 nwalkers=75
 #nsteps=50000
