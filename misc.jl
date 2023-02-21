@@ -2,7 +2,6 @@
 using TTVFaster,DataFrames,CSV,LsqFit
 function chisquare(tt0,nplanet,ntrans,params,tt,sigtt,jmax,EM)
   chisq = 0.0  #check memory allocation >>>>>>>>>>>>
-  # println(params,tt[1],sigtt[1])
   tt_model = ttv_wrapper(tt0,nplanet,ntrans,params,jmax,EM) 
   for j=1:length(tt)
     chisq += (tt[j]-tt_model[j])^2/sigtt[j]^2
@@ -11,11 +10,11 @@ function chisquare(tt0,nplanet,ntrans,params,tt,sigtt,jmax,EM)
 end
 avg(x,y)=(x + y)/2
 gaussian(x,mu,sig)=exp.(-((x .- mu).^2) ./ (2 * sig^.2))
-calc_BIC(chi2,Nparams,Nobs) = chi2 + Nparams *ln(Nobs)
-function calc_BIC(tt0,nplanet,ntrans,params,tt,sigtt,jmax,EM)
+function fit_BIC(tt0,nplanet,ntrans,params,tt,sigtt,jmax,EM)
 	chi2 = chisquare(tt0,nplanet,ntrans,params,tt,sigtt,jmax,EM)
 	N=length(tt0) ; k=length(params)
-	return chi2 + k*ln(N)
+	BIC=chi2 + k*ln(N)
+	return chi2,BIC
 end
 G=CGS.GRAV /1e3 #in kms units
 AU=CGS.AU /1e2 #in kms units

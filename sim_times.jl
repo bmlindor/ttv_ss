@@ -221,33 +221,25 @@ function sim_obs_and_find_times(jd1::Float64,sigma::Real,nyear::Real,obs::String
   body = zeros((nt1+nt2))
   body[1:nt1] .= 1.0
   body[nt1+1:nt1+nt2] .= 2.0
-  # function make_transit_times_table()
-  #   for i=1:nt1
-  #     println("Venus",'\t',i-1,'\t',round(t1[i].-2433500,sigdigits=10),'\t',round((tt1[i] .- t1[i]).*24*60,sigdigits=4),'\t',round(noise1[i].*24*60,sigdigits=2),'\t',sigtt1[i].*24*60)
-  #   end
-  #   for i=1:nt2
-  #     println("Earth",'\t',i-1,'\t',round(t2[i].-2433500,sigdigits=10),'\t',round((tt2[i] .- t2[i]).*24*60,sigdigits=4),'\t',round(noise2[i].*24*60,sigdigits=2),'\t',sigtt2[i].*24*60)
-  #   end
-  # end
+  function make_transit_times_table()
+    for i=1:nt1
+      println("Venus",'\t',i-1,'\t',round(t1[i].-2433500,sigdigits=10),'\t',round((tt1[i] .- t1[i]).*24*60,sigdigits=4),'\t',round(noise1[i].*24*60,sigdigits=2),'\t',sigtt1[i].*24*60)
+    end
+    for i=1:nt2
+      println("Earth",'\t',i-1,'\t',round(t2[i].-2433500,sigdigits=10),'\t',round((tt2[i] .- t2[i]).*24*60,sigdigits=4),'\t',round(noise2[i].*24*60,sigdigits=2),'\t',sigtt2[i].*24*60)
+    end
+  end
   # make_transit_times_table()
   return body,tt0,tt,sigtt
   # return body,tt
 end
-
-function test_sim_obs()
-  jd1=2.445005e6
-  sigma=30
-  nyear=30
-  obs="fromEV"
- body,tt0,tt,sigtt=sim_obs_and_find_times(jd1,sigma,nyear,obs)
-end
 # Simulate times starting at jd1 for nyear span with sigma Gaussian noise added, save to .txt
-function sim_times(jd1::Float64,sigma::Real,nyear::Real,obs::String)
+function sim_times(jd1::Float64,sigma::Real,nyear::Real,obs::String,dir::String="INPUTS")
   body,tt0,tt,sigtt=sim_obs_and_find_times(jd1,sigma,nyear,obs)
   if obs=="fromEMB"
-    name = string("INPUTS/EMBtt_",sigma,"s",nyear,"yrs.txt")
+    name = string(dir,"/EMBtt_",sigma,"s",nyear,"yrs.txt")
   else
-    name = string("INPUTS/tt_",sigma,"s",nyear,"yrs.txt")
+    name = string(dir,"/tt_",sigma,"s",nyear,"yrs.txt")
   end
   open(name,"w") do io
     # println(io,"#body",'\t',"tt0",'\t',"tt",'\t',"sigtt")

@@ -3,9 +3,11 @@ rc("font",family="sans-serif")
 rc("lines",linewidth=2)
 include("histogram.jl")
 xprob(lprob)=exp.(lprob .- maximum(lprob))
+ 	# true_per3=1.8808476
+ 	# true_per4=11.862615
 	# prob(p3,p3prob,p3_cur,nbins,param,"firebrick","Jupiter")
 # Create likelihood/probability plots of search grids
-function per_grid(sigma,nyear,grid_type_nplanet,per_col,true_per,color,pname,case_num,label_xloc)
+function per_grid(sigma,nyear,grid_type_nplanet,per_col,true_per,pname,case_num,label_xloc)
 	if case_num==1
 	file=string("grid/fromEMB/",grid_type_nplanet,"_grid",sigma,"s",nyear,"yrs.csv")
 	case_label="Case 1"
@@ -14,15 +16,16 @@ function per_grid(sigma,nyear,grid_type_nplanet,per_col,true_per,color,pname,cas
 	case_label="Case 2"
 	end
 	fit,header=readdlm(file,',',header=true)
-	sim_obs_label= string(case_label," [",nyear," yr span]",'\n',L"$\sigma_{obs}=$",sigma," sec")
+	sim_obs_label= string(case_label," [",nyear," yr span]")
 	# save_as =string("IMAGES/wide_grids/case",case_num,"_",grid_type_nplanet,pname,sigma,"secs",nyear,"yrs.png")
 	axvline(true_per,linestyle="--",color="black")
 	text(true_per + true_per/100,1.01,pname,fontsize="large")
-	text(label_xloc,1.05,sim_obs_label,fontsize="medium")
- 	plot(fit[:,per_col]./365.25,xprob(fit[:,end]),color)
+	#text(label_xloc,1.05,sim_obs_label,fontsize="medium")
+ 	plot(fit[:,per_col]./365.25,xprob(fit[:,end]),label=string("[",nyear," yr span]",L"$\sigma_{obs}=$",sigma," sec"))
  	xlabel("Planet Period Search Grid",fontsize="x-large")
  	ylabel("Probability",fontsize="x-large")
- 	ylim(0,1.2)
+ 	legend()
+ 	# ylim(0,1.2)
 end
 function moon_grid(sigma,nyear,grid_type_nplanet,per_col,true_per,color,pname,case_num,label_xloc)
 	if case_num==1
@@ -147,6 +150,13 @@ function plot_profile(sigma::Real,nyear::Real,label_xloc::Real,case_num::Int,inc
 
 	par_mcmc3=vec(mc3["par_mcmc"][:,mc3["iburn"]:end,12])./365.25
 	par_mcmc4=vec(mc4["par_mcmc"][:,mc4["iburn"]:end,12])./365.25
+	sigsys3=(mean(vec(mc3["par_mcmc"][:,mc3["iburn"]:end,end]))).* 3600*24
+	sigsys_err3=(std(vec(mc3["par_mcmc"][:,mc3["iburn"]:end,end]))).* 3600*24
+  sigtot3=sqrt(sigsys3^2 + sigma^2) 
+	sigsys4=(mean(vec(mc4["par_mcmc"][:,mc4["iburn"]:end,end]))).* 3600*24
+	sigsys_err4=(std(vec(mc4["par_mcmc"][:,mc4["iburn"]:end,end]))).* 3600*24
+	sigtot4=sqrt(sigsys4^2 + sigma^2) 
+
  	true_per3=1.8808476
  	true_per4=11.862615
 	sim_obs_label= string(case_label," [",nyear," yr span]",'\n',L"$\sigma_{obs}=$",sigma," sec")
@@ -172,30 +182,32 @@ function plot_profile(sigma::Real,nyear::Real,label_xloc::Real,case_num::Int,inc
 	tick_params(which="both",direction="in")
 
 	## plot Mars zoom-in
-	ax2=fig.add_subplot(223)
-	text(1.84,1.1,"a)",fontweight="bold")
+	ax2=fig.add_subplot(223,title=L"$\mathcal{H}_{PPsPP}$")
+	text(1.83,1.1,"a)",fontweight="bold")
 	axvline(true_per3,linestyle="--",color="black")
-	text(true_per3 - true_per3/100,0.96,"Mars",fontsize="medium")
-	xbin,xhist,xbin_square,hist_square=histogram(par_mcmc3,75)
- 	plot(fit3[:,12]./365.25,xprob(fit3[:,end]),color="orange",label="Global Fit")
+	text(1.89,0.96,"Mars",fontsize="medium")
+	xbin,xhist,xbin_square,hist_square=histogram(par_mcmc3,50)
+ 	plot(fit3[:,12]./365.25,xprob(fit3[:,end]),color="orange",label="Fit")
  	plot(xbin_square,hist_square./maximum(hist_square),color="orange",label="Posterior",alpha=0.75)
  	minorticks_on()
+ 	# legend()
 	tick_params(which="both",direction="in")
-	ax2.set_xlim(1.83,1.95)
+	# ax2.set_xlim(1.83,1.95)
 	ax2.set_xlabel(L"Per$_4$ [yrs]",fontsize="large")
 	ylabel("Probability",fontsize="x-large")
 
  	## plot Jupiter zoom-in
- 	ax3=fig.add_subplot(224,sharey=ax2)
+ 	ax3=fig.add_subplot(224,sharey=ax2,title=L"$\mathcal{H}_{PPP}$")
 	text(11,1.1,"b)",fontweight="bold")
  	axvline(true_per4,linestyle="--",color="black")
-	text(true_per4 + true_per4/100,0.96,"Jupiter",fontsize="medium")
+	text(12,0.96,"Jupiter",fontsize="medium")
 	xbin,xhist,xbin_square,hist_square=histogram(par_mcmc4,50)
- 	plot(fit4[:,12]./365.25,xprob(fit4[:,end]),color="firebrick",label="Global Fit")
+ 	plot(fit4[:,12]./365.25,xprob(fit4[:,end]),color="firebrick",label="Fit")
  	plot(xbin_square,hist_square./maximum(hist_square),color="firebrick",label="Posterior",alpha=0.75)
  	minorticks_on()
+	# legend(loc="upper right",fontsize="medium",title="Jupiter",title_fontsize="medium",bbox_to_anchor=(0.,1.02,1.,.102),ncol=5,mode="expand",borderaxespad=0.0)	
 	ax3.set_xlim(11,12.5)
-	ax3.tick_params(which="both",direction="in",left=false,labelleft=false)
+	ax3.tick_params(which="both",direction="in",left=true,labelleft=false)
 	ax3.set_xlabel(L"Per$_3$ [yrs]",fontsize="large")
 	tight_layout()
  	show()
