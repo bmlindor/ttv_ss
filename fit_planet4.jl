@@ -3,15 +3,13 @@ include("misc.jl")
 include("CGS.jl")
 using TTVFaster,DelimitedFiles,JLD2,LsqFit,Statistics,DataFrames,CSV
 
-function fit_planet4(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p3in::Float64,p3out::Float64,np3::Int,nphase::Int,p4in::Float64,p4out::Float64,np4::Int,obs::String,dir::String="FITS")
+function fit_planet4(filename::String,jmax::Int,jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p3in::Float64,p3out::Float64,np3::Int,nphase::Int,p4in::Float64,p4out::Float64,np4::Int,obs::String,dir::String="FITS")
   if obs=="fromEMB"
-    fitfile = string(dir,"/fromEMB/p4_fittest",sigma,"s",nyear,"yrs.jld2")
-    results = string("results/fromEMB/p4_fittest",sigma,"s",nyear,"yrs.txt")
-    grid = string("grid/fromEMB/p4_gridtest",sigma,"s",nyear,"yrs.txt")
+    fitfile = string(dir,"/fromEMB/p4_fit",sigma,"s",nyear,"yrs.jld2")
+    grid = string("grid/fromEMB/p4_grid",sigma,"s",nyear,"yrs.txt")
   elseif obs=="fromEV"
-    fitfile = string(dir,"/p4_fittest",sigma,"s",nyear,"yrs.jld2")
-    results = string("results/p4_fittest",sigma,"s",nyear,"yrs.txt")
-    grid = string("grid/p4_gridtest",sigma,"s",nyear,"yrs.txt")
+    fitfile = string(dir,"/p4_fit",sigma,"s",nyear,"yrs.jld2")
+    grid = string("grid/p4_grid",sigma,"s",nyear,"yrs.txt")
   end
   @assert isfile(filename)
   println(filename," loaded.")
@@ -204,16 +202,16 @@ function fit_planet4(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref:
   mp_errs=[err[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
   mean_ecc=[sqrt(best_p4[(iplanet-1)*5+4]^2 + best_p4[(iplanet-1)*5+4]^2) for iplanet=1:nplanet]
 
-  open(results,"w") do io
-    println(io,"Global Fit Results.",'\n',"per 4 range=[",p4in," - ",p4out,", length=",np4,"]")
+  # open(results,"w") do io
+  #   println(io,"Global Fit Results.",'\n',"per 4 range=[",p4in," - ",p4out,", length=",np4,"]")
     for i=1:nparam
-      println(io,pname[i],": ",best_p4[i]," ± ",err[i])
+      println(pname[i],": ",best_p4[i]," ± ",err[i])
     end
-    println(io,"Retrieved Earth masses:",'\n',mean_mp,'\n'," ± ",mp_errs)
-    println(io,"Retrieved eccentricity:",'\n',mean_ecc)
-  end
+    println("Retrieved Earth masses:",'\n',mean_mp,'\n'," ± ",mp_errs)
+    println("Retrieved eccentricity:",'\n',mean_ecc)
+  # end
   @save fitfile p3 lprob_p3 best_p3 lprob_best_p3 p4 lprob_p4 best_p4 lprob_best_p4 ntrans nplanet tt0 tt ttmodel sigtt
-  return best_p3,best_p4 
+  return best_p4,lprob_best_p4 
 end
 
 """

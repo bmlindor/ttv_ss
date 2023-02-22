@@ -3,7 +3,7 @@ include("misc.jl")
 include("CGS.jl")
 using TTVFaster,DelimitedFiles,JLD2,LsqFit,Statistics
 
-function fit_planet2(filename::String, jmax::Int,tref::Real,tol::Real,obs::String,dir::String="FITS")
+function fit_planet2(filename::String,jmax::Int,jd1,sigma,nyear,tref::Real,tol::Real,obs::String,dir::String="FITS")
   if obs=="fromEMB"
     fitfile = string(dir,"/fromEMB/p2_fit",sigma,"s",nyear,"yrs.jld2")
   elseif obs=="fromEV"
@@ -54,6 +54,7 @@ function fit_planet2(filename::String, jmax::Int,tref::Real,tol::Real,obs::Strin
   ntrans = [nt1,nt2]
   Nobs = sum(ntrans)
   nplanet = 2
+  nparam=10
   println("Initial chi-square: ",chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt,jmax,true))
   param1 = init_param .+ 100.0
   niter = 0
@@ -67,12 +68,17 @@ function fit_planet2(filename::String, jmax::Int,tref::Real,tol::Real,obs::Strin
     niter += 1
   end
   println("Finished 2-planet fit: ",init_param," ",niter)
-  ttmodel = ttv_wrapper(tt0,nplanet,ntrans,init_param,jmax,true)
-  lprob_best= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
-  chi2=chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt,jmax,true)
-  println("New 2-planet chi-square: ",chi2) 
-  @save fitfile chi2 init_param lprob_best ntrans nplanet tt0 tt ttmodel sigtt
-  return 
+   fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,true),tt0,tt,weight,init_param)
+  cov=estimate_covar(fit) ;  best_p2 = fit.param ##### is this the global p2 fit???
+  err=[sqrt(cov[i,j]) for i=1:nparam, j=1:nparam if i==j ]
+  ttmodel = ttv_wrapper(tt0,nplanet,ntrans,best_p2,jmax,true)
+  lprob_best_p2= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
+  # println("Finished 2-planet fit") 
+  chi2=chisquare(tt0,nplanet,ntrans,best_p2,tt,sigtt,jmax,true)
+  println("New 2-planet chi-square: ",chi2)
+  println("Maximum: ",lprob_best_p2," Param: ",best_p2)
+  @save fitfile best_p2 lprob_best_p2 ntrans nplanet tt0 tt ttmodel sigtt
+  return best_p2,lprob_best_p2
 end
 
 """
