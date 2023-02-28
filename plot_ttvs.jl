@@ -3,6 +3,7 @@ rc("font",family="sans-serif")
 rc("lines",linewidth=2)
 include("decompose_ttvs.jl")
 include("histogram.jl")
+include("misc.jl")
 # Plot residuals to best fit TTV models for different configurations
 function plot_res(sigma::Real,nyear::Real,options,include_moon::Bool=false)
   obs=options[1]; fit_type_nplanet=options[2]; bestfit=options[3]
@@ -45,14 +46,13 @@ function plot_res(sigma::Real,nyear::Real,options,include_moon::Bool=false)
     subplots_adjust(hspace=0.25,wspace=0.05)
   # subplots_adjust(hspace=0.05,wspace=0.05)
     # title("Test")
-  # title="TTVFaster Models"
-  # suptitle(string(title," [",nyear," yr span], ",L"$\sigma_{obs}=$",sigma," sec "))
+  title(string("TTVFaster Models [",nyear," yr span]"))
   ax1=subplot(221)
   ax1.errorbar(ttsim1,ttv1,sigtt1,fmt=".",color="black",mec="black",mfc="white")#,label="Venus")
   ax1.plot(ttsim1,p2_ttvs[1,2,1:n1],label=L"$\mathcal{H}_{PP}$")
   ax1.plot(ttsim1,p3_ttvs[1,3,1:n1]+p3_ttvs[1,2,1:n1],label=L"$\mathcal{H}_{PPP}$")
-  ax1.text(-1,6.5,"Venus",fontweight="bold",fontsize="medium")
-  ylim(-8,8)
+  ax1.text(0,5,"Venus",fontweight="bold",fontsize="medium")
+  ylim(-6.5,6.5)
   xlabel("Time [yrs]")
   ylabel(L"$O - C$ [mins]")
   minorticks_on()
@@ -61,7 +61,8 @@ function plot_res(sigma::Real,nyear::Real,options,include_moon::Bool=false)
   ax2.axhline(y=0, color="grey",linewidth=1.0,linestyle="--")
   ax2.plot(ttsim1,ttv1-(p2_ttvs[1,2,1:n1]),label=L"$\mathcal{H}_{PP}$")
   ax2.plot(ttsim1,ttv1-(p3_ttvs[1,3,1:n1]+p3_ttvs[1,2,1:n1]),label=L"$\mathcal{H}_{PPP}$")
-  ylim(-8,8)
+  ax2.text(maximum(ttsim1)-9,-4,string(L"$\sigma_{obs}=$",sigma/60," min "),fontsize="medium")
+  ylim(-6.5,6.5)
   xlabel("Time [yrs]")
   ylabel("Residuals [mins]")
   minorticks_on()
@@ -72,8 +73,8 @@ function plot_res(sigma::Real,nyear::Real,options,include_moon::Bool=false)
   ax3.errorbar(ttsim2,ttv2,sigtt2,fmt=".",color="black",mec="black",mfc="white")#,label="Earth")
   ax3.plot(ttsim2,p2_ttvs[2,1,1:n2],label=L"$\mathcal{H}_{PP}$")
   ax3.plot(ttsim2,p3_ttvs[2,3,1:n2]+p3_ttvs[2,1,1:n2],label=L"$\mathcal{H}_{PPP}$")
-  ax3.text(-1,6.5,label,fontweight="bold",fontsize="medium")
-  ylim(-8,8)
+  ax3.text(0,-6,label,fontweight="bold",fontsize="medium")
+  ylim(-6.5,6.5)
   ylabel(L"$O - C$ [mins]")
   xlabel("Time [yrs]")
   minorticks_on()
@@ -82,7 +83,8 @@ function plot_res(sigma::Real,nyear::Real,options,include_moon::Bool=false)
   ax4.axhline(y=0, color="grey",linewidth=1.0,linestyle="--")
   ax4.plot(ttsim2,ttv2-(p2_ttvs[2,1,1:n2]),label=L"$\mathcal{H}_{PP}$")
   ax4.plot(ttsim2,ttv2-(p3_ttvs[2,3,1:n2]+p3_ttvs[2,1,1:n2]),label=L"$\mathcal{H}_{PPP}$")
-  ylim(-8,8)
+  ax4.text(maximum(ttsim2)-9,-5,string(L"$\sigma_{obs}=$",sigma/60," min "),fontsize="medium")
+  ylim(-6.5,6.5)
   ylabel("Residuals [mins]")
   xlabel("Time [yrs]")
   minorticks_on()
@@ -91,15 +93,17 @@ function plot_res(sigma::Real,nyear::Real,options,include_moon::Bool=false)
   # ax1.legend(bbox_to_anchor=(0.,1.02,1.,.102),loc="lower left",
   #     ncol=3,mode="expand",borderaxespad=0.0)
 
-  # if nplanet==4
-  #   p4_ttvs=decompose_ttvs(4,ntrans[1:4],f4["best_p4"][1:20]) .* (24 * 60)
-  #   ax1.plot(ttsim1,p4_ttvs[1,4,1:n1]+p4_ttvs[1,3,1:n1]+p4_ttvs[1,2,1:n1],linestyle="-.",label=L"$\mathcal{H}_{PPPP}$")
-  #   ax2.plot(ttsim1,ttv1-(p4_ttvs[1,4,1:n1]+p4_ttvs[1,3,1:n1]+p4_ttvs[1,2,1:n1]),linestyle="-.",label=L"$\mathcal{H}_{PPPP}$")
-  #   ax3.plot(ttsim2,p4_ttvs[2,4,1:n2]+p4_ttvs[2,3,1:n2]+p4_ttvs[2,1,1:n2],linestyle="-.",label=L"$\mathcal{H}_{PPPP}$")
-  #   ax4.plot(ttsim2,ttv2-(p4_ttvs[2,4,1:n2]+p4_ttvs[2,3,1:n2]+p4_ttvs[2,1,1:n2]),linestyle="-.",label=L"$\mathcal{H}_{PPPP}$")
-  #   # ax2.legend(bbox_to_anchor=(0.,1.02,1.,.102),loc="lower left",
-  #   #     ncol=3,mode="expand",borderaxespad=0.0)
-  # end
+  if fit_type_nplanet=="p4"
+    if obs=="fromEMB"
+    p4_ttvs=decompose_ttvs(4,ntrans[1:4],f["best_p4"][1:20]) .* (24 * 60)
+    elseif obs=="fromEV"
+    p4_ttvs=decompose_ttvs(4,ntrans[1:4],f4["best_p4"][1:20]) .* (24 * 60)
+    end
+  ax1.plot(ttsim1,p4_ttvs[1,4,1:n1]+p4_ttvs[1,3,1:n1]+p4_ttvs[1,2,1:n1],linestyle="-.",label=L"$\mathcal{H}_{PPPP}$")
+  ax2.plot(ttsim1,ttv1-(p4_ttvs[1,4,1:n1]+p4_ttvs[1,3,1:n1]+p4_ttvs[1,2,1:n1]),linestyle="-.",label=L"$\mathcal{H}_{PPPP}$")
+  ax3.plot(ttsim2,p4_ttvs[2,4,1:n2]+p4_ttvs[2,3,1:n2]+p4_ttvs[2,1,1:n2],linestyle="-.",label=L"$\mathcal{H}_{PPPP}$")
+  ax4.plot(ttsim2,ttv2-(p4_ttvs[2,4,1:n2]+p4_ttvs[2,3,1:n2]+p4_ttvs[2,1,1:n2]),linestyle="-.",label=L"$\mathcal{H}_{PPPP}$")
+  end
   if include_moon
     #why not loading best_p3 fit results?
   moon3=moon_ttvs(ntrans[1:3],f["best_dp"]) .* (24 * 60)
@@ -124,6 +128,7 @@ end
   tight_layout()
   # savefig("IMAGES/EVresiduals.eps")
   show()
+
 end
 # Plot moon signal from subtracting EMB times from Earth times
 function plot_moon(sigma::Real,nyear::Real,fitmodel)
@@ -358,9 +363,11 @@ function plot_scatter(sigma::Real,nyear::Real,options::Array{String},include_moo
   obs=options[1]; fit_type_nplanet=options[2]; bestfit=options[3]
   if obs=="fromEMB"
     fitfile=string("FITS/fromEMB/",fit_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
+    mcfile=string("MCMC/fromEMB/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
     label="EMB"
   elseif obs=="fromEV"
     fitfile=string("FITS/",fit_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
+    mcfile=string("MCMC/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
     label="Earth"
   #   return  println("FITS file for ",sim," with ",fitmodel," model at ",sigma," secs and ",nyear," yrs doesn't exist!!!!")
   end
@@ -388,12 +395,32 @@ function plot_scatter(sigma::Real,nyear::Real,options::Array{String},include_moo
 
   scatter1=(ttvmodel1.-ttv1)
   scatter2=(ttvmodel2.-ttv2)
-  println(std(scatter1)," ",std(scatter2))
+  println("Venus Peak amplitude of O-C: ", maximum(scatter1))
+  println(label," Peak amplitude of O-C: ", maximum(scatter2))
+  println("Mean: ",mean(scatter1)," ",mean(scatter2))
+  println("Std: ",std(scatter1)," ",std(scatter2))
   # println((tt1.-tt01).* 24*60)
 
+  m=jldopen(String(mcfile),"r")
+  par_mcmc= m["par_mcmc"]
+  iburn=m["iburn"]
+  sigsys=(mean(vec(m["par_mcmc"][:,iburn:end,end]))).* 60*24
+  sigsys_err=(std(vec(m["par_mcmc"][:,iburn:end,end]))).* 60*24
+  sigtot=sqrt(sigsys^2 + sigma^2) 
+  if fit_type_nplanet=="p2"
+  model=L"$\mathcal{H}_{PP}$"
+  elseif fit_type_nplanet=="p3"
+    model=L"$\mathcal{H}_{PPPP}$"
+  elseif fit_type_nplanet=="p4"
+    model=L"$\mathcal{H}_{PPPP}$"
+  elseif fit_type_nplanet=="p3moon"
+    model=L"$\mathcal{H}_{PPsP}$"
+  elseif fit_type_nplanet=="p3moonp4"
+    model=L"$\mathcal{H}_{PPsPP}$"
+  end
   # xbin,xhist,xbin_square,hist_square=histogram(ttvmodel1.-ttv1,50)
     xbin,xhist,xbin_square,hist_square=histogram([scatter1;scatter2],50)
-  plot(xbin_square,hist_square./maximum(hist_square),label=string(fit_type_nplanet))
+  plot(xbin_square,hist_square./maximum(hist_square),label=string(model),alpha=0.75)
   # plot(xbin_square,rand(Normal(0, 0.5), n1))
   legend()
 end

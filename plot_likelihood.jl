@@ -61,7 +61,7 @@ function wide_grid(sigma,nyear,grid_type_nplanet,per_col,true_per,color,pname,ca
 	title="Search from Venus + EMB TTVs"
 	elseif case_num==2
   fitfile=string("grid/",grid_type_nplanet,"_grid",sigma,"s",nyear,"yrs.csv")
-	widefit=string("grid_wide/wide",grid_type_nplanet,"_grid",sigma,"s",nyear,"yrs.csv")
+	widefit=string("grid/wide",grid_type_nplanet,"_grid",sigma,"s",nyear,"yrs.csv")
 	case_label="Case 2"
 	title="Search from Venus + Earth TTVs"
 	end
@@ -73,7 +73,7 @@ function wide_grid(sigma,nyear,grid_type_nplanet,per_col,true_per,color,pname,ca
 	ax1.set_title(string(title),fontsize="x-large")
 	ax1.text(label_xloc,0.86,sim_obs_label,fontsize="small")
 	ax1.axvline(true_per,linestyle="--",color="black")
- 	ax1.plot(wide[:,12]./365.25,xprob(wide[:,end]),color="black")
+ 	ax1.plot(wide[:,per_col]./365.25,xprob(wide[:,end]),color="black")
  	ax2=subplot(212)
 	ax2.axvline(true_per,linestyle="--",color="black")
 	ax2.text(true_per - true_per/100,0.96,pname,fontsize="large")
@@ -114,7 +114,7 @@ end
 # per_col,true_per4,pname=12,1.8808476,"Mars"#,"orange"
 
 #### plot_profile(sigma,nyear,grid_type_nplanet,per_col,true_per,pname,case_num)
-function plot_profile(sigma::Real,nyear::Real,label_xloc::Real,case_num::Int,include_moon=false)
+function plot_profile(sigma::Real,nyear::Real,label_xloc::Real,case_num::Int,nbins=Int,include_moon=false)
 	if case_num==1
 	fitfile3=string("grid/fromEMB/","p4","_grid",sigma,"s",nyear,"yrs.csv")
 	widefit3=string("grid_wide/fromEMB/wide","p4","_grid",sigma,"s",nyear,"yrs.csv")
@@ -127,13 +127,13 @@ function plot_profile(sigma::Real,nyear::Real,label_xloc::Real,case_num::Int,inc
 	elseif case_num==2
   	if include_moon
   		fitfile3=string("grid/","p3moonp4","_grid",sigma,"s",nyear,"yrs.csv")
-			widefit3=string("grid_wide/wide","p3moonp4","_grid",sigma,"s",nyear,"yrs.csv")
+			widefit3=string("grid/wide","p3moonp4","_grid",sigma,"s",nyear,"yrs.csv")
   		mcfile3=string("MCMC/","p3moonp4","_mcmc",sigma,"s",nyear,"yrs.jld2")
   		title="Search from Venus + Earth TTVs"
   	else
-  		fitfile3=string("grid/","p4","_grid",sigma,"s",nyear,"yrs.csv")
-			widefit3=string("grid_wide/wide","p4","_grid",sigma,"s",nyear,"yrs.csv")
-  		mcfile3=string("MCMC/","p4","_mcmc",sigma,"s",nyear,"yrs.jld2")
+  		fitfile3=string("grid/wide","p4","_grid",sigma,"s",nyear,"yrs.csv")
+			widefit3=string("grid/wide","p4","_grid",sigma,"s",nyear,"yrs.csv")
+  		mcfile3=string("MCMC/","widep4","_mcmc",sigma,"s",nyear,"yrs.jld2")
   		title="Search from Venus + Earth TTVs"
   	end
   fitfile4=string("grid/","p3","_grid",sigma,"s",nyear,"yrs.csv")
@@ -160,7 +160,6 @@ function plot_profile(sigma::Real,nyear::Real,label_xloc::Real,case_num::Int,inc
  	true_per3=1.8808476
  	true_per4=11.862615
 	sim_obs_label= string(case_label," [",nyear," yr span]",'\n',L"$\sigma_{obs}=$",sigma," sec")
-
 	fig=figure(figsize=(6,6))
 	# subplots_adjust(hspace=0.2,wspace=0.15)
 	# ax1.title()
@@ -173,35 +172,42 @@ function plot_profile(sigma::Real,nyear::Real,label_xloc::Real,case_num::Int,inc
 	# text(minimum(wide[:,per_col]./365.25),1.05,sim_obs_label,fontsize="medium")
 	ax1.axvspan(1.8,2,color="lightblue",alpha=0.45)
 	ax1.axvspan(11.0,12.5,color="lightblue",alpha=0.45)
- 	plot(wide3[:,12]./365.25,xprob(wide3[:,end]),color="orange")
-	plot(wide4[:,12]./365.25,xprob(wide4[:,end]),color="firebrick")
- 	xlabel("Planet Period [yrs]",fontsize="x-large")
- 	ylabel("Probability",fontsize="x-large")
+ 	ax1.plot(wide3[:,12]./365.25,xprob(wide3[:,end]),color="orange")
+	ax1.plot(wide4[:,12]./365.25,xprob(wide4[:,end]),color="firebrick")
+ 	ax1.set_xlabel("Planet Period [yrs]",fontsize="x-large")
+ 	ax1.set_ylabel("Probability",fontsize="x-large")
  	# ylim(0,1.15)
  	minorticks_on()
 	tick_params(which="both",direction="in")
 
 	## plot Mars zoom-in
-	ax2=fig.add_subplot(223,title=L"$\mathcal{H}_{PPsPP}$")
-	text(1.83,1.1,"a)",fontweight="bold")
+	if include_moon
+	ax2=fig.add_subplot(223,title=L"a) 	$\mathcal{H}_{PPsPP}$")
+	else
+	ax2=fig.add_subplot(223,title=L"a)  $\mathcal{H}_{PPPP}$")
+	end
+	# text(1.83,1.1,"a)",fontweight="bold")
 	axvline(true_per3,linestyle="--",color="black")
 	text(1.89,0.96,"Mars",fontsize="medium")
-	xbin,xhist,xbin_square,hist_square=histogram(par_mcmc3,50)
+	xbin,xhist,xbin_square,hist_square=histogram(par_mcmc3,nbins)
+	# ax2.hist(par_mcmc3,bins=nbins,histtype="step",density=tr,color="orange")
  	plot(fit3[:,12]./365.25,xprob(fit3[:,end]),color="orange",label="Fit")
  	plot(xbin_square,hist_square./maximum(hist_square),color="orange",label="Posterior",alpha=0.75)
  	minorticks_on()
  	# legend()
 	tick_params(which="both",direction="in")
 	# ax2.set_xlim(1.83,1.95)
+		ax2.set_xlim(4.6,4.8)
 	ax2.set_xlabel(L"Per$_4$ [yrs]",fontsize="large")
 	ylabel("Probability",fontsize="x-large")
 
  	## plot Jupiter zoom-in
- 	ax3=fig.add_subplot(224,sharey=ax2,title=L"$\mathcal{H}_{PPP}$")
-	text(11,1.1,"b)",fontweight="bold")
+ 	ax3=fig.add_subplot(224,sharey=ax2,title=L"b)  $\mathcal{H}_{PPP}$")
+	# text(11,1.1,"b)",fontweight="bold")
  	axvline(true_per4,linestyle="--",color="black")
 	text(12,0.96,"Jupiter",fontsize="medium")
-	xbin,xhist,xbin_square,hist_square=histogram(par_mcmc4,50)
+	xbin,xhist,xbin_square,hist_square=histogram(par_mcmc4,nbins)
+	# ax3.hist(par_mcmc4,bins=nbins,histtype="step",density=tr,color="firebrick")
  	plot(fit4[:,12]./365.25,xprob(fit4[:,end]),color="firebrick",label="Fit")
  	plot(xbin_square,hist_square./maximum(hist_square),color="firebrick",label="Posterior",alpha=0.75)
  	minorticks_on()
