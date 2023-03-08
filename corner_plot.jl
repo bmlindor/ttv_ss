@@ -1,7 +1,11 @@
 using JLD2,PyPlot,Statistics,Distributions,LinearAlgebra
 using3D() # Needed to create a 3D subplot
-include("misc.jl")
-rc("font",family="sans-serif") 
+# include("CGS.jl")
+# rc("font",family="sans-serif") 
+calc_deg(value)=value * 180/pi
+calc_evec1(e,omega)=e* cos(omega-77)
+calc_evec2(e,omega)=e* sin(omega-77)
+calc_tmax(a_p,a_s,m_p,m_s,P_p)=(a_s*m_s*P_p) / (2*pi*a_p*(m_s+m_p))
 # Basic corner plot for posterior distributions of 2 parameters
 function corner(x1,x2,nbins)
   fig=figure(figsize=(5,5))
@@ -30,7 +34,7 @@ function corner(x1,x2,nbins)
 
   subplot(223,sharex=ax2,sharey=ax3)
   ax1=gca()
-  ax1.hist2d(x1,x2,bins=nbins,cmin=1)
+  ax1.hist2d(x1,x2,bins=nbins,cmin=1,cmax=100000)
   ax1.axis([minimum(x1),maximum(x1),minimum(x2),maximum(x2)])
   ax1.tick_params(which="major",direction="out",top=true,right=true,length=6)
   ax1.tick_params(which="minor",direction="out",top=true,right=true,length=2)
@@ -223,8 +227,7 @@ end
 function corner(x1,x2,x3,x4,truex1,truex2,truex3,truex4,nbins,lim,label)
   fig=figure(figsize=(9,9))
   subplots_adjust(hspace=0.09,wspace=0.09)
-  subplot(4,4,1)
-  ax1=gca()
+  ax1=subplot(4,4,1)
   ax1.axvline(truex4,linestyle="-",color="black")
   ax1.hist(x4,bins=nbins,histtype="step",density=true,color="black")
   ax1.minorticks_on()
@@ -235,9 +238,8 @@ function corner(x1,x2,x3,x4,truex1,truex2,truex3,truex4,nbins,lim,label)
       left=false,right=false,top=true,bottom=true,
       labelbottom=false,labeltop=false,labelleft=false,labelright=false)
 
-  subplot(4,4,5,sharex=ax1)
-  ax5=gca()
-  ax5.hist2d(x4,x3,bins=nbins,cmin=1)
+  ax5=subplot(4,4,5,sharex=ax1)
+  h1=ax5.hist2d(x4,x3,bins=nbins,cmin=1)
   ylabel(L"$e \sin \varpi $")
   ax5.minorticks_on()
   ax5.tick_params(which="major",direction="out",top=true,right=true,length=5,
@@ -245,8 +247,7 @@ function corner(x1,x2,x3,x4,truex1,truex2,truex3,truex4,nbins,lim,label)
   ax5.tick_params(which="minor",direction="out",top=true,right=true,length=2,
       labelleft=true,labelbottom=false)
 
-  subplot(4,4,6)
-  ax6=gca()
+  ax6=subplot(4,4,6)
   ax6.hist(x3,bins=nbins,histtype="step",density=true,color="black")
   ax6.axvline(truex3,linestyle="-",color="black")
   ax6.minorticks_on()
@@ -257,9 +258,8 @@ function corner(x1,x2,x3,x4,truex1,truex2,truex3,truex4,nbins,lim,label)
       left=false,right=false,top=true,bottom=true,
       labelbottom=false,labeltop=false,labelleft=false,labelright=false)
 
-  subplot(4,4,9,sharex=ax1)
-  ax9=gca()
-  ax9.hist2d(x4,x2,bins=nbins,cmin=1)
+  ax9=subplot(4,4,9,sharex=ax1)
+  h2=ax9.hist2d(x4,x2,bins=nbins,cmin=1)
   ylabel(L"$e \cos \varpi $")
   ax9.minorticks_on()
   ax9.tick_params(which="major",direction="out",top=true,right=true,length=5,
@@ -267,17 +267,15 @@ function corner(x1,x2,x3,x4,truex1,truex2,truex3,truex4,nbins,lim,label)
   ax9.tick_params(which="minor",direction="out",top=true,right=true,length=2,
       labelleft=true,labelbottom=false)
 
-  subplot(4,4,10,sharex=ax6)
-  ax10=gca()
-  ax10.hist2d(x3,x2,bins=nbins,cmin=1)
+  ax10=subplot(4,4,10,sharex=ax6)
+  h3=ax10.hist2d(x3,x2,bins=nbins,cmin=1)
   ax10.minorticks_on()
   ax10.tick_params(which="major",direction="out",top=true,right=true,length=5,
       labelleft=false,labelbottom=false)
   ax10.tick_params(which="minor",direction="out",top=true,right=true,length=2,
       labelleft=false,labelbottom=false)
 
-  subplot(4,4,11)
-  ax11=gca()
+  ax11=subplot(4,4,11)
   ax11.hist(x2,bins=nbins,histtype="step",density=true,color="black")
   ax11.axvline(truex2,linestyle="-",color="black")
   ax11.minorticks_on()
@@ -288,9 +286,8 @@ function corner(x1,x2,x3,x4,truex1,truex2,truex3,truex4,nbins,lim,label)
       left=false,right=false,top=true,bottom=true,
       labelbottom=false,labeltop=false,labelleft=false,labelright=false)    
 
-  subplot(4,4,13,sharex=ax1)
-  ax13=gca()
-  ax13.hist2d(x4,x1,bins=nbins,cmin=1)
+  ax13=subplot(4,4,13,sharex=ax1)
+  h4=ax13.hist2d(x4,x1,bins=nbins,cmin=1)
   # xlim(lim)
   xlabel(label)
   ylabel(L"Mass [$M_{Earth}$]")
@@ -300,9 +297,8 @@ function corner(x1,x2,x3,x4,truex1,truex2,truex3,truex4,nbins,lim,label)
   ax13.tick_params(which="minor",direction="out",top=true,right=true,length=2,
       labelbottom=false,labelleft=true)
 
-  subplot(4,4,14,sharex=ax6)
-  ax14=gca()
-  ax14.hist2d(x3,x1,bins=nbins,cmin=1)
+  ax14=subplot(4,4,14,sharex=ax6)
+  h5=ax14.hist2d(x3,x1,bins=nbins,cmin=1)
   xlabel(L"$e \sin \varpi $")
   ax14.minorticks_on()
   ax14.tick_params(which="major",direction="out",top=true,right=true,length=5,
@@ -310,9 +306,8 @@ function corner(x1,x2,x3,x4,truex1,truex2,truex3,truex4,nbins,lim,label)
   ax14.tick_params(which="minor",direction="out",top=true,right=true,length=2,
       labelleft=false,labelbottom=false)
 
-  subplot(4,4,15,sharex=ax11)
-  ax15=gca()
-  ax15.hist2d(x2,x1,bins=nbins,cmin=1)
+  ax15=subplot(4,4,15,sharex=ax11)
+  h6=ax15.hist2d(x2,x1,bins=nbins,cmin=1)
   xlabel(L"$e \cos \varpi $")
   ax15.minorticks_on()
   ax15.tick_params(which="major",direction="out",top=true,right=true,length=5,
@@ -320,8 +315,7 @@ function corner(x1,x2,x3,x4,truex1,truex2,truex3,truex4,nbins,lim,label)
   ax15.tick_params(which="minor",direction="out",top=true,right=true,length=2,
       labelleft=false,labelbottom=false)
 
-  subplot(4,4,16)
-  ax16=gca()
+  ax16=subplot(4,4,16)
   ax16.hist(x1,bins=nbins,histtype="step",density=true,color="black")
   ax16.axvline(truex1,linestyle="-",color="black")
   xlabel(L"Mass [$M_{Earth}$]")
@@ -333,10 +327,11 @@ function corner(x1,x2,x3,x4,truex1,truex2,truex3,truex4,nbins,lim,label)
       left=false,right=false,top=true,bottom=true,
       labelbottom=false,labeltop=false,labelleft=false,labelright=false)
   tight_layout()
+  return h1,h2,h3,h4,h5,h6
 end
 # Create a corner plot for significant posterior distributions of planet parameters
 function corner_hist(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::Bool=false) 
-  if case_num==1  && isfile(string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
+  if case_num==1  && isfile(string("MCMC/fromEMB/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
     mcfile=string("MCMC/fromEMB/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
   elseif case_num==2 && isfile(string("MCMC/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
     mcfile=string("MCMC/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
@@ -348,7 +343,6 @@ function corner_hist(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
   lprob_mcmc=m["lprob_mcmc"]
   nwalkers=m["nwalkers"]
   nsteps=m["nsteps"]
-  accept=m["accept"]
   iburn=m["iburn"]
   indepsamples=m["indepsamples"]
   # True values based on "PlanetaryBodyData.pdf" (source?)
@@ -404,7 +398,7 @@ function corner_hist(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
   title=string("IMAGES/discussion/case",case_num,grid_type_nplanet,"esin",sigma,"secs",nyear,"yrs.png")
   savefig(title)
   clf()
-  if String(model)=="p4"
+  if grid_type_nplanet=="p4"
     m3=vec(par_mcmc[:,iburn:nsteps,11]).* CGS.MSUN/CGS.MEARTH
     ec3=vec(par_mcmc[:,iburn:nsteps,14])#.*sqrt.(vec(par_mcmc[:,1:nsteps,14]).^2 .+ vec(par_mcmc[:,1:nsteps,15]).^2)
     es3=vec(par_mcmc[:,iburn:nsteps,15])#.*sqrt.(vec(par_mcmc[:,1:nsteps,14]).^2 .+ vec(par_mcmc[:,1:nsteps,15]).^2)
@@ -505,9 +499,9 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
   lim=0.00076,0.00081
   label=L"Per $- 224.7$ [days]"
   title=string("IMAGES/corner/case",case_num,grid_type_nplanet,"Venus-",sigma,"secs",nyear,"yrs.png")
-  corner(m1,ec1,es1,p1,truem1,trueec1,truees1,truep1,nbins,lim,label)
+  # corner(m1,ec1,es1,p1,truem1,trueec1,truees1,truep1,nbins,lim,label)
   # savefig(title)
-  close()
+  # clf()
   offset=365.25
   m2=vec(par_mcmc[:,iburn:nsteps,6]).* CGS.MSUN/CGS.MEARTH
   ec2=vec(par_mcmc[:,iburn:nsteps,9])#.*sqrt.(vec(par_mcmc[:,1:nsteps,9]).^2 .+ vec(par_mcmc[:,1:nsteps,10]).^2)
@@ -520,9 +514,13 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
   lim=0.0064,0.00652
   label=L"Per $- 365.25$ [days]"
   title=string("IMAGES/corner/case",case_num,grid_type_nplanet,"Earth-",sigma,"secs",nyear,"yrs.png")
-  corner(m2,ec2,es2,p2,truem2,trueec2,truees2,truep2,nbins,lim,label)
+  println("Venus= ",minimum(m1)," ",minimum(p1)," ",minimum(ec1)," ",minimum(es1))
+  println("Venus= ",maximum(m1)," ",maximum(p1)," ",maximum(ec1)," ",maximum(es1))
+  println("Earth= ",minimum(m2)," ",minimum(p2)," ",minimum(ec2)," ",minimum(es2))   
+  println("Earth= ",maximum(m2)," ",maximum(p2)," ",maximum(ec2)," ",maximum(es2))
+  # corner(m2,ec2,es2,p2,truem2,trueec2,truees2,truep2,nbins,lim,label)
   # savefig(title)
-  close()
+  # clf()
   if grid_type_nplanet=="p4" || grid_type_nplanet=="p3moonp4" || grid_type_nplanet=="widep4"
     m3=vec(par_mcmc[:,iburn:nsteps,11]).* CGS.MSUN/CGS.MEARTH
     ec3=vec(par_mcmc[:,iburn:nsteps,14])#.*sqrt.(vec(par_mcmc[:,1:nsteps,14]).^2 .+ vec(par_mcmc[:,1:nsteps,15]).^2)
@@ -535,9 +533,11 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
     lim=minimum(p3),maximum(p3)
     label="Per [days]"
     title=string("IMAGES/corner/case",case_num,grid_type_nplanet,"Mars-",sigma,"secs",nyear,"yrs.png")
-    corner(m3,ec3,es3,p3,truem3,trueec3,truees3,truep3,nbins,lim,label)
-    # savefig(title)
-    close()
+    # corner(m3,ec3,es3,p3,truem3,trueec3,truees3,truep3,nbins,lim,label)
+    # # savefig(title)
+    # clf()
+      println("Mars= ",minimum(m3)," ",minimum(p3)," ",minimum(ec3)," ",minimum(es3))
+      println("Mars= ",maximum(m3)," ",maximum(p3)," ",maximum(ec3)," ",maximum(es3))
     m4=vec(par_mcmc[:,iburn:nsteps,16]).* CGS.MSUN/CGS.MEARTH
     ec4=vec(par_mcmc[:,iburn:nsteps,19])#.*sqrt.(vec(par_mcmc[:,1:nsteps,14]).^2 .+ vec(par_mcmc[:,1:nsteps,15]).^2)
     es4=vec(par_mcmc[:,iburn:nsteps,20])#.*sqrt.(vec(par_mcmc[:,1:nsteps,14]).^2 .+ vec(par_mcmc[:,1:nsteps,15]).^2)
@@ -549,9 +549,11 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
     lim=minimum(p4),maximum(p4)
     label="Per [days]"
     title=string("IMAGES/corner/case",case_num,grid_type_nplanet,"Jupiter-",sigma,"secs",nyear,"yrs.png")
-    corner(m4,ec4,es4,p4,truem4,trueec4,truees4,truep4,nbins,lim,label)
+      println("Jupiter= ",minimum(m4)," ",minimum(p4)," ",minimum(ec4)," ",minimum(es4))
+      println("Jupiter= ",maximum(m4)," ",maximum(p4)," ",maximum(ec4)," ",maximum(es4))
+    # corner(m4,ec4,es4,p4,truem4,trueec4,truees4,truep4,nbins,lim,label)
     # savefig(title)
-    # close()
+    # clf()
   else
     m3=vec(par_mcmc[:,iburn:nsteps,11]).* CGS.MSUN/CGS.MEARTH
     ec3=vec(par_mcmc[:,iburn:nsteps,14])#.*sqrt.(vec(par_mcmc[:,1:nsteps,14]).^2 .+ vec(par_mcmc[:,1:nsteps,15]).^2)
@@ -564,9 +566,11 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
     lim=minimum(p3),maximum(p3)
     label="Per [days]"
     title=string("IMAGES/corner/case",case_num,grid_type_nplanet,"Jupiter-",sigma,"secs",nyear,"yrs.png")
+      println("Jupiter= ",minimum(m3)," ",minimum(p3)," ",minimum(ec3)," ",minimum(es3))
+      println("Jupiter= ",maximum(m3)," ",maximum(p3)," ",maximum(ec3)," ",maximum(es3))
     corner(m3,ec3,es3,p3,truem3,trueec3,truees3,truep3,nbins,lim,label)
     # savefig(title)
-    # close()
+    # clf()
   end
   # if include_moon
   #   tmax=sqrt.(vec(par_mcmc[:,iburn:nsteps,16]).^2 .+ vec(par_mcmc[:,iburn:nsteps,17]).^2)
@@ -579,7 +583,8 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
   #   title=string("IMAGES/corner/case",case_num,grid_type_nplanet,"Moon2-",sigma,"secs",nyear,"yrs.png")
   #   # corner(tmax,x3,truetmax,truex3,nbins)
   #   corner(x1,x2,x3,nbins)
-  #   # savefig(title)
-  #   # close()
+  #   savefig(title)
+  #   clf()
   # end
+  # close()
 end

@@ -18,10 +18,7 @@ function fit_BIC(tt0,nplanet,ntrans,params,tt,sigtt,jmax,EM)
 end
 G=CGS.GRAV /1e3 #in kms units
 AU=CGS.AU /1e2 #in kms units
-calc_deg(value)=value * 180/pi
-calc_evec1(e,omega)=e* cos(omega-77)
-calc_evec2(e,omega)=e* sin(omega-77)
-calc_tmax(a_p,a_s,m_p,m_s,P_p)=(a_s*m_s*P_p) / (2*pi*a_p*(m_s+m_p))
+
 Kepler_law(Per,mp,mstar)= ((G*(mstar + mp)* (Per*24*3600)^2) /(4*pi^2))^(1/3) 
 Hill_radius(Per,mp,ecc,mstar) = (Kepler_law(Per,mp,mstar) * (1-ecc) * (mp/(3 * mstar))^(1/3)) / AU
 #Hill_radius((1733*24*3600),(27*5.9742e24),0.4,1.99e30)

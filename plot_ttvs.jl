@@ -404,7 +404,7 @@ function plot_scatter(sigma::Real,nyear::Real,options::Array{String},include_moo
   m=jldopen(String(mcfile),"r")
   par_mcmc= m["par_mcmc"]
   iburn=m["iburn"]
-  sigsys=(mean(vec(m["par_mcmc"][:,iburn:end,end]))).* 60*24
+  sigsys=(median(vec(m["par_mcmc"][:,iburn:end,end]))).* 60*24
   sigsys_err=(std(vec(m["par_mcmc"][:,iburn:end,end]))).* 60*24
   sigtot=sqrt(sigsys^2 + sigma^2) 
   if fit_type_nplanet=="p2"
@@ -421,6 +421,7 @@ function plot_scatter(sigma::Real,nyear::Real,options::Array{String},include_moo
   # xbin,xhist,xbin_square,hist_square=histogram(ttvmodel1.-ttv1,50)
     xbin,xhist,xbin_square,hist_square=histogram([scatter1;scatter2],50)
   plot(xbin_square,hist_square./maximum(hist_square),label=string(model),alpha=0.75)
+  # plt.hist(sigtot,bins=50,histtype="step")
   # plot(xbin_square,rand(Normal(0, 0.5), n1))
   legend()
 end

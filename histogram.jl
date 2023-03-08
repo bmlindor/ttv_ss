@@ -5,7 +5,7 @@ function histogram(param,nbin)
   hist_square = [0.0]
   pbin = zeros(nbin)
   hist = zeros(nbin)
-  psort = sort(param)
+  psort = sort(param,dims=1)
   i1 = 1; np = size(param)[1]
   #println(p1," ",psort[i1]," ",p2," ",psort[np])
   for i=1:nbin
