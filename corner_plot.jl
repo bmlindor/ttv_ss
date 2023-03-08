@@ -484,6 +484,7 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
   lprob_mcmc=m["lprob_mcmc"]
   nwalkers=m["nwalkers"]
   nsteps=m["nsteps"]
+
   iburn=m["iburn"]
   indepsamples=m["indepsamples"]
   # True values based on "PlanetaryBodyData.pdf" (source?)
