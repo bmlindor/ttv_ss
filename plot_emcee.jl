@@ -114,9 +114,10 @@ function plot_trace(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num,i
       end
       subplot(223)
       for j=1:nwalkers
+        if j=/= 56
       plot(vec(par_mcmc[j,iburn:nsteps,12]),lprob_mcmc[j,iburn:nsteps])
-      xlabel("Period [days]")
       end
+      xlabel("Period [days]")
       subplot(224)
       for j=1:nwalkers
       ecc=vec(sqrt.(par_mcmc[j,iburn:nsteps,14].^2 .+ par_mcmc[j,iburn:nsteps,15].^2))
