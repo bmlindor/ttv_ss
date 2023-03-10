@@ -7,4 +7,5 @@
 #julia full_run.jl Hpp mcmc fromEMB 10000 > OUTPUTS/mcmc_p2_EMB.out &
 #julia full_run.jl Hppp mcmc fromEMB 20000 > OUTPUTS/mcmc_p3_EMB.out &
 # julia full_run.jl Hpppp mcmc fromEMB 50000 > OUTPUTS/mcmc_p4_EMB.out &
-julia full_run.jl Hppmpp grid fromEV 300 > OUTPUTS/fit_p4m_EV.out &
+#julia full_run.jl Hpppp wide fromEV 500 22 &
+#julia full_run.jl Hpp grid fromEV > OUTPUTS/fit_p2_60_EV.out &
