@@ -277,7 +277,7 @@ function mc_vals(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num=Int,
   if include_moon
     EM=false
   end
-  println("Added moon to model? ",include_moon)
+  # println("Added moon to model? ",include_moon)
   jldmc=jldopen(String(mcfile),"r")
   jldfit=jldopen(String(fitfile),"r")
   nwalkers,nsteps=jldmc["nwalkers"],jldmc["nsteps"]
@@ -292,7 +292,7 @@ function mc_vals(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num=Int,
   weight=ones(nt1+nt2)./ sigtt.^2 
   nparam=length(par_mcmc[1,end,:])
   # println("From fit: ",param)
-  println("           Posterior Parameters from ",mcfile)
+  # println("           Posterior Parameters from ",mcfile)
   # println(" lprob: ",lprob)
   avg=zeros(nparam)
   minus1sig=zeros(nparam)
@@ -309,16 +309,17 @@ function mc_vals(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num=Int,
     end
     return chisq
   end
-  println("median posteriors: ",avg)
+  # println("median posteriors: ",avg)
   mean_posteriors=[mean(par_mcmc[:,iburn:nsteps,i]) for i=1:nparam]
-  println("mean posteriors: ",mean_posteriors)
+  # println("mean posteriors: ",mean_posteriors)
   chi2_avg = chi_mcmc(tt0,nplanet,ntrans,avg,tt,sigtt,jmax,EM)
   chi2 = chi_mcmc(tt0,nplanet,ntrans,mean_posteriors,tt,sigtt,jmax,EM)
   N=length(tt0) ; k=nparam
-  println(" χ^2 from median: ",chi2_avg," from mean: ",chi2)
   mc_BIC(chi2,k,N)=chi2 + k*log(N)
-  println("BIC from median: ",mc_BIC(chi2_avg,k,N))
-  println("BIC from mean: ",mc_BIC(chi2,k,N))
+  println(" χ^2 from median: ",chi2_avg,"BIC from median: ",mc_BIC(chi2_avg,k,N))
+  chi=round(chi2_avg,sigdigits=4)
+  model_BIC= round(mc_BIC(chi2_avg,k,N),sigdigits=4)
+  # println(" χ^2 from median: ",chi2_avg,"BIC from mean: ",mc_BIC(chi2,k,N))
 
     # Percentage of walkers where diff. between median and quantile value is >100
     # bad_walk=0
@@ -352,15 +353,15 @@ function mc_vals(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num=Int,
   #   tmax_errs=calc_quad_errs(median(jldmc["par_mcmc"][:,iburn:end,19]),std(jldmc["par_mcmc"][:,iburn:end,19]),median(jldmc["par_mcmc"][:,iburn:end,20]),std(jldmc["par_mcmc"][:,iburn:end,20]))
   # end
 
-  sigsys=(median(vec(par_mcmc[:,iburn:end,end]))).* 3600*24
+  sigsys=round((median(vec(par_mcmc[:,iburn:end,end]))).* 3600*24,sigdigits=3)
   sigsys_err=(std(vec(par_mcmc[:,iburn:end,end]))).* 3600*24
-  sigtot=sqrt(sigsys^2 + sigma^2) 
+  sigtot=round(sqrt(sigsys^2 + sigma^2),sigdigits=4)
 
-  println("Retrieved values.")
-  println("M_p[M⊕]=",masses," +/- ",mass_errs)
-  println("Per [d]=",periods," +/- ",per_errs)
-  # println("eccen. =",ecc," +/- ",ecc_errs)
-  println("σsys[s]=",sigsys," +/- ",sigsys_err)
-  println("σtot[s]=",sigtot)
-    # return masses, mass_errs, periods, per_errs, sigtot
+  # println("Retrieved values.")
+  # println("M_p[M⊕]=",masses," +/- ",mass_errs)
+  # println("Per [d]=",periods," +/- ",per_errs)
+  # # println("eccen. =",ecc," +/- ",ecc_errs)
+  # println("σsys[s]=",sigsys," +/- ",sigsys_err)
+  # println("σtot[s]=",sigtot)
+  return model_BIC,sigsys,sigtot,chi
 end

@@ -2,6 +2,19 @@ using PyPlot,PyCall,Statistics,JLD2,DelimitedFiles,DataFrames
 rc("font",family="sans-serif")
 rc("lines",linewidth=2)
 include("histogram.jl")
+  if grid_type_nplanet=="p3"
+    model=L"$\mathcal{H}_{PPPP}$"
+    per_col,true_per,pname,color=12,11.862615,"Jupiter","firebrick"; label_xloc=5
+  elseif grid_type_nplanet=="p4"
+    model=L"$\mathcal{H}_{PPPP}$"
+    per_col,true_per,pname,color=12,1.8808476,"Mars","orange"; label_xloc=2.75
+  elseif grid_type_nplanet=="p3moon"
+    model=L"$\mathcal{H}_{PPsP}$"
+    per_col,true_per,pname,color=12,11.862615,"Jupiter","firebrick"; label_xloc=5
+  elseif grid_type_nplanet=="p3moonp4"
+    model=L"$\mathcal{H}_{PPsPP}$"
+    per_col,true_per,pname,color=12,1.8808476,"Mars","orange"; label_xloc=2.75
+  end
 xprob(lprob)=exp.(lprob .- maximum(lprob))
  	# true_per3=1.8808476
  	# true_per4=11.862615
@@ -59,19 +72,6 @@ function wide_grid(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::Bo
 	case_label="Case 2"
 	title="Search from Venus + Earth TTVs"
 	end
-  if grid_type_nplanet=="p3"
-    model=L"$\mathcal{H}_{PPPP}$"
-    per_col,true_per,pname,color=12,11.862615,"Jupiter","firebrick"; label_xloc=5
-  elseif grid_type_nplanet=="p4"
-    model=L"$\mathcal{H}_{PPPP}$"
-    per_col,true_per,pname,color=12,1.8808476,"Mars","orange"; label_xloc=2.75
-  elseif grid_type_nplanet=="p3moon"
-    model=L"$\mathcal{H}_{PPsP}$"
-    per_col,true_per,pname,color=12,11.862615,"Jupiter","firebrick"; label_xloc=5
-  elseif grid_type_nplanet=="p3moonp4"
-    model=L"$\mathcal{H}_{PPsPP}$"
-    per_col,true_per,pname,color=12,1.8808476,"Mars","orange"; label_xloc=2.75
-  end
 	fit,header=readdlm(fitfile,',',header=true)
 	wide,header=readdlm(widefit,',',header=true)
 	sim_obs_label= string(case_label," [",nyear," yr span]",'\n',L"$\sigma_{obs}=$",sigma," sec")
