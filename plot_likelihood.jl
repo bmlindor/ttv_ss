@@ -2,19 +2,7 @@ using PyPlot,PyCall,Statistics,JLD2,DelimitedFiles,DataFrames
 rc("font",family="sans-serif")
 rc("lines",linewidth=2)
 include("histogram.jl")
-  if grid_type_nplanet=="p3"
-    model=L"$\mathcal{H}_{PPPP}$"
-    per_col,true_per,pname,color=12,11.862615,"Jupiter","firebrick"; label_xloc=5
-  elseif grid_type_nplanet=="p4"
-    model=L"$\mathcal{H}_{PPPP}$"
-    per_col,true_per,pname,color=12,1.8808476,"Mars","orange"; label_xloc=2.75
-  elseif grid_type_nplanet=="p3moon"
-    model=L"$\mathcal{H}_{PPsP}$"
-    per_col,true_per,pname,color=12,11.862615,"Jupiter","firebrick"; label_xloc=5
-  elseif grid_type_nplanet=="p3moonp4"
-    model=L"$\mathcal{H}_{PPsPP}$"
-    per_col,true_per,pname,color=12,1.8808476,"Mars","orange"; label_xloc=2.75
-  end
+
 xprob(lprob)=exp.(lprob .- maximum(lprob))
  	# true_per3=1.8808476
  	# true_per4=11.862615
@@ -28,13 +16,26 @@ function per_grid(sigma,nyear,grid_type_nplanet,per_col,true_per,pname,case_num,
 	file=string("grid/",grid_type_nplanet,"_grid",sigma,"s",nyear,"yrs.csv")
 	case_label="Case 2"
 	end
+		  if grid_type_nplanet=="p3"
+    model=L"$\mathcal{H}_{PPP}$"
+    # per_col,true_per,pname,color=12,11.862615,"Jupiter","firebrick"; label_xloc=5
+  elseif grid_type_nplanet=="p4"
+    model=L"$\mathcal{H}_{PPPP}$"
+    # per_col,true_per,pname,color=12,1.8808476,"Mars","orange"; label_xloc=2.75
+  elseif grid_type_nplanet=="p3moon"
+    model=L"$\mathcal{H}_{PPsP}$"
+    # per_col,true_per,pname,color=12,11.862615,"Jupiter","firebrick"; label_xloc=5
+  elseif grid_type_nplanet=="p3moonp4"
+    model=L"$\mathcal{H}_{PPsPP}$"
+    # per_col,true_per,pname,color=12,1.8808476,"Mars","orange"; label_xloc=2.75
+  end
 	fit,header=readdlm(file,',',header=true)
 	sim_obs_label= string(case_label," [",nyear," yr span]")
 	# save_as =string("IMAGES/wide_grids/case",case_num,"_",grid_type_nplanet,pname,sigma,"secs",nyear,"yrs.png")
 	axvline(true_per,linestyle="--",color="black")
 	text(true_per + true_per/100,1.01,pname,fontsize="large")
 	#text(label_xloc,1.05,sim_obs_label,fontsize="medium")
- 	plot(fit[:,per_col]./365.25,xprob(fit[:,end]),label=string("[",nyear," yr span]",L"$\sigma_{obs}=$",sigma," sec"))
+ 	plot(fit[:,per_col]./365.25,xprob(fit[:,end]),label=string(model))#label=string("[",nyear," yr span]",L"$\sigma_{obs}=$",sigma," sec"))
  	xlabel("Planet Period Search Grid",fontsize="x-large")
  	ylabel("Probability",fontsize="x-large")
  	legend()
@@ -63,7 +64,7 @@ end
 function wide_grid(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::Bool=false)
 	if case_num==1
 	fitfile=string("grid/fromEMB/",grid_type_nplanet,"_grid",sigma,"s",nyear,"yrs.csv")
-	widefit=string("grid_wide/fromEMB/wide",grid_type_nplanet,"_grid",sigma,"s",nyear,"yrs.csv")
+	widefit=string("grid/fromEMB/wide",grid_type_nplanet,"_grid",sigma,"s",nyear,"yrs.csv")
 	case_label="Case 1"
 	title="Search from Venus + EMB TTVs"
 	elseif case_num==2
@@ -72,19 +73,37 @@ function wide_grid(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::Bo
 	case_label="Case 2"
 	title="Search from Venus + Earth TTVs"
 	end
+		  if grid_type_nplanet=="p3"
+    model=L"$\mathcal{H}_{PPP}$"
+    per_col,true_per,pname,color=12,11.862615,"Jupiter","firebrick"; label_xloc=5
+    text_loc=11.9
+  elseif grid_type_nplanet=="p4"
+    model=L"$\mathcal{H}_{PPPP}$"
+     per_col,true_per,pname,color=12,1.8808476,"Mars","orange"; label_xloc=2.75
+     text_loc=1.85
+  elseif grid_type_nplanet=="p3moon"
+    model=L"$\mathcal{H}_{PPsP}$"
+     per_col,true_per,pname,color=12,11.862615,"Jupiter","firebrick"; label_xloc=5
+     text_loc=11.9
+  elseif grid_type_nplanet=="p3moonp4"
+    model=L"$\mathcal{H}_{PPsPP}$"
+     per_col,true_per,pname,color=12,1.8808476,"Mars","orange"; label_xloc=2.75
+     text_loc=true_per - true_per/100
+  end
 	fit,header=readdlm(fitfile,',',header=true)
 	wide,header=readdlm(widefit,',',header=true)
 	sim_obs_label= string(case_label," [",nyear," yr span]",'\n',L"$\sigma_{obs}=$",sigma," sec")
-	fig=figure(figsize=(6,6),dpi=150)
+	fig=figure(figsize=(5,5),dpi=150)
 	ax1=subplot(211)
 	ax1.set_title(string(title),fontsize="x-large")
 	ax1.text(label_xloc,0.86,sim_obs_label,fontsize="small")
 	ax1.axvline(true_per,linestyle="--",color="black")
  	ax1.plot(wide[:,per_col]./365.25,xprob(wide[:,end]),color="black")
+	ax1.axvspan(minimum(fit[:,per_col]./365.25),maximum(fit[:,per_col]./365.25),color="lightblue",alpha=0.45)
  	# ax1.plot(wide[:,per_col]./365.25,xprob(wide[:,end]),".")
  	ax2=subplot(212)
 	ax2.axvline(true_per,linestyle="--",color="black")
-	ax2.text(true_per - true_per/100,0.96,pname,fontsize="large")
+	ax2.text(text_loc,0.96,pname,fontsize="large")
  	ax2.plot(fit[:,per_col]./365.25,xprob(fit[:,end]),color,label=string(model))
 	# plot(fit[:,per_col]./365.25,xprob(fit[:,end]),".",label="pts")
 	ax2.legend()
@@ -118,34 +137,46 @@ function plot_grid(sigma,nyear,grid_type_nplanet,per_col,true_per,pname,case_num
 end
 
 #### plot_profile(sigma,nyear,grid_type_nplanet,per_col,true_per,pname,case_num)
-function plot_profile(sigma::Real,nyear::Real,label_xloc::Real,case_num::Int,nbins=Int,include_moon=false)
-	if case_num==1
+function plot_profile(sigma::Real,nyear::Real,label_xloc::Real,case_num::Int,nbins=Int,include_moon=false,p3m=false)
+if case_num==1
 	fitfile3=string("grid/fromEMB/","p4","_grid",sigma,"s",nyear,"yrs.csv")
 	widefit3=string("grid/fromEMB/wide","p4","_grid",sigma,"s",nyear,"yrs.csv")
-  mcfile3=string("MCMC/fromEMB/","p4","_mcmc",sigma,"s",nyear,"yrs.jld2")
-  fitfile4=string("grid/fromEMB/","p3","_grid",sigma,"s",nyear,"yrs.csv")
+  	mcfile3=string("MCMC/fromEMB/","p4","_mcmc",sigma,"s",nyear,"yrs.jld2")
+	fitfile4=string("grid/fromEMB/","p3","_grid",sigma,"s",nyear,"yrs.csv")
 	widefit4=string("grid/fromEMB/wide","p3","_grid",sigma,"s",nyear,"yrs.csv")
-  mcfile4=string("MCMC/fromEMB/","p3","_mcmc",sigma,"s",nyear,"yrs.jld2")
+  	mcfile4=string("MCMC/fromEMB/","p3","_mcmc",sigma,"s",nyear,"yrs.jld2")
 	case_label="Case 1"
 	title="Search from Venus + EMB TTVs"
-	elseif case_num==2
+	label1=L"a)    $\mathcal{H}_{PPPP}$"
+elseif case_num==2
+case_label="Case 2"
   	if include_moon
   		fitfile3=string("grid/","p3moonp4","_grid",sigma,"s",nyear,"yrs.csv")
 			widefit3=string("grid/wide","p3moonp4","_grid",sigma,"s",nyear,"yrs.csv")
   		mcfile3=string("MCMC/","p3moonp4","_mcmc",sigma,"s",nyear,"yrs.jld2")
   		title="Search from Venus + Earth TTVs"
+		 	label1=L"a)    $\mathcal{H}_{PPsPP}$"
   	else
-  		fitfile3=string("grid/wide","p4","_grid",sigma,"s",nyear,"yrs.csv")
+  		fitfile3=string("grid/","p4","_grid",sigma,"s",nyear,"yrs.csv")
 			widefit3=string("grid/wide","p4","_grid",sigma,"s",nyear,"yrs.csv")
-  		mcfile3=string("MCMC/","widep4","_mcmc",sigma,"s",nyear,"yrs.jld2")
+  		mcfile3=string("MCMC/","p4","_mcmc",sigma,"s",nyear,"yrs.jld2")
   		title="Search from Venus + Earth TTVs"
+  		label1=L"a)    $\mathcal{H}_{PPPP}$"
   	end
+if p3m
+    fitfile4=string("grid/","p3moon","_grid",sigma,"s",nyear,"yrs.csv")
+    widefit4=string("grid/wide","p3","_grid",sigma,"s",nyear,"yrs.csv")
+    mcfile4=string("MCMC/","p3moon","_mcmc",sigma,"s",nyear,"yrs.jld2")
+    println("Hppmp fit on right.")
+else
+ 	
     fitfile4=string("grid/","p3","_grid",sigma,"s",nyear,"yrs.csv")
     widefit4=string("grid/wide","p3","_grid",sigma,"s",nyear,"yrs.csv")
     mcfile4=string("MCMC/","p3","_mcmc",sigma,"s",nyear,"yrs.jld2")
-		case_label="Case 2"
-	end
- 	mc3=jldopen(String(mcfile3),"r")
+end
+
+end
+	mc3=jldopen(String(mcfile3),"r")
  	mc4=jldopen(String(mcfile4),"r")
 	fit3,header=readdlm(fitfile3,',',header=true)
 	wide3,header=readdlm(widefit3,',',header=true)
@@ -156,7 +187,7 @@ function plot_profile(sigma::Real,nyear::Real,label_xloc::Real,case_num::Int,nbi
 	par_mcmc4=vec(mc4["par_mcmc"][:,mc4["iburn"]:end,12])./365.25
 	sigsys3=(mean(vec(mc3["par_mcmc"][:,mc3["iburn"]:end,end]))).* 3600*24
 	sigsys_err3=(std(vec(mc3["par_mcmc"][:,mc3["iburn"]:end,end]))).* 3600*24
-    sigtot3=sqrt(sigsys3^2 + sigma^2) 
+    	sigtot3=sqrt(sigsys3^2 + sigma^2) 
 	sigsys4=(mean(vec(mc4["par_mcmc"][:,mc4["iburn"]:end,end]))).* 3600*24
 	sigsys_err4=(std(vec(mc4["par_mcmc"][:,mc4["iburn"]:end,end]))).* 3600*24
 	sigtot4=sqrt(sigsys4^2 + sigma^2) 
@@ -164,14 +195,14 @@ function plot_profile(sigma::Real,nyear::Real,label_xloc::Real,case_num::Int,nbi
  	true_per3=1.8808476
  	true_per4=11.862615
 	sim_obs_label= string(case_label," [",nyear," yr span]",'\n',L"$\sigma_{obs}=$",sigma," sec")
-	fig=figure(figsize=(6,6),dpi=150)
+	fig=figure(figsize=(5,5),dpi=150)
 	# subplots_adjust(hspace=0.2,wspace=0.15)
 	# ax1.title()
 	ax1=subplot(211)
 	ax1.set_title(string(title),fontsize="x-large")
 	axvline(true_per3,linestyle="--",color="black")
  	axvline(true_per4,linestyle="--",color="black")
-	text(label_xloc,0.86,sim_obs_label,fontsize="medium")
+	text(label_xloc,0.8,sim_obs_label,fontsize="medium")
 	# text(true_per + true_per/100,1.01,pname,fontsize="large")
 	# text(minimum(wide[:,per_col]./365.25),1.05,sim_obs_label,fontsize="medium")
 	ax1.axvspan(1.8,2,color="lightblue",alpha=0.45)
@@ -186,10 +217,10 @@ function plot_profile(sigma::Real,nyear::Real,label_xloc::Real,case_num::Int,nbi
 
 	## plot Mars zoom-in
 	if include_moon
-	ax2=fig.add_subplot(223,title=L"a) 	$\mathcal{H}_{PPsPP}$")
+	ax2=fig.add_subplot(223,title=string(label1))
 	title=string("IMAGES/likelihood/wide_case",case_num,"_",sigma,"s",nyear,".png")
 	else
-	ax2=fig.add_subplot(223,title=L"a)  $\mathcal{H}_{PPPP}$")
+	ax2=fig.add_subplot(223,title=L"a)    $\mathcal{H}_{PPPP}$")
 	title=string("IMAGES/likelihood/wide_case",case_num,"_",sigma,"s",nyear,"_p4.png")
 	end
 	# text(1.83,1.1,"a)",fontweight="bold")
@@ -202,17 +233,17 @@ function plot_profile(sigma::Real,nyear::Real,label_xloc::Real,case_num::Int,nbi
  	minorticks_on()
  	# legend()
 	tick_params(which="both",direction="in")
-	# ax2.set_xlim(1.83,1.95)
-		ax2.set_xlim(4.6,4.8)
+	ax2.set_xlim(1.83,1.95)
+		# ax2.set_xlim(quantile(par_mcmc3,0.1587))
 	ax2.set_xlabel(L"Per$_4$ [yrs]",fontsize="large")
 	ylabel("Probability",fontsize="x-large")
 
  	## plot Jupiter zoom-in
- 	ax3=fig.add_subplot(224,sharey=ax2,title=L"b)  $\mathcal{H}_{PPP}$")
+ 	ax3=fig.add_subplot(224,sharey=ax2,title=L"b)    $\mathcal{H}_{PPP}$")
 	# text(11,1.1,"b)",fontweight="bold")
  	axvline(true_per4,linestyle="--",color="black")
 	text(12,0.96,"Jupiter",fontsize="medium")
-	xbin,xhist,xbin_square,hist_square=histogram(par_mcmc4,nbins)
+	xbin,xhist,xbin_square,hist_square=histogram(par_mcmc4,50)
 	# ax3.hist(par_mcmc4,bins=nbins,histtype="step",density=tr,color="firebrick")
  	plot(fit4[:,12]./365.25,xprob(fit4[:,end]),color="firebrick",label="Fit")
  	plot(xbin_square,hist_square./maximum(hist_square),color="firebrick",label="Posterior",alpha=0.75)
@@ -223,31 +254,31 @@ function plot_profile(sigma::Real,nyear::Real,label_xloc::Real,case_num::Int,nbi
 	ax3.set_xlabel(L"Per$_3$ [yrs]",fontsize="large")
 	tight_layout()
  	savefig(title)
- 	if include_moon
-		phi_col,true_phi,color=18,2.31586,"purple"; label_xloc=2.75
-		lim=f["dpin"],f["dpout"]
-		fig=plt.figure()
-	  ax3=subplot(211)
-		ax3.axvline(true_phi,linestyle="--",color="black")
-		ax3.text(2.4,1,"Moon",fontsize="large")
-		ax3.plot(wide[:,phi_col]./365.25,xprob(wide[:,end]),color="black")
-		# tight_layout()
-		# ax3.plot(grid_wide,lprob_wide,color="red") 
-		xlabel("Satellite Phase Offset Search Grid [radians]")
-		ylabel("Probability")
-		ax3.minorticks_on()
-		ax3.tick_params(which="both",direction="in")
-		# Inset zoom of finer δϕ grid 
-		ax4=fig.add_axes([0.68,0.4,0.2,0.4])
-	  ax4.plot(fit[:,phi_col]./365.25,xprob(fit[:,end]),color="purple",label=string(model)) 
-	  ax4.plot(xbin_square,hist_square./maximum(hist_square),color="purple",alpha=0.5)
-	  xlim(2.24,2.37)
-	  ax4.minorticks_on()
-	  ax4.tick_params(which="both",direction="in",left="false",labelleft="false",
-	  		right="true",labelright="true")
-	  title2=string("IMAGES/likelihood/",grid_type_nplanet,"Moon",sigma,"s",nyear,"yrs.png")
-	  savefig(title2)
-	end
+	# if include_moon
+	# 	phi_col,true_phi,color=18,2.31586,"purple"; label_xloc=2.75
+	# 	# lim=f["dpin"],f["dpout"]
+	# 	fig=plt.figure()
+	#   ax3=subplot(211)
+	# 	ax3.axvline(true_phi,linestyle="--",color="black")
+	# 	ax3.text(2.4,1,"Moon",fontsize="large")
+	# 	ax3.plot(wide3[:,23]./365.25,xprob(wide3[:,end]),color="black")
+	# 	# tight_layout()
+	# 	# ax3.plot(grid_wide,lprob_wide,color="red") 
+	# 	xlabel("Satellite Phase Offset Search Grid [radians]")
+	# 	ylabel("Probability")
+	# 	ax3.minorticks_on()
+	# 	ax3.tick_params(which="both",direction="in")
+	# 	# Inset zoom of finer δϕ grid 
+	# 	ax4=fig.add_axes([0.68,0.4,0.2,0.4])
+	#   ax4.plot(fit[:,23]./365.25,xprob(fit[:,end]),color="purple",label=string(model)) 
+	#   ax4.plot(xbin_square,hist_square./maximum(hist_square),color="purple",alpha=0.5)
+	#   xlim(2.24,2.37)
+	#   ax4.minorticks_on()
+	#   ax4.tick_params(which="both",direction="in",left="false",labelleft="false",
+	#   		right="true",labelright="true")
+	#   #title2=string("IMAGES/likelihood/",grid_type_nplanet,"Moon",sigma,"s",nyear,"yrs.png")
+	#   #savefig(title2)
+	# end
 end
 
 function compare_sigs(nyear,grid_type_nplanet,per_col,true_per,pname,case_num)
