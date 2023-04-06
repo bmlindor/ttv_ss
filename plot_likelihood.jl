@@ -159,7 +159,7 @@ case_label="Case 2"
   	else
   		fitfile3=string("grid/","p4","_grid",sigma,"s",nyear,"yrs.csv")
 			widefit3=string("grid/wide","p4","_grid",sigma,"s",nyear,"yrs.csv")
-  		mcfile3=string("MCMC/","p4","_mcmc",sigma,"s",nyear,"yrs.jld2")
+  		mcfile3=string("MCMC/","widep4","_mcmc",sigma,"s",nyear,"yrs.jld2")
   		title="Search from Venus + Earth TTVs"
   		label1=L"a)    $\mathcal{H}_{PPPP}$"
   	end

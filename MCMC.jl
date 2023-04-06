@@ -310,21 +310,23 @@ function mc_vals(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num=Int,
     return chisq
   end
   # println("median posteriors: ",avg)
-  mean_posteriors=[mean(par_mcmc[:,iburn:nsteps,i]) for i=1:nparam]
+  #mean_posteriors=[mean(par_mcmc[:,iburn:nsteps,i]) for i=1:nparam]
   # println("mean posteriors: ",mean_posteriors)
   chi2_avg = chi_mcmc(tt0,nplanet,ntrans,avg,tt,sigtt,jmax,EM)
-  chi2 = chi_mcmc(tt0,nplanet,ntrans,mean_posteriors,tt,sigtt,jmax,EM)
+  lprob=quantile(lprob_mcmc[iburn:nsteps],0.5) ; lprob_max = maximum(lprob_mcmc[iburn:nsteps])
+  #chi2 = chi_mcmc(tt0,nplanet,ntrans,mean_posteriors,tt,sigtt,jmax,EM)
   N=length(tt0) ; k=nparam
+  ### -2logLikelihood
   mc_BIC(chi2,k,N)=chi2 + k*log(N)
   println(" χ^2 from median: ",chi2_avg,"BIC from median: ",mc_BIC(chi2_avg,k,N))
   chi=round(chi2_avg,sigdigits=4)
   model_BIC= round(mc_BIC(chi2_avg,k,N),sigdigits=4)
-  # println(" χ^2 from median: ",chi2_avg,"BIC from mean: ",mc_BIC(chi2,k,N))
+  med_lprob=round(lprob,sigdigits=4)
 
     # Percentage of walkers where diff. between median and quantile value is >100
     # bad_walk=0
     # for i in 1:nwalkers
-    #    med,sig1,quant=quantile!(jldmc["par_mcmc"][i,jldmc["iburn"]:end,12],[0.5,0.68,0.9])
+    #    med,sig1,quant=quantile!(par_mcmc[i,jldmc["iburn"]:end,12],[0.5,0.68,0.9])
     #    if abs(quant-med)>100
     #    bad_walk+=1
     #    end
@@ -333,35 +335,35 @@ function mc_vals(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num=Int,
 
   masses=[median(vec(par_mcmc[:,iburn:end,i-4])) for i in 1:length(param) if i%5==0] .*CGS.MSUN/CGS.MEARTH
   mass_errs=[std(vec(par_mcmc[:,iburn:end,i-4])) for i in 1:length(param) if i%5==0] .*CGS.MSUN/CGS.MEARTH
-  periods=[mean(vec(jldmc["par_mcmc"][:,iburn:end,i-3])) for i in 1:length(param) if i%5==0] 
-  per_errs=[std(vec(jldmc["par_mcmc"][:,iburn:end,i-3])) for i in 1:length(param) if i%5==0] 
+  periods=[mean(vec(par_mcmc[:,iburn:end,i-3])) for i in 1:length(param) if i%5==0] 
+  per_errs=[std(vec(par_mcmc[:,iburn:end,i-3])) for i in 1:length(param) if i%5==0] 
   ecc=[median(sqrt.(vec(par_mcmc[:,iburn:nsteps,(i-1)]).^2 .+ vec(par_mcmc[:,iburn:nsteps,(i)]).^2)) for i in 1:length(param) if i%5==0]
 
-  #   ecc_err1 = calc_quad_errs(median(jldmc["par_mcmc"][:,iburn:end,4]),std(jldmc["par_mcmc"][:,iburn:end,4]),median(jldmc["par_mcmc"][:,iburn:end,5]),std(jldmc["par_mcmc"][:,iburn:end,5]))
-  #   ecc_err2 = calc_quad_errs(median(jldmc["par_mcmc"][:,iburn:end,9]),std(jldmc["par_mcmc"][:,iburn:end,9]),median(jldmc["par_mcmc"][:,iburn:end,10]),std(jldmc["par_mcmc"][:,iburn:end,10]))
-  #   ecc_errs = [ecc_err1,ecc_err2]
+  ecc_err1 = calc_quad_errs(median(par_mcmc[:,iburn:end,4]),std(par_mcmc[:,iburn:end,4]),median(par_mcmc[:,iburn:end,5]),std(par_mcmc[:,iburn:end,5]))
+  ecc_err2 = calc_quad_errs(median(par_mcmc[:,iburn:end,9]),std(par_mcmc[:,iburn:end,9]),median(par_mcmc[:,iburn:end,10]),std(par_mcmc[:,iburn:end,10]))
+  ecc_errs = [ecc_err1,ecc_err2]
 
-    # if grid_type_nplanet=="p3" || grid_type_nplanet=="p3moon"
-  #     ecc_err3=calc_quad_errs(median(jldmc["par_mcmc"][:,iburn:end,14]),std(jldmc["par_mcmc"][:,iburn:end,14]),median(jldmc["par_mcmc"][:,iburn:end,15]),std(jldmc["par_mcmc"][:,iburn:end,15]))
-  #     ecc_errs=[ecc_errs;ecc_err3]
-    # elseif grid_type_nplanet=="p4" || grid_type_nplanet=="p3moonp4"
-  #     ecc_err4=calc_quad_errs(median(jldmc["par_mcmc"][:,iburn:end,14]),std(jldmc["par_mcmc"][:,iburn:end,14]),median(jldmc["par_mcmc"][:,iburn:end,15]),std(jldmc["par_mcmc"][:,iburn:end,15]))
-  #     ecc_err3=calc_quad_errs(median(jldmc["par_mcmc"][:,iburn:end,19]),std(jldmc["par_mcmc"][:,iburn:end,19]),median(jldmc["par_mcmc"][:,iburn:end,20]),std(jldmc["par_mcmc"][:,iburn:end,20]))
-  #     ecc_errs=[ecc_errs;ecc_err4;ecc_err3]
-    # end
-  # if grid_type_nplanet=="p3moon" || grid_type_nplanet=="p3moonp4"
-  #   tmax_errs=calc_quad_errs(median(jldmc["par_mcmc"][:,iburn:end,19]),std(jldmc["par_mcmc"][:,iburn:end,19]),median(jldmc["par_mcmc"][:,iburn:end,20]),std(jldmc["par_mcmc"][:,iburn:end,20]))
-  # end
+  if grid_type_nplanet=="p3" || grid_type_nplanet=="p3moon"
+    ecc_err3=calc_quad_errs(median(par_mcmc[:,iburn:end,14]),std(par_mcmc[:,iburn:end,14]),median(par_mcmc[:,iburn:end,15]),std(par_mcmc[:,iburn:end,15]))
+    ecc_errs=[ecc_errs;ecc_err3]
+  elseif grid_type_nplanet=="p4" || grid_type_nplanet=="p3moonp4"
+    ecc_err4=calc_quad_errs(median(par_mcmc[:,iburn:end,14]),std(par_mcmc[:,iburn:end,14]),median(par_mcmc[:,iburn:end,15]),std(par_mcmc[:,iburn:end,15]))
+    ecc_err3=calc_quad_errs(median(par_mcmc[:,iburn:end,19]),std(par_mcmc[:,iburn:end,19]),median(par_mcmc[:,iburn:end,20]),std(par_mcmc[:,iburn:end,20]))
+    ecc_errs=[ecc_errs;ecc_err4;ecc_err3]
+  end
+if grid_type_nplanet=="p3moon" || grid_type_nplanet=="p3moonp4"
+  tmax_errs=calc_quad_errs(median(par_mcmc[:,iburn:end,19]),std(par_mcmc[:,iburn:end,19]),median(par_mcmc[:,iburn:end,20]),std(par_mcmc[:,iburn:end,20]))
+end
 
   sigsys=round((median(vec(par_mcmc[:,iburn:end,end]))).* 3600*24,sigdigits=3)
   sigsys_err=(std(vec(par_mcmc[:,iburn:end,end]))).* 3600*24
   sigtot=round(sqrt(sigsys^2 + sigma^2),sigdigits=4)
 
-  # println("Retrieved values.")
-  # println("M_p[M⊕]=",masses," +/- ",mass_errs)
-  # println("Per [d]=",periods," +/- ",per_errs)
-  # # println("eccen. =",ecc," +/- ",ecc_errs)
-  # println("σsys[s]=",sigsys," +/- ",sigsys_err)
-  # println("σtot[s]=",sigtot)
-  return model_BIC,sigsys,sigtot,chi
+  println("Retrieved values.")
+  println("M_p[M⊕]=",masses," +/- ",mass_errs)
+  println("Per [d]=",periods," +/- ",per_errs)
+  println("eccen. =",ecc," +/- ",ecc_errs)
+  println("σsys[s]=",sigsys," +/- ",sigsys_err)
+  println("σtot[s]=",sigtot)
+  return med_lprob,sigsys,sigtot,chi
 end
