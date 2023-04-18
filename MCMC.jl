@@ -313,15 +313,19 @@ function mc_vals(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num=Int,
   #mean_posteriors=[mean(par_mcmc[:,iburn:nsteps,i]) for i=1:nparam]
   # println("mean posteriors: ",mean_posteriors)
   chi2_avg = chi_mcmc(tt0,nplanet,ntrans,avg,tt,sigtt,jmax,EM)
-  lprob=quantile(lprob_mcmc[iburn:nsteps],0.5) ; lprob_max = maximum(lprob_mcmc[iburn:nsteps])
+
+  # Calculate Bayesian Inference Criterion (BIC) 
+  prob=quantile(exp.(lprob_mcmc[iburn:nsteps]),0.5);prob_max = maximum(exp.(lprob_mcmc[iburn:nsteps]))
+  #println(" median Prob: ",prob,"      maximum Prob: ",prob_max)
+
   #chi2 = chi_mcmc(tt0,nplanet,ntrans,mean_posteriors,tt,sigtt,jmax,EM)
   N=length(tt0) ; k=nparam
-  ### -2logLikelihood
-  mc_BIC(chi2,k,N)=chi2 + k*log(N)
-  println(" χ^2 from median: ",chi2_avg,"BIC from median: ",mc_BIC(chi2_avg,k,N))
+  println("[N_obs]= ",N," [no. of model params]= ",k)
+  BIC_chi(chi2,k,N)=chi2 + k*log(N)
+  BIC_prob(prob,k,N)=-2*log(prob) + k*log(N)
+  println(" χ^2 from median: ",chi2_avg,"     reduced χ^2: ",chi2_avg/(N-k))
   chi=round(chi2_avg,sigdigits=4)
-  model_BIC= round(mc_BIC(chi2_avg,k,N),sigdigits=4)
-  med_lprob=round(lprob,sigdigits=4)
+  BIC= round(BIC_prob(prob_max,k,N),sigdigits=4)
 
     # Percentage of walkers where diff. between median and quantile value is >100
     # bad_walk=0
@@ -365,5 +369,5 @@ end
   println("eccen. =",ecc," +/- ",ecc_errs)
   println("σsys[s]=",sigsys," +/- ",sigsys_err)
   println("σtot[s]=",sigtot)
-  return med_lprob,sigsys,sigtot,chi
+  return sigsys,sigtot,chi,BIC
 end

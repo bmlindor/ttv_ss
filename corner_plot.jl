@@ -2,8 +2,8 @@ using JLD2,PyPlot,Statistics,Distributions,LinearAlgebra
 using3D() # Needed to create a 3D subplot
 #include("CGS.jl")
 include("MCMC.jl")
-rc("font",family="sans-serif")
-rc("lines",linewidth=1.5)
+# rc("font",family="sans-serif")
+# rc("lines",linewidth=1.5)
 calc_deg(value)=value * 180/pi
 calc_evec1(e,omega)=e* cos(omega-77)
 calc_evec2(e,omega)=e* sin(omega-77)
