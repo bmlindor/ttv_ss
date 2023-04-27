@@ -206,7 +206,8 @@ function sim_obs_and_find_times(jd1::Float64,sigma::Real,nyear::Real,obs::String
   # end
   x1,t01,per1 = linear_fit(tt1+noise1,P_venus,sigtt1)
   x2,t02,per2 = linear_fit(tt2+noise2,P_earth,sigtt2)
-  # println("coefficients: ",t02," , ",per2)
+  println("P1 linear coefficients: ",t01," , ",per1)
+  println("P2 linear coefficients: ",t02," , ",per2)
   # println(linear_fit(tt2.+noise2,P_earth,sigtt2))
 	tt=[tt1+noise1;tt2+noise2]
   # println("t0= ",t01)
@@ -261,8 +262,8 @@ function sim_times(jd1,nyear,obs)
 end
 
   # Plot orbits along ecliptic and top-down,point to observer of Venus and Earth transits
-function plot_orbits(dimension::Int,obs::String)
-  jd1=2.4332825e6 ; nyear=10 ; sigma=30 ;jdsize=1000
+function plot_orbits(dimension::Int,obs::String,nyear::Real=10)
+  jd1=2.4332825e6 ; sigma=30 ;jdsize=1000
   jd2 = nyear*365.25 + jd1
   theta_sun=range(0, stop=2pi, length=100)
   xsun = CGS.RSUN/CGS.AU * cos.(theta_sun)
@@ -297,27 +298,38 @@ function plot_orbits(dimension::Int,obs::String)
     else
       trans_pva_moon = compute(eph,tt[i],0.0,301,10,options)./AU
       trans_pva_earth[1:6,i] = compute(eph,tt[i],0.0,399,10,options)./AU
+      
     end
   end
-  n_obs=calc_obs_loc(trans_pva_venus[1:3],trans_pva_venus[4:6],trans_pva_earth[1:3],trans_pva_earth[4:6])
+
+  ## Find position of Moon w.r.t. Earth when Earth transit occurs
+  # trans_pva_moon
   
   if dimension==2
   fig,ax=subplots(figsize=(5,5),dpi=150)
-  plot([0,n_obs[1]*1.1],[0,n_obs[2]*1.1],"k--",linewidth=1,alpha=0.5)
+  title(string("Location over ",nyear,"yrs"))
   fill(xsun.*5,ysun.*5,color="yellow")
   plot(xsun,ysun,color="yellow")
   plot(pva_venus[1,:],pva_venus[2,:],color="salmon",linewidth=1,alpha=0.5)
-  plot(pva_earth[1,:],pva_earth[2,:],color="forestgreen",linewidth=1,alpha=0.5)
   p1=ax.scatter(trans_pva_venus[1,1:nt1],trans_pva_venus[2,1:nt1],marker="v",color="salmon",label="Venus")
+  if obs=="fromEMB"
+    n_obs=calc_obs_loc(trans_pva_venus[1:3],trans_pva_venus[4:6],trans_pva_emb[1:3],trans_pva_emb[4:6])
+    plot(pva_emb[1,:],pva_emb[2,:],color="forestgreen",linewidth=1,alpha=0.5)
+    p2=ax.scatter(trans_pva_emb[1,nt1+1:nt1+nt2],trans_pva_emb[2,nt1+1:nt1+nt2],marker=".",color="forestgreen",label="EMB")
+  else
+  n_obs=calc_obs_loc(trans_pva_venus[1:3],trans_pva_venus[4:6],trans_pva_earth[1:3],trans_pva_earth[4:6])
+  plot(pva_earth[1,:],pva_earth[2,:],color="forestgreen",linewidth=1,alpha=0.5)
   p2=ax.scatter(trans_pva_earth[1,nt1+1:nt1+nt2],trans_pva_earth[2,nt1+1:nt1+nt2],marker=".",color="forestgreen",label="Earth")
+  end
   # arrow(0.0,0.0,n_obs[1],n_obs[2],facecolor="black")
+  plot([0,n_obs[1]*1.1],[0,n_obs[2]*1.1],"k--",linewidth=1,alpha=0.5)
   annotate("Line of sight",xy=[n_obs[1];n_obs[2]], xytext=[n_obs[1]+0.05;n_obs[2]],xycoords="data",fontsize="medium") 
   ax.grid(linestyle="--",alpha=0.4)
   xlabel("x [au]",fontsize="large")
   ylabel("y [au]",fontsize="large")
   ylim(-1,1)
   xlim(-1.1,1.1)
-  ax.legend(title="Transits",fontsize="medium",title_fontsize="medium",markerscale=1.5,loc="upper left")
+  ax.legend(title="Mid-Transit",fontsize="medium",title_fontsize="medium",markerscale=1.5,loc="upper left")
   # fill(xsun,ysun,color="yellow")
   # plot(xsun,ysun,color="black")
   # plot(pva_venus[1,:],pva_venus[2,:],color="orange",linewidth=1,alpha=0.5)

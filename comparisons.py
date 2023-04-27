@@ -52,6 +52,8 @@ MJUP = 1.8986e27 #kg
 RJUP = 6.9911e11 #km
 
 # Solar System params
+ssnames=["Mercury", "Venus", "Earth", "Mars","Jupiter" ,"Saturn","Uranus","Neptune"]
+ssnames_short=["Mer","V","E","M","J","S","U","N"]
 ssmass = np.array([0.3302, 4.8685, 5.9736, 0.64185, 1898.6, 568.46, 86.832, 102.43]) * 10**24 #kg
 ssper = np.array([88.0,224.7,365.2,687.0,4331,10747,30589,59800]) #days
 ssecc= [0.205,0.007,0.017,0.094,0.049,0.057,0.046,0.011]
@@ -66,37 +68,62 @@ font = {'family': 'sans-serif',
         'weight': 'normal',
         'size': 12
         }
-def plot_per_vs_mp():
-fig,ax = plt.subplots(figsize=(8,6))
-ax.set_xscale('log') 
-ax.set_yscale('log')
-plt.scatter(data[other].pl_orbper,data[other].pl_bmasse,label="Other Disc. Method",marker=".",color='gray',alpha=0.45)
-plt.scatter(data[single].pl_orbper,data[single].pl_bmasse,label="Single Transiting System",marker=".",color="black")
-plt.scatter(data[multi].pl_orbper,data[multi].pl_bmasse,label="Multi-Transiting System",marker="o",color='white',edgecolors='black')
-plt.scatter(ssper,ssmass/MEARTH,marker="o",color="red")
-plt.text(300,0.6,"Venus",fontdict=font)
-plt.text(480,0.88,"Earth",fontdict=font)
-plt.text(120,0.045,"Mercury",fontdict=font)
-plt.text(990,0.095,"Mars",fontdict=font)
-plt.text(5200,270,"Jupiter",fontdict=font)
-plt.text(14000,80,"Saturn",fontdict=font)
-plt.text(2800,13,"Uranus",fontdict=font)
-plt.text(81000,15,"Neptune",fontdict=font)
-plt.xlabel("Orbital Period [days]",fontsize='large')
-plt.ylabel("Mass or $M\sin{i}$ [M$_{Earth}$]",fontsize='large')
-plt.tick_params(axis='both',which='both',direction='in',top=True,right=True)
-ax.minorticks_on()
-plt.legend(loc=4,fontsize='medium')
-plt.show()
+def per_vs_mp():
+    fig,ax = plt.subplots(figsize=(8,6))
+    ax.set_xscale('log') 
+    ax.set_yscale('log')
+    plt.scatter(data[other].pl_orbper,data[other].pl_bmasse,label="Other Disc. Method",marker=".",color='gray',alpha=0.45)
+    plt.scatter(data[single].pl_orbper,data[single].pl_bmasse,label="Single Transiting System",marker=".",color="black")
+    plt.scatter(data[multi].pl_orbper,data[multi].pl_bmasse,label="Multi-Transiting System",marker="o",color='white',edgecolors='black')
+    plt.scatter(ssper,ssmass/MEARTH,marker="o",color="red")
+    for i in range(len(ssmass)):
+        plt.text(1.2*ssper[i],0.8*(ssmass[i]/MEARTH),ssnames[i],fontdict=font)
+    # plt.text(300,0.6,"Venus",fontdict=font)
+    # plt.text(480,0.88,"Earth",fontdict=font)
+    # plt.text(120,0.045,"Mercury",fontdict=font)
+    # plt.text(990,0.095,"Mars",fontdict=font)
+    # plt.text(5200,270,"Jupiter",fontdict=font)
+    # plt.text(14000,80,"Saturn",fontdict=font)
+    # plt.text(2800,13,"Uranus",fontdict=font)
+    # plt.text(81000,15,"Neptune",fontdict=font)
+    plt.xlabel("Orbital Period [days]",fontsize='large')
+    plt.ylabel("Mass or $M\sin{i}$ [M$_{Earth}$]",fontsize='large')
+    plt.tick_params(axis='both',which='both',direction='in',top=True,right=True)
+    ax.minorticks_on()
+    plt.legend(loc=4,fontsize='medium')
+    plt.show()
 
-def plot_mp_vs_rp():
-fig,ax = plt.subplots(figsize=(8,6))
-ax.set_xscale('log') 
-ax.set_yscale('log')
-plt.scatter(data[other].pl_radj,data[other].pl_bmassj,label="Other Disc. Method",marker=".",color='gray',alpha=0.45)
-plt.scatter(data[single].pl_radj,data[single].pl_bmassj,label="Single Transiting System",marker=".",color="black")
-plt.scatter(data[multi].pl_radj,data[multi].pl_bmassj,label="Multi-Transiting 
+def per_vs_mp_errs():
+    plt.errorbar(data[other].pl_orbper,data[other].pl_bmasse,yerr=(data[other].pl_bmasse-data[other].pl_bmasseerr1,data[other].pl_bmasseerr2+data[other].pl_bmasse),fmt=".",color="grey",alpha=0.2,label="Other Disc. Method",capsize=1)
 
+    plt.errorbar(data[single].pl_orbper,data[single].pl_bmasse,yerr=(data[single].pl_bmasse-data[single].pl_bmasseerr1,data[single].pl_bmasseerr2+data[single].pl_bmasse),fmt=".",color="black",alpha=0.4,label="Single Transiting System",capsize=2)
+    plt.errorbar(data[multi].pl_orbper,data[multi].pl_bmasse,yerr=(data[multi].pl_bmasse-data[multi].pl_bmasseerr1,data[multi].pl_bmasseerr2+data[multi].pl_bmasse),fmt="o",color="black",mfc="white",label="Multi-Transiting System",capsize=2)
+    for i in range(len(ssmass)):
+        plt.text(1.2*ssper[i],0.8*(ssmass[i]/MEARTH),ssnames_short[i],fontdict=font)
+
+per_vs_mp_errs()
+def plot_rp_vs_mp():
+    fig,ax = plt.subplots(figsize=(8,6))
+    ax.set_xscale('log') 
+    ax.set_yscale('log')
+    plt.scatter(data[other].pl_radj,data[other].pl_bmassj,label="Other Disc. Method",marker=".",color='gray',alpha=0.45)
+    plt.scatter(data[single].pl_radj,data[single].pl_bmassj,label="Single Transiting System",marker=".",color="black")
+    plt.scatter(data[multi].pl_orbper,data[multi].pl_bmassj,label="Multi-Transiting System",marker="o",color='white',edgecolors='black')
+    plt.scatter(ssper,ssmass/MEARTH,marker="o",color="red")
+    # plt.text(300,0.6,"Venus",fontdict=font)
+    # plt.text(480,0.88,"Earth",fontdict=font)
+    # plt.text(120,0.045,"Mercury",fontdict=font)
+    # plt.text(990,0.095,"Mars",fontdict=font)
+    # plt.text(5200,270,"Jupiter",fontdict=font)
+    # plt.text(14000,80,"Saturn",fontdict=font)
+    # plt.text(2800,13,"Uranus",fontdict=font)
+    # plt.text(81000,15,"Neptune",fontdict=font)
+    plt.xlabel("Orbital Period [days]",fontsize='large')
+    plt.ylabel("Mass or $M\sin{i}$ [M$_{Earth}$]",fontsize='large')
+    plt.tick_params(axis='both',which='both',direction='in',top=True,right=True)
+    ax.minorticks_on()
+    plt.legend(loc=4,fontsize='medium')
+    plt.show()
 
 def system_conditions(max_a,min_mp,max_mstar,max_p):
     acut = (sma < max_a) 
@@ -132,9 +159,9 @@ def jup_to_sol(radius):
 
 def plot_TEPs(x,y):
     plt.loglog(pt.pl_orbper,pt.pl_bmassj,'o',alpha=0.75,label='TEP')
-    # plt.loglog(rv.pl_orbper,rv.pl_bmassj,'v',alpha=0.75,label='Doppler')
-# # plt.loglog(im.pl_orbper[cuts],im.pl_bmassj[cuts],'s',alpha=0.5,label='Imaging')
-# # plt.loglog(ml.pl_orbper[cuts],ml.pl_bmassj[cuts],'d',alpha=0.5,label='Microlensing')
+    plt.loglog(rv.pl_orbper,rv.pl_bmassj,'v',alpha=0.75,label='Doppler')
+ # plt.loglog(im.pl_orbper[cuts],im.pl_bmassj[cuts],'s',alpha=0.5,label='Imaging')
+ # plt.loglog(ml.pl_orbper[cuts],ml.pl_bmassj[cuts],'d',alpha=0.5,label='Microlensing')
     plt.loglog(2.30,0.779,'+',label='HAT-P-68b',markersize=15)
     plt.xlabel("Orbital Period [days]")
     plt.ylabel("Planet Mass [$M_{Jup}$]")

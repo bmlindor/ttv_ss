@@ -16,10 +16,10 @@ function per_grid(sigma,nyear,grid_type_nplanet,per_col,true_per,pname,case_num,
 	file=string("grid/",grid_type_nplanet,"_grid",sigma,"s",nyear,"yrs.csv")
 	case_label="Case 2"
 	end
-		  if grid_type_nplanet=="p3"
+	if grid_type_nplanet=="p3" || grid_type_nplanet=="widep3"
     model=L"$\mathcal{H}_{PPP}$"
     # per_col,true_per,pname,color=12,11.862615,"Jupiter","firebrick"; label_xloc=5
-  elseif grid_type_nplanet=="p4"
+  elseif grid_type_nplanet=="p4" || grid_type_nplanet=="widep4"
     model=L"$\mathcal{H}_{PPPP}$"
     # per_col,true_per,pname,color=12,1.8808476,"Mars","orange"; label_xloc=2.75
   elseif grid_type_nplanet=="p3moon"
@@ -32,10 +32,11 @@ function per_grid(sigma,nyear,grid_type_nplanet,per_col,true_per,pname,case_num,
 	fit,header=readdlm(file,',',header=true)
 	sim_obs_label= string(case_label," [",nyear," yr span]")
 	# save_as =string("IMAGES/wide_grids/case",case_num,"_",grid_type_nplanet,pname,sigma,"secs",nyear,"yrs.png")
+	title(string(model," [",nyear," yr span]"))
 	axvline(true_per,linestyle="--",color="black")
-	text(true_per + true_per/100,1.01,pname,fontsize="large")
+	text(1.1*true_per,1.01,pname,fontsize="large")
 	#text(label_xloc,1.05,sim_obs_label,fontsize="medium")
- 	plot(fit[:,per_col]./365.25,xprob(fit[:,end]),label=string(model))#label=string("[",nyear," yr span]",L"$\sigma_{obs}=$",sigma," sec"))
+ 	plot(fit[:,per_col]./365.25,xprob(fit[:,end]),label=string(L"$\sigma_{obs}=$",sigma," sec"))#label=string("[",nyear," yr span]",L"$\sigma_{obs}=$",sigma," sec"))
  	xlabel("Planet Period Search Grid",fontsize="x-large")
  	ylabel("Probability",fontsize="x-large")
  	legend()
@@ -73,22 +74,22 @@ function wide_grid(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::Bo
 	case_label="Case 2"
 	title="Search from Venus + Earth TTVs"
 	end
-		  if grid_type_nplanet=="p3"
+  if grid_type_nplanet=="p3"
     model=L"$\mathcal{H}_{PPP}$"
     per_col,true_per,pname,color=12,11.862615,"Jupiter","firebrick"; label_xloc=5
     text_loc=11.9
   elseif grid_type_nplanet=="p4"
     model=L"$\mathcal{H}_{PPPP}$"
-     per_col,true_per,pname,color=12,1.8808476,"Mars","orange"; label_xloc=2.75
-     text_loc=1.85
+    per_col,true_per,pname,color=12,1.8808476,"Mars","orange"; label_xloc=2.75
+    text_loc=1.85
   elseif grid_type_nplanet=="p3moon"
     model=L"$\mathcal{H}_{PPsP}$"
-     per_col,true_per,pname,color=12,11.862615,"Jupiter","firebrick"; label_xloc=5
-     text_loc=11.9
+    per_col,true_per,pname,color=12,11.862615,"Jupiter","firebrick"; label_xloc=5
+    text_loc=11.9
   elseif grid_type_nplanet=="p3moonp4"
     model=L"$\mathcal{H}_{PPsPP}$"
-     per_col,true_per,pname,color=12,1.8808476,"Mars","orange"; label_xloc=2.75
-     text_loc=true_per - true_per/100
+    per_col,true_per,pname,color=12,1.8808476,"Mars","orange"; label_xloc=2.75
+    text_loc=0.9*true_per
   end
 	fit,header=readdlm(fitfile,',',header=true)
 	wide,header=readdlm(widefit,',',header=true)
@@ -159,7 +160,7 @@ case_label="Case 2"
   	else
   		fitfile3=string("grid/","p4","_grid",sigma,"s",nyear,"yrs.csv")
 			widefit3=string("grid/wide","p4","_grid",sigma,"s",nyear,"yrs.csv")
-  		mcfile3=string("MCMC/","widep4","_mcmc",sigma,"s",nyear,"yrs.jld2")
+  		mcfile3=string("MCMC/","p4","_mcmc",sigma,"s",nyear,"yrs.jld2")
   		title="Search from Venus + Earth TTVs"
   		label1=L"a)    $\mathcal{H}_{PPPP}$"
   	end
@@ -194,7 +195,7 @@ end
 
  	true_per3=1.8808476
  	true_per4=11.862615
-	sim_obs_label= string(case_label," [",nyear," yr span]",'\n',L"$\sigma_{obs}=$",sigma," sec")
+	sim_obs_label= string(" [",nyear," yr span]",'\n',L"$\sigma_{obs}=$",sigma," sec")
 	fig=figure(figsize=(5,5),dpi=150)
 	# subplots_adjust(hspace=0.2,wspace=0.15)
 	# ax1.title()
@@ -325,7 +326,7 @@ function compare_sigs(nyear,grid_type_nplanet,per_col,true_per,pname,case_num)
 end
 ### compare_yrs(30,"p5",22,29.447,"Saturn",1)
 
-function compare_yrs(sigma,grid_type_nplanet,per_col,true_per,pname,case_num)
+function compare_yrs(sigma,grid_type_nplanet,case_num)
 	if case_num==1
 	file1=string("grid/fromEMB/",grid_type_nplanet,"_grid",sigma,"s15yrs.csv")	
 	file2=string("grid/fromEMB/",grid_type_nplanet,"_grid",sigma,"s16yrs.csv")
@@ -355,15 +356,23 @@ function compare_yrs(sigma,grid_type_nplanet,per_col,true_per,pname,case_num)
 	file8=string("grid/",grid_type_nplanet,"_grid",sigma,"s22yrs.csv")
 	file9=string("grid/",grid_type_nplanet,"_grid",sigma,"s23yrs.csv")
 	file10=string("grid/",grid_type_nplanet,"_grid",sigma,"s24yrs.csv")
+	file11=string("grid/",grid_type_nplanet,"_grid",sigma,"s25yrs.csv")
+	file12=string("grid/",grid_type_nplanet,"_grid",sigma,"s26yrs.csv")
+	file13=string("grid/",grid_type_nplanet,"_grid",sigma,"s27yrs.csv")
+	file14=string("grid/",grid_type_nplanet,"_grid",sigma,"s28yrs.csv")
+	file15=string("grid/",grid_type_nplanet,"_grid",sigma,"s29yrs.csv")
+	file16=string("grid/",grid_type_nplanet,"_grid",sigma,"s30yrs.csv")
 	case_label=string("Case 2"," [σ=",sigma," sec]")
 	end
-	fit1,header1=readdlm(file1,',',header=true)
+	# fit1,header1=readdlm(file1,',',header=true)
+			if grid_type_nplanet=="p3" || grid_type_nplanet=="widep3"
 	fit2,header2=readdlm(file2,',',header=true)
 	fit3,header3=readdlm(file3,',',header=true)
 	fit4,header4=readdlm(file4,',',header=true)
 	fit5,header5=readdlm(file5,',',header=true)
 	fit6,header6=readdlm(file6,',',header=true)
 	fit7,header7=readdlm(file7,',',header=true)
+		end
 	fit8,header8=readdlm(file8,',',header=true)
 	fit9,header9=readdlm(file9,',',header=true)
 	fit10,header10=readdlm(file10,',',header=true)
@@ -373,53 +382,73 @@ function compare_yrs(sigma,grid_type_nplanet,per_col,true_per,pname,case_num)
 	fit14,header14=readdlm(file14,',',header=true)
 	fit15,header15=readdlm(file15,',',header=true)
 	fit16,header16=readdlm(file16,',',header=true)
+	if grid_type_nplanet=="p3" || grid_type_nplanet=="widep3"
+    model=L"$\mathcal{H}_{PPP}$"
+    per_col,true_per,pname,color=12,11.862615,"Jupiter","firebrick";
+    pnum="3rd"
+  elseif grid_type_nplanet=="p4" || grid_type_nplanet=="widep4"
+    model=L"$\mathcal{H}_{PPPP}$"
+    per_col,true_per,pname,color=12,1.8808476,"Mars","orange";
+    pnum="4th"
+  elseif grid_type_nplanet=="p3moon"
+    model=L"$\mathcal{H}_{PPsP}$"
+    per_col,true_per,pname,color=12,11.862615,"Jupiter","firebrick";
+    pnum="3rd"
+  elseif grid_type_nplanet=="p3moonp4"
+    model=L"$\mathcal{H}_{PPsPP}$"
+    per_col,true_per,pname,color=12,1.8808476,"Mars","orange";
+    pnum="4th"
+  end
 
 	fig,ax=subplots(figsize=(8,6))#,dpi=150)
-	title("Search for 3rd Planet (i.e. Jupiter) in Hppp",fontsize="xx-large")
-	ax.plot(fit1[:,per_col]./365.25 ,xprob(fit1[:,end]),label="15 yrs")
-	ax.plot(fit2[:,per_col]./365.25 ,xprob(fit2[:,end]),label="16 yrs")
-	ax.plot(fit3[:,per_col]./365.25 ,xprob(fit3[:,end]),label="17 yrs")
-	ax.plot(fit4[:,per_col]./365.25 ,xprob(fit4[:,end]),label="18 yrs")
-	ax.plot(fit5[:,per_col]./365.25 ,xprob(fit5[:,end]),label="19 yrs")
-	ax.plot(fit6[:,per_col]./365.25 ,xprob(fit6[:,end]),label="20 yrs")
-	ax.plot(fit7[:,per_col]./365.25 ,xprob(fit7[:,end]),label="21 yrs")
-	ax.plot(fit8[:,per_col]./365.25 ,xprob(fit8[:,end]),label="22 yrs")#,linestyle="--")	
-	ax.plot(fit9[:,per_col]./365.25 ,xprob(fit9[:,end]),label="23 yrs")#,linestyle="--")
-	ax.plot(fit10[:,per_col]./365.25 ,xprob(fit10[:,end]),label="24 yrs")#,linestyle="--")
-	ax.plot(fit11[:,per_col]./365.25 ,xprob(fit11[:,end]),label="25 yrs")#,linestyle="--")
-	ax.plot(fit12[:,per_col]./365.25 ,xprob(fit12[:,end]),label="26 yrs")#,linestyle="--")
-	ax.plot(fit13[:,per_col]./365.25 ,xprob(fit13[:,end]),label="27 yrs")#,linestyle="--")  
-	ax.plot(fit14[:,per_col]./365.25 ,xprob(fit14[:,end]),label="28 yrs")#,linestyle="--")  
-	ax.plot(fit15[:,per_col]./365.25 ,xprob(fit15[:,end]),label="29 yrs")#,linestyle="--")  
-	ax.plot(fit16[:,per_col]./365.25 ,xprob(fit16[:,end]),label="30 yrs")#,linestyle="--")      
+	title(string("Search for ",pnum," Planet (i.e. ",pname,") in ",model),fontsize="xx-large")
+	# ax.plot(fit1[:,per_col]./365.25 ,xprob(fit1[:,end]),label="15 yrs")
+	if grid_type_nplanet=="p3" || grid_type_nplanet=="widep3"
+	ax.plot(fit2[:,per_col]./365.25 ,xprob(fit2[:,end]),label="16 yrs",linewidth=1)
+	ax.plot(fit3[:,per_col]./365.25 ,xprob(fit3[:,end]),label="17 yrs",linewidth=1)
+	ax.plot(fit4[:,per_col]./365.25 ,xprob(fit4[:,end]),label="18 yrs",linewidth=1)
+	ax.plot(fit5[:,per_col]./365.25 ,xprob(fit5[:,end]),label="19 yrs",linewidth=1)
+	ax.plot(fit6[:,per_col]./365.25 ,xprob(fit6[:,end]),label="20 yrs",linewidth=1)
+	ax.plot(fit7[:,per_col]./365.25 ,xprob(fit7[:,end]),label="21 yrs",linewidth=1)
+	end
+	ax.plot(fit8[:,per_col]./365.25 ,xprob(fit8[:,end]),label="22 yrs",linewidth=1)#,linestyle="--")	
+	ax.plot(fit9[:,per_col]./365.25 ,xprob(fit9[:,end]),label="23 yrs",linewidth=1)#,linestyle="--")
+	ax.plot(fit10[:,per_col]./365.25 ,xprob(fit10[:,end]),label="24 yrs",linewidth=1)#,linestyle="--")
+	ax.plot(fit11[:,per_col]./365.25 ,xprob(fit11[:,end]),label="25 yrs",linewidth=1)#,linestyle="--")
+	ax.plot(fit12[:,per_col]./365.25 ,xprob(fit12[:,end]),label="26 yrs",linewidth=1,linestyle="--")
+	ax.plot(fit13[:,per_col]./365.25 ,xprob(fit13[:,end]),label="27 yrs",linewidth=1,linestyle="--")  
+	ax.plot(fit14[:,per_col]./365.25 ,xprob(fit14[:,end]),label="28 yrs",linewidth=1,linestyle="--")  
+	ax.plot(fit15[:,per_col]./365.25 ,xprob(fit15[:,end]),label="29 yrs",linewidth=1,linestyle="--")  
+	ax.plot(fit16[:,per_col]./365.25 ,xprob(fit16[:,end]),label="30 yrs",linewidth=1,linestyle="--")      
 	axvline(true_per,linestyle="--",color="black")
-	text(true_per + true_per/100,1.01,pname,fontsize="large")
+	text(1.01*true_per,0.96,pname,fontsize="large")
+	tick_params(which="both",direction="in")
+	# text(true_per + true_per/100,1.01,pname,fontsize="large")
 	#inset 
 	# text(label_xloc,1.05,sim_obs_label)
-	#legend(loc="upper right",fontsize="large",title=case_label,title_fontsize="large",bbox_to_anchor=(0.,0.9,1.,.102),ncol=5,mode="expand",borderaxespad=0.0)
+	legend(loc="upper right",fontsize="large",title=case_label,title_fontsize="large",bbox_to_anchor=(0.,0.9,1.,.102),ncol=5,mode="expand",borderaxespad=0.0)
 	# legend(fontsize="medium",title_fontsize="medium",title=case_label)
-	legend()
-	if grid_type_nplanet=="p4" #|| grid_type_nplanet=="p3moonp4"
-	ax2=fig.add_axes([0.5,0.2,0.3,0.5])
-	ax2.plot(fit1[:,per_col]./365.25 ,xprob(fit1[:,end]),label="15 yrs")
-	# ax2.plot(fit2[:,per_col]./365.25 ,xprob(fit2[:,end]),label="16 yrs")
-	ax2.plot(fit3[:,per_col]./365.25 ,xprob(fit3[:,end]),label="17 yrs")
-	# ax2.plot(fit4[:,per_col]./365.25 ,xprob(fit4[:,end]),label="18 yrs")
-	ax2.plot(fit5[:,per_col]./365.25 ,xprob(fit5[:,end]),label="19 yrs")
-	# ax2.plot(fit6[:,per_col]./365.25 ,xprob(fit6[:,end]),label="20 yrs")
-	ax2.plot(fit7[:,per_col]./365.25 ,xprob(fit7[:,end]),label="21 yrs")
-	# ax2.plot(fit8[:,per_col]./365.25 ,xprob(fit8[:,end]),label="22 yrs")
-	ax2.plot(fit9[:,per_col]./365.25 ,xprob(fit9[:,end]),label="23 yrs")
-	# ax2.plot(fit10[:,per_col]./365.25 ,xprob(fit10[:,end]),label="24 yrs")
-	ax2.set_xlim(1.81,1.9)
-	ax2.axvline(true_per,linestyle="--",color="black")
-	ax2.tick_params(which="both",direction="in")
-	end
+	# if grid_type_nplanet=="p4" #|| grid_type_nplanet=="p3moonp4"
+	# ax2=fig.add_axes([0.5,0.2,0.3,0.5])
+	# ax2.plot(fit1[:,per_col]./365.25 ,xprob(fit1[:,end]),label="15 yrs")
+	# # ax2.plot(fit2[:,per_col]./365.25 ,xprob(fit2[:,end]),label="16 yrs")
+	# ax2.plot(fit3[:,per_col]./365.25 ,xprob(fit3[:,end]),label="17 yrs")
+	# # ax2.plot(fit4[:,per_col]./365.25 ,xprob(fit4[:,end]),label="18 yrs")
+	# ax2.plot(fit5[:,per_col]./365.25 ,xprob(fit5[:,end]),label="19 yrs")
+	# # ax2.plot(fit6[:,per_col]./365.25 ,xprob(fit6[:,end]),label="20 yrs")
+	# ax2.plot(fit7[:,per_col]./365.25 ,xprob(fit7[:,end]),label="21 yrs")
+	# # ax2.plot(fit8[:,per_col]./365.25 ,xprob(fit8[:,end]),label="22 yrs")
+	# ax2.plot(fit9[:,per_col]./365.25 ,xprob(fit9[:,end]),label="23 yrs")
+	# # ax2.plot(fit10[:,per_col]./365.25 ,xprob(fit10[:,end]),label="24 yrs")
+	# ax2.set_xlim(1.81,1.9)
+	# ax2.axvline(true_per,linestyle="--",color="black")
+	# ax2.tick_params(which="both",direction="in")
+	# end
 	ax.set_xlabel("Planet Period Search Grid [years]",fontsize="xx-large")
-	# xlim(minimum(xgrid_in_yrs)-minimum(xgrid_in_yrs)/10,maximum(xgrid_in_yrs)+.05)
+	# # xlim(minimum(xgrid_in_yrs)-minimum(xgrid_in_yrs)/10,maximum(xgrid_in_yrs)+.05)
 	ax.set_ylabel("Probability",fontsize="xx-large")
-	ax.set_ylim(0,1.2)
-	#ax.set_xlim(1.8,1.9)
+	ax.set_ylim(0,1.3)
+	# #ax.set_xlim(1.8,1.9)
 	ax.minorticks_on()
 	tight_layout()
 end
