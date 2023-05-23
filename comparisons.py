@@ -94,13 +94,19 @@ def per_vs_mp():
     plt.show()
 
 def per_vs_mp_errs():
+    fig,ax = plt.subplots(figsize=(8,6))
+    ax.set_xscale('log') 
+    ax.set_yscale('log')
     plt.errorbar(data[other].pl_orbper,data[other].pl_bmasse,yerr=(data[other].pl_bmasse-data[other].pl_bmasseerr1,data[other].pl_bmasseerr2+data[other].pl_bmasse),fmt=".",color="grey",alpha=0.2,label="Other Disc. Method",capsize=1)
-
     plt.errorbar(data[single].pl_orbper,data[single].pl_bmasse,yerr=(data[single].pl_bmasse-data[single].pl_bmasseerr1,data[single].pl_bmasseerr2+data[single].pl_bmasse),fmt=".",color="black",alpha=0.4,label="Single Transiting System",capsize=2)
     plt.errorbar(data[multi].pl_orbper,data[multi].pl_bmasse,yerr=(data[multi].pl_bmasse-data[multi].pl_bmasseerr1,data[multi].pl_bmasseerr2+data[multi].pl_bmasse),fmt="o",color="black",mfc="white",label="Multi-Transiting System",capsize=2)
     for i in range(len(ssmass)):
         plt.text(1.2*ssper[i],0.8*(ssmass[i]/MEARTH),ssnames_short[i],fontdict=font)
-
+    plt.scatter(ssper,ssmass/MEARTH,marker="o",color="red")
+    plt.xlabel("Orbital Period [days]",fontsize='large')
+    plt.ylabel("Mass or $M\sin{i}$ [M$_{Earth}$]",fontsize='large')
+    plt.show()
+    
 per_vs_mp_errs()
 def plot_rp_vs_mp():
     fig,ax = plt.subplots(figsize=(8,6))
