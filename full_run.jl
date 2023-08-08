@@ -1,8 +1,4 @@
-function show_args(args)
-@show args
-end
-using Profile,TTVFaster
-using DelimitedFiles,JLD2,DataFrames,CSV,LsqFit,Statistics
+using Profile,TTVFaster,DelimitedFiles,JLD2,DataFrames,CSV,LsqFit,Statistics
 include("regress.jl")
 include("sim_times.jl")
 include("fit_planet2.jl")
@@ -11,38 +7,39 @@ include("fit_planet4.jl")
 include("fit_planet5.jl")
 include("fit_moon.jl")
 include("MCMC.jl")
-
-show_args(ARGS)
 label,runtype,obs,opt=ARGS[1],ARGS[2],ARGS[3],parse(Int64,ARGS[4])
-#parse(Float64,ARGS[2]),parse(Float64,ARGS[3]),ARGS[4],ARGS[5],parse(Int64,ARGS[6])
+sigma,nyear=parse(Int64,ARGS[5]),parse(Int64,ARGS[6])
+function show_args(args)
+@show args
+end
 function parse_model(label::String)
 	nplanet = 0
 	nmoon = 0
 	for obj in 1:length(label)
 	  if label[obj]=='p'
-	    # println(obj)
 	    nplanet += 1
 	  end
 	  if label[obj]=='m'
 	  	nmoon += 1
 	  end
 	end
+	println("Modeling ",nplanet," planets and ", nmoon," moons.")
 	return nplanet,nmoon
 end
 nplanet,nmoon=parse_model(label)
-# println(nplanet," planets and ", nmoon," moons in model")
+show_args(ARGS)
 # Initialize variables and period ranges
 jd1=2.4332825e6
 tref=2430000; tol=1e-5
 nphase=36 #wide: 100,36,180
 if opt < 1000 
 nper=opt
-nsteps=50000
+nsteps=10000
 else
 nsteps=opt
-nper=100#200
+nper=100
 end
-np3,np4,ndp,np5=[nper, nper, nper,nper]
+np3,np4,ndp,np5=[nper, nper, nper, nper]
 
 # Run markov chains
 function planet_mcmc(sigma,nyear,nplanet,nsteps,obs::String)
@@ -101,16 +98,15 @@ function run_grid(sigma,nyear,label::String,obs::String)
  	p3in,p3out=11*365.25,13*365.25 
 	p4in,p4out=1.6*365.25,3.8*365.25
  end
-
 	if label=="Hpp" 
 	sim_times(jd1,sigma,nyear,obs)
  	fit_planet2(jd1,sigma,nyear,tref,tol,[obs],true)
 	elseif label=="Hppp"
 	fit_planet3(jd1,sigma,nyear,tref,tol,p3in,p3out,np3,nphase,[obs,"p3"],true)
 	elseif label=="Hpppp"
-  fit_planet4(jd1,sigma,nyear,tref,tol,p4in,p4out,np4,nphase,[obs,"p4"],true)
+  	fit_planet4(jd1,sigma,nyear,tref,tol,p4in,p4out,np4,nphase,[obs,"p4"],true)
 	elseif label=="Hppppp"
-  fit_planet5(jd1,sigma,nyear,tref,tol,p5in,p5out,np5,nphase,[obs,"p5"],true)
+	fit_planet5(jd1,sigma,nyear,tref,tol,p5in,p5out,np5,nphase,[obs,"p5"],true)
 	end
 	if label=="Hppm"
  	#fit_planet2(jd1,sigma,nyear,tref,tol,[obs],true)
@@ -119,59 +115,72 @@ function run_grid(sigma,nyear,label::String,obs::String)
 	#fit_planet3(jd1,sigma,nyear,tref,tol,p3in,p3out,np3,nphase,[obs,"p3"],true)
 	fit_moon(jd1,sigma,nyear,tref,tol,dpin,dpout,ndp,["p3moon"],true)
 	elseif label=="Hppmpp"
-  #fit_planet4(jd1,sigma,nyear,tref,tol,p4in,p4out,np4,nphase,[obs,"p4"],true)
+  	#fit_planet4(jd1,sigma,nyear,tref,tol,p4in,p4out,np4,nphase,[obs,"p4"],true)
 	# fit_moon(jd1,sigma,nyear,tref,tol,dpin,dpout,ndp,4,"p4moon",true)
 	fit_moon(jd1,sigma,nyear,tref,tol,p4in,p4out,np4,nphase,["p3moonp4"],true)
 	elseif label=="Hppmppp"
-  fit_planet5(jd1,sigma,nyear,tref,tol,p5in,p5out,np5,nphase,[obs,"p5"],true)
+  	fit_planet5(jd1,sigma,nyear,tref,tol,p5in,p5out,np5,nphase,[obs,"p5"],true)
 	fit_moon(jd1,sigma,nyear,tref,tol,dpin,dpout,ndp,["p5moon"],true,5)
 	end
 end
-sigma=10;# nyear=30
 
-if runtype=="wide"
-	nyear=parse(Int,ARGS[5])
+function wide_run(sigma,nyear,label,obs)
 	nphase=36 #wide: 100,36,180 
-	p3in,p3out,np3=5*365.25,22*365.25,200
-	dpin,dpout,ndp=0.0,2*pi,100
+	p3in,p3out,np3=5*365.25,22*365.25,nper
+	dpin,dpout,ndp=0.0,2*pi,nper
 	p4in,p4out,np4=1.5*365.25,5*365.25,nper
 	p5in,p5out,np5=22*365.25,36*365.25,nper
 	if label=="Hpp" 
 	sim_times(jd1,sigma,nyear,obs)
  	best_p2,lprob_best_p2=fit_planet2(jd1,sigma,nyear,tref,tol,[obs],true)
 	elseif label=="Hppp"
-  fit_planet3(jd1,sigma,nyear,tref,tol,p3in,p3out,np3,nphase,[obs,"widep3"],true)
+	fit_planet3(jd1,sigma,nyear,tref,tol,p3in,p3out,np3,nphase,[obs,"widep3"],true)
 	elseif label=="Hpppp"
-  fit_planet4(jd1,sigma,nyear,tref,tol,p4in,p4out,np4,nphase,[obs,"widep4"],true)
+  	fit_planet4(jd1,sigma,nyear,tref,tol,p4in,p4out,np4,nphase,[obs,"widep4"],true)
 	elseif label=="Hppppp"
-  fit_planet5(jd1,sigma,nyear,tref,tol,p5in,p5out,np5,nphase,[obs,"widep5"],true)
+  	fit_planet5(jd1,sigma,nyear,tref,tol,p5in,p5out,np5,nphase,[obs,"widep5"],true)
 	elseif label=="Hppmpp" 
 	fit_moon(jd1,sigma,nyear,tref,tol,p4in,p4out,np4,nphase,["widep3moonp4"],true)
+	elseif label=="Hppmp"
+	fit_moon(jd1,sigma,nyear,tref,tol,dpin,dpout,ndp,["widep3moon"],true)
+
 	end
-#  fit_planet2(jd1,sigma,nyear,tref,tol,[obs])
-	# @time fit_moon(jd1,sigma,nyear,tref,tol,dpin,dpout,ndp,3)
 end
-#nyears=[15,17,19,21,23,25,27,29,16,18,20,22,24,26,28,30]#,14,13,12,11,10]
-#nyears=[30,29,28,27,26,25,24,23,22,21,20,19,18,17,16,15,14,13,12,11,10]
+
+nyears=[30,29,28,27,26,25,24,23,22,21,20,19,18,17,16,15,14,13,12,11,10]
 #if nplanet==2 || nplanet==3
 #nyears=[30,29,28,27,26,25,24,23,22,21,20,19,18]
-#sigmas=[30,10,60]
-#elseif nplanet>3
-nyears=[30,29,28,27,26,25,24,23,22]#,21,20,19,18,17,16,15]#
-sigmas=[60]#,60]
+sigmas=[10,60]#,80,90]
 #end
+
 nwalkers=75
 #nsteps=50000
-for sig in sigmas
-for yr in nyears
-	if runtype=="mcmc" && nmoon==0
-	@time planet_mcmc(sig,yr,nplanet,nsteps,obs)
+#for sig in sigmas
+#for yr in nyears
+if runtype=="mcmc" && nmoon==0
+	@time planet_mcmc(sigma,nyear,nplanet,nsteps,obs)
 	elseif runtype=="mcmc" && nmoon>0
-	@time moon_mcmc(sig,yr,nplanet,nsteps,label)
-	end
-	if runtype=="grid"
-	run_grid(sig,yr,label,obs)
-	end
+	@time moon_mcmc(sigma,nyear,nplanet,nsteps,label)
 end
+if runtype=="grid"
+	@time run_grid(sigma,nyear,label,obs)
+end
+if runtype=="wide"
+	@time wide_run(sigma,nyear,label,obs)
+end
+if runtype=="widemcmc" 
+	if nmoon==0
+		fitfile=string("FITS/widep",nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
+       	foutput=string("MCMC/widep",nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+       	p=jldopen(String(fitfile),"r")
+      	println(p," loaded.")
+        @time MCMC(foutput,p[string("best_p",nplanet)],p[string("lprob_best_p",nplanet)],nsteps,nwalkers,nplanet,p["ntrans"][1:nplanet],p["tt0"],p["tt"],p["sigtt"],true,true)
+    elseif nmoon>0 && nplanet>3
+    	fitfile=string("FITS/widep",nplanet-1,"moonp",nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
+       	foutput=string("MCMC/widep",nplanet-1,"moonp",nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+       	p=jldopen(String(fitfile),"r")
+      	println(p," loaded.")
+        @time MCMC(foutput,p[string("best_dp")],p[string("lprob_best_dp")],nsteps,nwalkers,nplanet,p["ntrans"][1:nplanet],p["tt0"],p["tt"],p["sigtt"],true,false)
+   end
 end
 

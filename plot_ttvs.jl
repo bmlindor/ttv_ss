@@ -282,7 +282,7 @@ function plot_contrib(sigma::Real,nyear::Real,options::Array{String},include_moo
   sigtt1,sigtt2=sigtt[1:n1].* (24 * 60),sigtt[n1+1:n1+n2].* (24 * 60) 
   total1=0;total2=0
 
-  fig=figure(figsize=(5,5),dpi=150)
+  fig=figure(figsize=(5.5,5.5),dpi=150)
   # title="Planet Contributions"
   # suptitle(string(title," [",nyear," yr span], ",L"$\sigma_{obs}=$",sigma," sec "))
   subplots_adjust(hspace=0.25)
@@ -351,11 +351,11 @@ function plot_contrib(sigma::Real,nyear::Real,options::Array{String},include_moo
   # ax2.text(maximum(ttsim1)-5,5,sim_obs_label)
   ax1.legend(loc="lower left",fontsize="large",ncol=nplanet)
   # ax1.legend(loc="lower left",fontsize="large",title="Contributions",title_fontsize="large",ncol=4)
-  ax2.legend(loc="lower left",ncol=nplanet,fontsize="medium")
+  ax2.legend(loc="lower left",ncol=nplanet,fontsize="large")
   tight_layout()
   # legend(loc="upper right")
   # title=string("IMAGES/ttvs/",sim,fitmodel,"ttvs-",sigma,"secs",nyear,"yrs.png")
-  # savefig(title)
+  savefig("IMAGES/ttv/widep4_EV.pdf")
   # show()
 end
   #how does scatter in residuals compare w/ uncertainty?

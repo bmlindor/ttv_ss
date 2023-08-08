@@ -106,7 +106,7 @@ function plot_trace(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num,i
     suptitle(string(title,'\n'," [",nyear," yr span] ",L"$\sigma_{obs}=$",sigma," sec ",L"$\sigma_{sys}=$",round(sigsys,sigdigits=3)," sec"))
       for j=1:nwalkers
       plot(vec(par_mcmc[j,iburn:nsteps,end]).* 3600*24,lprob_mcmc[j,iburn:nsteps])
-      xlabel(L"$\sigma_{sys}$ [min]")
+      xlabel(L"$\sigma_{sys}$ [sec]")
         # plot(vec(lprob_mcmc[j,iburn:nsteps]),label=string("walker=",j))
       end
       subplot(222)
@@ -134,7 +134,7 @@ function plot_trace(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num,i
     suptitle(string(title,'\n'," [",nyear," yr span] ",L"$\sigma_{obs}=$",sigma," sec ",L"$\sigma_{sys}=$",round(sigsys,sigdigits=3)," sec"))
       for j=1:nwalkers
       plot(vec(par_mcmc[j,iburn:nsteps,end]).* 3600*24,lprob_mcmc[j,iburn:nsteps])
-      xlabel(L"$\sigma_{sys}$ [min]")
+      xlabel(L"$\sigma_{sys}$ [set]")
       end
       subplot(222)
       for j=1:nwalkers
@@ -226,19 +226,19 @@ function plot_emcee(sigma::Real,nyear::Real,sim::String,model::String,include_mo
   ax1.set_ylabel(parname[i])
   end
   tight_layout()
-  title=string("IMAGES/traces/",sim,model,"testVenus-",sigma,"secs",nyear,"yrs.png")
+  title=string("IMAGES/traces/",sim,model,"Venus-",sigma,"secs",nyear,"yrs.png")
   savefig(title)
   clf()
   figure(figsize=(8,6))
   for i=1:5
-  ax2=subplot(3,2,i)
-  for j=1:nwalkers 
-  ax2.plot(par_mcmc[j,iburn:nsteps,i+5])
-  end
-  ax2.set_ylabel(parname[i+5])
+    ax2=subplot(3,2,i)
+    for j=1:nwalkers 
+    ax2.plot(par_mcmc[j,iburn:nsteps,i+5])
+    end
+    ax2.set_ylabel(parname[i+5])
   end
   tight_layout()
-  title=string("IMAGES/traces/",sim,model,"testEarth-",sigma,"secs",nyear,"yrs.png")
+  title=string("IMAGES/traces/",sim,model,"Earth-",sigma,"secs",nyear,"yrs.png")
   savefig(title)
   clf()
   if String(model)=="p5"
@@ -251,7 +251,7 @@ function plot_emcee(sigma::Real,nyear::Real,sim::String,model::String,include_mo
     ax3.set_ylabel(parname[i+20])
     end
     tight_layout()
-    title=string("IMAGES/traces/",sim,model,"testSaturn-",sigma,"secs",nyear,"yrs.png")
+    title=string("IMAGES/traces/",sim,model,"Saturn-",sigma,"secs",nyear,"yrs.png")
     savefig(title)
     clf()
     figure(figsize=(8,6))
@@ -263,7 +263,7 @@ function plot_emcee(sigma::Real,nyear::Real,sim::String,model::String,include_mo
     ax3.set_ylabel(parname[i+10])
     end
     tight_layout()
-    title=string("IMAGES/traces/",sim,model,"testMars-",sigma,"secs",nyear,"yrs.png")
+    title=string("IMAGES/traces/",sim,model,"Mars-",sigma,"secs",nyear,"yrs.png")
     savefig(title)
     clf()
     figure(figsize=(8,6))
@@ -280,29 +280,29 @@ function plot_emcee(sigma::Real,nyear::Real,sim::String,model::String,include_mo
       ax4.set_ylabel(parname[end])
     end
     tight_layout()
-    title=string("IMAGES/traces/",sim,model,"testJupiter-",sigma,"secs",nyear,"yrs.png")
+    title=string("IMAGES/traces/",sim,model,"Jupiter-",sigma,"secs",nyear,"yrs.png")
     savefig(title)
     clf()
   elseif String(model)=="p4"
     figure(figsize=(8,6))
     for i=1:5
-    ax3=subplot(3,2,i)
-    for j=1:nwalkers 
-    ax3.plot(par_mcmc[j,iburn:nsteps,i+10])
-    end
-    ax3.set_ylabel(parname[i+10])
+      ax3=subplot(3,2,i)
+      for j=1:nwalkers 
+      ax3.plot(par_mcmc[j,iburn:nsteps,i+10])
+      end
+      ax3.set_ylabel(parname[i+10])
     end
     tight_layout()
-    title=string("IMAGES/traces/",sim,model,"testMars-",sigma,"secs",nyear,"yrs.png")
+    title=string("IMAGES/traces/",sim,model,"Mars-",sigma,"secs",nyear,"yrs.png")
     savefig(title)
     clf()
     figure(figsize=(8,6))
     for i=1:5
-    ax3=subplot(3,2,i)
-    for j=1:nwalkers 
-    ax3.plot(par_mcmc[j,iburn:nsteps,i+15])
-    end
-    ax3.set_ylabel(parname[i+15])
+      ax3=subplot(3,2,i)
+      for j=1:nwalkers 
+      ax3.plot(par_mcmc[j,iburn:nsteps,i+15])
+      end
+      ax3.set_ylabel(parname[i+15])
     end
     ax4=subplot(3,2,6)
     for j=1:nwalkers
@@ -310,7 +310,7 @@ function plot_emcee(sigma::Real,nyear::Real,sim::String,model::String,include_mo
       ax4.set_ylabel(parname[end])
     end
     tight_layout()
-    title=string("IMAGES/traces/",sim,model,"testJupiter-",sigma,"secs",nyear,"yrs.png")
+    title=string("IMAGES/traces/",sim,model,"Jupiter-",sigma,"secs",nyear,"yrs.png")
     savefig(title)
     clf()
   else
@@ -328,7 +328,7 @@ function plot_emcee(sigma::Real,nyear::Real,sim::String,model::String,include_mo
       ax4.set_ylabel(parname[end])
     end
     tight_layout()
-    title=string("IMAGES/traces/",sim,model,"testJupiter-",sigma,"secs",nyear,"yrs.png")
+    title=string("IMAGES/traces/",sim,model,"Jupiter-",sigma,"secs",nyear,"yrs.png")
     savefig(title)
     clf()
   end

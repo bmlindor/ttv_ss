@@ -1,5 +1,5 @@
 include("bounds.jl")
-include("CGS.jl")
+#include("CGS.jl")
 include("misc.jl")
 using TTVFaster,DelimitedFiles,JLD2
 using Statistics,StatsBase,MCMCDiagnostics
@@ -338,36 +338,39 @@ function mc_vals(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num=Int,
     # println("Bad walkers: ",bad_walk/nwalkers)
 
   masses=[median(vec(par_mcmc[:,iburn:end,i-4])) for i in 1:length(param) if i%5==0] .*CGS.MSUN/CGS.MEARTH
-  mass_errs=[std(vec(par_mcmc[:,iburn:end,i-4])) for i in 1:length(param) if i%5==0] .*CGS.MSUN/CGS.MEARTH
-  periods=[mean(vec(par_mcmc[:,iburn:end,i-3])) for i in 1:length(param) if i%5==0] 
-  per_errs=[std(vec(par_mcmc[:,iburn:end,i-3])) for i in 1:length(param) if i%5==0] 
+  mass_low=[quantile(vec(par_mcmc[:,iburn:end,i-4]),0.1587) for i in 1:length(param) if i%5==0] .*CGS.MSUN/CGS.MEARTH
+  mass_high=[quantile(vec(par_mcmc[:,iburn:end,i-4]),0.8413) for i in 1:length(param) if i%5==0] .*CGS.MSUN/CGS.MEARTH
+  mass_errs=[std(vec(par_mcmc[:,iburn:end,i-4])) for i in 1:length(param) if i%5==0] 
+
+  periods=[median(vec(par_mcmc[:,iburn:end,i-3])) for i in 1:length(param) if i%5==0] 
   ecc=[median(sqrt.(vec(par_mcmc[:,iburn:nsteps,(i-1)]).^2 .+ vec(par_mcmc[:,iburn:nsteps,(i)]).^2)) for i in 1:length(param) if i%5==0]
 
-  ecc_err1 = calc_quad_errs(median(par_mcmc[:,iburn:end,4]),std(par_mcmc[:,iburn:end,4]),median(par_mcmc[:,iburn:end,5]),std(par_mcmc[:,iburn:end,5]))
-  ecc_err2 = calc_quad_errs(median(par_mcmc[:,iburn:end,9]),std(par_mcmc[:,iburn:end,9]),median(par_mcmc[:,iburn:end,10]),std(par_mcmc[:,iburn:end,10]))
-  ecc_errs = [ecc_err1,ecc_err2]
+  #ecc_err1 = calc_quad_errs(median(par_mcmc[:,iburn:end,4]),std(par_mcmc[:,iburn:end,4]),median(par_mcmc[:,iburn:end,5]),std(par_mcmc[:,iburn:end,5]))
+  #ecc_err2 = calc_quad_errs(median(par_mcmc[:,iburn:end,9]),std(par_mcmc[:,iburn:end,9]),median(par_mcmc[:,iburn:end,10]),std(par_mcmc[:,iburn:end,10]))
+  #ecc_errs = [ecc_err1,ecc_err2]
 
-  if grid_type_nplanet=="p3" || grid_type_nplanet=="p3moon"
-    ecc_err3=calc_quad_errs(median(par_mcmc[:,iburn:end,14]),std(par_mcmc[:,iburn:end,14]),median(par_mcmc[:,iburn:end,15]),std(par_mcmc[:,iburn:end,15]))
-    ecc_errs=[ecc_errs;ecc_err3]
-  elseif grid_type_nplanet=="p4" || grid_type_nplanet=="p3moonp4"
-    ecc_err4=calc_quad_errs(median(par_mcmc[:,iburn:end,14]),std(par_mcmc[:,iburn:end,14]),median(par_mcmc[:,iburn:end,15]),std(par_mcmc[:,iburn:end,15]))
-    ecc_err3=calc_quad_errs(median(par_mcmc[:,iburn:end,19]),std(par_mcmc[:,iburn:end,19]),median(par_mcmc[:,iburn:end,20]),std(par_mcmc[:,iburn:end,20]))
-    ecc_errs=[ecc_errs;ecc_err4;ecc_err3]
-  end
-if grid_type_nplanet=="p3moon" || grid_type_nplanet=="p3moonp4"
-  tmax_errs=calc_quad_errs(median(par_mcmc[:,iburn:end,19]),std(par_mcmc[:,iburn:end,19]),median(par_mcmc[:,iburn:end,20]),std(par_mcmc[:,iburn:end,20]))
-end
+  #if grid_type_nplanet=="p3" || grid_type_nplanet=="p3moon"
+  #  ecc_err3=calc_quad_errs(median(par_mcmc[:,iburn:end,14]),std(par_mcmc[:,iburn:end,14]),median(par_mcmc[:,iburn:end,15]),std(par_mcmc[:,iburn:end,15]))
+  #  ecc_errs=[ecc_errs;ecc_err3]
+  #elseif grid_type_nplanet=="p4" || grid_type_nplanet=="p3moonp4"
+  #  ecc_err4=calc_quad_errs(median(par_mcmc[:,iburn:end,14]),std(par_mcmc[:,iburn:end,14]),median(par_mcmc[:,iburn:end,15]),std(par_mcmc[:,iburn:end,15]))
+  #  ecc_err3=calc_quad_errs(median(par_mcmc[:,iburn:end,19]),std(par_mcmc[:,iburn:end,19]),median(par_mcmc[:,iburn:end,20]),std(par_mcmc[:,iburn:end,20]))
+  #  ecc_errs=[ecc_errs;ecc_err4;ecc_err3]
+  #end
+# if grid_type_nplanet=="p3moon" || grid_type_nplanet=="p3moonp4"
+#   tmax_errs=calc_quad_errs(median(par_mcmc[:,iburn:end,19]),std(par_mcmc[:,iburn:end,19]),median(par_mcmc[:,iburn:end,20]),std(par_mcmc[:,iburn:end,20]))
+# end
 
   sigsys=round((median(vec(par_mcmc[:,iburn:end,end]))).* 3600*24,sigdigits=3)
   sigsys_err=(std(vec(par_mcmc[:,iburn:end,end]))).* 3600*24
   sigtot=round(sqrt(sigsys^2 + sigma^2),sigdigits=4)
 
   println("Retrieved values.")
-  println("M_p[M⊕]=",masses," +/- ",mass_errs)
-  println("Per [d]=",periods," +/- ",per_errs)
-  println("eccen. =",ecc," +/- ",ecc_errs)
-  println("σsys[s]=",sigsys," +/- ",sigsys_err)
-  println("σtot[s]=",sigtot)
+  println("M_p[M⊕]= ",masses," + ",masses.-mass_high," - ",masses.-mass_low)
+  println("std(M_p)= ",mass_errs)
+  println("Per [d]= ",periods)#," +/- ",per_errs)
+  # println("eccen. =",ecc," +/- ",ecc_errs)
+  println("σsys[s]= ",sigsys," +/- ",sigsys_err)
+  println("σtot[s]= ",sigtot)
   return sigsys,sigtot,chi,BIC
 end

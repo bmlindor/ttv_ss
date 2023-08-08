@@ -369,17 +369,16 @@ function compare_yrs(sigma,grid_type_nplanet,case_num)
 	file14=string("grid/",grid_type_nplanet,"_grid",sigma,"s28yrs.csv")
 	file15=string("grid/",grid_type_nplanet,"_grid",sigma,"s29yrs.csv")
 	file16=string("grid/",grid_type_nplanet,"_grid",sigma,"s30yrs.csv")
-	case_label=string("σ=",sigma,"s")
+	case_label=string(L"$σ_{obs}=$",sigma,"s")
 	end
 	# fit1,header1=readdlm(file1,',',header=true)
-			if grid_type_nplanet=="p3" || grid_type_nplanet=="widep3"
+			# if grid_type_nplanet=="p3" || grid_type_nplanet=="widep3"
 	fit2,header2=readdlm(file2,',',header=true)
 	fit3,header3=readdlm(file3,',',header=true)
 	fit4,header4=readdlm(file4,',',header=true)
 	fit5,header5=readdlm(file5,',',header=true)
 	fit6,header6=readdlm(file6,',',header=true)
 	fit7,header7=readdlm(file7,',',header=true)
-		end
 	fit8,header8=readdlm(file8,',',header=true)
 	fit9,header9=readdlm(file9,',',header=true)
 	fit10,header10=readdlm(file10,',',header=true)
@@ -407,17 +406,17 @@ function compare_yrs(sigma,grid_type_nplanet,case_num)
     pnum="4th"
   end
 
-	fig,ax=subplots(figsize=(8,6))#,dpi=150)
-	title(string("Search for ",pnum," Planet (i.e. ",pname,") in ",model),fontsize="xx-large")
+	fig,ax=subplots(figsize=(7,5),dpi=150)
+	title(string("Search for ",pnum," Planet in ",model),fontsize="xx-large")
 	# ax.plot(fit1[:,per_col]./365.25 ,xprob(fit1[:,end]),label="15 yrs")
 	if grid_type_nplanet=="p3" || grid_type_nplanet=="widep3"
 	ax.plot(fit2[:,per_col]./365.25 ,xprob(fit2[:,end]),label="16 yrs",linewidth=1)
 	ax.plot(fit3[:,per_col]./365.25 ,xprob(fit3[:,end]),label="17 yrs",linewidth=1)
+end
 	ax.plot(fit4[:,per_col]./365.25 ,xprob(fit4[:,end]),label="18 yrs",linewidth=1)
 	ax.plot(fit5[:,per_col]./365.25 ,xprob(fit5[:,end]),label="19 yrs",linewidth=1)
 	ax.plot(fit6[:,per_col]./365.25 ,xprob(fit6[:,end]),label="20 yrs",linewidth=1)
 	ax.plot(fit7[:,per_col]./365.25 ,xprob(fit7[:,end]),label="21 yrs",linewidth=1)
-	end
 	ax.plot(fit8[:,per_col]./365.25 ,xprob(fit8[:,end]),label="22 yrs",linewidth=1)#,linestyle="--")	
 	ax.plot(fit9[:,per_col]./365.25 ,xprob(fit9[:,end]),label="23 yrs",linewidth=1)#,linestyle="--")
 	ax.plot(fit10[:,per_col]./365.25 ,xprob(fit10[:,end]),label="24 yrs",linewidth=1)#,linestyle="--")
@@ -426,14 +425,14 @@ function compare_yrs(sigma,grid_type_nplanet,case_num)
 	ax.plot(fit13[:,per_col]./365.25 ,xprob(fit13[:,end]),label="27 yrs",linewidth=1,linestyle="--")  
 	ax.plot(fit14[:,per_col]./365.25 ,xprob(fit14[:,end]),label="28 yrs",linewidth=1,linestyle="--")  
 	ax.plot(fit15[:,per_col]./365.25 ,xprob(fit15[:,end]),label="29 yrs",linewidth=1,linestyle="--")  
-	ax.plot(fit16[:,per_col]./365.25 ,xprob(fit16[:,end]),label="30 yrs",linewidth=1,linestyle="--")      
+	# ax.plot(fit16[:,per_col]./365.25 ,xprob(fit16[:,end]),label="30 yrs",linewidth=1,linestyle="--")      
 	axvline(true_per,linestyle="--",color="black")
 	text(1.01*true_per,0.96,pname,fontsize="large")
 	tick_params(which="both",direction="in")
 	# text(true_per + true_per/100,1.01,pname,fontsize="large")
 	#inset 
 	# text(label_xloc,1.05,sim_obs_label)
-	ax.legend(loc="upper right",fontsize="large",title=case_label,title_fontsize="large",bbox_to_anchor=(0.,0.9,1.,.102),ncol=5,mode="expand",borderaxespad=0.0)
+	ax.legend(loc="upper right",fontsize="large",bbox_to_anchor=(0.,0.9,1.,.102),ncol=6,mode="expand",borderaxespad=0.0)
 	# legend(fontsize="medium",title_fontsize="medium",title=case_label)
 	# if grid_type_nplanet=="p4" #|| grid_type_nplanet=="p3moonp4"
 	# ax2=fig.add_axes([0.5,0.2,0.3,0.5])

@@ -5,7 +5,7 @@ rc("lines",linewidth=2)
 include("regress.jl")
 include("CGS.jl")
 # Load JPL ephemerides from data and set units
-eph = Ephem("INPUTS/DE440.bsp") ; prefetch(eph)
+eph = Ephem("../ttv_ss/INPUTS/DE440.bsp") ; prefetch(eph)
 options = useNaifId+unitKM+unitDay # useNaifId + unitDay + unitAU
 AU = 149597870.700 #km
 Random.seed!(42)
@@ -222,18 +222,27 @@ function sim_obs_and_find_times(jd1::Float64,sigma::Real,nyear::Real,obs::String
   body = zeros((nt1+nt2))
   body[1:nt1] .= 1.0
   body[nt1+1:nt1+nt2] .= 2.0
-  function make_transit_times_table()
-    for i=1:nt1
-      println("Venus",'\t',i-1,'\t',round(t1[i].-2433500,sigdigits=10),'\t',round((tt1[i] .- t1[i]).*24*60,sigdigits=4),'\t',round(noise1[i].*24*60,sigdigits=2),'\t',sigtt1[i].*24*60)
-    end
-    for i=1:nt2
-      println("Earth",'\t',i-1,'\t',round(t2[i].-2433500,sigdigits=10),'\t',round((tt2[i] .- t2[i]).*24*60,sigdigits=4),'\t',round(noise2[i].*24*60,sigdigits=2),'\t',sigtt2[i].*24*60)
-    end
-  end
+
+  ttv1=(tt1 .- t1).*24*60
+  ttv2=(tt2 .- t2).*24*60
+  # function make_transit_times_table()
+  #   name= string(jd1,"VEtransit_times",nyear,".txt")
+  #   open(name,"w") do io
+  #     for i=1:nt1
+  #       println(io,"Venus",'\t',i-1,'\t',round(t1[i].-2433500,sigdigits=10),'\t',round(ttv1[i],sigdigits=4),'\t',round(noise1[i].*24*60,sigdigits=2),'\t',sigtt1[i].*24*60)
+  #     end
+  #     for i=1:nt2
+  #       println(io,"Earth",'\t',i-1,'\t',round(t2[i].-2433500,sigdigits=10),'\t',round(ttv2[i],sigdigits=4),'\t',round(noise2[i].*24*60,sigdigits=2),'\t',sigtt2[i].*24*60)
+  #     end
+  #   end
+  # end
   # make_transit_times_table()
+  println("A_TTV1= ",maximum(abs.(ttv1)))
+  println("A_TTV2= ",maximum(abs.(ttv2)))
   return body,tt0,tt,sigtt
   # return body,tt
 end
+# body,tt0,tt,sigtt=sim_obs_and_find_times(2.4332825e6,30,30,"fromEV")
 # Simulate times starting at jd1 for nyear span with sigma Gaussian noise added, save to .txt
 function sim_times(jd1::Float64,sigma::Real,nyear::Real,obs::String,dir::String="INPUTS")
   body,tt0,tt,sigtt=sim_obs_and_find_times(jd1,sigma,nyear,obs)

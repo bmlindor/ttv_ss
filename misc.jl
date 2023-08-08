@@ -16,11 +16,16 @@ function fit_BIC(tt0,nplanet,ntrans,params,tt,sigtt,jmax,EM)
 	BIC=chi2 + k*ln(N)
 	return chi2,BIC
 end
-G=CGS.GRAV /1e3 #in kms units
-AU=CGS.AU /1e2 #in kms units
+G=CGS.GRAV /1e3 #in MKS units
+AU=CGS.AU /1e2 #in MKS units
 
 Kepler_law(Per,mp,mstar)= ((G*(mstar + mp)* (Per*24*3600)^2) /(4*pi^2))^(1/3) 
 Hill_radius(Per,mp,ecc,mstar) = (Kepler_law(Per,mp,mstar) * (1-ecc) * (mp/(3 * mstar))^(1/3)) / AU
+RV_semiamplitude(Per,mp,ecc,inc,mstar) = (((mp*sin(inc))^3/((Per*24*3600) * (1-ecc^2)^3/2)) * (2pi*G/(mstar+mp)^2))^(1/3)
+calc_deg(value)=value * 180/pi
+calc_evec1(e,omega)=e* cos(omega-77)
+calc_evec2(e,omega)=e* sin(omega-77)
+calc_tmax(a_p,a_s,m_p,m_s,P_p)=(a_s*m_s*P_p) / (2*pi*a_p*(m_s+m_p))
 #Hill_radius((1733*24*3600),(27*5.9742e24),0.4,1.99e30)
 function mutual_Hill(Per1,mp1,mstar,Per2,mp2)
 	a1,a2 = Kepler_law(Per1,mp1,mstar),Kepler_law(Per2,mp2,mstar)	
