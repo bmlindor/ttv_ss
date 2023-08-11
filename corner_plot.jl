@@ -4,10 +4,6 @@ using3D() # Needed to create a 3D subplot
 include("MCMC.jl")
 # rc("font",family="sans-serif")
 # rc("lines",linewidth=1.5)
-calc_deg(value)=value * 180/pi
-calc_evec1(e,omega)=e* cos(omega-77)
-calc_evec2(e,omega)=e* sin(omega-77)
-calc_tmax(a_p,a_s,m_p,m_s,P_p)=(a_s*m_s*P_p) / (2*pi*a_p*(m_s+m_p))
 # Basic corner plot for posterior distributions of 2 parameters
 function corner(x1,x2,nbins)
   fig=figure(figsize=(5,5),dpi=150)
@@ -431,7 +427,7 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
   iburn,samples=jldmc["iburn"], jldmc["indepsamples"]
   par_mcmc=jldmc["par_mcmc"]; lprob_mcmc=jldmc["lprob_mcmc"]  ; param=jldmc["param"]
   pname=jldmc["pname"]
-
+ 
   println("# of independent samples: ",samples)
   println("Burn-in number: ",iburn," out of ",nsteps," steps")
   tt0,tt,ttmodel,sigtt=jldfit["tt0"],jldfit["tt"],jldfit["ttmodel"],jldfit["sigtt"]
@@ -447,7 +443,10 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
    avg[i],minus1sig[i],plus1sig[i]=quantile(vec(par_mcmc[:,iburn:end,i]),[0.5,0.1587,0.8413])
    println(pname[i]," = ",avg[i]," + ",abs(plus1sig[i]-avg[i])," _ ",abs(avg[i]-minus1sig[i]))
   end
-  # Calculate Bayesian Inference Criterion (BIC) 
+  stable=false 
+  mutual_radius=mutual_Hill(avg[2],avg[1].*CGS.MSUN/CGS.MEARTH,CGS.MSUN,avg[7],avg[6].*CGS.MSUN/CGS.MEARTH)
+ # if mutual_radius <
+ # Calculate Bayesian Inference Criterion (BIC) 
   function calc_BIC(prob)
     function calc_chisq(par_mcmc)
     chisq = 0.0  
@@ -455,14 +454,15 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
       for j=1:length(tt)
         chisq += (tt[j]-tt_model[j])^2 / (sigtt[j]^2 + par_mcmc[end]^2)
       end
-    end
-    chisq=chi_mcmc(avg)
+    return chisq
+	end
+    chisq=calc_chisq(avg)
     N=length(tt0) ; k=nparam
     #println("[N_obs]= ",N," [no. of model params]= ",k)
     reduced_chisq=chisq/(N-k)
     BIC_chi(chisq,k,N)=chisq + k*log(N)
-    BIC_prob(prob,k,N)=-2*log(prob) + k*log(N)
-    return reduced_chisq, BIC_prob
+    BIC=-2*log(prob) + k*log(N)
+    return reduced_chisq, BIC
   end
   prob=quantile(exp.(lprob_mcmc[iburn:nsteps]),0.5);prob_max = maximum(exp.(lprob_mcmc[iburn:nsteps]))
   #println(" median Prob: ",prob,"      maximum Prob: ",prob_max)
@@ -477,14 +477,6 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
   #BIC,sigsys,sigtot,chi=mc_vals(sigma,nyear,grid_type_nplanet,case_num,include_moon)
   # println("Loaded",mcfile,".")
   # Percentage of walkers where difference between median and quantile value is >100
-  bad_walk=0
-  for i in 1:nwalkers
-    med,sig1,quant=quantile!(par_mcmc[i,jldmc["iburn"]:end,12],[0.5,0.68,0.9])
-    if abs(quant-(sig1/med))>100
-    bad_walk+=1
-    end
-  end
-  # println("# of bad walkers: ",bad_walk)
 
   if  grid_type_nplanet=="p2" 
     model=L"$\mathcal{H}_{PP}$"
@@ -505,139 +497,18 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
     L"$t_{max} sin(ϕ_0)$",L"$t_{max} cos(ϕ_0)$",L"$Δϕ$ [rad]",L"$σ_{sys}^2$ [days]"]
   function plot_traces()
     figure(figsize=(8,6))
-    for i=1:5
-    ax1=subplot(3,2,i)
-    for j=1:nwalkers 
-    ax1.plot(par_mcmc[j,iburn:nsteps,i])
-    end
-    ax1.set_ylabel(parname[i])
-    end
-    tight_layout()
-    title=string("IMAGES/traces/",sim,model,"Venus-",sigma,"secs",nyear,"yrs.png")
-    savefig(title)
-    clf()
-    figure(figsize=(8,6))
-    for i=1:5
-      ax2=subplot(3,2,i)
+      for i=1:nparam
+      ax=subplot(nplanet,5,i)
       for j=1:nwalkers 
-      ax2.plot(par_mcmc[j,iburn:nsteps,i+5])
+      ax.plot(par_mcmc[j,iburn:end,i])
       end
-      ax2.set_ylabel(parname[i+5])
-    end
-    tight_layout()
-    title=string("IMAGES/traces/",sim,model,"Earth-",sigma,"secs",nyear,"yrs.png")
-    savefig(title)
-    clf()
-    if String(model)=="p5"
-      figure(figsize=(8,6))
-      for i=1:5
-      ax3=subplot(3,2,i)
-      for j=1:nwalkers 
-      ax3.plot(par_mcmc[j,iburn:nsteps,i+20])
-      end
-      ax3.set_ylabel(parname[i+20])
-      end
-      tight_layout()
-      title=string("IMAGES/traces/",sim,model,"Saturn-",sigma,"secs",nyear,"yrs.png")
+      ax.set_ylabel(pname[i])
+      # tight_layout()
+      title=string("IMAGES/trace/",grid_type_nplanet,"-",sigma,"secs",nyear,"yrs.png")
       savefig(title)
+      #    println("Hit return to continue")
+      #    read(STDIN,Char)
       clf()
-      figure(figsize=(8,6))
-      for i=1:5
-      ax3=subplot(3,2,i)
-      for j=1:nwalkers 
-      ax3.plot(par_mcmc[j,iburn:nsteps,i+10])
-      end
-      ax3.set_ylabel(parname[i+10])
-      end
-      tight_layout()
-      title=string("IMAGES/traces/",sim,model,"Mars-",sigma,"secs",nyear,"yrs.png")
-      savefig(title)
-      clf()
-      figure(figsize=(8,6))
-      for i=1:5
-      ax3=subplot(3,2,i)
-      for j=1:nwalkers 
-      ax3.plot(par_mcmc[j,iburn:nsteps,i+15])
-      end
-      ax3.set_ylabel(parname[i+15])
-      end
-      ax4=subplot(3,2,6)
-      for j=1:nwalkers
-        ax4.plot(par_mcmc[j,iburn:nsteps,end])
-        ax4.set_ylabel(parname[end])
-      end
-      tight_layout()
-      title=string("IMAGES/traces/",sim,model,"Jupiter-",sigma,"secs",nyear,"yrs.png")
-      savefig(title)
-      clf()
-    elseif String(model)=="p4"
-      figure(figsize=(8,6))
-      for i=1:5
-        ax3=subplot(3,2,i)
-        for j=1:nwalkers 
-        ax3.plot(par_mcmc[j,iburn:nsteps,i+10])
-        end
-        ax3.set_ylabel(parname[i+10])
-      end
-      tight_layout()
-      title=string("IMAGES/traces/",sim,model,"Mars-",sigma,"secs",nyear,"yrs.png")
-      savefig(title)
-      clf()
-      figure(figsize=(8,6))
-      for i=1:5
-        ax3=subplot(3,2,i)
-        for j=1:nwalkers 
-        ax3.plot(par_mcmc[j,iburn:nsteps,i+15])
-        end
-        ax3.set_ylabel(parname[i+15])
-      end
-      ax4=subplot(3,2,6)
-      for j=1:nwalkers
-        ax4.plot(par_mcmc[j,iburn:nsteps,end])
-        ax4.set_ylabel(parname[end])
-      end
-      tight_layout()
-      title=string("IMAGES/traces/",sim,model,"Jupiter-",sigma,"secs",nyear,"yrs.png")
-      savefig(title)
-      clf()
-    else
-      figure(figsize=(8,6))
-      for i=1:5
-      ax3=subplot(3,2,i)
-      for j=1:nwalkers 
-      ax3.plot(par_mcmc[j,iburn:nsteps,i+10])
-      end
-      ax3.set_ylabel(parname[i+10])
-      end
-      ax4=subplot(3,2,6)
-      for j=1:nwalkers
-        ax4.plot(par_mcmc[j,iburn:nsteps,end])
-        ax4.set_ylabel(parname[end])
-      end
-      tight_layout()
-      title=string("IMAGES/traces/",sim,model,"Jupiter-",sigma,"secs",nyear,"yrs.png")
-      savefig(title)
-      clf()
-    end
-    if include_moon
-      figure(figsize=(7,5))
-      for i=1:3
-      ax5=subplot(2,2,i)
-      for j=1:nwalkers 
-      ax5.plot(par_mcmc[j,1:nsteps,i+15])
-      end
-      ax5.set_ylabel(parname[i+20])
-      end
-      # subplot(2,2,4)
-      # for j=1:nwalkers
-      # plot(lprob_mcmc[j,iburn:nsteps])  
-      # ylabel(L"$logProb$")
-      # end
-      tight_layout()
-      title=string("IMAGES/traces/",sim,model,"Moon-",sigma,"secs",nyear,"yrs.png")
-      savefig(title)
-      clf()
-    end
   end
   function plot_dist()
     # True values based on "PlanetaryBodyData.pdf" (source?)
@@ -677,7 +548,7 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
     fig2.text(0.36,0.8,string(L"$\sigma_{sys}=$",sigsys," sec",'\n',L"$\sigma_{tot}=$",sigtot," sec",'\n',"BIC= ",BIC,'\n',L"$\chi^2 =$",chi))
     savefig(title)
     clf()
-    if grid_type_nplanet=="p4" || grid_type_nplanet=="p3moonp4" || grid_type_nplanet=="widep4"
+    if grid_type_nplanet=="p4" || grid_type_nplanet=="p3moonp4" || grid_type_nplanet=="widep3moonp4" || grid_type_nplanet=="widep4"
       m3=vec(par_mcmc[:,iburn:nsteps,11]).* CGS.MSUN/CGS.MEARTH
       ec3=vec(par_mcmc[:,iburn:nsteps,14])#.*sqrt.(vec(par_mcmc[:,1:nsteps,14]).^2 .+ vec(par_mcmc[:,1:nsteps,15]).^2)
       es3=vec(par_mcmc[:,iburn:nsteps,15])#.*sqrt.(vec(par_mcmc[:,1:nsteps,14]).^2 .+ vec(par_mcmc[:,1:nsteps,15]).^2)
@@ -714,7 +585,7 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
       fig4.text(0.36,0.8,string(L"$\sigma_{sys}=$",sigsys," sec",'\n',L"$\sigma_{tot}=$",sigtot," sec",'\n',"BIC= ",BIC,'\n',L"$\chi^2 =$",chi))
       savefig(title)
       clf()
-    elseif grid_type_nplanet=="p3" || grid_type_nplanet=="widep3"
+    elseif grid_type_nplanet=="p3" || grid_type_nplanet=="widep3" || grid_type_nplanet=="p3moon"
       m3=vec(par_mcmc[:,iburn:nsteps,11]).* CGS.MSUN/CGS.MEARTH
       ec3=vec(par_mcmc[:,iburn:nsteps,14])#.*sqrt.(vec(par_mcmc[:,1:nsteps,14]).^2 .+ vec(par_mcmc[:,1:nsteps,15]).^2)
       es3=vec(par_mcmc[:,iburn:nsteps,15])#.*sqrt.(vec(par_mcmc[:,1:nsteps,14]).^2 .+ vec(par_mcmc[:,1:nsteps,15]).^2)

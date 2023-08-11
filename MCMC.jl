@@ -220,7 +220,7 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,nsteps
     end
   end
   indepsamples = minimum(samplesize)
-  println("Independent Sample Size: ",indepsamples)
+  # println("Independent Sample Size: ",indepsamples)
 
 	# Calculate the auto-correlation function for each parameter:
 	#acf=zeros(nparam)
@@ -229,20 +229,37 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,nsteps
 	#end
 	#println("Auto-Cor Function: ",acf)
 
+  # Find bad walkers where diffence between final step and median value is >100
+  # bad_walk=[]
+  # final_step[j,i]=abs(median(par_mcmc[j,iburn:end,i]) .- par_mcmc[j,end,i])
+  # if final_step[j,i] > 100
+  #  # append!(bad_walk,j)
+  #   println(j)
+  # end
+  # println("Bad walkers: ",bad_walk/nwalkers)
+
   # Find mean and standard deviation of posteriors after burn-in:
 	mean_posteriors=[mean(par_mcmc[:,iburn:nsteps,i]) for i=1:nparam]
 	println("Mean posteriors after burn-in: ",mean_posteriors)
   sigtot=[sqrt((mean(vec(par_mcmc[:,iburn:nsteps,end])).*3600*24)^2 + (mean(sigtt).*3600*24)^2) ]
 	println("Total timing uncertainty of: ",sigtot," secs.")
+  for i=1:nparam
+   avg[i],minus1sig[i],plus1sig[i]=quantile(vec(par_mcmc[:,iburn:end,i]),[0.5,0.1587,0.8413])
+   println(pname[i]," = ",avg[i]," + ",abs(plus1sig[i]-avg[i])," _ ",abs(avg[i]-minus1sig[i]))
+  end
 
-
-  #mean_mp = [mean(vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+1])).*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
-  #mp_errs = [std(vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+1])).*abs(CGS.MSUN/CGS.MEARTH) for iplanet=1:nplanet]
-
-  #mean_ecc=[mean(sqrt.(vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+4]).^2 .+ vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+5]).^2)) for iplanet=1:nplanet]
-	#ecc_errs= [sqrt((vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+4]).^2 .* (std(vec((par_mcmc[:,iburn:nsteps,(iplanet-1)*5+4])).^2))  / (vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+4]).^2 .+ vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+5]).^2)) .+ (vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+5]).^2 .* (std(vec((par_mcmc[:,iburn:nsteps,(iplanet-1)*5+5])).^2))  / (vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+4]).^2 .+ vec(par_mcmc[:,iburn:nsteps,(iplanet-1)*5+5]).^2))) for iplanet=1:nplanet]
-
-
+  # Plot traces
+  # for i=2:nparam
+  #   for j=1:i-1
+  #     scatter(vec(par_mcmc[1:nwalkers,iburn:end,i]),vec(par_mcmc[1:nwalkers,iburn:end,j]))
+  #     xlabel(pname[i])
+  #     ylabel(pname[j])
+  #        println("Hit return to continue")
+  #     read(STDIN,Char)
+  #     clf()
+  #   end
+  # end
+  
   #open(fresults,"w") do io
 	#println(io,"MC chi-square after burn-in: ",chi2)
   #for i=1:nparam
@@ -299,51 +316,28 @@ function mc_vals(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num=Int,
   plus1sig=zeros(nparam)
   for i=1:nparam
    avg[i],minus1sig[i],plus1sig[i]=quantile(vec(par_mcmc[:,iburn:end,i]),[0.5,0.1587,0.8413])
-   # println(pname[i]," = ",avg[i]," + ",abs(plus1sig[i]-avg[i])," _ ",abs(avg[i]-minus1sig[i]))
+   println(pname[i]," = ",avg[i]," + ",abs(plus1sig[i]-avg[i])," _ ",abs(avg[i]-minus1sig[i]))
   end
-  function chi_mcmc(tt0,nplanet,ntrans,par_mcmc,tt,sigtt,jmax,EM)
-    chisq = 0.0  
-    tt_model = TTVFaster.ttv_wrapper(tt0,nplanet,ntrans,par_mcmc[1:end-1],jmax,EM) 
-    for j=1:length(tt)
-      chisq += (tt[j]-tt_model[j])^2 / (sigtt[j]^2 + par_mcmc[end]^2)
-    end
-    return chisq
-  end
-  # println("median posteriors: ",avg)
-  #mean_posteriors=[mean(par_mcmc[:,iburn:nsteps,i]) for i=1:nparam]
-  # println("mean posteriors: ",mean_posteriors)
-  chi2_avg = chi_mcmc(tt0,nplanet,ntrans,avg,tt,sigtt,jmax,EM)
 
-  # Calculate Bayesian Inference Criterion (BIC) 
-  prob=quantile(exp.(lprob_mcmc[iburn:nsteps]),0.5);prob_max = maximum(exp.(lprob_mcmc[iburn:nsteps]))
-  #println(" median Prob: ",prob,"      maximum Prob: ",prob_max)
+  # Percentage of walkers where diff. between median and quantile value is >100
+  # bad_walk=0
+  # for i in 1:nwalkers
+  #    med,sig1,quant=quantile!(par_mcmc[i,jldmc["iburn"]:end,12],[0.5,0.68,0.9])
+  #    if abs(quant-med)>100
+  #    bad_walk+=1
+  #    end
+  # end
+  # println("Bad walkers: ",bad_walk/nwalkers)
 
-  #chi2 = chi_mcmc(tt0,nplanet,ntrans,mean_posteriors,tt,sigtt,jmax,EM)
-  N=length(tt0) ; k=nparam
-  println("[N_obs]= ",N," [no. of model params]= ",k)
-  BIC_chi(chi2,k,N)=chi2 + k*log(N)
-  BIC_prob(prob,k,N)=-2*log(prob) + k*log(N)
-  println(" χ^2 from median: ",chi2_avg,"     reduced χ^2: ",chi2_avg/(N-k))
-  chi=round(chi2_avg,sigdigits=4)
-  BIC= round(BIC_prob(prob_max,k,N),sigdigits=4)
 
-    # Percentage of walkers where diff. between median and quantile value is >100
-    # bad_walk=0
-    # for i in 1:nwalkers
-    #    med,sig1,quant=quantile!(par_mcmc[i,jldmc["iburn"]:end,12],[0.5,0.68,0.9])
-    #    if abs(quant-med)>100
-    #    bad_walk+=1
-    #    end
-    # end
-    # println("Bad walkers: ",bad_walk/nwalkers)
 
   masses=[median(vec(par_mcmc[:,iburn:end,i-4])) for i in 1:length(param) if i%5==0] .*CGS.MSUN/CGS.MEARTH
-  mass_low=[quantile(vec(par_mcmc[:,iburn:end,i-4]),0.1587) for i in 1:length(param) if i%5==0] .*CGS.MSUN/CGS.MEARTH
-  mass_high=[quantile(vec(par_mcmc[:,iburn:end,i-4]),0.8413) for i in 1:length(param) if i%5==0] .*CGS.MSUN/CGS.MEARTH
-  mass_errs=[std(vec(par_mcmc[:,iburn:end,i-4])) for i in 1:length(param) if i%5==0] 
+  # mass_low=[quantile(vec(par_mcmc[:,iburn:end,i-4]),0.1587) for i in 1:length(param) if i%5==0] .*CGS.MSUN/CGS.MEARTH
+  # mass_high=[quantile(vec(par_mcmc[:,iburn:end,i-4]),0.8413) for i in 1:length(param) if i%5==0] .*CGS.MSUN/CGS.MEARTH
+  # mass_errs=[std(vec(par_mcmc[:,iburn:end,i-4])) for i in 1:length(param) if i%5==0] 
+  # periods=[median(vec(par_mcmc[:,iburn:end,i-3])) for i in 1:length(param) if i%5==0]
+  ecc=[calc_ecc(avg[i-1],avg[i]) for i in 1:length(param) if i%5==0] 
 
-  periods=[median(vec(par_mcmc[:,iburn:end,i-3])) for i in 1:length(param) if i%5==0] 
-  ecc=[median(sqrt.(vec(par_mcmc[:,iburn:nsteps,(i-1)]).^2 .+ vec(par_mcmc[:,iburn:nsteps,(i)]).^2)) for i in 1:length(param) if i%5==0]
 
   #ecc_err1 = calc_quad_errs(median(par_mcmc[:,iburn:end,4]),std(par_mcmc[:,iburn:end,4]),median(par_mcmc[:,iburn:end,5]),std(par_mcmc[:,iburn:end,5]))
   #ecc_err2 = calc_quad_errs(median(par_mcmc[:,iburn:end,9]),std(par_mcmc[:,iburn:end,9]),median(par_mcmc[:,iburn:end,10]),std(par_mcmc[:,iburn:end,10]))
@@ -366,11 +360,11 @@ function mc_vals(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num=Int,
   sigtot=round(sqrt(sigsys^2 + sigma^2),sigdigits=4)
 
   println("Retrieved values.")
-  println("M_p[M⊕]= ",masses," + ",masses.-mass_high," - ",masses.-mass_low)
-  println("std(M_p)= ",mass_errs)
-  println("Per [d]= ",periods)#," +/- ",per_errs)
-  # println("eccen. =",ecc," +/- ",ecc_errs)
+  println("M_p[M⊕]= ",masses)#" + ",masses.-mass_high," - ",masses.-mass_low)
+  # println("std(M_p)= ",mass_errs)
+  # println("Per [d]= ",periods)#," +/- ",per_errs)
+  println("eccen. =",ecc)#," +/- ",ecc_errs)
   println("σsys[s]= ",sigsys," +/- ",sigsys_err)
   println("σtot[s]= ",sigtot)
-  return sigsys,sigtot,chi,BIC
+  # return sigsys,sigtot,chi,BIC
 end

@@ -8,7 +8,7 @@ function chisquare(tt0,nplanet,ntrans,params,tt,sigtt,jmax,EM)
   end
   return chisq
 end
-avg(x,y)=(x + y)/2
+# avg(x,y)=(x + y)/2
 gaussian(x,mu,sig)=exp.(-((x .- mu).^2) ./ (2 * sig^.2))
 function fit_BIC(tt0,nplanet,ntrans,params,tt,sigtt,jmax,EM)
 	chi2 = chisquare(tt0,nplanet,ntrans,params,tt,sigtt,jmax,EM)
@@ -19,12 +19,13 @@ end
 G=CGS.GRAV /1e3 #in MKS units
 AU=CGS.AU /1e2 #in MKS units
 
-Kepler_law(Per,mp,mstar)= ((G*(mstar + mp)* (Per*24*3600)^2) /(4*pi^2))^(1/3) 
-Hill_radius(Per,mp,ecc,mstar) = (Kepler_law(Per,mp,mstar) * (1-ecc) * (mp/(3 * mstar))^(1/3)) / AU
+Kepler_law(Per,mp,mstar)=((G*(mstar + mp)* (Per*24*3600)^2) /(4*pi^2))^(1/3) 
+Hill_radius(Per,mp,ecc,mstar)=(Kepler_law(Per,mp,mstar) * (1-ecc) * (mp/(3 * mstar))^(1/3)) / AU
 RV_semiamplitude(Per,mp,ecc,inc,mstar) = (((mp*sin(inc))^3/((Per*24*3600) * (1-ecc^2)^3/2)) * (2pi*G/(mstar+mp)^2))^(1/3)
 calc_deg(value)=value * 180/pi
 calc_evec1(e,omega)=e* cos(omega-77)
 calc_evec2(e,omega)=e* sin(omega-77)
+calc_ecc(ecosom,esinom)=sqrt(ecosom^2 + esinom^2)
 calc_tmax(a_p,a_s,m_p,m_s,P_p)=(a_s*m_s*P_p) / (2*pi*a_p*(m_s+m_p))
 #Hill_radius((1733*24*3600),(27*5.9742e24),0.4,1.99e30)
 function mutual_Hill(Per1,mp1,mstar,Per2,mp2)
@@ -52,15 +53,6 @@ function second_peak_params(grid_file::String)
       end
      end
   end
-
-	# function peaks(df)
-  #   for i=1:length(df.lprob)
-  #    	if xprob(df.lprob)[i] > .8 && xprob(df.lprob)[i]!=1
-  #      println("indx: ",i," Lprob: ", xprob(df.lprob)[i])
-  #      append!(indxs,i)
-  #     end
-  #    end
-  # end
   peaks(df)
   new_params=df[indxs,:]
 	return new_params

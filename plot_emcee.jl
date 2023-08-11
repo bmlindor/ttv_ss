@@ -395,14 +395,15 @@ function plot_effects(sigma::Real,nyear::Real,sim::String,model::String)
   nsteps=m["nsteps"]
   accept=m["accept"]
   iburn=m["iburn"]
-  plot()
+
+  fig=figure(figsize=(8,6))
+  for i=2:nparam
+    for j=1:i-1
+    scatter(vec(par_mcmc[1:nwalkers,iburn:nsteps,i]),vec(par_mcmc[1:nwalkers,iburn:nsteps,j]))
+    xlabel(pname[i])
+    ylabel(pname[j])
+    end
+  end
 end
-# # figsize=(8,6)
-# # for i=2:nparam
-# #   for j=1:i-1
-# #     scatter(vec(par_mcmc[1:nwalkers,iburn:nsteps,i]),vec(par_mcmc[1:nwalkers,iburn:nsteps,j]))
-# #     xlabel(pname[i])
-# #     ylabel(pname[j])
-# #   end
-# # end
+
 # # name=string("IMAGES/MCMCparams",label,".png")
