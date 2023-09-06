@@ -5,29 +5,58 @@ include("MCMC.jl")
 # rc("font",family="sans-serif")
 # rc("lines",linewidth=1.5)
 # Basic corner plot for posterior distributions of 2 parameters
-function corner(x1,x2,nbins)
-  fig=figure(figsize=(5,5),dpi=150)
-  subplots_adjust(hspace=0.05,wspace=0.05)
-  ax2=subplot(221)
-  ax2.hist(x1,bins=nbins,histtype="step",color="black")
-  ax2.minorticks_on()
-  ax2.tick_params(which="both",direction="out",
-      left=false,right=false,top=true,bottom=true,
-      labelbottom=false,labeltop=false,labelleft=false,labelright=false)
+function corner(x,y,nbins)
+  function scatter_hist(x, y, ax, ax_histx, ax_histy)
+    # no labels
+    ax_histx.tick_params(axis="x", labelbottom="False")
+    ax_histy.tick_params(axis="y", labelleft="False")
+    # the scatter plot:
+    # ax.scatter(x, y)
+    h,xedges,yedges=ax.hist2d(x,y,bins=nbins,cmin=1,cmax=100000)
+    # the contour:
+    # M=meshgrid(x,y)
 
-  ax3=subplot(224)
-  ax3.hist(x2,bins=nbins,histtype="step",color="black",orientation="horizontal")
-  ax3.minorticks_on()
-  ax3.tick_params(which="both",direction="out",
-      left=true,right=true,top=false,bottom=false,
-      labelbottom=false,labeltop=false,labelleft=false,labelright=false)
-
-  ax1=subplot(223,sharex=ax2,sharey=ax3)
-  ax1.hist2d(x1,x2,bins=nbins,cmin=1)
-  ax1.axis([minimum(x1),maximum(x1),minimum(x2),maximum(x2)])
-  ax1.tick_params(which="both",direction="out",top=true,right=true)
-  return fig
+    # xedges=h[2][2:end];yedges=h[3][2:end];
+    # ax.contour(xedges,yedges,h,levels=[10,30,50])
+    # now determine nice limits by hand:
+    # binwidth = 0.25
+    # xymax = maximum(maximum(abs.(x)), maximum(abs.(y)))
+    # lim = (int(xymax/binwidth) + 1) * binwidth
+    # bins = range(-lim, lim + binwidth, binwidth)
+    ax_histx.hist(x, bins=nbins,histtype="step")
+    ax_histy.hist(y, bins=nbins,histtype="step", orientation="horizontal")
+  end
+  fig=figure(figsize=(5,5))#,dpi=150)
+  # gs = fig.add_gridspec(2, 2)
+  # Add a gridspec with two rows and two columns and a ratio of 1 to 4 between
+  # the size of the marginal axes and the main axes in both directions.
+  gs = fig.add_gridspec(2, 2,  width_ratios=(4, 1), height_ratios=(1, 4),
+                      left=0.1, right=0.9, bottom=0.1, top=0.9,
+                      wspace=0.05, hspace=0.05)
+  # Create the Axes.
+  ax = fig.add_subplot(gs[2, 1])
+  ax_histx = fig.add_subplot(gs[1, 1], sharex=ax)
+  ax_histy = fig.add_subplot(gs[2, 2], sharey=ax)
+  # Draw the scatter plot and marginals.
+  scatter_hist(x, y, ax, ax_histx, ax_histy)
+    return fig
 end
+  # subplots_adjust(hspace=0.05,wspace=0.05)
+  # ax2=subplot(221)
+  # ax2.hist(x1,bins=nbins,histtype="step",color="black")
+  # ax2.minorticks_on()
+  # ax2.tick_params(which="both",direction="out",
+  #     left=false,right=false,top=true,bottom=true,
+  #     labelbottom=false,labeltop=false,labelleft=false,labelright=false)
+
+  # ax3=subplot(224)
+  # ax3.hist(x2,bins=nbins,histtype="step",color="black",orientation="horizontal")
+  # ax3.minorticks_on()
+  # ax3.tick_params(which="both",direction="out",
+  #     left=true,right=true,top=false,bottom=false,
+  #     labelbottom=false,labeltop=false,labelleft=false,labelright=false)
+
+        
 # Corner plot for posterior distributions of 2 parameters, compared to true values
 function corner(x1,x2,truex1,truex2,nbins)
 	fig=figure(figsize=(4,4),dpi=150)
@@ -41,7 +70,7 @@ function corner(x1,x2,truex1,truex2,nbins)
   ylabel(L"$\Delta\phi$ [rad], $Per_2$ Phase Offset")
   ax1.tick_params(which="both",direction="out",top=true,right=true)
 
-	ax2=fig.add_subplot(221,sharex=ax1)
+	ax2=fig.add_subplot(221)
 	h1=ax2.hist(x1,bins=nbins,histtype="step",color="black")
   ax2.axvspan(quantile(x1,0.1587),quantile(x1,0.8413),color="limegreen",alpha=0.35)
 	axvline(truex1,linestyle="--",color="black",label="True Value")
@@ -60,210 +89,469 @@ function corner(x1,x2,truex1,truex2,nbins)
 	    labelbottom=false,labeltop=false,labelleft=false,labelright=true)
   return fig
 end
-# Corner plot for posterior distributions of 3 parameters
-function corner(x1,x2,x3,nbins)
-  fig=figure(figsize=(5,5),dpi=150)
-  subplots_adjust(hspace=0.05,wspace=0.05)
-  ax1=subplot(3,3,1)
-  ax1.hist(x3,bins=nbins,histtype="step",color="black")
-  ax1.minorticks_on()
-  ax1.tick_params(which="major",direction="out",length=5,
-      left=false,right=false,top=true,bottom=true,
-      labelbottom=false,labeltop=false,labelleft=false,labelright=false)
-  ax1.tick_params(which="minor",direction="out",length=2,
-      left=false,right=false,top=true,bottom=true,
-      labelbottom=false,labeltop=false,labelleft=false,labelright=false)
 
-  ax4=subplot(3,3,4,sharex=ax1)
-  ax4.hist2d(x3,x2,bins=nbins,cmin=1)
-  ylabel(L"$t_{max} \cos{\phi_0}$")
-  ax4.minorticks_on()
-  ax4.tick_params(which="major",direction="out",top=true,right=true,length=5,
-      labelleft=true,labelbottom=false)
-  ax4.tick_params(which="minor",direction="out",top=true,right=true,length=2,
-      labelleft=true,labelbottom=false)
+# Corner plot for posterior distributions of 6 parameters, compared to true values
+function corner(xs,true_xs,labels,nbins)
+  x1,x2,x3,x4,x5,x6=xs[1],xs[2],xs[3],xs[4],xs[5],xs[6]
+  truex1,truex2,truex3,truex4,truex5,truex6=true_xs
+  label1,label2,label3,label4,label5,label6=labels
+  fig=figure(figsize=(8,8))#,dpi=150)
+  fig.subplots_adjust(hspace=0.2,wspace=0.2)
+  ax1=fig.add_subplot(6,6,1)
+  ax1.axvline(truex6,linestyle="--",color="black")
+  ax1.hist(x6,bins=nbins,histtype="step",color="black")
+  ax1.axvspan(quantile(vec(x6),0.1587),quantile(vec(x6),0.8413),color="limegreen",alpha=0.35)
+  tick_params(left=false,labelleft=false,labelbottom=false)
+      #     left=false,right=false,top=true,bottom=true,
+  #     labelbottom=false,labeltop=false,labelleft=false,labelright=false)
 
-  ax5=subplot(3,3,5)
-  ax5.hist(x2,bins=nbins,histtype="step",color="black")
-  ax5.minorticks_on()
-  ax5.tick_params(which="major",direction="out",length=5,
-      left=false,right=false,top=true,bottom=true,
-      labelbottom=false,labeltop=false,labelleft=false,labelright=false)
-  ax5.tick_params(which="minor",direction="out",length=2,
-      left=false,right=false,top=true,bottom=true,
-      labelbottom=false,labeltop=false,labelleft=false,labelright=false)
+  ax2=fig.add_subplot(6,6,7)
+  # ax2.hist2d(x6,x5,bins=nbins,cmin=1,cmax=100000)
+  h,xedges,yedges=np.histogram2d(x6,x5,nbins)
+  c=ax2.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  ax2.set_ylabel(label5)
+  tick_params(labelbottom=false)
+  # ax2.minorticks_on()
+  # ax2.tick_params(which="both",direction="out",top=true,right=false,
+  #     labelleft=true,labelbottom=false)
 
-  ax7=subplot(3,3,7,sharex=ax1)
-  ax7.hist2d(x3,x1,bins=nbins,cmin=1)
-  xlabel(L"$\Delta \phi [rad]$")
-  ylabel(L"$t_{max} \sin{\phi_0}$")
-  ax7.minorticks_on()
-  ax7.tick_params(which="major",direction="out",top=true,right=true,length=5,
-      labelleft=true,labelbottom=true)
-  ax7.tick_params(which="minor",direction="out",top=true,right=true,length=2,
-      labelleft=true,labelbottom=true)
+  ax3=fig.add_subplot(6,6,8)
+  ax3.hist(x5,bins=nbins,histtype="step",color="black")
+  ax3.axvline(truex5,linestyle="--",color="black")
+  ax3.axvspan(quantile(vec(x5),0.1587),quantile(vec(x5),0.8413),color="limegreen",alpha=0.35)
+  tick_params(left=false,labelleft=false,labelbottom=false)
+  # ax6.minorticks_on()
+  # ax6.tick_params(which="both",direction="in",
+  #     left=false,right=false,top=true,bottom=true,
+  #     labelbottom=false,labeltop=false,labelleft=false,labelright=false)
 
-  ax8=subplot(3,3,8,sharex=ax5)
-  ax8.hist2d(x2,x1,bins=nbins,cmin=1)
-  xlabel(L"$t_{max} \cos{\phi_0}$")
-  ax8.minorticks_on()
-  ax8.tick_params(which="major",direction="out",top=true,right=true,length=5,
-      labelleft=false,labelbottom=true)
-  ax8.tick_params(which="minor",direction="out",top=true,right=true,length=2,
-      labelleft=false,labelbottom=true)
+  ax3=fig.add_subplot(6,6,13)
+  # ax3.hist2d(x6,x4,bins=nbins,cmin=1,cmax=100000)
+  h,xedges,yedges=np.histogram2d(x6,x4,nbins)
+  c=ax3.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  ax3.set_ylabel(label4)
+  tick_params(labelbottom=false)
+  # ax9.minorticks_on()
+  # ax9.tick_params(which="both",direction="out",top=true,right=false,
+  #     labelleft=true,labelbottom=false)
 
-  ax9=subplot(3,3,9)
-  ax9.hist(x1,bins=nbins,histtype="step",color="black")
-  xlabel(L"$t_{max} \sin{\phi_0}$")
-  ax9.minorticks_on()
-  ax9.tick_params(which="major",direction="out",top=true,left=false,right=false,length=5,
-      labelleft=false,labelbottom=true)
-  ax9.tick_params(which="minor",direction="out",top=true,left=false,right=false,length=2,
-      labelleft=false,labelbottom=true)
-  tight_layout()
+  ax4=fig.add_subplot(6,6,14)
+  # ax4.hist2d(x5,x4,bins=nbins,cmin=1,cmax=100000)
+  h,xedges,yedges=np.histogram2d(x5,x4,nbins)
+  c=ax4.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  tick_params(left=false,labelleft=false,labelbottom=false)
+  # ax9.minorticks_on()
+  # ax9.tick_params(which="both",direction="out",top=true,right=false,
+  #     labelleft=true,labelbottom=false)
+
+  ax5=fig.add_subplot(6,6,15)
+  ax5.hist(x4,bins=nbins,histtype="step",color="black")
+  ax5.axvline(truex4,linestyle="--",color="black")
+  ax5.axvspan(quantile(vec(x4),0.1587),quantile(vec(x4),0.8413),color="limegreen",alpha=0.35)
+  tick_params(left=false,labelleft=false,labelbottom=false)
+  # ax5.minorticks_on()
+  # ax5.tick_params(which="both",direction="in",
+  #     left=false,right=false,top=true,bottom=true,
+  #     labelbottom=false,labeltop=false,labelleft=false,labelright=false) 
+
+  ax6=fig.add_subplot(6,6,19)
+  # ax6.hist2d(x6,x3,bins=nbins,cmin=1,cmax=100000)
+  h,xedges,yedges=np.histogram2d(x6,x3,nbins)
+  c=ax6.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  ax6.set_ylabel(label3)
+  tick_params(labelbottom=false)
+  # ax6.minorticks_on()
+  # ax6.tick_params(which="both",direction="out",top=true,right=false,
+  #     labelleft=false,labelbottom=false)
+
+  ax7=fig.add_subplot(6,6,20)
+  # ax7.hist2d(x5,x3,bins=nbins,cmin=1,cmax=100000)
+  h,xedges,yedges=np.histogram2d(x5,x3,nbins)
+  c=ax7.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  tick_params(left=false,labelleft=false,labelbottom=false)
+  # ax7.minorticks_on()
+  # ax7.tick_params(which="both",direction="out",top=true,right=false,
+  #     labelleft=false,labelbottom=false)
+
+  ax8=fig.add_subplot(6,6,21)
+  # ax8.hist2d(x4,x3,bins=nbins,cmin=1,cmax=100000)
+  h,xedges,yedges=np.histogram2d(x4,x3,nbins)
+  c=ax8.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  tick_params(left=false,labelleft=false,labelbottom=false)
+  # ax8.minorticks_on()
+  # ax8.tick_params(which="both",direction="out",top=true,right=false,
+  #     labelleft=false,labelbottom=false)
+
+  ax9=fig.add_subplot(6,6,22)
+  ax9.hist(x3,bins=nbins,histtype="step",color="black")
+  ax9.axvline(truex3,linestyle="--",color="black")
+  ax9.axvspan(quantile(vec(x3),0.1587),quantile(vec(x3),0.8413),color="limegreen",alpha=0.35)
+  tick_params(left=false,labelleft=false,labelbottom=false)
+  # ax9.minorticks_on()
+  # ax9.tick_params(which="both",direction="in",
+  #     left=false,right=false,top=true,bottom=true,
+  #     labelbottom=false,labeltop=false,labelleft=false,labelright=false) 
+
+  ax10=fig.add_subplot(6,6,25)
+    h,xedges,yedges=np.histogram2d(x6,x2,nbins)
+  c=ax10.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  ax10.set_ylabel(label2)
+  tick_params(labelbottom=false)
+      #     labelleft=false,labelbottom=false)
+
+  ax11=fig.add_subplot(6,6,26)
+    h,xedges,yedges=np.histogram2d(x5,x2,nbins)
+  c=ax11.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  tick_params(left=false,labelleft=false,labelbottom=false)
+      #     labelleft=false,labelbottom=false)
+
+  ax12=fig.add_subplot(6,6,27)
+    h,xedges,yedges=np.histogram2d(x4,x2,nbins)
+  c=ax12.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  tick_params(left=false,labelleft=false,labelbottom=false)
+      #     labelleft=false,labelbottom=false)
+
+  ax13=fig.add_subplot(6,6,28)
+    h,xedges,yedges=np.histogram2d(x3,x2,nbins)
+  c=ax13.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  tick_params(left=false,labelleft=false,labelbottom=false)
+      #     labelleft=false,labelbottom=false)
+
+  ax14=fig.add_subplot(6,6,29)
+  ax14.hist(x2,bins=nbins,histtype="step",color="black")
+  ax14.axvline(truex2,linestyle="--",color="black")
+  ax14.axvspan(quantile(vec(x2),0.1587),quantile(vec(x2),0.8413),color="limegreen",alpha=0.35)
+  tick_params(left=false,labelleft=false,labelbottom=false)
+      #     left=false,right=false,top=true,bottom=true,
+  #     labelbottom=false,labeltop=false,labelleft=false,labelright=false) 
+
+  ax15=fig.add_subplot(6,6,31)
+    h,xedges,yedges=np.histogram2d(x6,x1,nbins)
+  c=ax15.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  ax15.set_xlabel(label6)
+  ax15.set_ylabel(label1)
+      #     labelbottom=true,labelleft=true)
+
+  ax16=fig.add_subplot(6,6,32)
+    h,xedges,yedges=np.histogram2d(x5,x1,nbins)
+  c=ax16.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  ax16.set_xlabel(label5)
+  tick_params(left=false,labelleft=false)
+      #     labelleft=false,labelbottom=true)
+
+  ax17=fig.add_subplot(6,6,33)
+    h,xedges,yedges=np.histogram2d(x4,x1,nbins)
+  c=ax17.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  ax17.set_xlabel(label4)
+  tick_params(left=false,labelleft=false)
+      #     labelleft=false,labelbottom=true)
+
+  ax18=fig.add_subplot(6,6,34)
+    h,xedges,yedges=np.histogram2d(x3,x1,nbins)
+  c=ax18.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  ax18.set_xlabel(label3)
+  tick_params(left=false,labelleft=false)
+      #     labelleft=false,labelbottom=true)
+
+  ax19=fig.add_subplot(6,6,35)
+    h,xedges,yedges=np.histogram2d(x2,x1,nbins)
+  c=ax19.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  ax19.set_xlabel(label2)
+  tick_params(left=false,labelleft=false)
+      #     labelleft=false,labelbottom=true)
+
+  ax20=fig.add_subplot(6,6,36)
+  ax20.hist(x1,bins=nbins,histtype="step",color="black")
+  ax20.axvline(truex1,linestyle="--",color="black")
+  ax20.axvspan(quantile(vec(x1),0.1587),quantile(vec(x1),0.8413),color="limegreen",alpha=0.35)
+  ax20.set_xlabel(label1)
+  tick_params(left=false,labelleft=false)
+      #     left=false,right=false,top=true,bottom=true,
+  #     labelbottom=true,labeltop=false,labelleft=false,labelright=false)
+  # tight_layout()
+  # tick_params(left=false,labelleft=false,bottom=false,labelbottom=false)
+ # return fig
 end
-# Corner plot for posterior distributions of 3 parameters, compared to true values
-function corner(x1,x2,x3,truex1,truex2,truex3,nbins)
-  fig=figure(figsize=(6,6),dpi=150)
-  subplots_adjust(hspace=0.05,wspace=0.05)
-  ax1=subplot(3,3,1)
-  ax1.hist(x3,bins=nbins,histtype="step",color="black")
-  ax1.axvline(truex3,linestyle="-",color="black")
-  ax1.axvspan(quantile(x3,0.1587),quantile(x3,0.8413),color="limegreen",alpha=0.5)
-  ax1.minorticks_on()
-  ax1.tick_params(which="both",direction="out",
-      left=false,right=false,top=true,bottom=true,
-      labelbottom=false,labeltop=false,labelleft=false,labelright=false)
+# Corner plot for posterior distributions of 8 parameters, compared to true values
+function corner(xs,true_xs,labels,nbins)
+  x1,x2,x3,x4,x5,x6,x7,x8=xs[1],xs[2],xs[3],xs[4],xs[5],xs[6],xs[7],xs[8]
+  truex1,truex2,truex3,truex4,truex5,truex6,truex7,truex8=true_xs
+  label1,label2,label3,label4,label5,label6,label7,label8=labels
+  fig=figure(figsize=(9,7))#,dpi=150)
+  fig.subplots_adjust(hspace=0.2,wspace=0.2)
 
-  ax4=subplot(3,3,4,sharex=ax1)
-  ax4.hist2d(x3,x2,bins=nbins,cmin=1)
-  ylabel(L"$t_{max} \cos{\phi_0}$")
-  ax4.minorticks_on()
-  ax4.tick_params(which="both",direction="out",top=true,right=true,
-      labelleft=true,labelbottom=false)
+  ax1=fig.add_subplot(8,8,1)
+  ax1.axvline(truex8,linestyle="--",color="black")
+  ax1.hist(x8,bins=nbins,histtype="step",color="black")
+  ax1.axvspan(quantile(vec(x8),0.1587),quantile(vec(x8),0.8413),color="limegreen",alpha=0.35)
+  tick_params(left=false,labelleft=false,labelbottom=false)
+      #     left=false,right=false,top=true,bottom=true,
+  #     labelbottom=false,labeltop=false,labelleft=false,labelright=false)
 
-  ax5=subplot(3,3,5)
-  ax5.hist(x2,bins=nbins,histtype="step",color="black")
-  ax5.axvline(truex2,linestyle="-",color="black")
-  ax5.axvspan(quantile(x2,0.1587),quantile(x2,0.8413),color="limegreen",alpha=0.5)
-  ax5.minorticks_on()
-  ax5.tick_params(which="both",direction="out",
-      left=false,right=false,top=true,bottom=true,
-      labelbottom=false,labeltop=false,labelleft=false,labelright=false)
+  ax2=fig.add_subplot(8,8,9)
+  # ax2.hist2d(x6,x5,bins=nbins,cmin=1,cmax=100000)
+  h,xedges,yedges=np.histogram2d(x8,x7,nbins)
+  c=ax2.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  ax2.set_ylabel(label7)
+  tick_params(labelbottom=false)
+  # ax2.minorticks_on()
+  # ax2.tick_params(which="both",direction="out",top=true,right=false,
+  #     labelleft=true,labelbottom=false)
 
-  ax7=subplot(3,3,7,sharex=ax1)
-  ax7.hist2d(x3,x1,bins=nbins,cmin=1)
-  xlabel(L"$\Delta \phi [rad]$")
-  ylabel(L"$t_{max} \sin{\phi_0}$")
-  ax7.minorticks_on()
-  ax7.tick_params(which="both",direction="out",top=true,right=true,
-      labelleft=true,labelbottom=true)
+  ax3=fig.add_subplot(8,8,10)
+  ax3.hist(x7,bins=nbins,histtype="step",color="black")
+  ax3.axvline(truex7,linestyle="--",color="black")
+  ax3.axvspan(quantile(vec(x7),0.1587),quantile(vec(x7),0.8413),color="limegreen",alpha=0.35)
+  tick_params(left=false,labelleft=false,labelbottom=false)
+  # ax6.minorticks_on()
+  # ax6.tick_params(which="both",direction="in",
+  #     left=false,right=false,top=true,bottom=true,
+  #     labelbottom=false,labeltop=false,labelleft=false,labelright=false)
 
-  ax8=subplot(3,3,8,sharex=ax5)
-  ax8.hist2d(x2,x1,bins=nbins,cmin=1)
-  xlabel(L"$t_{max} \cos{\phi_0}$")
-  ax8.minorticks_on()
-  ax8.tick_params(which="both",direction="out",top=true,right=true,
-      labelleft=false,labelbottom=true)
+  ax4=fig.add_subplot(8,8,17)
+  # ax3.hist2d(x6,x4,bins=nbins,cmin=1,cmax=100000)
+  h,xedges,yedges=np.histogram2d(x8,x6,nbins)
+  c=ax4.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  ax4.set_ylabel(label6)
+  tick_params(labelbottom=false)
+  # ax9.minorticks_on()
+  # ax9.tick_params(which="both",direction="out",top=true,right=false,
+  #     labelleft=true,labelbottom=false)
 
-  ax9=subplot(3,3,9)
-  ax9.hist(x1,bins=nbins,histtype="step",color="black")
-  ax9.axvline(truex1,linestyle="-",color="black")
-  ax9.axvspan(quantile(x1,0.1587),quantile(x1,0.8413),color="limegreen",alpha=0.5)
-  xlabel(L"$t_{max} \sin{\phi_0}$")
-  #     ylabel(L"$e \cos \varpi $")
-  ax9.minorticks_on()
-  ax9.tick_params(which="both",direction="out",top=true,left=false,right=false,
-      labelleft=false,labelbottom=true)
-  tight_layout()
-  return fig
+  ax5=fig.add_subplot(8,8,18)
+  # ax4.hist2d(x5,x4,bins=nbins,cmin=1,cmax=100000)
+  h,xedges,yedges=np.histogram2d(x7,x6,nbins)
+  c=ax5.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  tick_params(left=false,labelleft=false,labelbottom=false)
+  # ax9.minorticks_on()
+  # ax9.tick_params(which="both",direction="out",top=true,right=false,
+  #     labelleft=true,labelbottom=false)
+
+  ax6=fig.add_subplot(8,8,19)
+  ax6.hist(x6,bins=nbins,histtype="step",color="black")
+  ax6.axvline(truex6,linestyle="--",color="black")
+  ax6.axvspan(quantile(vec(x6),0.1587),quantile(vec(x6),0.8413),color="limegreen",alpha=0.35)
+  tick_params(left=false,labelleft=false,labelbottom=false)
+  # ax5.minorticks_on()
+  # ax5.tick_params(which="both",direction="in",
+  #     left=false,right=false,top=true,bottom=true,
+  #     labelbottom=false,labeltop=false,labelleft=false,labelright=false) 
+
+  ax7=fig.add_subplot(8,8,25)
+  # ax6.hist2d(x6,x3,bins=nbins,cmin=1,cmax=100000)
+  h,xedges,yedges=np.histogram2d(x8,x5,nbins)
+  c=ax7.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  ax7.set_ylabel(label5)
+  tick_params(labelbottom=false)
+  # ax6.minorticks_on()
+  # ax6.tick_params(which="both",direction="out",top=true,right=false,
+  #     labelleft=false,labelbottom=false)
+
+  ax8=fig.add_subplot(8,8,26)
+  # ax7.hist2d(x5,x3,bins=nbins,cmin=1,cmax=100000)
+  h,xedges,yedges=np.histogram2d(x7,x5,nbins)
+  c=ax8.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  tick_params(left=false,labelleft=false,labelbottom=false)
+  # ax7.minorticks_on()
+  # ax7.tick_params(which="both",direction="out",top=true,right=false,
+  #     labelleft=false,labelbottom=false)
+
+  ax9=fig.add_subplot(8,8,27)
+  # ax8.hist2d(x4,x3,bins=nbins,cmin=1,cmax=100000)
+  h,xedges,yedges=np.histogram2d(x6,x5,nbins)
+  c=ax9.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  tick_params(left=false,labelleft=false,labelbottom=false)
+  # ax8.minorticks_on()
+  # ax8.tick_params(which="both",direction="out",top=true,right=false,
+  #     labelleft=false,labelbottom=false)
+
+  ax10=fig.add_subplot(8,8,28)
+  ax10.hist(x5,bins=nbins,histtype="step",color="black")
+  ax10.axvline(truex5,linestyle="--",color="black")
+  ax10.axvspan(quantile(vec(x5),0.1587),quantile(vec(x5),0.8413),color="limegreen",alpha=0.35)
+  tick_params(left=false,labelleft=false,labelbottom=false)
+  # ax9.minorticks_on()
+  # ax9.tick_params(which="both",direction="in",
+  #     left=false,right=false,top=true,bottom=true,
+  #     labelbottom=false,labeltop=false,labelleft=false,labelright=false) 
+
+  ax11=fig.add_subplot(8,8,33)
+    h,xedges,yedges=np.histogram2d(x8,x4,nbins)
+  c=ax11.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  ax11.set_ylabel(label4)
+  tick_params(labelbottom=false)
+      #     labelleft=false,labelbottom=false)
+
+  ax12=fig.add_subplot(8,8,34)
+    h,xedges,yedges=np.histogram2d(x7,x4,nbins)
+  c=ax12.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  tick_params(left=false,labelleft=false,labelbottom=false)
+      #     labelleft=false,labelbottom=false)
+
+  ax13=fig.add_subplot(8,8,35)
+    h,xedges,yedges=np.histogram2d(x6,x4,nbins)
+  c=ax13.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  tick_params(left=false,labelleft=false,labelbottom=false)
+      #     labelleft=false,labelbottom=false)
+
+  ax14=fig.add_subplot(8,8,36)
+    h,xedges,yedges=np.histogram2d(x5,x4,nbins)
+  c=ax14.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  tick_params(left=false,labelleft=false,labelbottom=false)
+      #     labelleft=false,labelbottom=false)
+
+  ax16=fig.add_subplot(8,8,37)
+  ax16.hist(x4,bins=nbins,histtype="step",color="black")
+  ax16.axvline(truex4,linestyle="--",color="black")
+  ax16.axvspan(quantile(vec(x4),0.1587),quantile(vec(x4),0.8413),color="limegreen",alpha=0.35)
+  tick_params(left=false,labelleft=false,labelbottom=false)
+      #     left=false,right=false,top=true,bottom=true,
+  #     labelbottom=false,labeltop=false,labelleft=false,labelright=false) 
+
+  ax17=fig.add_subplot(8,8,41)
+  h,xedges,yedges=np.histogram2d(x8,x3,nbins)
+  c=ax17.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  ax17.set_ylabel(label3)
+  tick_params(labelbottom=false)
+
+      #     labelbottom=true,labelleft=true)
+
+  ax18=fig.add_subplot(8,8,42)
+  h,xedges,yedges=np.histogram2d(x7,x3,nbins)
+  c=ax18.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  # ax18.set_xlabel(label7)
+  tick_params(left=false,labelleft=false,labelbottom=false)
+      #     labelleft=false,labelbottom=true)
+
+  ax19=fig.add_subplot(8,8,43)
+    h,xedges,yedges=np.histogram2d(x6,x3,nbins)
+  c=ax19.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  tick_params(left=false,labelleft=false,labelbottom=false)
+      #     labelleft=false,labelbottom=true)
+
+  ax20=fig.add_subplot(8,8,44)
+    h,xedges,yedges=np.histogram2d(x5,x3,nbins)
+  c=ax20.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  tick_params(left=false,labelleft=false,labelbottom=false)
+      #     labelleft=false,labelbottom=true)
+
+  ax21=fig.add_subplot(8,8,45)
+    h,xedges,yedges=np.histogram2d(x4,x3,nbins)
+  c=ax21.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  tick_params(left=false,labelleft=false,labelbottom=false)
+      #     labelleft=false,labelbottom=true)
+
+  ax22=fig.add_subplot(8,8,46)
+  ax22.hist(x3,bins=nbins,histtype="step",color="black")
+  ax22.axvline(truex3,linestyle="--",color="black")
+  ax22.axvspan(quantile(vec(x3),0.1587),quantile(vec(x3),0.8413),color="limegreen",alpha=0.35)
+  tick_params(left=false,labelleft=false,labelbottom=false)
+
+  ax23=fig.add_subplot(8,8,49)
+    h,xedges,yedges=np.histogram2d(x8,x2,nbins)
+  ax23.set_ylabel(label2)
+  c=ax23.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+      #     labelbottom=true,labelleft=true)
+    tick_params(labelbottom=false)
+
+  ax24=fig.add_subplot(8,8,50)
+    h,xedges,yedges=np.histogram2d(x7,x2,nbins)
+  c=ax24.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  tick_params(left=false,labelleft=false,labelbottom=false)
+      #     labelleft=false,labelbottom=true)
+
+  ax25=fig.add_subplot(8,8,51)
+    h,xedges,yedges=np.histogram2d(x6,x2,nbins)
+  c=ax25.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  tick_params(left=false,labelleft=false,labelbottom=false)
+      #     labelleft=false,labelbottom=true)
+
+  ax26=fig.add_subplot(8,8,52)
+    h,xedges,yedges=np.histogram2d(x5,x2,nbins)
+  c=ax26.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  tick_params(left=false,labelleft=false,labelbottom=false)
+      #     labelleft=false,labelbottom=true)
+
+  ax27=fig.add_subplot(8,8,53)
+    h,xedges,yedges=np.histogram2d(x4,x2,nbins)
+  c=ax27.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  tick_params(left=false,labelleft=false,labelbottom=false)
+      #     labelleft=false,labelbottom=true)
+  
+  ax28=fig.add_subplot(8,8,54)
+    h,xedges,yedges=np.histogram2d(x3,x2,nbins)
+  c=ax28.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  tick_params(left=false,labelleft=false,labelbottom=false)
+      #     labelleft=false,labelbottom=true)
+
+  ax29=fig.add_subplot(8,8,55)
+  ax29.hist(x2,bins=nbins,histtype="step",color="black")
+  ax29.axvline(truex2,linestyle="--",color="black")
+  ax29.axvspan(quantile(vec(x2),0.1587),quantile(vec(x2),0.8413),color="limegreen",alpha=0.35)
+  tick_params(left=false,labelleft=false,labelbottom=false)
+
+  ax30=fig.add_subplot(8,8,57)
+    h,xedges,yedges=np.histogram2d(x8,x1,nbins)
+  c=ax30.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  ax30.set_xlabel(label8)
+  ax30.set_ylabel(label1)
+  # tick_params(labelrotation=60)
+      #     labelbottom=true,labelleft=true)
+
+  ax31=fig.add_subplot(8,8,58)
+    h,xedges,yedges=np.histogram2d(x7,x1,nbins)
+  c=ax31.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  ax31.set_xlabel(label7)
+  tick_params(left=false,labelleft=false,labelrotation=45)
+  # ax31.set_ylabel(label1)
+      #     labelbottom=true,labelleft=true)
+
+  ax32=fig.add_subplot(8,8,59)
+    h,xedges,yedges=np.histogram2d(x6,x1,nbins)
+  c=ax32.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  ax32.set_xlabel(label6)
+  tick_params(left=false,labelleft=false,labelrotation=45)
+      #     labelleft=false,labelbottom=true)
+
+  ax33=fig.add_subplot(8,8,60)
+    h,xedges,yedges=np.histogram2d(x5,x1,nbins)
+  c=ax33.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  ax33.set_xlabel(label5)
+  tick_params(left=false,labelleft=false,labelrotation=45)
+
+      #     labelleft=false,labelbottom=true)
+  ax34=fig.add_subplot(8,8,61)
+    h,xedges,yedges=np.histogram2d(x4,x1,nbins)
+  c=ax34.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  ax34.set_xlabel(label4)
+  tick_params(left=false,labelleft=false,labelrotation=45)
+      #     labelleft=false,labelbottom=true)
+  
+  ax35=fig.add_subplot(8,8,62)
+  h,xedges,yedges=np.histogram2d(x3,x1,nbins)
+  c=ax35.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  ax35.set_xlabel(label3)
+  tick_params(left=false,labelleft=false,labelrotation=45)
+      #     labelleft=false,labelbottom=true)
+
+  ax36=fig.add_subplot(8,8,63)
+    h,xedges,yedges=np.histogram2d(x2,x1,nbins)
+  c=ax36.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  ax36.set_xlabel(label2)
+  tick_params(left=false,labelleft=false,labelrotation=45)
+      #     labelleft=false,labelbottom=true)
+
+  ax37=fig.add_subplot(8,8,64)
+  ax37.hist(x1,bins=nbins,histtype="step",color="black")
+  ax37.axvline(truex1,linestyle="--",color="black")
+  ax37.axvspan(quantile(vec(x1),0.1587),quantile(vec(x1),0.8413),color="limegreen",alpha=0.35)
+  ax37.set_xlabel(label1)
+  tick_params(left=false,labelleft=false,labelrotation=45)
+  # tight_layout()
+
+ # return fig
 end
-# Corner plot for posterior distributions of 4 parameters, compared to true values
-function corner(x1,x2,x3,x4,truex1,truex2,truex3,truex4,nbins,lim,label)
-  fig=figure(figsize=(6.5,6.5),dpi=150)
-  subplots_adjust(hspace=0.05,wspace=0.05)
-  ax1=fig.add_subplot(4,4,1)
-  ax1.axvline(truex4,linestyle="--",color="black")
-  ax1.hist(x4,bins=nbins,histtype="step",color="black")
-  ax1.axvspan(quantile(x4,0.1587),quantile(x4,0.8413),color="limegreen",alpha=0.35)
-  ax1.minorticks_on()
-  ax1.tick_params(which="both",direction="in",
-      left=false,right=false,top=true,bottom=true,
-      labelbottom=false,labeltop=false,labelleft=false,labelright=false)
 
-  ax5=fig.add_subplot(4,4,5,sharex=ax1)
-  h21=ax5.hist2d(x4,x3,bins=nbins,cmin=1,cmax=100000)
-  ylabel(L"$e \sin \varpi $")
-  ax5.minorticks_on()
-  ax5.tick_params(which="both",direction="out",top=true,right=false,
-      labelleft=true,labelbottom=false)
-
-  ax6=fig.add_subplot(4,4,6)
-  ax6.hist(x3,bins=nbins,histtype="step",color="black")
-  ax6.axvline(truex3,linestyle="--",color="black")
-  ax6.axvspan(quantile(x3,0.1587),quantile(x3,0.8413),color="limegreen",alpha=0.35)
-  ax6.minorticks_on()
-  ax6.tick_params(which="both",direction="in",
-      left=false,right=false,top=true,bottom=true,
-      labelbottom=false,labeltop=false,labelleft=false,labelright=false)
-
-  ax9=fig.add_subplot(4,4,9,sharex=ax1)
-  h22=ax9.hist2d(x4,x2,bins=nbins,cmin=1,cmax=100000)
-  ylabel(L"$e \cos \varpi $")
-  ax9.minorticks_on()
-  ax9.tick_params(which="both",direction="out",top=true,right=false,
-      labelleft=true,labelbottom=false)
-
-  ax10=fig.add_subplot(4,4,10,sharex=ax6)
-  h23=ax10.hist2d(x3,x2,bins=nbins,cmin=1,cmax=100000)
-  ax10.minorticks_on()
-  ax10.tick_params(which="both",direction="out",top=true,right=false,
-      labelleft=false,labelbottom=false)
-
-  ax11=fig.add_subplot(4,4,11)
-  ax11.hist(x2,bins=nbins,histtype="step",color="black")
-  ax11.axvline(truex2,linestyle="--",color="black")
-  ax11.axvspan(quantile(x2,0.1587),quantile(x2,0.8413),color="limegreen",alpha=0.35)
-  ax11.minorticks_on()
-  ax11.tick_params(which="both",direction="in",
-      left=false,right=false,top=true,bottom=true,
-      labelbottom=false,labeltop=false,labelleft=false,labelright=false) 
-
-  ax13=fig.add_subplot(4,4,13,sharex=ax1)
-  h24=ax13.hist2d(x4,x1,bins=nbins,cmin=1,cmax=100000)
-  xlim(lim)
-  xlabel(label)
-  ylabel(L"Mass [$M_{\oplus}$]")
-  ax13.minorticks_on()
-  ax13.tick_params(which="both",direction="out",top=true,right=false,
-      labelbottom=true,labelleft=true)
-
-  ax14=fig.add_subplot(4,4,14,sharex=ax6)
-  h25=ax14.hist2d(x3,x1,bins=nbins,cmin=1,cmax=100000)
-  xlabel(L"$e \sin \varpi $")
-  ax14.minorticks_on()
-  ax14.tick_params(which="both",direction="out",top=true,right=false,
-      labelleft=false,labelbottom=true)
-
-  ax15=fig.add_subplot(4,4,15,sharex=ax11)
-  h26=ax15.hist2d(x2,x1,bins=nbins,cmin=1,cmax=100000)
-  xlabel(L"$e \cos \varpi $")
-  ax15.minorticks_on()
-  ax15.tick_params(which="both",direction="out",top=true,right=false,
-      labelleft=false,labelbottom=true)
-
-  ax16=fig.add_subplot(4,4,16)
-  ax16.hist(x1,bins=nbins,histtype="step",color="black")
-  ax16.axvline(truex1,linestyle="--",color="black")
-  ax16.axvspan(quantile(x1,0.1587),quantile(x1,0.8413),color="limegreen",alpha=0.35)
-  xlabel(L"Mass [$M_{\oplus}$]")
-  ax16.minorticks_on()
-  ax16.tick_params(which="both",direction="in",
-      left=false,right=false,top=true,bottom=true,
-      labelbottom=true,labeltop=false,labelleft=false,labelright=false)
-  tight_layout()
- return fig
-end
 # Create a corner plot for significant posterior distributions of planet parameters
 function corner_hist(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::Bool=false) 
   if case_num==1  && isfile(string("MCMC/fromEMB/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
@@ -428,8 +716,8 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
   par_mcmc=jldmc["par_mcmc"]; lprob_mcmc=jldmc["lprob_mcmc"]  ; param=jldmc["param"]
   pname=jldmc["pname"]
  
-  println("# of independent samples: ",samples)
-  println("Burn-in number: ",iburn," out of ",nsteps," steps")
+  # println("# of independent samples: ",samples)
+  # println("Burn-in number: ",iburn," out of ",nsteps," steps")
   tt0,tt,ttmodel,sigtt=jldfit["tt0"],jldfit["tt"],jldfit["ttmodel"],jldfit["sigtt"]
   nplanet,ntrans=jldfit["nplanet"],jldfit["ntrans"]
   nt1,nt2=jldfit["ntrans"][1],jldfit["ntrans"][2]
@@ -441,10 +729,10 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
   plus1sig=zeros(nparam)
   for i=1:nparam
    avg[i],minus1sig[i],plus1sig[i]=quantile(vec(par_mcmc[:,iburn:end,i]),[0.5,0.1587,0.8413])
-   println(pname[i]," = ",avg[i]," + ",abs(plus1sig[i]-avg[i])," _ ",abs(avg[i]-minus1sig[i]))
+   # println(pname[i]," = ",avg[i]," + ",abs(plus1sig[i]-avg[i])," _ ",abs(avg[i]-minus1sig[i]))
   end
-  stable=false 
-  mutual_radius=mutual_Hill(avg[2],avg[1].*CGS.MSUN/CGS.MEARTH,CGS.MSUN,avg[7],avg[6].*CGS.MSUN/CGS.MEARTH)
+  # stable=false 
+  # mutual_radius=mutual_Hill(avg[2],avg[1].*CGS.MSUN/CGS.MEARTH,CGS.MSUN,avg[7],avg[6].*CGS.MSUN/CGS.MEARTH)
  # if mutual_radius <
  # Calculate Bayesian Inference Criterion (BIC) 
   function calc_BIC(prob)
@@ -455,7 +743,7 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
         chisq += (tt[j]-tt_model[j])^2 / (sigtt[j]^2 + par_mcmc[end]^2)
       end
     return chisq
-	end
+    end
     chisq=calc_chisq(avg)
     N=length(tt0) ; k=nparam
     #println("[N_obs]= ",N," [no. of model params]= ",k)
@@ -468,7 +756,7 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
   #println(" median Prob: ",prob,"      maximum Prob: ",prob_max)
   #chi2_avg = chi_mcmc(tt0,nplanet,ntrans,mean_posteriors,tt,sigtt,jmax,EM)
   chi,BIC=round.(calc_BIC(prob_max),sigdigits=4)
-  println("BIC= ",BIC ,'\t'," reduced χ^2: ",chi)
+  # println("BIC= ",BIC ,'\t'," reduced χ^2: ",chi)
 
   sigsys=round((median(vec(par_mcmc[:,iburn:end,end]))).* 3600*24,sigdigits=3)
   sigsys_err=(std(vec(par_mcmc[:,iburn:end,end]))).* 3600*24
@@ -496,20 +784,173 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
     L"$μ_5$ [$M_{⋆}$]",L"$P_5$ [days]",L"$t_{0,5}$",L"$e_4 cos(ω_5)$",L"$e_5 sin(ω_5)$",
     L"$t_{max} sin(ϕ_0)$",L"$t_{max} cos(ϕ_0)$",L"$Δϕ$ [rad]",L"$σ_{sys}^2$ [days]"]
   function plot_traces()
+    # fig=figure(figsize=(8,6))
+    # fig,axs=plt.subplots(nrows=5,ncols=nplanet)
+    # fig.suptitle(string(model," traces; BIC=",BIC))
+    # for ax in axs
+    #   for i=1:nparam
+    #   for j=1:nwalkers 
+    #   ax.plot(par_mcmc[j,iburn:end,i])
+    #   end
+    #   ax.set_ylabel(pname[i])
+    #   end
+    # end
+    # title=string("IMAGES/trace/",grid_type_nplanet,"-",sigma,"secs",nyear,"yrs.png")
+    # savefig(title)
     figure(figsize=(8,6))
-      for i=1:nparam
+    for i=1:5
+    ax1=subplot(3,2,i)
+    for j=1:nwalkers 
+    ax1.plot(par_mcmc[j,iburn:nsteps,i])
+    end
+    ax1.set_ylabel(parname[i])
+    end
+    tight_layout()
+    title=string("IMAGES/traces/",grid_type_nplanet,"Venus-",sigma,"secs",nyear,"yrs.png")
+    savefig(title)
+    clf()
+    figure(figsize=(8,6))
+    for i=1:5
+      ax2=subplot(3,2,i)
+      # for i=1:nparam
       ax=subplot(nplanet,5,i)
       for j=1:nwalkers 
-      ax.plot(par_mcmc[j,iburn:end,i])
+      ax2.plot(par_mcmc[j,iburn:nsteps,i+5])
+      # ax.plot(par_mcmc[j,iburn:end,i])
       end
-      ax.set_ylabel(pname[i])
-      # tight_layout()
-      title=string("IMAGES/trace/",grid_type_nplanet,"-",sigma,"secs",nyear,"yrs.png")
+      ax2.set_ylabel(parname[i+5])
+    end
+    tight_layout()
+    title=string("IMAGES/traces/",grid_type_nplanet,"Earth-",sigma,"secs",nyear,"yrs.png")
+    savefig(title)
+    clf()
+
+    if nplanet==5
+      figure(figsize=(8,6))
+      for i=1:5
+      ax3=subplot(3,2,i)
+      for j=1:nwalkers 
+      ax3.plot(par_mcmc[j,iburn:nsteps,i+20])
+      end
+      ax3.set_ylabel(parname[i+20])
+      end
+      tight_layout()
+      title=string("IMAGES/traces/",grid_type_nplanet,"Saturn-",sigma,"secs",nyear,"yrs.png")
+      savefig(title)
+      clf()
+      figure(figsize=(8,6))
+      for i=1:5
+      ax3=subplot(3,2,i)
+      for j=1:nwalkers 
+      ax3.plot(par_mcmc[j,iburn:nsteps,i+10])
+      end
+      ax3.set_ylabel(parname[i+10])
+      end
+      tight_layout()
+      title=string("IMAGES/traces/",grid_type_nplanet,"Mars-",sigma,"secs",nyear,"yrs.png")
       savefig(title)
       #    println("Hit return to continue")
       #    read(STDIN,Char)
       clf()
+      figure(figsize=(8,6))
+      for i=1:5
+      ax3=subplot(3,2,i)
+      for j=1:nwalkers 
+      ax3.plot(par_mcmc[j,iburn:nsteps,i+15])
+      end
+      ax3.set_ylabel(parname[i+15])
+      end
+      ax4=subplot(3,2,6)
+      for j=1:nwalkers
+        ax4.plot(par_mcmc[j,iburn:nsteps,end])
+        ax4.set_ylabel(parname[end])
+      end
+      tight_layout()
+      title=string("IMAGES/traces/",grid_type_nplanet,"Jupiter-",sigma,"secs",nyear,"yrs.png")
+      savefig(title)
+      clf()
+    elseif nplanet==4
+      figure(figsize=(8,6))
+      for i=1:5
+        ax3=subplot(3,2,i)
+        for j=1:nwalkers 
+        ax3.plot(par_mcmc[j,iburn:nsteps,i+10])
+        end
+        ax3.set_ylabel(parname[i+10])
+      end
+      tight_layout()
+      title=string("IMAGES/traces/",grid_type_nplanet,"Mars-",sigma,"secs",nyear,"yrs.png")
+      savefig(title)
+      clf()
+      figure(figsize=(8,6))
+      for i=1:5
+        ax3=subplot(3,2,i)
+        for j=1:nwalkers 
+        ax3.plot(par_mcmc[j,iburn:nsteps,i+15])
+        end
+        ax3.set_ylabel(parname[i+15])
+      end
+      ax4=subplot(3,2,6)
+      for j=1:nwalkers
+        ax4.plot(par_mcmc[j,iburn:nsteps,end])
+        ax4.set_ylabel(parname[end])
+      end
+      tight_layout()
+      title=string("IMAGES/traces/",grid_type_nplanet,"Jupiter-",sigma,"secs",nyear,"yrs.png")
+      savefig(title)
+      clf()
+    else
+      figure(figsize=(8,6))
+      for i=1:5
+      ax3=subplot(3,2,i)
+      for j=1:nwalkers 
+      ax3.plot(par_mcmc[j,iburn:nsteps,i+10])
+      end
+      ax3.set_ylabel(parname[i+10])
+      end
+      ax4=subplot(3,2,6)
+      for j=1:nwalkers
+        ax4.plot(par_mcmc[j,iburn:nsteps,end])
+        ax4.set_ylabel(parname[end])
+      end
+      tight_layout()
+      title=string("IMAGES/traces/",grid_type_nplanet,"Jupiter-",sigma,"secs",nyear,"yrs.png")
+      savefig(title)
+      clf()
+    end
+    if include_moon
+      figure(figsize=(7,5))
+      for i=1:3
+      ax5=subplot(2,2,i)
+      for j=1:nwalkers 
+      ax5.plot(par_mcmc[j,1:nsteps,i+15])
+      end
+      ax5.set_ylabel(parname[i+20])
+      end
+      # subplot(2,2,4)
+      # for j=1:nwalkers
+      # plot(lprob_mcmc[j,iburn:nsteps])  
+      # ylabel(L"$logProb$")
+      # end
+      tight_layout()
+      title=string("IMAGES/traces/",grid_type_nplanet,"Moon-",sigma,"secs",nyear,"yrs.png")
+      savefig(title)
+      clf()
+    end
   end
+  #   for i=1:nparam
+  #     for j=1:nwalkers 
+  #     # ax.plot(par_mcmc[j,iburn:end,i])
+  #     end
+  #     # ax.set_ylabel(pname[i])
+  #     # tight_layout()
+  #     title=string("IMAGES/trace/",grid_type_nplanet,"-",sigma,"secs",nyear,"yrs.png")
+  #     savefig(title)
+  #     #    println("Hit return to continue")
+  #     #    read(STDIN,Char)
+  #     clf()
+  #   end
+  # end
   function plot_dist()
     # True values based on "PlanetaryBodyData.pdf" (source?)
     offset_p1=224.70
@@ -638,5 +1079,5 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
      end
   end
   plot_traces()
-  plot_dist()
+  # plot_dist()
 end

@@ -252,12 +252,12 @@ function plot_ttv(sigma::Real,nyear::Real,options::Array{String},include_moon::B
 end
 # Plot observed TTVs vs model fit, with contributions
 function plot_contrib(sigma::Real,nyear::Real,options::Array{String},include_moon::Bool=false)
-  obs=options[1]; fit_type_nplanet=options[2]; bestfit=options[3]
+  obs=options[1]; grid_type_nplanet=options[2]; bestfit=options[3]
   if obs=="fromEMB"
-    fitfile=string("FITS/fromEMB/",fit_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
+    fitfile=string("FITS/fromEMB/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
     label="EMB"
   elseif obs=="fromEV"
-    fitfile=string("FITS/",fit_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
+    fitfile=string("FITS/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
     label="Earth"
   #   return  println("FITS file for ",sim," with ",fitmodel," model at ",sigma," secs and ",nyear," yrs doesn't exist!!!!")
   end
@@ -287,55 +287,57 @@ function plot_contrib(sigma::Real,nyear::Real,options::Array{String},include_moo
   # suptitle(string(title," [",nyear," yr span], ",L"$\sigma_{obs}=$",sigma," sec "))
   subplots_adjust(hspace=0.25)
   ax1=subplot(211)
-  plot(ttsim1,pair_ttvs[1,2,1:n1],color="forestgreen",label=label)
+  plot(ttsim1,pair_ttvs[1,2,1:n1],color="forestgreen",label="planet c",linewidth=1.5)
   errorbar(ttsim1,ttv1,sigtt1,fmt="v",color="black",mfc="white",capsize=3,ms=3)
-  ax1.text(-1,5,"Venus",fontweight="bold",fontsize="medium")
+  ax1.text(-1,7,"Venus",fontweight="bold",fontsize="medium")
   # text(0,5,"Venus",fontsize="xx-large")
   ylabel("TTV [min]",fontsize="x-large")
   xlabel("Time [years]",fontsize="x-large")
-  ylim(-8,8)
+  ylim(-10,10)
   ax1.minorticks_on()
   tick_params(which="both",direction="in",top=true,right=true)
   ax2=subplot(212,sharex=ax1)
-  plot(ttsim2,pair_ttvs[2,1,1:n2],color="salmon",label="Venus")
+  plot(ttsim2,pair_ttvs[2,1,1:n2],color="salmon",label="planet b",linewidth=1.5)
   errorbar(ttsim2,ttv2,sigtt2,fmt=".",color="black",mfc="white",capsize=3,ms=5)#,label="Earth")
-  ax2.text(-1,6,label,fontweight="bold",fontsize="medium")
+  ax2.text(-1,7,label,fontweight="bold",fontsize="medium")
   # text(0,-5.5,label,fontsize="xx-large")
   xlabel("Time [years]",fontsize="x-large")
   ylabel("TTV [min]",fontsize="x-large")
-  ylim(-8,8)
+  ylim(-10,10)
   ax2.minorticks_on()
   tick_params(which="both",direction="in",top=true,right=true)
   if f["nplanet"]==4
     total1=pair_ttvs[1,3,1:n1]+pair_ttvs[1,2,1:n1]+pair_ttvs[1,4,1:n1]
     total2=pair_ttvs[2,3,1:n2]+pair_ttvs[2,1,1:n2]+pair_ttvs[2,4,1:n2]
-    ax1.plot(ttsim1,pair_ttvs[1,3,1:n1],linestyle="--",color="orange",label="Mars",alpha=0.9)
-    ax1.plot(ttsim1,pair_ttvs[1,4,1:n1],color="firebrick",label="Jupiter")
-    ax2.plot(ttsim2,pair_ttvs[2,3,1:n2],linestyle="--",color="orange",label="Mars",alpha=0.9)
-    ax2.plot(ttsim2,pair_ttvs[2,4,1:n2],color="firebrick",label="Jupiter")
+    ax1.plot(ttsim1,pair_ttvs[1,3,1:n1],linestyle="--",color="orange",label="planet e",alpha=0.9,linewidth=1.5)
+    ax1.plot(ttsim1,pair_ttvs[1,4,1:n1],color="firebrick",label="planet d",linewidth=1.5)
+    ax2.plot(ttsim2,pair_ttvs[2,3,1:n2],linestyle="--",color="orange",label="planet e",alpha=0.9,linewidth=1.5)
+    ax2.plot(ttsim2,pair_ttvs[2,4,1:n2],color="firebrick",label="planet d",linewidth=1.5)
     ax1.set_title(L"Contributions to $\mathcal{H}_{PPPP}$ Fit",fontsize="x-large")
   elseif f["nplanet"]==5
     total1=pair_ttvs[1,3,1:n1]+pair_ttvs[1,2,1:n1]+pair_ttvs[1,4,1:n1]+pair_ttvs[1,5,1:n1]
     total2=pair_ttvs[2,3,1:n2]+pair_ttvs[2,1,1:n2]+pair_ttvs[2,4,1:n2]+pair_ttvs[2,5,1:n2]
-    ax1.plot(ttsim1,pair_ttvs[1,3,1:n1],linestyle="--",color="orange",label="'Mars'",alpha=0.9)
-    ax1.plot(ttsim1,pair_ttvs[1,4,1:n1],color="firebrick",label="Jupiter")
-    ax1.plot(ttsim1,pair_ttvs[1,5,1:n1],linestyle="--",color="tan",label="'Saturn'")
-    ax2.plot(ttsim2,pair_ttvs[2,3,1:n2],linestyle="--",color="orange",label="'Mars'",alpha=0.9)
-    ax2.plot(ttsim2,pair_ttvs[2,4,1:n2],color="firebrick",label="Jupiter")
-    ax2.plot(ttsim2,pair_ttvs[2,5,1:n2],linestyle="--",color="tan",label="'Saturn'")
+    ax1.plot(ttsim1,pair_ttvs[1,3,1:n1],linestyle="--",color="orange",label="planet e",alpha=0.9,linewidth=1.5)
+    ax1.plot(ttsim1,pair_ttvs[1,4,1:n1],color="firebrick",label="planet d",linewidth=1.5)
+    ax1.plot(ttsim1,pair_ttvs[1,5,1:n1],linestyle="--",color="tan",label="planet f",linewidth=1.5)
+    ax2.plot(ttsim2,pair_ttvs[2,3,1:n2],linestyle="--",color="orange",label="planet e",alpha=0.9,linewidth=1.5)
+    ax2.plot(ttsim2,pair_ttvs[2,4,1:n2],color="firebrick",label="planet d",linewidth=1.5)
+    ax2.plot(ttsim2,pair_ttvs[2,5,1:n2],linestyle="--",color="tan",label="planet f",linewidth=1.5)
     ax1.set_title(L"Contributions to $\mathcal{H}_{PPPP}$ Fit",fontsize="x-large")
   elseif f["nplanet"]==3
     total1=pair_ttvs[1,3,1:n1]+pair_ttvs[1,2,1:n1]
     total2=pair_ttvs[2,3,1:n2]+pair_ttvs[2,1,1:n2]
-    ax1.plot(ttsim1,pair_ttvs[1,3,1:n1],color="firebrick",label="Jupiter")
-    ax2.plot(ttsim2,pair_ttvs[2,3,1:n2],color="firebrick",label="Jupiter")
+    ax1.plot(ttsim1,pair_ttvs[1,3,1:n1],color="firebrick",label="planet d",linewidth=1.5)
+    ax2.plot(ttsim2,pair_ttvs[2,3,1:n2],color="firebrick",label="planet d",linewidth=1.5)
     ax1.set_title(L"Contributions to $\mathcal{H}_{PPP}$ Fit",fontsize="x-large")
   end
-  ax1.plot(ttsim1,total1,linewidth=1.5,color="grey")
+  ax1.plot(ttsim1,total1,color="grey")
   if include_moon 
     moon=moon_ttvs(ntrans,pbest_global) .* (24 * 60)
-    ax2.plot(ttsim2,total2+moon,linewidth=1.5,color="grey")
-    ax2.plot(ttsim2,moon,linestyle="-.",color="purple",label="Moon")
+    ax2.plot(ttsim2,total2+moon,color="grey")
+    ax2.plot(ttsim2,moon,linestyle="-.",color="purple",label="satellite",linewidth=1.5)
+    ax1.set_title(L"Contributions to $\mathcal{H}_{PPsP}$ Fit",fontsize="x-large")
+
     # text(0,-5.5,label,fontsize="xx-large")
     # xlabel("Time [years]",fontsize=20)
     # ylabel("TTV [min]",fontsize=20)
@@ -343,19 +345,21 @@ function plot_contrib(sigma::Real,nyear::Real,options::Array{String},include_moo
     # ax2.minorticks_on()
     # tick_params(which="both",direction="in",top=true,right=true)
   else
-    ax2.plot(ttsim2,total2,linewidth=1.5,color="grey")
+    ax2.plot(ttsim2,total2,color="grey")
   end
   sim_obs_label= string(L"$\sigma_{obs}=$",sigma," sec")
   # ax1.set_title(L"Contributions to $\mathcal{H}_{PPPP}$ Fit",fontsize="x-large")
-  ax1.text(maximum(ttsim1)-5,5,sim_obs_label)
+  ax1.text(maximum(ttsim1)-5,6,sim_obs_label)
+  ax2.text(maximum(ttsim1)-5,6,sim_obs_label)
   # ax2.text(maximum(ttsim1)-5,5,sim_obs_label)
-  ax1.legend(loc="lower left",fontsize="large",ncol=nplanet)
+  ax1.legend(loc="lower left",fontsize="medium",ncol=nplanet)
   # ax1.legend(loc="lower left",fontsize="large",title="Contributions",title_fontsize="large",ncol=4)
-  ax2.legend(loc="lower left",ncol=nplanet,fontsize="large")
+  ax2.legend(loc="lower left",ncol=nplanet,fontsize="medium")#,mode="expand")
   tight_layout()
   # legend(loc="upper right")
   # title=string("IMAGES/ttvs/",sim,fitmodel,"ttvs-",sigma,"secs",nyear,"yrs.png")
-  savefig("IMAGES/ttv/widep4_EV.pdf")
+  title=string("IMAGES/ttv/",grid_type_nplanet,"_",sigma,"s",nyear,"yrs.pdf")
+  savefig(title)
   # show()
 end
   #how does scatter in residuals compare w/ uncertainty?

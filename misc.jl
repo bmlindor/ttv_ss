@@ -1,5 +1,11 @@
 include("CGS.jl")
 using TTVFaster,DataFrames,CSV,LsqFit
+calc_deg(value)=value * 180/pi
+calc_rad(value)=value * pi/180
+calc_evec1(e,omega)=e* cos(omega-77)
+calc_evec2(e,omega)=e* sin(omega-77)
+calc_ecc(ecosom,esinom)=sqrt(ecosom^2 + esinom^2)
+calc_tmax(a_p,a_s,m_p,m_s,P_p)=(a_s*m_s*P_p) / (2*pi*a_p*(m_s+m_p))
 function chisquare(tt0,nplanet,ntrans,params,tt,sigtt,jmax,EM)
   chisq = 0.0  #check memory allocation >>>>>>>>>>>>
   tt_model = ttv_wrapper(tt0,nplanet,ntrans,params,jmax,EM) 
@@ -19,17 +25,23 @@ end
 G=CGS.GRAV /1e3 #in MKS units
 AU=CGS.AU /1e2 #in MKS units
 
-Kepler_law(Per,mp,mstar)=((G*(mstar + mp)* (Per*24*3600)^2) /(4*pi^2))^(1/3) 
-Hill_radius(Per,mp,ecc,mstar)=(Kepler_law(Per,mp,mstar) * (1-ecc) * (mp/(3 * mstar))^(1/3)) / AU
-RV_semiamplitude(Per,mp,ecc,inc,mstar) = (((mp*sin(inc))^3/((Per*24*3600) * (1-ecc^2)^3/2)) * (2pi*G/(mstar+mp)^2))^(1/3)
-calc_deg(value)=value * 180/pi
-calc_evec1(e,omega)=e* cos(omega-77)
-calc_evec2(e,omega)=e* sin(omega-77)
-calc_ecc(ecosom,esinom)=sqrt(ecosom^2 + esinom^2)
-calc_tmax(a_p,a_s,m_p,m_s,P_p)=(a_s*m_s*P_p) / (2*pi*a_p*(m_s+m_p))
+calc_sma(Per,mp,mstar)=((G*(mstar + mp)* (Per*24*3600)^2) /(4*pi^2))^(1/3) 
+Hill_radius(Per,mp,ecc,mstar)=(calc_sma(Per,mp,mstar) * (1-ecc) * (mp/(3 * mstar))^(1/3)) / AU
 #Hill_radius((1733*24*3600),(27*5.9742e24),0.4,1.99e30)
-function mutual_Hill(Per1,mp1,mstar,Per2,mp2)
-	a1,a2 = Kepler_law(Per1,mp1,mstar),Kepler_law(Per2,mp2,mstar)	
+RV_semiamplitude(Per,mp,ecc,inc,mstar) = (((mp*sin(inc))^3/((Per*24*3600) * (1-ecc^2)^3/2)) * (2pi*G/(mstar+mp)^2))^(1/3)
+
+function calc_sma(Per::Real,mu::Real) 
+  # mp=mu .* (CGS.MSUN/CGS.MEARTH)/CGS.KILOGRAM
+  # mstar=CGS.MSUN/CGS.KILOGRAM
+  a=((((CGS.GRAV*CGS.MSUN) .+ mu).* (Per.*24*3600).^2) /(4*pi^2)).^(1/3) 
+  return a #(AU/1e2) # returns semi-major axis in AU
+end
+calc_P(a,mu)=
+function mutual_Hill(Per1,mu1,Per2,mu2) 
+#Hill_stability(μ1::Real,μ2::Real,a1::Real,a2::Real,Cx::Real)
+	@assert(Per1 <= Per2)
+	a1=calc_sma(Per1,mu1)
+	a2=calc_sma(Per2,mu2)
 	return ((mp1 + mp2)/(3 * mstar))^(1/3) * (a1 + a2)/2
 end
 

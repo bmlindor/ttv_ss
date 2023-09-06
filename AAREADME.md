@@ -136,13 +136,13 @@ Q). Wrong signs for evectors? <-- not first time this has been found
 1). Write up model desctription (as above) [ x ]
 2). Write up methods description [ x ]
 3). Write up analysis description [ x ]
-4). Create tables for parameters. [  ]
+4). Create tables for parameters. [ x ]
 
 ##########################  Project Tasks ##########################
 Make likelihood profiles continuous [ ]
 10). Condense results to 1 equation fit (ex. how much of X to get Y uncertainty). [  ]
 9). See if we can detect Mars [ x ] or Saturn. [ x ]
-8). See which scenario best fits simulated data [ ]
+8). See which scenario best fits simulated data [ x ]
 7). Add M_p > 0 prior to MCMC [ x ]
 7). Figure out whether the Earth-Moon barycenter offset causes
 bias in measurements and if so, why.
@@ -153,7 +153,8 @@ bias in measurements and if so, why.
 5b). See what the necessary precision would be (vary noise added to simulations). [ x ]
 4). Show models are correct: derived Earth and Venus parameters.
 4b). Make plots of histograms of parameter results from MCMC with correct values. [ x ]
-4c). Make plots of orbits with 1-sigma uncertainties overplotted with the correct orbits. [  ] Q   - how to do this with eccentricities and omega? Need pomega and Omega?
+4c). Make plots of orbits with 1-sigma uncertainties overplotted with the correct orbits. [  ] 
+Q   - how to do this with eccentricities and omega? Need pomega and Omega?
 4d). Make plots of logL for Jupiter period and Moon deltaphi with correct values at peak. [ x ] 
     (include histograms of posterior results) 
 4e). Make plots of posterior results of model fit to simulated times. [ x ] 
