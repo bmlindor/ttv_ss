@@ -756,7 +756,7 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
   #println(" median Prob: ",prob,"      maximum Prob: ",prob_max)
   #chi2_avg = chi_mcmc(tt0,nplanet,ntrans,mean_posteriors,tt,sigtt,jmax,EM)
   chi,BIC=round.(calc_BIC(prob_max),sigdigits=4)
-  # println("BIC= ",BIC ,'\t'," reduced χ^2: ",chi)
+  println("BIC= ",BIC ,'\t'," reduced χ^2: ",chi)
 
   sigsys=round((median(vec(par_mcmc[:,iburn:end,end]))).* 3600*24,sigdigits=3)
   sigsys_err=(std(vec(par_mcmc[:,iburn:end,end]))).* 3600*24
@@ -764,7 +764,34 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
 
   #BIC,sigsys,sigtot,chi=mc_vals(sigma,nyear,grid_type_nplanet,case_num,include_moon)
   # println("Loaded",mcfile,".")
-  # Percentage of walkers where difference between median and quantile value is >100
+  # figure(figsize=(5,5))
+  # plot(vec(par_mcmc[:,iburn:end,end]),vec(lprob_mcmc[:,iburn:end]))
+  # xlabel(L"$σ_{sys}$")
+  # ylabel(L"$\log(P)$")
+  # @show
+
+  # Find Percentage of walkers where difference between median and quantile value is >100
+  # bad_walk=[]
+  # for i in 1:nwalkers
+  #   for j in 1:nparam
+  #     walker_med,walker_quant=quantile!(par_mcmc[i,jldmc["iburn"]+1:end,j],[0.5,0.9])
+  #     walk_start=par_mcmc[i,jldmc["iburn"]+1,j] 
+  #     walk_end = par_mcmc[i,jldmc["iburn"]+1,j]
+  #     ratio = walk_end/walk_start
+  #     walker_prob=median(lprob_mcmc[i,jldmc["iburn"]+1:end])
+  #     if abs(walk_end-walk_start)/walk_start > 0.1
+  #       #abs(walker_med-walker_end)>30
+  #       # println(i," ",walker_prob[i])
+  #       append!(bad_walk,i)
+  #     end
+  #   end
+  #     # If systematic uncertainty > injected uncertainty, reject
+  #   # if median(par_mcmc[i,jldmc["iburn"]:end,end]).*3600*24 >= sigma
+  #   #   # println("Reject results?")
+  #   #   append!(bad_walk,i)
+  #   # end
+  # end
+  # println("Bad walkers: ",bad_walk)
 
   if  grid_type_nplanet=="p2" 
     model=L"$\mathcal{H}_{PP}$"
@@ -806,14 +833,14 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
     ax1.set_ylabel(parname[i])
     end
     tight_layout()
-    title=string("IMAGES/traces/",grid_type_nplanet,"Venus-",sigma,"secs",nyear,"yrs.png")
+    title=string("IMAGES/trace/",grid_type_nplanet,"Venus-",sigma,"secs",nyear,"yrs.png")
     savefig(title)
     clf()
     figure(figsize=(8,6))
     for i=1:5
       ax2=subplot(3,2,i)
       # for i=1:nparam
-      ax=subplot(nplanet,5,i)
+      # ax=subplot(nplanet,5,i)
       for j=1:nwalkers 
       ax2.plot(par_mcmc[j,iburn:nsteps,i+5])
       # ax.plot(par_mcmc[j,iburn:end,i])
@@ -821,7 +848,7 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
       ax2.set_ylabel(parname[i+5])
     end
     tight_layout()
-    title=string("IMAGES/traces/",grid_type_nplanet,"Earth-",sigma,"secs",nyear,"yrs.png")
+    title=string("IMAGES/trace/",grid_type_nplanet,"Earth-",sigma,"secs",nyear,"yrs.png")
     savefig(title)
     clf()
 
@@ -835,7 +862,7 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
       ax3.set_ylabel(parname[i+20])
       end
       tight_layout()
-      title=string("IMAGES/traces/",grid_type_nplanet,"Saturn-",sigma,"secs",nyear,"yrs.png")
+      title=string("IMAGES/trace/",grid_type_nplanet,"Saturn-",sigma,"secs",nyear,"yrs.png")
       savefig(title)
       clf()
       figure(figsize=(8,6))
@@ -847,7 +874,7 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
       ax3.set_ylabel(parname[i+10])
       end
       tight_layout()
-      title=string("IMAGES/traces/",grid_type_nplanet,"Mars-",sigma,"secs",nyear,"yrs.png")
+      title=string("IMAGES/trace/",grid_type_nplanet,"Mars-",sigma,"secs",nyear,"yrs.png")
       savefig(title)
       #    println("Hit return to continue")
       #    read(STDIN,Char)
@@ -866,7 +893,7 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
         ax4.set_ylabel(parname[end])
       end
       tight_layout()
-      title=string("IMAGES/traces/",grid_type_nplanet,"Jupiter-",sigma,"secs",nyear,"yrs.png")
+      title=string("IMAGES/trace/",grid_type_nplanet,"Jupiter-",sigma,"secs",nyear,"yrs.png")
       savefig(title)
       clf()
     elseif nplanet==4
@@ -879,7 +906,7 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
         ax3.set_ylabel(parname[i+10])
       end
       tight_layout()
-      title=string("IMAGES/traces/",grid_type_nplanet,"Mars-",sigma,"secs",nyear,"yrs.png")
+      title=string("IMAGES/trace/",grid_type_nplanet,"Mars-",sigma,"secs",nyear,"yrs.png")
       savefig(title)
       clf()
       figure(figsize=(8,6))
@@ -896,7 +923,7 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
         ax4.set_ylabel(parname[end])
       end
       tight_layout()
-      title=string("IMAGES/traces/",grid_type_nplanet,"Jupiter-",sigma,"secs",nyear,"yrs.png")
+      title=string("IMAGES/trace/",grid_type_nplanet,"Jupiter-",sigma,"secs",nyear,"yrs.png")
       savefig(title)
       clf()
     else
@@ -914,7 +941,7 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
         ax4.set_ylabel(parname[end])
       end
       tight_layout()
-      title=string("IMAGES/traces/",grid_type_nplanet,"Jupiter-",sigma,"secs",nyear,"yrs.png")
+      title=string("IMAGES/trace/",grid_type_nplanet,"Jupiter-",sigma,"secs",nyear,"yrs.png")
       savefig(title)
       clf()
     end
@@ -933,7 +960,7 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
       # ylabel(L"$logProb$")
       # end
       tight_layout()
-      title=string("IMAGES/traces/",grid_type_nplanet,"Moon-",sigma,"secs",nyear,"yrs.png")
+      title=string("IMAGES/trace/",grid_type_nplanet,"Moon-",sigma,"secs",nyear,"yrs.png")
       savefig(title)
       clf()
     end

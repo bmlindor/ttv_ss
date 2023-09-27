@@ -303,32 +303,36 @@ function mc_vals(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num=Int,
   sigtot=round(sqrt(sigsys^2 + sigma^2),sigdigits=4)
   # Find percentage of walkers where diff. between median and quantile value is >100
   bad_walk=[]
-  for i in 1:nwalkers
-    for j in 1:nparam
-      walker_med,walker_quant=quantile!(par_mcmc[i,jldmc["iburn"]:end,j],[0.5,0.9])
-      walker_prob=median(lprob_mcmc[i,jldmc["iburn"]:end])
-      if abs(walker_prob-prob_max)>30
-        # println(i," ",walker_prob[i])
-        append(bad_walk,i)
-      end
-    end
-      # If systematic uncertainty > injected uncertainty, reject
-    if median(par_mcmc[i,jldmc["iburn"]:end,end]).*3600*24 >= sigma
-      println("Reject results?")
-      append(bad_walk,i)
-    end
-  end
-  println("Bad walkers: ",bad_walk)
+  # for i in 1:nwalkers
+  #   for j in 1:nparam
+  #     walker_med,walker_quant=quantile!(par_mcmc[i,jldmc["iburn"]+1:end,j],[0.5,0.9])
+  #     walk_start=par_mcmc[i,jldmc["iburn"]+1,j] 
+  #     walk_end = par_mcmc[i,jldmc["iburn"]+1,j]
+  #     ratio = walk_end/walk_start
+  #     walker_prob=median(lprob_mcmc[i,jldmc["iburn"]+1:end])
+  #     if abs(walk_end-walk_start)/walk_start > 0.1
+  #       #abs(walker_med-walker_end)>30
+  #       # println(i," ",walker_prob[i])
+  #       append!(bad_walk,i)
+  #     end
+  #   end
+  #     # If systematic uncertainty > injected uncertainty, reject
+  #   # if median(par_mcmc[i,jldmc["iburn"]:end,end]).*3600*24 >= sigma
+  #   #   println("Reject results?")
+  #   #   append(bad_walk,i)
+  #   # end
+  # end
+  # println("Bad walkers: ",bad_walk)
 
-  avg=zeros(nparam)
+  med=zeros(nparam)
   low=zeros(nparam)
   # plus1sig=zeros(nparam)
   errors=zeros((2,nparam))
   high=zeros(nparam)
   for i=1:nparam
-   avg[i],low[i],high[i]=quantile(vec(par_mcmc[:,iburn:end,i]),[0.5,0.1587,0.8413])
+   med[i],low[i],high[i]=quantile(vec(par_mcmc[:,iburn:end,i]),[0.5,0.1587,0.8413])
    # for j=1:2
-   errors[1,i]=avg[i]-low[i]; errors[2,i]=high[i]-avg[i]
+   errors[1,i]=med[i]-low[i]; errors[2,i]=high[i]-med[i]
    # println(pname[i]," = ",avg[i]," + ",abs(plus1sig[i]-avg[i])," _ ",abs(avg[i]-minus1sig[i]))
   end
   # masses=[median(vec(par_mcmc[:,iburn:end,i-4])) for i in 1:length(param) if i%5==0] .*CGS.MSUN/CGS.MEARTH
@@ -341,5 +345,5 @@ function mc_vals(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num=Int,
   # println("eccen. =",ecc)#," +/- ",ecc_errs)
   # println("σsys[s]= ",sigsys," +/- ",sigsys_err)
   # println("σtot[s]= ",sigtot)
-  return avg,errors
+  return med,errors
 end
