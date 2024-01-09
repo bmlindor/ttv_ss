@@ -105,7 +105,7 @@ function corner(xs,true_xs,labels,nbins)
       #     left=false,right=false,top=true,bottom=true,
   #     labelbottom=false,labeltop=false,labelleft=false,labelright=false)
 
-  ax2=fig.add_subplot(6,6,7)
+  ax2=fig.add_subplot(6,6,7,sharex=ax1)
   # ax2.hist2d(x6,x5,bins=nbins,cmin=1,cmax=100000)
   h,xedges,yedges=np.histogram2d(x6,x5,nbins)
   c=ax2.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
@@ -154,7 +154,7 @@ function corner(xs,true_xs,labels,nbins)
   #     left=false,right=false,top=true,bottom=true,
   #     labelbottom=false,labeltop=false,labelleft=false,labelright=false) 
 
-  ax6=fig.add_subplot(6,6,19)
+  ax6=fig.add_subplot(6,6,19,sharex=ax1)
   # ax6.hist2d(x6,x3,bins=nbins,cmin=1,cmax=100000)
   h,xedges,yedges=np.histogram2d(x6,x3,nbins)
   c=ax6.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
@@ -192,7 +192,7 @@ function corner(xs,true_xs,labels,nbins)
   #     left=false,right=false,top=true,bottom=true,
   #     labelbottom=false,labeltop=false,labelleft=false,labelright=false) 
 
-  ax10=fig.add_subplot(6,6,25)
+  ax10=fig.add_subplot(6,6,25,sharex=ax1)
     h,xedges,yedges=np.histogram2d(x6,x2,nbins)
   c=ax10.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
   ax10.set_ylabel(label2)
@@ -225,7 +225,7 @@ function corner(xs,true_xs,labels,nbins)
       #     left=false,right=false,top=true,bottom=true,
   #     labelbottom=false,labeltop=false,labelleft=false,labelright=false) 
 
-  ax15=fig.add_subplot(6,6,31)
+  ax15=fig.add_subplot(6,6,31,sharex=ax1)
     h,xedges,yedges=np.histogram2d(x6,x1,nbins)
   c=ax15.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
   ax15.set_xlabel(label6)
@@ -273,13 +273,13 @@ function corner(xs,true_xs,labels,nbins)
  # return fig
 end
 # Corner plot for posterior distributions of 8 parameters, compared to true values
-function corner(xs,true_xs,labels,nbins)
+function corner(xs,true_xs,labels,nbins,model::LaTeXString)
   x1,x2,x3,x4,x5,x6,x7,x8=xs[1],xs[2],xs[3],xs[4],xs[5],xs[6],xs[7],xs[8]
   truex1,truex2,truex3,truex4,truex5,truex6,truex7,truex8=true_xs
   label1,label2,label3,label4,label5,label6,label7,label8=labels
-  fig=figure(figsize=(9,7))#,dpi=150)
+  fig=figure(figsize=(8,6),dpi=150)
   fig.subplots_adjust(hspace=0.2,wspace=0.2)
-
+  # fig.suptitle(string("Posteriors for [30 yr span] with model: ",model))
   ax1=fig.add_subplot(8,8,1)
   ax1.axvline(truex8,linestyle="--",color="black")
   ax1.hist(x8,bins=nbins,histtype="step",color="black")
@@ -288,12 +288,12 @@ function corner(xs,true_xs,labels,nbins)
       #     left=false,right=false,top=true,bottom=true,
   #     labelbottom=false,labeltop=false,labelleft=false,labelright=false)
 
-  ax2=fig.add_subplot(8,8,9)
+  ax2=fig.add_subplot(8,8,9,sharex=ax1)
   # ax2.hist2d(x6,x5,bins=nbins,cmin=1,cmax=100000)
   h,xedges,yedges=np.histogram2d(x8,x7,nbins)
   c=ax2.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
-  ax2.set_ylabel(label7)
-  tick_params(labelbottom=false)
+  ax2.set_ylabel(label7,fontsize="large")
+  tick_params(labelbottom=false,labelsize="small")
   # ax2.minorticks_on()
   # ax2.tick_params(which="both",direction="out",top=true,right=false,
   #     labelleft=true,labelbottom=false)
@@ -302,23 +302,23 @@ function corner(xs,true_xs,labels,nbins)
   ax3.hist(x7,bins=nbins,histtype="step",color="black")
   ax3.axvline(truex7,linestyle="--",color="black")
   ax3.axvspan(quantile(vec(x7),0.1587),quantile(vec(x7),0.8413),color="limegreen",alpha=0.35)
-  tick_params(left=false,labelleft=false,labelbottom=false)
+  tick_params(left=false,labelleft=false,labelrotation=15,labelbottom=false)
   # ax6.minorticks_on()
   # ax6.tick_params(which="both",direction="in",
   #     left=false,right=false,top=true,bottom=true,
   #     labelbottom=false,labeltop=false,labelleft=false,labelright=false)
 
-  ax4=fig.add_subplot(8,8,17)
+  ax4=fig.add_subplot(8,8,17,sharex=ax1)
   # ax3.hist2d(x6,x4,bins=nbins,cmin=1,cmax=100000)
   h,xedges,yedges=np.histogram2d(x8,x6,nbins)
   c=ax4.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
-  ax4.set_ylabel(label6)
-  tick_params(labelbottom=false)
+  ax4.set_ylabel(label6,fontsize="large")
+  tick_params(labelbottom=false,labelsize="small")
   # ax9.minorticks_on()
   # ax9.tick_params(which="both",direction="out",top=true,right=false,
   #     labelleft=true,labelbottom=false)
 
-  ax5=fig.add_subplot(8,8,18)
+  ax5=fig.add_subplot(8,8,18,sharex=ax3,sharey=ax4)
   # ax4.hist2d(x5,x4,bins=nbins,cmin=1,cmax=100000)
   h,xedges,yedges=np.histogram2d(x7,x6,nbins)
   c=ax5.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
@@ -331,23 +331,23 @@ function corner(xs,true_xs,labels,nbins)
   ax6.hist(x6,bins=nbins,histtype="step",color="black")
   ax6.axvline(truex6,linestyle="--",color="black")
   ax6.axvspan(quantile(vec(x6),0.1587),quantile(vec(x6),0.8413),color="limegreen",alpha=0.35)
-  tick_params(left=false,labelleft=false,labelbottom=false)
+  tick_params(left=false,labelleft=false,labelrotation=15,labelbottom=false)
   # ax5.minorticks_on()
   # ax5.tick_params(which="both",direction="in",
   #     left=false,right=false,top=true,bottom=true,
   #     labelbottom=false,labeltop=false,labelleft=false,labelright=false) 
 
-  ax7=fig.add_subplot(8,8,25)
+  ax7=fig.add_subplot(8,8,25,sharex=ax1)
   # ax6.hist2d(x6,x3,bins=nbins,cmin=1,cmax=100000)
   h,xedges,yedges=np.histogram2d(x8,x5,nbins)
   c=ax7.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
-  ax7.set_ylabel(label5)
-  tick_params(labelbottom=false)
+  ax7.set_ylabel(label5,fontsize="large")
+  tick_params(labelbottom=false,labelsize="small")
   # ax6.minorticks_on()
   # ax6.tick_params(which="both",direction="out",top=true,right=false,
   #     labelleft=false,labelbottom=false)
 
-  ax8=fig.add_subplot(8,8,26)
+  ax8=fig.add_subplot(8,8,26,sharex=ax3,sharey=ax7)
   # ax7.hist2d(x5,x3,bins=nbins,cmin=1,cmax=100000)
   h,xedges,yedges=np.histogram2d(x7,x5,nbins)
   c=ax8.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
@@ -356,7 +356,7 @@ function corner(xs,true_xs,labels,nbins)
   # ax7.tick_params(which="both",direction="out",top=true,right=false,
   #     labelleft=false,labelbottom=false)
 
-  ax9=fig.add_subplot(8,8,27)
+  ax9=fig.add_subplot(8,8,27,sharex=ax6,sharey=ax7)
   # ax8.hist2d(x4,x3,bins=nbins,cmin=1,cmax=100000)
   h,xedges,yedges=np.histogram2d(x6,x5,nbins)
   c=ax9.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
@@ -369,32 +369,32 @@ function corner(xs,true_xs,labels,nbins)
   ax10.hist(x5,bins=nbins,histtype="step",color="black")
   ax10.axvline(truex5,linestyle="--",color="black")
   ax10.axvspan(quantile(vec(x5),0.1587),quantile(vec(x5),0.8413),color="limegreen",alpha=0.35)
-  tick_params(left=false,labelleft=false,labelbottom=false)
+  tick_params(left=false,labelleft=false,labelrotation=15,labelbottom=false)
   # ax9.minorticks_on()
   # ax9.tick_params(which="both",direction="in",
   #     left=false,right=false,top=true,bottom=true,
   #     labelbottom=false,labeltop=false,labelleft=false,labelright=false) 
 
-  ax11=fig.add_subplot(8,8,33)
+  ax11=fig.add_subplot(8,8,33,sharex=ax1)
     h,xedges,yedges=np.histogram2d(x8,x4,nbins)
   c=ax11.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
-  ax11.set_ylabel(label4)
-  tick_params(labelbottom=false)
+  ax11.set_ylabel(label4,fontsize="large")
+  tick_params(labelbottom=false,labelsize="small")
       #     labelleft=false,labelbottom=false)
 
-  ax12=fig.add_subplot(8,8,34)
+  ax12=fig.add_subplot(8,8,34,sharex=ax3,sharey=ax11)
     h,xedges,yedges=np.histogram2d(x7,x4,nbins)
   c=ax12.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
   tick_params(left=false,labelleft=false,labelbottom=false)
       #     labelleft=false,labelbottom=false)
 
-  ax13=fig.add_subplot(8,8,35)
+  ax13=fig.add_subplot(8,8,35,sharex=ax6,sharey=ax11)
     h,xedges,yedges=np.histogram2d(x6,x4,nbins)
   c=ax13.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
   tick_params(left=false,labelleft=false,labelbottom=false)
       #     labelleft=false,labelbottom=false)
 
-  ax14=fig.add_subplot(8,8,36)
+  ax14=fig.add_subplot(8,8,36,sharex=ax10,sharey=ax11)
     h,xedges,yedges=np.histogram2d(x5,x4,nbins)
   c=ax14.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
   tick_params(left=false,labelleft=false,labelbottom=false)
@@ -404,38 +404,38 @@ function corner(xs,true_xs,labels,nbins)
   ax16.hist(x4,bins=nbins,histtype="step",color="black")
   ax16.axvline(truex4,linestyle="--",color="black")
   ax16.axvspan(quantile(vec(x4),0.1587),quantile(vec(x4),0.8413),color="limegreen",alpha=0.35)
-  tick_params(left=false,labelleft=false,labelbottom=false)
+  tick_params(left=false,labelleft=false,labelrotation=15,labelbottom=false)
       #     left=false,right=false,top=true,bottom=true,
   #     labelbottom=false,labeltop=false,labelleft=false,labelright=false) 
 
-  ax17=fig.add_subplot(8,8,41)
+  ax17=fig.add_subplot(8,8,41,sharex=ax1)
   h,xedges,yedges=np.histogram2d(x8,x3,nbins)
   c=ax17.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
-  ax17.set_ylabel(label3)
-  tick_params(labelbottom=false)
+  ax17.set_ylabel(label3,fontsize="large")
+  tick_params(labelbottom=false,labelsize="small")
 
       #     labelbottom=true,labelleft=true)
 
-  ax18=fig.add_subplot(8,8,42)
+  ax18=fig.add_subplot(8,8,42,sharex=ax3,sharey=ax17)
   h,xedges,yedges=np.histogram2d(x7,x3,nbins)
   c=ax18.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
   # ax18.set_xlabel(label7)
   tick_params(left=false,labelleft=false,labelbottom=false)
       #     labelleft=false,labelbottom=true)
 
-  ax19=fig.add_subplot(8,8,43)
+  ax19=fig.add_subplot(8,8,43,sharex=ax6,sharey=ax17)
     h,xedges,yedges=np.histogram2d(x6,x3,nbins)
   c=ax19.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
   tick_params(left=false,labelleft=false,labelbottom=false)
       #     labelleft=false,labelbottom=true)
 
-  ax20=fig.add_subplot(8,8,44)
+  ax20=fig.add_subplot(8,8,44,sharex=ax10,sharey=ax17)
     h,xedges,yedges=np.histogram2d(x5,x3,nbins)
   c=ax20.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
   tick_params(left=false,labelleft=false,labelbottom=false)
       #     labelleft=false,labelbottom=true)
 
-  ax21=fig.add_subplot(8,8,45)
+  ax21=fig.add_subplot(8,8,45,sharex=ax16,sharey=ax17)
     h,xedges,yedges=np.histogram2d(x4,x3,nbins)
   c=ax21.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
   tick_params(left=false,labelleft=false,labelbottom=false)
@@ -445,40 +445,40 @@ function corner(xs,true_xs,labels,nbins)
   ax22.hist(x3,bins=nbins,histtype="step",color="black")
   ax22.axvline(truex3,linestyle="--",color="black")
   ax22.axvspan(quantile(vec(x3),0.1587),quantile(vec(x3),0.8413),color="limegreen",alpha=0.35)
-  tick_params(left=false,labelleft=false,labelbottom=false)
+  tick_params(left=false,labelleft=false,labelrotation=15,labelbottom=false)
 
-  ax23=fig.add_subplot(8,8,49)
+  ax23=fig.add_subplot(8,8,49,sharex=ax1)
     h,xedges,yedges=np.histogram2d(x8,x2,nbins)
-  ax23.set_ylabel(label2)
+  ax23.set_ylabel(label2,fontsize="large")
   c=ax23.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
       #     labelbottom=true,labelleft=true)
-    tick_params(labelbottom=false)
+    tick_params(labelbottom=false,labelsize="small")
 
-  ax24=fig.add_subplot(8,8,50)
+  ax24=fig.add_subplot(8,8,50,sharex=ax3,sharey=ax23)
     h,xedges,yedges=np.histogram2d(x7,x2,nbins)
   c=ax24.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
   tick_params(left=false,labelleft=false,labelbottom=false)
       #     labelleft=false,labelbottom=true)
 
-  ax25=fig.add_subplot(8,8,51)
+  ax25=fig.add_subplot(8,8,51,sharex=ax6,sharey=ax23)
     h,xedges,yedges=np.histogram2d(x6,x2,nbins)
   c=ax25.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
   tick_params(left=false,labelleft=false,labelbottom=false)
       #     labelleft=false,labelbottom=true)
 
-  ax26=fig.add_subplot(8,8,52)
+  ax26=fig.add_subplot(8,8,52,sharex=ax10,sharey=ax23)
     h,xedges,yedges=np.histogram2d(x5,x2,nbins)
   c=ax26.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
   tick_params(left=false,labelleft=false,labelbottom=false)
       #     labelleft=false,labelbottom=true)
 
-  ax27=fig.add_subplot(8,8,53)
+  ax27=fig.add_subplot(8,8,53,sharex=ax16,sharey=ax23)
     h,xedges,yedges=np.histogram2d(x4,x2,nbins)
   c=ax27.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
   tick_params(left=false,labelleft=false,labelbottom=false)
       #     labelleft=false,labelbottom=true)
   
-  ax28=fig.add_subplot(8,8,54)
+  ax28=fig.add_subplot(8,8,54,sharex=ax22,sharey=ax23)
     h,xedges,yedges=np.histogram2d(x3,x2,nbins)
   c=ax28.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
   tick_params(left=false,labelleft=false,labelbottom=false)
@@ -488,65 +488,68 @@ function corner(xs,true_xs,labels,nbins)
   ax29.hist(x2,bins=nbins,histtype="step",color="black")
   ax29.axvline(truex2,linestyle="--",color="black")
   ax29.axvspan(quantile(vec(x2),0.1587),quantile(vec(x2),0.8413),color="limegreen",alpha=0.35)
-  tick_params(left=false,labelleft=false,labelbottom=false)
+  tick_params(left=false,labelleft=false,labelrotation=15,labelbottom=false)
 
-  ax30=fig.add_subplot(8,8,57)
+  ax30=fig.add_subplot(8,8,57,sharex=ax1)
     h,xedges,yedges=np.histogram2d(x8,x1,nbins)
   c=ax30.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
-  ax30.set_xlabel(label8)
-  ax30.set_ylabel(label1)
-  # tick_params(labelrotation=60)
+  ax30.set_xlabel(label8,fontsize="large")
+  ax30.set_ylabel(label1,fontsize="large")
+  tick_params(axis="x",labelrotation=20,labelsize="small")
+  tick_params(axis="y",labelsize="small")
       #     labelbottom=true,labelleft=true)
 
-  ax31=fig.add_subplot(8,8,58)
+  ax31=fig.add_subplot(8,8,58,sharex=ax3,sharey=ax30)
     h,xedges,yedges=np.histogram2d(x7,x1,nbins)
   c=ax31.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
-  ax31.set_xlabel(label7)
-  tick_params(left=false,labelleft=false,labelrotation=45)
+  ax31.set_xlabel(label7,fontsize="large")
+  tick_params(left=false,labelleft=false,labelrotation=20,labelsize="small")
   # ax31.set_ylabel(label1)
       #     labelbottom=true,labelleft=true)
 
-  ax32=fig.add_subplot(8,8,59)
+  ax32=fig.add_subplot(8,8,59,sharex=ax6,sharey=ax30)
     h,xedges,yedges=np.histogram2d(x6,x1,nbins)
   c=ax32.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
-  ax32.set_xlabel(label6)
-  tick_params(left=false,labelleft=false,labelrotation=45)
+  ax32.set_xlabel(label6,fontsize="large")
+  tick_params(left=false,labelleft=false,labelrotation=20,labelsize="small")
       #     labelleft=false,labelbottom=true)
 
-  ax33=fig.add_subplot(8,8,60)
+  ax33=fig.add_subplot(8,8,60,sharex=ax10,sharey=ax30)
     h,xedges,yedges=np.histogram2d(x5,x1,nbins)
   c=ax33.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
-  ax33.set_xlabel(label5)
-  tick_params(left=false,labelleft=false,labelrotation=45)
+  ax33.set_xlabel(label5,fontsize="large")
+  tick_params(left=false,labelleft=false,labelrotation=20,labelsize="small")
 
       #     labelleft=false,labelbottom=true)
-  ax34=fig.add_subplot(8,8,61)
+  ax34=fig.add_subplot(8,8,61,sharex=ax16,sharey=ax30)
     h,xedges,yedges=np.histogram2d(x4,x1,nbins)
   c=ax34.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
-  ax34.set_xlabel(label4)
-  tick_params(left=false,labelleft=false,labelrotation=45)
+  ax34.set_xlabel(label4,fontsize="large")
+  tick_params(left=false,labelleft=false,labelrotation=20,labelsize="small")
       #     labelleft=false,labelbottom=true)
   
-  ax35=fig.add_subplot(8,8,62)
+  ax35=fig.add_subplot(8,8,62,sharex=ax22,sharey=ax30)
   h,xedges,yedges=np.histogram2d(x3,x1,nbins)
   c=ax35.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
-  ax35.set_xlabel(label3)
-  tick_params(left=false,labelleft=false,labelrotation=45)
+  ax35.set_xlabel(label3,fontsize="large")
+  tick_params(left=false,labelleft=false,labelrotation=20,labelsize="small")
       #     labelleft=false,labelbottom=true)
 
-  ax36=fig.add_subplot(8,8,63)
+  ax36=fig.add_subplot(8,8,63,sharex=ax29,sharey=ax30)
     h,xedges,yedges=np.histogram2d(x2,x1,nbins)
   c=ax36.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
-  ax36.set_xlabel(label2)
-  tick_params(left=false,labelleft=false,labelrotation=45)
+  ax36.set_xlabel(label2,fontsize="large")
+  tick_params(left=false,labelleft=false,labelrotation=20,labelsize="small")
       #     labelleft=false,labelbottom=true)
 
   ax37=fig.add_subplot(8,8,64)
   ax37.hist(x1,bins=nbins,histtype="step",color="black")
   ax37.axvline(truex1,linestyle="--",color="black")
   ax37.axvspan(quantile(vec(x1),0.1587),quantile(vec(x1),0.8413),color="limegreen",alpha=0.35)
-  ax37.set_xlabel(label1)
-  tick_params(left=false,labelleft=false,labelrotation=45)
+  ax37.set_xlabel(label1,fontsize="large")
+  tick_params(left=false,labelleft=false,labelrotation=20,labelsize="small")
+  fig.align_ylabels()
+  fig.align_xlabels()
   # tight_layout()
 
  # return fig
@@ -771,20 +774,22 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
   # @show
 
   # Find Percentage of walkers where difference between median and quantile value is >100
-  # bad_walk=[]
-  # for i in 1:nwalkers
-  #   for j in 1:nparam
-  #     walker_med,walker_quant=quantile!(par_mcmc[i,jldmc["iburn"]+1:end,j],[0.5,0.9])
-  #     walk_start=par_mcmc[i,jldmc["iburn"]+1,j] 
-  #     walk_end = par_mcmc[i,jldmc["iburn"]+1,j]
-  #     ratio = walk_end/walk_start
-  #     walker_prob=median(lprob_mcmc[i,jldmc["iburn"]+1:end])
-  #     if abs(walk_end-walk_start)/walk_start > 0.1
-  #       #abs(walker_med-walker_end)>30
-  #       # println(i," ",walker_prob[i])
-  #       append!(bad_walk,i)
-  #     end
-  #   end
+  bad_walk=[]
+  for i in 1:nwalkers
+    for j in 1:nparam
+      walker_med,walker_quant=quantile!(par_mcmc[i,jldmc["iburn"]+1:end,j],[0.5,0.9])
+      walk_start=par_mcmc[i,jldmc["iburn"]+1,j] 
+      walk_end = par_mcmc[i,jldmc["iburn"]+1,j]
+      ratio = walk_end/walk_start
+      walker_prob=median(lprob_mcmc[i,jldmc["iburn"]+1:end])
+      if abs(walk_end-walk_start)/walk_start > 0.1
+        #abs(walker_med-walker_end)>30
+        # println(i," ",walker_prob[i])
+        append!(bad_walk,i)
+      end
+    end
+  # If prob for a given chain is low, reject it
+
   #     # If systematic uncertainty > injected uncertainty, reject
   #   # if median(par_mcmc[i,jldmc["iburn"]:end,end]).*3600*24 >= sigma
   #   #   # println("Reject results?")

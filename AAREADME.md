@@ -41,26 +41,33 @@ NaifID:
     3           'EARTH MOON BARYCENTER'
     399         'EARTH'
 
+Observer is calculating barycentic julian date for theings outside SS, with light travel time correction.
+
 1). Simulate transit times from JPLEphemeris. Add noise option to data.
 
-sim_times(jd1::Float64,sigma::Real,nyear::Real,obs::String)
-
+sim_obs_and_find_times(jd1::Float64,sigma::Real,nyear::Real,obs::String)
 
 2a). Carry out a linear fit to the transit times. 
 
 2b). Call ttv_nplanet.jl from wrapper then compute the chi-square 
 of the fit. Carry out an initial fit of the 2 inner planets
-
+Note: jmax is the truncation of infinite [?] series in Laplace coefficients. It's larger when planets are closer to each other.
 ttv_nplanet(nplanet::Int64,jmax::Int64,ntrans::Vector{Int64},data::Vector{T}) where T<:Real
 ttv_wrapper(tt0,nplanet::Int64,ntrans::Vector{Int64},params::Vector{T},jmax::Integer,EM::Bool) 
 
-2c). Then add in the third planet. Initialize a grid of periods & 
+fit_planet2(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,options::Array{String},save_as_jld2::Bool=false)
+
+2c). Then add in the third (and later, fourth) planet. Initialize a grid of periods & 
 phases of the outer planet, compute the best-fit at each.
 Optimize the fit to the two sets of transit times by varying all of the
 other parameters. 
-Note: This assumes 2 transits for Jupiter because transits are required for TTVFaster
-Show that likelihood curve peaks at period of Jupiter.
-Note: the third planet can't be too close to the transiting planets.
+    - subtracted tref from times to increase speed/accuracy. 
+    - added tolerance limit to optimization 
+    - tref, jd1, and tol defined in full_run.jl 
+Note: This assumes 2 transits for Jupiter/Mars-analogues because that is required for TTVFaster
+Show that likelihood curve peaks at real period of Jupiter.
+Note: the third planet can't be too close to the transiting planets. 
+    - Currently doing 5-22 years, but ran rebound simulations to test minimum orbit of jupiter analogue. Conditioned on retrieved V+E parameters, Jupiter orbit can go down to 1337.0 days but this doesn't account for the observed TTVs. Would need NbodyGradient to find actual minimum.
 
 fit_planet3(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p3in::Float64,p3out::Float64,np3::Int,nphase::Int,obs::String)
 
@@ -83,38 +90,23 @@ Note: deltaphi dist. is multi-modal, so ensure that value is inside dp range.
     tt0::Array{Float64,1},tt::Array{Float64,1},sigtt::Array{Float64,1},
     use_sigsys::Bool,EM::Bool) 
 
-4).  Run routine for range of noise levels (sigmas) and observation time spans (nyears):
--Which runs best detect perturbing objects? 
+4).  Run routine for range of noise levels (sigmas) and observation time spans (nyears). 
+Which runs best detect perturbing objects? 
 For different time spans, there are diff. posterior distributions, 
 must change grid search to accommodate for width of dist.
 
-julia full_run.jl grid 30.0 40 ppp &> results/run.out &
-julia EMB_run.jl grid 10 40 ppppp &> results/p5test.out &
-......
-label = [ppp, ppmp, pppp, etc.]
-runtype = [sim, grid, mcmc, wide]
-runtype, label = ARGS[1], ARGS[4]
-sigma, nyear = parse(Float64,ARGS[2]),parse(Float64,ARGS[3])
-np3 = [fine=200, medium=100, coarse=50]     <!-- test=10 -->
-nphase = [fine=72, medium=36, coarse=18]    <!-- test=10 -->
-ndp = [fine=180, medium=72, coarse=36]      <!-- test=10 -->
-steps=[short=10000, med=50000, long=100000] <!-- test=1000 -->
-sigmas = [10, 30, 45, 60, 75, 90, 105, 120] <!-- which of these are realistic? -->
-years = [10, 12, 15, 18, 20, 23, 25, 28, 30, 40] <!-- how often to check results? -->
-......
-
-07/22/2021
+09/22/2023 updated 12/13/2023
 ##########################	Current State	##########################
-0). Updated TTVFaster to be compatible with Julia v1.3
-1). With transit times of Earth & Venus, can infer both of
-their masses, as well as existence of Jupiter first then Moon
-1a). clear gaussians in likelihood profiles, agrees with posterior dist.
-2). For 30 sec noise, ~18 years is enough to constrain Jupiter period from E+V 
-        (mass?)
-    For 30 sec noise, ~22 years is enough to constrain Mars period from E+V
-        (mass?)
-    For 60secs and 90 secs, 30 years is enough
-        limits/constraints make sense based on TTVs
+0). Updated TTVFaster to be compatible with Julia v1.3+
+1). With transit times of Earth & Venus, can constrain both of their masses
+jd1=2.4332825e6; tref=2430000; tol=1e-5
+1a). Can infer existence of Jupiter first then Moon
+1b). clear gaussians in likelihood profiles, agrees with posterior dist.
+2). - For 30 sec noise, ~18 years is enough to constrain Jupiter period from E+V 
+        (mass?){
+            - For 30 sec noise, ~22 years is enough to constrain Mars period fr}}'
+    - For 60secs and 90 secs, 30 years is enough
+    limits/constraints make sense based on TTVs
 3). Less time span or more noise overestimate (or underestimate?) Jupiter period
         could be different definitions of period (linear ephemeris fit vs average time to orbit)
 4). Once t_maxsinphi and t_maxcosphi are approx 0, no constrain on deltaphi
@@ -129,7 +121,7 @@ Q). P-M_p degeneracy? <--tail on Jupiter distributions
         assymetry for ecosw and esinw
 Q). Wrong signs for evectors? <-- not first time this has been found
 
-##########################	Writing Tasks	##########################
+##########################  Project Tasks   ##########################
 0). Complete bibliography. [  ]
 0a). Find relevant papers and add them to .bib file [  ]
 0b). Read and summarize relevant papers [ x ]
@@ -137,45 +129,25 @@ Q). Wrong signs for evectors? <-- not first time this has been found
 2). Write up methods description [ x ]
 3). Write up analysis description [ x ]
 4). Create tables for parameters. [ x ]
-
-##########################  Project Tasks ##########################
-Make likelihood profiles continuous [ ]
-10). Condense results to 1 equation fit (ex. how much of X to get Y uncertainty). [  ]
-9). See if we can detect Mars [ x ] or Saturn. [ x ]
-8). See which scenario best fits simulated data [ x ]
-7). Add M_p > 0 prior to MCMC [ x ]
+5) Make likelihood profiles continuous [ ]
+6). Make plots of orbits with 1-sigma uncertainties overplotted with the correct orbits. [  ] 
+     - how to do this with eccentricities and omega? Need pomega and Omega?
 7). Figure out whether the Earth-Moon barycenter offset causes
 bias in measurements and if so, why.
-6). Add in 4th planet. Fit for best params [ x ]
-6a). Search for second peak in likelihood profile to fit. [ x ]
-5). Analyze chain results: trace plots, uncertainties, etc.
-5a). See how many observations would be needed (minimum number of years required). [ x ]
-5b). See what the necessary precision would be (vary noise added to simulations). [ x ]
-4). Show models are correct: derived Earth and Venus parameters.
-4b). Make plots of histograms of parameter results from MCMC with correct values. [ x ]
-4c). Make plots of orbits with 1-sigma uncertainties overplotted with the correct orbits. [  ] 
-Q   - how to do this with eccentricities and omega? Need pomega and Omega?
-4d). Make plots of logL for Jupiter period and Moon deltaphi with correct values at peak. [ x ] 
-    (include histograms of posterior results) 
-4e). Make plots of posterior results of model fit to simulated times. [ x ] 
-3). Create slurm file to run multiple grids on hyak.mox. [ x ] 
-3a). Schedule parallel fit and chain runs on hyak.mox using slurm scheduler [  ]
+8). Schedule parallel fit and chain runs on hyak.mox using slurm scheduler [  ]
      - exits prematurely, times out, or returns error in regress.jl assertion
-2a). Add in the option for Moon. [ x ]
-2b). Fit for Moon deltaphi. [ x ]
-1). Makes plots of the contributions of individual bodies [ x ]
-    (including the ones we are neglecting).      
-<!-- 
-##########################  Optional Tasks  ##########################
+10). Condense results to 1 equation fit (ex. how much of X to get Y uncertainty). [  ]
+
+############################ Future Tasks   ##########################
 Q: What really limits timing precision of Earth & Venus
 about the Sun? 
-3a). Could use existing telescope precision info
-3a). Figure out what the actual expected timing precision
-would be (limited by stellar noise -- related to Tyler's work). 
+1). How to account for missed transits in real data? 
+multiple coefficeints -> loop over coefficients?
+2). Could use existing telescope precision info 
+3). Figure out what the actual expected timing precision would be (limited by stellar noise -- related to Tyler's work). 
 Q: The masses inferred with sufficient data are good, although
 still a bit more discrepant than I would like. need to implement an N-body fit?
-4a). Using TTVFaster for first estimate, do NBody Gradient fit. 
-4b). Refine TTVFaster estimates from finding Jupiter by applying NbodyGradient.
+4a). Refine TTVFaster estimates from finding Jupiter by applying NbodyGradient.
 (should get better parameters for the masses of Venus and Earth)
 Heirarchy example for Solar System:
 Sun Venus Earth Moon Jupiter Saturn ....
@@ -189,12 +161,75 @@ indices = [[-1, 1, 0, 0, 0, 0],  # SUN & VENUS orbit in a binary
 5a). Figure out how to speed things up so I can do a global
 search, and explore duration & error bar dependence. 
 5b). Do inverse matrix fitting for linear parameters (Jupiter period & Moon deltaphi) to speed things up (might be more robust).
-5c). Maybe make a type to hold the pre-computed Laplace coefficents,
+5c). Maybe make a struct to hold the pre-computed Laplace coefficents,
 and pass this to routines, or create a closure for this.
+5d). Analytical Jacobian (could speed up TTVFaster). How do finite differences compare to analytic derivatives?
+    - computate Laplace coefficients, need derivatives of coeffs from table 1 of Agol&Deck 2015
+    - write tests to show that analytic derivatives work.
 6). From posteriors, show how well we can measure mean insolation. 
 7). Show that model is correct either way (Moon first then Jupiter). 
     - unrealistic because it's more likely that the giant planet would be discovered first since it's easier
-8a). Make model of actual transit light curves (as opposed to just transit times).
-8b). Show how well constrained densities are (for Earth and Venus).
-8c). Show how well constrained densities are for Sun.
+8). Make model of actual transit light curves (as opposed to just transit times).
+    - Show how well constrained densities are (for Earth and Venus).
+    - Show how well constrained densities are for Sun.
+
+   
+<!-- 
+##########################  Completed Tasks  ##########################
+9). See if we can detect Mars [ x ] or Saturn. [ x ]
+8). See which scenario best fits simulated data [ x ]
+7). Add M_p > 0 prior to MCMC [ x ]
+6). Add in 4th planet. Fit for best params [ x ]
+6a). Search for second peak in likelihood profile to fit. [ x ]
+5). Analyze chain results: trace plots, uncertainties, etc.
+5a). See how many observations would be needed (minimum number of years required). [ x ]
+5b). See what the necessary precision would be (vary noise added to simulations). [ x ]
+4). Show models are correct: derived Earth and Venus parameters.
+4b). Make plots of histograms of parameter results from MCMC with correct values. [ x ]
+4d). Make plots of logL for Jupiter period and Moon deltaphi with correct values at peak. [ x ] 
+    (include histograms of posterior results) 
+4e). Make plots of posterior results of model fit to simulated times. [ x ] 
+3). Create slurm file to run multiple grids on hyak.mox. [ x ] 
+2a). Add in the option for Moon. [ x ]
+2b). Fit for Moon deltaphi. [ x ]
+1). Makes plots of the contributions of individual bodies [ x ]
+    (including the ones we are neglecting).   
+
+
+#### Hyak  slurm example
+julia full_run.jl grid 30.0 40 ppp &> results/run.out &
+julia EMB_run.jl grid 10 40 ppppp &> results/p5test.out &
+......
+obs = "fromEMB" or "fromEV"
+label = [ppp, ppmp, pppp, etc.]
+runtype = [sim, grid, mcmc, wide]
+runtype, label = ARGS[1], ARGS[4]
+sigma, nyear = parse(Float64,ARGS[2]),parse(Float64,ARGS[3])
+np3 = [fine=200, medium=100, coarse=50]     # test=10 
+nphase = [fine=72, medium=36, coarse=18]    # test=10 
+ndp = [fine=180, medium=72, coarse=36]      # test=10 
+steps=[short=10000, med=50000, long=100000] # test=1000
+sigmas = [10, 30, 45, 60, 75, 90, 105, 120] # which of these are realistic?
+years = [10, 12, 15, 18, 20, 23, 25, 28, 30, 40] # how often to check results?
+......
+####
+Plotting examples
+plot_contrib(30,30,["fromEMB","p4","best_p4"])
+
+#### More general example for github
+The data array contains parameters that describe a multi-transiting planet system. In the case of 2 planets, there are 10 parameters. 
+```julia
+  # Set up data structure to hold planet-plane properties,passed to TTVFaster
+  data=init_param
+  julia> p1=TTVFaster.Planet_plane_hk(data[1],data[2],data[3],data[4],data[ 5]);
+  julia> p2=TTVFaster.Planet_plane_hk(data[6],data[7],data[8],data[9],data[10]);
+  # Compute expected transit times (if there were no perturbations): 
+  time1 = collect(p1.trans0 .+ range(0,stop=nt1-1,length=nt1) .* p1.period);
+  time2 = collect(p2.trans0 .+ range(0,stop=nt2-1,length=nt2) .* p2.period);
+  # Initialize the computation of the Laplace coefficients:
+  ttv1 = zeros(nt1);
+  ttv2 = zeros(nt2);
+  # Need first call to TTVFaster,without optimizing
+  julia> dummy=TTVFaster.compute_ttv!(jmax,p1,p2,time1,time2,ttv1,ttv2)
+```
 -->

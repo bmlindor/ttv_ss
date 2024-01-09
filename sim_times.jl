@@ -204,10 +204,11 @@ function sim_obs_and_find_times(jd1::Float64,sigma::Real,nyear::Real,obs::String
   # for i=1:length(tt2)
   #   println(tt2[i], " ",tt2[i]+noise2[i])
   # end
+  tref=2430000
   x1,t01,per1 = linear_fit(tt1+noise1,P_venus,sigtt1)
   x2,t02,per2 = linear_fit(tt2+noise2,P_earth,sigtt2)
-  println("P1 linear coefficients: ",t01," , ",per1)
-  println("P2 linear coefficients: ",t02," , ",per2)
+  println("P1 linear coefficients: ",t01.-tref," , ",per1)
+  println("P2 linear coefficients: ",t02.-tref," , ",per2)
   # println(linear_fit(tt2.+noise2,P_earth,sigtt2))
 	tt=[tt1+noise1;tt2+noise2]
   # println("t0= ",t01)
@@ -225,21 +226,23 @@ function sim_obs_and_find_times(jd1::Float64,sigma::Real,nyear::Real,obs::String
 
   ttv1=(tt1 .- t1).*24*60
   ttv2=(tt2 .- t2).*24*60
-  # function make_transit_times_table()
-  #   name= string(jd1,"VEtransit_times",nyear,".txt")
-  #   open(name,"w") do io
-  #     for i=1:nt1
-  #       println(io,"Venus",'\t',i-1,'\t',round(t1[i].-2433500,sigdigits=10),'\t',round(ttv1[i],sigdigits=4),'\t',round(noise1[i].*24*60,sigdigits=2),'\t',sigtt1[i].*24*60)
-  #     end
-  #     for i=1:nt2
-  #       println(io,"Earth",'\t',i-1,'\t',round(t2[i].-2433500,sigdigits=10),'\t',round(ttv2[i],sigdigits=4),'\t',round(noise2[i].*24*60,sigdigits=2),'\t',sigtt2[i].*24*60)
-  #     end
-  #   end
-  # end
-  # make_transit_times_table()
+  trans=[round.(range(0,stop = nt1-1, length=nt1));  round.(range(0,stop = nt2-1, length=nt2))]
+  function make_transit_times_table()
+    name= string("EMBtransit_times",nyear,".txt")
+    open(name,"w") do io
+      println(io,"# body ntrans  tcalc ttv noise sigma",'\n',"#   JED-2430000 min min min")
+      for i=1:nt1
+        println(io,"1.0",'\t',i-1,'\t',round(t1[i].-tref,sigdigits=10),'\t',round(ttv1[i],sigdigits=4),'\t',round(noise1[i].*24*60,sigdigits=2),'\t',sigtt1[i].*24*60)
+      end
+      for i=1:nt2
+        println(io,"2.0",'\t',i-1,'\t',round(t2[i].-tref,sigdigits=10),'\t',round(ttv2[i],sigdigits=4),'\t',round(noise2[i].*24*60,sigdigits=2),'\t',sigtt2[i].*24*60)
+      end
+    end
+  end
+  make_transit_times_table()
   println("A_TTV1= ",maximum(abs.(ttv1)))
   println("A_TTV2= ",maximum(abs.(ttv2)))
-  return body,tt0,tt,sigtt
+  return body,trans,tt0,tt,sigtt
   # return body,tt
 end
 # body,tt0,tt,sigtt=sim_obs_and_find_times(2.4332825e6,30,30,"fromEV")

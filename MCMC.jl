@@ -78,7 +78,7 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,nsteps
     end
     for iplanet=1:nplanet
     # The masses should be positive:
-      if param[(iplanet-1)*5+1] < 0
+      if param[(iplanet-1)*5+1] < 0 #unsure if this is correct implement
         lprior += -Inf
       end
     end
@@ -302,7 +302,7 @@ function mc_vals(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num=Int,
   sigsys_err=(std(vec(par_mcmc[:,iburn:end,end]))).* 3600*24
   sigtot=round(sqrt(sigsys^2 + sigma^2),sigdigits=4)
   # Find percentage of walkers where diff. between median and quantile value is >100
-  bad_walk=[]
+  # bad_walk=[]
   # for i in 1:nwalkers
   #   for j in 1:nparam
   #     walker_med,walker_quant=quantile!(par_mcmc[i,jldmc["iburn"]+1:end,j],[0.5,0.9])
