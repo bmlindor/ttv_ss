@@ -12,9 +12,9 @@ Random.seed!(42)
 # Find when body_id transits between jd1 and jd2 for observer at n_obs with N orbit integration steps 
 function find_transit(body_id::Int,eph::CALCEPH.Ephem,jd1::Float64,jd2::Float64,n_obs::Vector{Float64},N::Int)
   JD_0 = 0.0
-  ff = zeros(N)
+  ff = Array{Float64}(undef, N)
   xdotn = 0.0
-  pos = zeros(3,N) 
+  pos = Array{Float64}(undef,3, N)
   # Compute functions of position and velocity, f(t)=dot(x_bar, v_bar) and f'(t):
   function calc_ffs(t)
     pva = compute(eph,JD_0,t,body_id,10,options,2)./AU
@@ -26,7 +26,7 @@ function find_transit(body_id::Int,eph::CALCEPH.Ephem,jd1::Float64,jd2::Float64,
   end
   # Compute minimum sky separation of planet wrt star for all JDs
   dt =  (jd2 - jd1)/(N-1)
-  JD = zeros(N)
+  JD = Array{Float64}(undef, N)
   i_min = 1
   ff_min = Inf
   for i=1:N
@@ -73,24 +73,31 @@ function find_transit(body_id::Int,eph::CALCEPH.Ephem,jd1::Float64,jd2::Float64,
   end          
   JD_tt = JD_0 + JD_n
   #println("Refined Transit Time: ",JD_tt)
-  # return JD_tt
-	return JD,ff,i_min,pos,JD_tt
+  return JD_tt,pos
+	# return JD,ff,i_min,pos,JD_tt
 end
 # Find the transit times for body_id, given planetary period estimate,and number of refinement steps N
 function transit_times(body_id::Int,eph::CALCEPH.Ephem,t0,period::Float64,period_err::Float64,n_obs::Vector{Float64},N::Int)
   TT = Float64[]
-  t_final = t0[end]
-  # Initialize & find first transit time:
-  JD,ff,i_min,pos,JD_tt = find_transit(body_id,eph,t0[1],t0[1]+period,n_obs,1000) #why did we use 1000 here? want first time to be precise
+  nt=1
+  # Initialize & find first transit time (with high precision so N=1000):
+  JD_tt,pos = find_transit(body_id,eph,t0[1],t0[1]+period,n_obs,1000) 
   push!(TT,JD_tt)
+  t_final = t0[end]
   # Find subsequent transit times by shifting time frame by 1 planetary period:
-  while JD_tt < t_final
+  while JD_tt < t_final # condition to continue shifting frame
     t_start = JD_tt+period-period_err
     t_end = JD_tt+period+period_err
-    JD,ff,i_min,pos,JD_tt = find_transit(body_id,eph,t_start,t_end,n_obs,N)
-    push!(TT,JD_tt)
+    JD_tt,pos = find_transit(body_id,eph,t_start,t_end,n_obs,N)
+    # JD,ff,i_min,pos,JD_tt = find_transit(body_id,eph,t_start,t_end,n_obs,N)
+    if (JD_tt>t_final) # last run of while loop doesn't meet condition , so need to break 
+      break
+    else
+      push!(TT,JD_tt)
+      nt+=1
+    end
   end
-  return TT
+  return TT,nt
 end
 # Add Gaussian sigma noise level (in seconds) to transit times (in days)
 function fixed_noise(tt::Vector{Float64},sigma::Real)
@@ -103,19 +110,18 @@ function fixed_noise(tt::Vector{Float64},sigma::Real)
       noise = sigtt .* randn(length(tt))
       # println("Noise added with σ of ",string(sigma)," seconds.")
   else
-      sigtt=zeros(length(tt))
+      sigtt=Array{Float64}(undef, length(tt))
       println("No noise added.")
   end
   return sigtt,noise 
 end
 # Do linear regression of transit times, given mean orbital period
 function linear_fit(tt::Vector{Float64},period::Float64,sigtt::Vector{Float64})
-  nt=length(tt)
-  noise = zeros(nt)
-  x = zeros(2,nt)
-  x[1,1:nt] .= 1.0
+  noise = Array{Float64}(undef, length(tt))
+  x = Array{Float64}(undef,2, length(tt))
+  x[1,1:length(tt)] .= 1.0
   x[2,1] = 0.0 
-  for i=2:nt
+  for i=2:length(tt)
     # currently accounts for missing transits (noncontinuous) 
     # by rounding [difference in consecutive transit times/Period]
       x[2,i] = round((tt[i]-tt[1])/period) 
@@ -128,9 +134,8 @@ function linear_fit(tt::Vector{Float64},period::Float64,sigtt::Vector{Float64})
 end
 # Collect linear transit times (i.e. t_calc), given mean orbital period
 function linear_times(tt::Vector{Float64},period::Float64,sigtt::Vector{Float64})
-  nt=length(tt)
   x,t0,per=linear_fit(tt,period,sigtt)
-  times=collect(t0 .+ per .* range(0,stop = nt-1,length = nt)) 
+  times=collect(t0 .+ per .* range(0,stop = length(tt)-1,length = length(tt))) 
   return times
 end
 # Compute unit vector which intersects orbital plane of objects 1 and 2:
@@ -159,12 +164,12 @@ function sim_obs_and_find_times(jd1::Float64,sigma::Real,nyear::Real,obs::String
   # dt = (jd2 - jd1)/jdsize
   @assert (jd1 >= 2287184.5) #2414105.0
   @assert (jd2 <= 2688976.5) #2488985.0
-  t0 = range(jd1,stop=jd2-1,length = jdsize)
+  t0 = range(jd1,stop=jd2,length = jdsize)
 
   # Compute ephemerides of Sun, Venus and Earth (or EMB):
-  pva_sun = zeros(9,jdsize)
-  pva_venus = zeros(9,jdsize)
-  pva_earth = zeros(9,jdsize)
+  pva_sun = Array{Float64}(undef, 9, jdsize)
+  pva_venus = Array{Float64}(undef, 9, jdsize)
+  pva_earth = Array{Float64}(undef, 9, jdsize)
   for i=1:jdsize
     pva_sun[1:9,i] = compute(eph,t0[i],0.0,10,10,options,2)./AU
     pva_venus[1:9,i] = compute(eph,t0[i],0.0,2,10,options,2)./AU
@@ -188,14 +193,15 @@ function sim_obs_and_find_times(jd1::Float64,sigma::Real,nyear::Real,obs::String
   P_venus = 225.0
   P_earth = 365.0
   P_err = 1.0
-  tt1 = transit_times(2,eph,t0,P_venus,P_err,n_obs,10)
-  nt1=length(tt1)
+  tt1,nt1 = transit_times(2,eph,t0,P_venus,P_err,n_obs,10)
+  # nt1=length(tt1)
   if obs=="fromEMB"
-    tt2 = transit_times(3,eph,t0,P_earth,P_err,n_obs,10)
+    tt2,nt2 = transit_times(3,eph,t0,P_earth,P_err,n_obs,10)
   else
-    tt2 = transit_times(399,eph,t0,P_earth,P_err,n_obs,10)
+    tt2,nt2 = transit_times(399,eph,t0,P_earth,P_err,n_obs,10)
   end
-  nt2=length(tt2)
+  # nt2=length(tt2)
+  # println(nt1," ",nt2)
   # println("Venus Transit Times: ",tt1,'\n',"Earth Transit Times: ",tt2)
 	sigtt1,noise1=fixed_noise(tt1,sigma)
 	sigtt2,noise2=fixed_noise(tt2,sigma)
@@ -239,10 +245,10 @@ function sim_obs_and_find_times(jd1::Float64,sigma::Real,nyear::Real,obs::String
       end
     end
   end
-  make_transit_times_table()
+  # make_transit_times_table()
   println("A_TTV1= ",maximum(abs.(ttv1)))
   println("A_TTV2= ",maximum(abs.(ttv2)))
-  return body,trans,tt0,tt,sigtt
+  return body,trans,tt,sigtt,tt0
   # return body,tt
 end
 # body,tt0,tt,sigtt=sim_obs_and_find_times(2.4332825e6,30,30,"fromEV")
@@ -323,15 +329,17 @@ function plot_orbits(dimension::Int,obs::String,nyear::Real=10)
   fill(xsun.*5,ysun.*5,color="yellow")
   plot(xsun,ysun,color="yellow")
   plot(pva_venus[1,:],pva_venus[2,:],color="salmon",linewidth=1,alpha=0.5)
-  p1=ax.scatter(trans_pva_venus[1,1:nt1],trans_pva_venus[2,1:nt1],marker="v",color="salmon",label="Venus")
+  for i=1:nt1
+  ax.scatter(trans_pva_venus[1,i],trans_pva_venus[2,i],marker="v",color="salmon",label=string(i))
+  end
   if obs=="fromEMB"
     n_obs=calc_obs_loc(trans_pva_venus[1:3],trans_pva_venus[4:6],trans_pva_emb[1:3],trans_pva_emb[4:6])
     plot(pva_emb[1,:],pva_emb[2,:],color="forestgreen",linewidth=1,alpha=0.5)
-    p2=ax.scatter(trans_pva_emb[1,nt1+1:nt1+nt2],trans_pva_emb[2,nt1+1:nt1+nt2],marker=".",color="forestgreen",label="EMB")
+    ax.scatter(trans_pva_emb[1,nt1+1:nt1+nt2],trans_pva_emb[2,nt1+1:nt1+nt2],marker=".",color="forestgreen",label="EMB")
   else
   n_obs=calc_obs_loc(trans_pva_venus[1:3],trans_pva_venus[4:6],trans_pva_earth[1:3],trans_pva_earth[4:6])
   plot(pva_earth[1,:],pva_earth[2,:],color="forestgreen",linewidth=1,alpha=0.5)
-  p2=ax.scatter(trans_pva_earth[1,nt1+1:nt1+nt2],trans_pva_earth[2,nt1+1:nt1+nt2],marker=".",color="forestgreen",label="Earth")
+  ax.scatter(trans_pva_earth[1,nt1+1:nt1+nt2],trans_pva_earth[2,nt1+1:nt1+nt2],marker=".",color="forestgreen",label="Earth")
   end
   # arrow(0.0,0.0,n_obs[1],n_obs[2],facecolor="black")
   plot([0,n_obs[1]*1.1],[0,n_obs[2]*1.1],"k--",linewidth=1,alpha=0.5)
