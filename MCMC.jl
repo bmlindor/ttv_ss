@@ -294,13 +294,25 @@ function mc_vals(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num=Int,
   jmax=5
   # weight=ones(nt1+nt2)./ sigtt.^2 
   nparam=length(pname)
-  # println("From fit: ",param)
-  # println("           Posterior Parameters from ",mcfile)
-  # println(" lprob: ",lprob)
-  prob_max=maximum(lprob_mcmc[:,jldmc["iburn"]:end])
+  prob_max=maximum(lprob_mcmc[:,iburn:end])
   sigsys=round((median(vec(par_mcmc[:,iburn:end,end]))).* 3600*24,sigdigits=3)
   sigsys_err=(std(vec(par_mcmc[:,iburn:end,end]))).* 3600*24
   sigtot=round(sqrt(sigsys^2 + sigma^2),sigdigits=4)
+
+    figure(figsize=(8,6))
+#    for i=1:nparam
+    ax1=subplot(2,2,1)
+   	ax2=subplot(2,2,2)
+    for j=1:nwalkers 
+    ax1.plot(par_mcmc[j,iburn:nsteps,end].*24*3600,lprob[iburn:nsteps])
+		#for iplanet=1:nplanet
+			#ax2.plot()
+    end
+		ax1.set_xlabel("σsys [sec]")
+	  ax1.set_ylabel("log Prob")
+    tight_layout()
+    title=string("IMAGES/trace/case",case_num,grid_type_nplanet,"-",sigma,"secs",nyear,"yrs.png")
+    savefig(title)
   # Find percentage of walkers where diff. between median and quantile value is >100
   # bad_walk=[]
   # for i in 1:nwalkers
@@ -323,21 +335,20 @@ function mc_vals(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num=Int,
   #   # end
   # end
   # println("Bad walkers: ",bad_walk)
-
+	avg=zeros(nparam)
   med=zeros(nparam)
   low=zeros(nparam)
-  # plus1sig=zeros(nparam)
   errors=zeros((2,nparam))
   high=zeros(nparam)
   for i=1:nparam
    med[i],low[i],high[i]=quantile(vec(par_mcmc[:,iburn:end,i]),[0.5,0.1587,0.8413])
-   # for j=1:2
    errors[1,i]=med[i]-low[i]; errors[2,i]=high[i]-med[i]
    # println(pname[i]," = ",avg[i]," + ",abs(plus1sig[i]-avg[i])," _ ",abs(avg[i]-minus1sig[i]))
   end
-  # masses=[median(vec(par_mcmc[:,iburn:end,i-4])) for i in 1:length(param) if i%5==0] .*CGS.MSUN/CGS.MEARTH
-  # ecc=[calc_ecc(avg[i-1],avg[i]) for i in 1:length(param) if i%5==0] 
-
+  masses=[med[i-4] for i in 1:length(param) if i%5==0] .*CGS.MSUN/CGS.MEARTH
+  ecc=[calc_ecc(med[i-1],med[i]) for i in 1:length(param) if i%5==0] 
+	periods=[med[i-3] for i in 1:length(param) if i%5==0]
+	
   # println("Retrieved values.")
   # println("M_p[M⊕]= ",masses)#" + ",masses.-mass_high," - ",masses.-mass_low)
   # # println("std(M_p)= ",mass_errs)
@@ -378,9 +389,6 @@ function mc_table(sigma::Real,nyear::Real,options,include_moon::Bool=false)
       EM=false
     end
 
-  # model2=string(L"$\mathcal{H}_{PP}$")
-  # model3=L"$\mathcal{H}_{PPP}$"
-  # model4=L"$\mathcal{H}_{PPPP}$"
   f=jldopen(String(fitfile),"r")
   f2=jldopen(String(fitfile2),"r")
   f3=jldopen(String(fitfile3),"r")
@@ -388,18 +396,12 @@ function mc_table(sigma::Real,nyear::Real,options,include_moon::Bool=false)
   mc2=jldopen(String(mcfile2),"r")
   mc3=jldopen(String(mcfile3),"r")
   tt,tt0,sigtt,ttmodel=f["tt"],f["tt0"],f["sigtt"],f["ttmodel"]
-  # pbest_global=f[bestfit]
   pname=mc["pname"];nparam=length(pname)
-  # avg=zeros(nparam)
-  # avg2=zeros(nparam-10)
-  # avg3=zeros(nparam-5)
-  # low=zeros(nparam);  low2=zeros(nparam-10) ;  low3=zeros(nparam-5);
-  # high=zeros(nparam);   high2=zeros(nparam-10)   ;high3=zeros(nparam-5);
+
   vals=mc["par_mcmc"][:,mc["iburn"]:end,:]#,sigdigits=6)
-   vals2=mc2["par_mcmc"][:,mc2["iburn"]:end,:]#,sigdigits=6)
-    vals3=mc3["par_mcmc"][:,mc3["iburn"]:end,:]#,sigdigits=6)
-  # avg2=[mean(vec(mc2["par_mcmc"][:,mc2["iburn"]:end,i])) for i=1:11]#,sigdigits=6)
-  # avg3=[mean(vec(mc3["par_mcmc"][:,mc3["iburn"]:end,i])) for i=1:16]#,sigdigits=6)
+  vals2=mc2["par_mcmc"][:,mc2["iburn"]:end,:]#,sigdigits=6)
+  vals3=mc3["par_mcmc"][:,mc3["iburn"]:end,:]#,sigdigits=6)
+
   avg=[quantile(vec(mc["par_mcmc"][:,mc["iburn"]:end,i]),0.5) for i=1:nparam]#,sigdigits=6)
   avg2=[quantile(vec(mc2["par_mcmc"][:,mc2["iburn"]:end,i]),0.5) for i=1:11]#,sigdigits=6)
   avg3=[quantile(vec(mc3["par_mcmc"][:,mc3["iburn"]:end,i]),0.5) for i=1:16]#,sigdigits=6)
@@ -412,19 +414,9 @@ function mc_table(sigma::Real,nyear::Real,options,include_moon::Bool=false)
   high2=round.([quantile(vec(mc2["par_mcmc"][:,mc2["iburn"]:end,i]),0.8413) for i=1:11],sigdigits=6)
   high3=round.([quantile(vec(mc3["par_mcmc"][:,mc3["iburn"]:end,i]),0.8413) for i=1:16],sigdigits=6)
 
-  # avg4=[mean(vec(mc["par_mcmc"][:,mc["iburn"]:end,i])) for i=1:18]
-  # for i=1:21
-  #  avg[i],low[i],high[i]=round.(quantile(vec(mc["par_mcmc"][:,mc["iburn"]:end,i]),[0.5,0.1587,0.8413]))
-  # end
-  # for i=1:11
-  #  avg2[i],low2[i],high2[i]=round.(quantile(vec(mc2["par_mcmc"][:,mc2["iburn"]:end,i]),[0.5,0.1587,0.8413]))
-  # end
-  # for i=1:16
-  #  avg3[i],low3[i],high3[i]=round.(quantile(vec(mc3["par_mcmc"][:,mc3["iburn"]:end,i]),[0.5,0.1587,0.8413]))
-  # end
-  function calc_BIC(prob,nplanet,ntrans,par_mcmc)
-    imax=argmax(prob)
-    prob_max=exp.(prob[imax])
+  function calc_BIC(lprob,nplanet,ntrans,par_mcmc)
+    imax=argmax(lprob)
+    prob_max=exp.(lprob[imax])
     function calc_chisq(par_mcmc,nplanet,ntrans)
     chisq = 0.0  
     jmax=5
@@ -437,28 +429,22 @@ function mc_table(sigma::Real,nyear::Real,options,include_moon::Bool=false)
     chisq=calc_chisq(par_mcmc,nplanet,ntrans)
     N=length(tt0) ; k=nplanet*5 + 1
     #println("[N_obs]= ",N," [no. of model params]= ",k)
-    println("chi^2=",chisq)
+    #println("chi^2=",chisq)
     # println("max Prob=",prob_max)
     reduced_chisq=chisq/(N-k)
     BIC_chi(chisq,k,N)=chisq + k*log(N)
     BIC=-2*log(prob_max) + k*log(N)
-    return reduced_chisq, BIC
+    return reduced_chisq, BIC,chisq
   end
-  prob=quantile(exp.(mc["lprob_mcmc"][mc["iburn"]:mc["nsteps"]]),0.5);prob_max = maximum(exp.(mc["lprob_mcmc"][mc["iburn"]:mc["nsteps"]]))
-   prob2=quantile(exp.(mc2["lprob_mcmc"][mc2["iburn"]:mc2["nsteps"]]),0.5);prob_max2 = maximum(exp.(mc2["lprob_mcmc"][mc2["iburn"]:mc2["nsteps"]]))
-    prob3=quantile(exp.(mc3["lprob_mcmc"][mc3["iburn"]:mc3["nsteps"]]),0.5);prob_max3 = maximum(exp.(mc3["lprob_mcmc"][mc3["iburn"]:mc3["nsteps"]]))
+  prob=quantile(exp.(mc["lprob_mcmc"][mc["iburn"]:mc["nsteps"]]),0.5);#prob_max = maximum(exp.(mc["lprob_mcmc"][mc["iburn"]:mc["nsteps"]]))
+   prob2=quantile(exp.(mc2["lprob_mcmc"][mc2["iburn"]:mc2["nsteps"]]),0.5);#prob_max2 = maximum(exp.(mc2["lprob_mcmc"][mc2["iburn"]:mc2["nsteps"]]))
+    prob3=quantile(exp.(mc3["lprob_mcmc"][mc3["iburn"]:mc3["nsteps"]]),0.5);#prob_max3 = maximum(exp.(mc3["lprob_mcmc"][mc3["iburn"]:mc3["nsteps"]]))
   #println(" median Prob: ",prob,"      maximum Prob: ",prob_max)
   #chi2_avg = chi_mcmc(tt0,nplanet,ntrans,mean_posteriors,tt,sigtt,jmax,EM)
-  chi,BIC=round.(calc_BIC(mc["lprob_mcmc"][:,mc["iburn"]:mc["nsteps"]],f["nplanet"],f["ntrans"],vals),sigdigits=6)
-    chi2,BIC2=round.(calc_BIC(mc2["lprob_mcmc"][:,mc2["iburn"]:mc2["nsteps"]],f2["nplanet"],f2["ntrans"],vals2),sigdigits=6)
-      chi3,BIC3=round.(calc_BIC(mc3["lprob_mcmc"][:,mc3["iburn"]:mc3["nsteps"]],f3["nplanet"],f3["ntrans"],vals3),sigdigits=6)
+  reduced_chi,BIC,chi=round.(calc_BIC(mc["lprob_mcmc"][:,mc["iburn"]:mc["nsteps"]],f["nplanet"],f["ntrans"],vals),sigdigits=6)
+  reduced_chi2,BIC2,chi2=round.(calc_BIC(mc2["lprob_mcmc"][:,mc2["iburn"]:mc2["nsteps"]],f2["nplanet"],f2["ntrans"],vals2),sigdigits=6)
+  reduced_chi3,BIC3,chi3=round.(calc_BIC(mc3["lprob_mcmc"][:,mc3["iburn"]:mc3["nsteps"]],f3["nplanet"],f3["ntrans"],vals3),sigdigits=6)
 
-  # plot(avg[end],)
-  # imax=  argmax(mc["lprob_mcmc"][:,mc["iburn"]:mc["nsteps"]])
-  # println(imax)
-  # sig=vals[imax,end]
-  # println(sig)
-  println("BIC= ",BIC ,'\t'," reduced χ^2: ",chi)
   # scatter1=(ttvmodel1.-ttv1)
   # scatter2=(ttvmodel2.-ttv2)
   # println("Venus Peak amplitude of O-C: ", maximum(scatter1))
@@ -466,15 +452,19 @@ function mc_table(sigma::Real,nyear::Real,options,include_moon::Bool=false)
   # println("Mean: ",mean(scatter1)," ",mean(scatter2))
   # println("Std: ",std(scatter1)," ",std(scatter2))
 
-  sigsys=round(avg[end].*24*3600,sigdigits=3)
-  sigsys2=round(avg2[end].*24*3600,sigdigits=3)
-  sigsys3=round(avg3[end].*24*3600,sigdigits=3)
+  #sigsys=round(avg[end].*24*3600,sigdigits=3)
+  #sigsys2=round(avg2[end].*24*3600,sigdigits=3)
+  #sigsys3=round(avg3[end].*24*3600,sigdigits=3)
   parname=[L"$\mu_1 \times 10^{-6}$",L"$P_1$ [days]",L"$t_{0,1}$ [days]",L"$e_1 \cos{\omega_1}$",L"$e_1 \sin{\omega_1}$",
             L"$\mu_2 \times 10^{-6}$",L"$P_2$ [days]",L"$t_{0,2}$ [days]",L"$e_2 \cos{\omega_2}$",L"$e_2 \sin{\omega_2}$",
             L"$\mu_3$",               L"$P_3$ [days]",L"$t_{0,3}$ [days]",L"$e_3 \cos{\omega_3}$",L"$e_3 \sin{\omega_3}$",
             L"$\mu_4 \times 10^{-6}$",L"$P_4$ [days]",L"$t_{0,4}$ [days]",L"$e_4 \cos{\omega_4}$",L"$e_4 \sin{\omega_4}$",
             L"$\mu_5$",               L"$P_5$ [days]",L"$t_{0,5}$ [days]",L"$e_4 \cos{\omega_5}$",L"$e_5 \sin{\omega_5}$",
             L"$t_{max} \sin{\phi_0}$",L"$t_{max} \cos{\phi_0}$",L"$\Delta \phi$ [rad]",L"$\sigma_{sys}^2$ [days]"]
+   model2=L"$\mathcal{H}_{PP}$"
+   model3=L"$\mathcal{H}_{PPP}$"
+   model=L"$\mathcal{H}_{PPPP}$"
+
 
   if obs=="fromEMB"
     name = string("OUTPUTS/EMBmc_table_",sigma,"s",nyear,"yrs.tex")
@@ -482,21 +472,23 @@ function mc_table(sigma::Real,nyear::Real,options,include_moon::Bool=false)
     name = string("OUTPUTS/EVmc_table_",sigma,"s",nyear,"yrs.tex")
   end
   open(name,"w") do io
-    # println(io,"#body",'\t',"tt0",'\t',"tt",'\t',"sigtt")
-    println(io,"BIC",'\t',BIC2,'\t',BIC3,'\t',BIC)
-    println(io,"reduced χ^2:",'\t',chi2,'\t',chi3,'\t',chi)
+
+    println(io,"Model",'\t',model2,'\t',model3,'\t',model,"\\")
+    println(io,"BIC",'\t',BIC2,'\t',BIC3,'\t',BIC," \\")
+ 		println(io,"χ^2",'\t',chi2,'\t',chi3,'\t',chi,"\\")
+    println(io,"reduced χ^2",'\t',reduced_chi2,'\t',reduced_chi3,'\t',reduced_chi,"\\")
   for i=1:length(avg)
     if i<=10
-      println(io,parname[i],'\t',avg2[i],"_{-",avg2[i]-low2[i],"}^{+",high2[i]-avg2[i],"} & ",'\t',avg3[i],"_{-",avg3[i]-low3[i],"}^{+",high3[i]-avg3[i],"} & ",'\t',avg[i],"_{-",avg[i]-low[i],"}^{+",high[i]-avg[i],"} \\",'\n')
+      println(io,parname[i],'\t',avg2[i],"_{-",avg2[i]-low2[i],"}^{+",high2[i]-avg2[i],"} & ",'\t',avg3[i],"_{-",avg3[i]-low3[i],"}^{+",high3[i]-avg3[i],"} & ",'\t',avg[i],"_{-",avg[i]-low[i],"}^{+",high[i]-avg[i],"} \\")
     end 
     if i in 11:15
-      println(io,parname[i],'\t','\t','\t',avg3[i],"_{-",avg3[i]-low3[i],"}^{+",high3[i]-avg3[i],"} & ",'\t',avg[i],"_{-",avg[i]-low[i],"}^{+",high[i]-avg[i],"} \\",'\n')
+      println(io,parname[i],'\t','\t','\t',avg3[i],"_{-",avg3[i]-low3[i],"}^{+",high3[i]-avg3[i],"} & ",'\t',avg[i],"_{-",avg[i]-low[i],"}^{+",high[i]-avg[i],"} \\")
     end
     if i in 16:20
-      println(io,parname[i],'\t','\t','\t','\t','\t',avg[i],"_{-",avg[i]-low[i],"}^{+",high[i]-avg[i],"} \\",'\n')
+      println(io,parname[i],'\t','\t','\t','\t','\t',avg[i],"_{-",avg[i]-low[i],"}^{+",high[i]-avg[i],"} \\")
     end
   end
-  println(io,parname[end],'\t',avg2[end],"_{-",avg2[end]-low2[end],"}^{+",high2[end]-avg2[end],"} & ",'\t',avg3[end],"_{-",avg3[end]-low3[end],"}^{+",high3[end]-avg3[end],"} & ",'\t',avg[end],"_{-",avg[end]-low[end],"}^{+",high[end]-avg[end],"} \\",'\n')
+  println(io,parname[end],'\t',avg2[end],"_{-",avg2[end]-low2[end],"}^{+",high2[end]-avg2[end],"} & ",'\t',avg3[end],"_{-",avg3[end]-low3[end],"}^{+",high3[end]-avg3[end],"} & ",'\t',avg[end],"_{-",avg[end]-low[end],"}^{+",high[end]-avg[end],"} \\")
   end
-  return sig
+  return 
 end
