@@ -1,93 +1,89 @@
-using JLD2,PyPlot,Statistics,Distributions,LinearAlgebra
-using3D() # Needed to create a 3D subplot
+using JLD2,PyPlot,Statistics,Distributions,LinearAlgebra,PyCall
 #include("CGS.jl")
 include("MCMC.jl")
+np = pyimport("numpy")
 # rc("font",family="sans-serif")
 # rc("lines",linewidth=1.5)
-# Basic corner plot for posterior distributions of 2 parameters
-function corner(x,y,nbins)
-  function scatter_hist(x, y, ax, ax_histx, ax_histy)
-    # no labels
-    ax_histx.tick_params(axis="x", labelbottom="False")
-    ax_histy.tick_params(axis="y", labelleft="False")
-    # the scatter plot:
-    # ax.scatter(x, y)
-    h,xedges,yedges=ax.hist2d(x,y,bins=nbins,cmin=1,cmax=100000)
-    # the contour:
-    # M=meshgrid(x,y)
-
-    # xedges=h[2][2:end];yedges=h[3][2:end];
-    # ax.contour(xedges,yedges,h,levels=[10,30,50])
-    # now determine nice limits by hand:
-    # binwidth = 0.25
-    # xymax = maximum(maximum(abs.(x)), maximum(abs.(y)))
-    # lim = (int(xymax/binwidth) + 1) * binwidth
-    # bins = range(-lim, lim + binwidth, binwidth)
-    ax_histx.hist(x, bins=nbins,histtype="step")
-    ax_histy.hist(y, bins=nbins,histtype="step", orientation="horizontal")
-  end
-  fig=figure(figsize=(5,5))#,dpi=150)
-  # gs = fig.add_gridspec(2, 2)
-  # Add a gridspec with two rows and two columns and a ratio of 1 to 4 between
-  # the size of the marginal axes and the main axes in both directions.
-  gs = fig.add_gridspec(2, 2,  width_ratios=(4, 1), height_ratios=(1, 4),
-                      left=0.1, right=0.9, bottom=0.1, top=0.9,
-                      wspace=0.05, hspace=0.05)
-  # Create the Axes.
-  ax = fig.add_subplot(gs[2, 1])
-  ax_histx = fig.add_subplot(gs[1, 1], sharex=ax)
-  ax_histy = fig.add_subplot(gs[2, 2], sharey=ax)
-  # Draw the scatter plot and marginals.
-  scatter_hist(x, y, ax, ax_histx, ax_histy)
-    return fig
-end
-  # subplots_adjust(hspace=0.05,wspace=0.05)
-  # ax2=subplot(221)
-  # ax2.hist(x1,bins=nbins,histtype="step",color="black")
-  # ax2.minorticks_on()
-  # ax2.tick_params(which="both",direction="out",
-  #     left=false,right=false,top=true,bottom=true,
-  #     labelbottom=false,labeltop=false,labelleft=false,labelright=false)
-
-  # ax3=subplot(224)
-  # ax3.hist(x2,bins=nbins,histtype="step",color="black",orientation="horizontal")
-  # ax3.minorticks_on()
-  # ax3.tick_params(which="both",direction="out",
-  #     left=true,right=true,top=false,bottom=false,
-  #     labelbottom=false,labeltop=false,labelleft=false,labelright=false)
-
         
 # Corner plot for posterior distributions of 2 parameters, compared to true values
-function corner(x1,x2,truex1,truex2,nbins)
-	fig=figure(figsize=(4,4),dpi=150)
-	# subplots_adjust(hspace=0.05,wspace=0.05)
-  # ax2=fig.add_axes(221)
-  # text(0.5,0.5,"test")
-  ax1=fig.add_subplot(223)
-  ax1.hist2d(x1,x2,bins=nbins,cmin=1,cmax=100000)
-  ax1.axis([minimum(x1),maximum(x1),minimum(x2),maximum(x2)])
-  xlabel(L"$t_{max}$ [min], TTV Amplitude on Planet 2")
-  ylabel(L"$\Delta\phi$ [rad], $Per_2$ Phase Offset")
-  ax1.tick_params(which="both",direction="out",top=true,right=true)
+function corner(xs,labels,bins=10;quantiles)
+K=length(xs)
+factor = 1.5  # size of one side of one panel
+lbdim = 0.5 * factor  # size of left/bottom margin
+trdim = 0.2 * factor  # size of top/right margin
+whspace = 0.05 * 2  # w/hspace size
+plotdim = factor * K + factor * (K - 1.0) * whspace
+dim = lbdim + plotdim + trdim
+@show dim
 
-	ax2=fig.add_subplot(221)
-	h1=ax2.hist(x1,bins=nbins,histtype="step",color="black")
-  ax2.axvspan(quantile(x1,0.1587),quantile(x1,0.8413),color="limegreen",alpha=0.35)
-	axvline(truex1,linestyle="--",color="black",label="True Value")
-	ax2.minorticks_on()
-	ax2.tick_params(which="both",direction="out",
-	    left=false,right=false,top=false,bottom=true,
-	    labelbottom=true,labeltop=false,labelleft=false,labelright=false)
+fig, axes = plt.subplots(K, K, figsize=(dim, dim),dpi=150)
+lb = lbdim / dim
+tr = (lbdim + plotdim) / dim
+fig.subplots_adjust(
+    left=lb, bottom=lb, right=tr, top=tr, wspace=whspace, hspace=whspace)
 
-	ax3=fig.add_subplot(224,sharey=ax1)
-	h2=ax3.hist(x2,bins=nbins,histtype="step",color="black",orientation="horizontal")
-  ax3.axhspan(quantile(x2,0.1587),quantile(x2,0.8413),color="limegreen",alpha=0.35)
-	axhline(truex2,linestyle="--",color="black")
-	ax3.minorticks_on()
-	ax3.tick_params(which="both",direction="out",
-	    left=false,right=true,top=false,bottom=false,
-	    labelbottom=false,labeltop=false,labelleft=false,labelright=true)
-  return fig
+for (i ,x) in enumerate(xs)
+    ax=axes[i,i]
+    ax.hist(x,bins=bins,histtype="step")
+#     ax.tick_params(left=false,labelleft=false)
+    if length(quantiles)>0
+        qvalues=quantile(x,quantiles)
+        ax.axvspan(qvalues[1],qvalues[2],linestyle="--",color="limegreen",alpha=0.3)            
+        for q in qvalues
+            ax.axvline(q,linestyle="--",color="k")
+        end
+    end
+    q_mid = median(x) 
+    q_lo,q_hi=quantile(x,quantiles)
+    q_m, q_p = q_mid - q_lo, q_hi - q_mid
+#     fmt = "{{0:{0}}}".format(title_fmt).format
+#     title = r"${{{0}}}_{{-{1}}}^{{+{2}}}$"
+#     title = title.format(fmt(q_mid), fmt(q_m), fmt(q_p))
+#     title=string(L"$=$",q_mid,L"$_{}")
+#     ax.set_title(title)
+     ax.set_xticklabels([])
+     ax.set_yticklabels([])
+    ax.set_yticks([])
+
+    for (j, y) in enumerate(xs)
+        ax=axes[i,j]
+         if j > i
+                ax.set_frame_on(false)
+                ax.set_xticks([])
+                ax.set_yticks([])
+                continue
+            elseif j == i
+                continue
+            end
+        h,xedges,yedges=ax.hist2d(y,x,bins=bins,alpha=0.9)
+        h_sort=sort(vec(h))
+      sig1=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.683))
+      sig2=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.955))
+    level1=h_sort[sig2[1]];level2=h_sort[sig1[1]]
+    if level1==level2
+    error("Too many bins or not enough data points")
+    end
+    ax.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),colors="white",levels=[level1,level2])
+    if length(labels)>0
+        if i < K 
+        ax.set_xticklabels([])
+        else
+        ax.set_xlabel(labels[j],fontsize="x-large")
+        end
+        if j>1
+        ax.set_yticklabels([])
+        else
+        ax.set_ylabel(labels[i],fontsize="x-large")
+
+        end
+    else
+    end
+    end
+end
+fig.align_ylabels()
+fig.align_xlabels()
+fig.autofmt_xdate()
+
 end
 
 # Corner plot for posterior distributions of 6 parameters, compared to true values
@@ -95,188 +91,224 @@ function corner(xs,true_xs,labels,nbins)
   x1,x2,x3,x4,x5,x6=xs[1],xs[2],xs[3],xs[4],xs[5],xs[6]
   truex1,truex2,truex3,truex4,truex5,truex6=true_xs
   label1,label2,label3,label4,label5,label6=labels
+
   fig=figure(figsize=(8,8))#,dpi=150)
-  fig.subplots_adjust(hspace=0.2,wspace=0.2)
+  fig.subplots_adjust(hspace=0.25,wspace=0.25)
   ax1=fig.add_subplot(6,6,1)
   ax1.axvline(truex6,linestyle="--",color="black")
   ax1.hist(x6,bins=nbins,histtype="step",color="black")
   ax1.axvspan(quantile(vec(x6),0.1587),quantile(vec(x6),0.8413),color="limegreen",alpha=0.35)
-  tick_params(left=false,labelleft=false,labelbottom=false)
+  tick_params(left=false,labelleft=false,labelbottom=false,bottom=false)
       #     left=false,right=false,top=true,bottom=true,
   #     labelbottom=false,labeltop=false,labelleft=false,labelright=false)
-
   ax2=fig.add_subplot(6,6,7,sharex=ax1)
   # ax2.hist2d(x6,x5,bins=nbins,cmin=1,cmax=100000)
-  h,xedges,yedges=np.histogram2d(x6,x5,nbins)
-  c=ax2.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  h,xedges,yedges=ax2.hist2d(x6,x5,bins=nbins,alpha=0.95)
+  h_sort=sort(vec(h))
+  sig1=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.683))
+  sig2=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.955))
+  c=ax2.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),colors="white",levels=[h_sort[sig2[1]],h_sort[sig1[1]]])
   ax2.set_ylabel(label5)
-  tick_params(labelbottom=false)
+  tick_params(left=false,labelleft=false,labelbottom=false,bottom=false)
   # ax2.minorticks_on()
   # ax2.tick_params(which="both",direction="out",top=true,right=false,
   #     labelleft=true,labelbottom=false)
-
   ax3=fig.add_subplot(6,6,8)
   ax3.hist(x5,bins=nbins,histtype="step",color="black")
   ax3.axvline(truex5,linestyle="--",color="black")
   ax3.axvspan(quantile(vec(x5),0.1587),quantile(vec(x5),0.8413),color="limegreen",alpha=0.35)
-  tick_params(left=false,labelleft=false,labelbottom=false)
+  tick_params(left=false,labelleft=false,labelbottom=false,bottom=false)
   # ax6.minorticks_on()
   # ax6.tick_params(which="both",direction="in",
   #     left=false,right=false,top=true,bottom=true,
   #     labelbottom=false,labeltop=false,labelleft=false,labelright=false)
-
-  ax3=fig.add_subplot(6,6,13)
+  ax4=fig.add_subplot(6,6,13,sharex=ax1)
   # ax3.hist2d(x6,x4,bins=nbins,cmin=1,cmax=100000)
-  h,xedges,yedges=np.histogram2d(x6,x4,nbins)
-  c=ax3.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
-  ax3.set_ylabel(label4)
-  tick_params(labelbottom=false)
+  h,xedges,yedges=ax4.hist2d(x6,x4,bins=nbins,alpha=0.95)
+  h_sort=sort(vec(h))
+  sig1=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.683))
+  sig2=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.955))
+  c=ax4.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),colors="white",levels=[h_sort[sig2[1]],h_sort[sig1[1]]])
+  ax4.set_ylabel(label4)
+  tick_params(left=false,labelleft=false,labelbottom=false,bottom=false)
   # ax9.minorticks_on()
   # ax9.tick_params(which="both",direction="out",top=true,right=false,
   #     labelleft=true,labelbottom=false)
-
-  ax4=fig.add_subplot(6,6,14)
+  ax5=fig.add_subplot(6,6,14,sharex=ax3)
   # ax4.hist2d(x5,x4,bins=nbins,cmin=1,cmax=100000)
-  h,xedges,yedges=np.histogram2d(x5,x4,nbins)
-  c=ax4.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
-  tick_params(left=false,labelleft=false,labelbottom=false)
-  # ax9.minorticks_on()
+  h,xedges,yedges=ax5.hist2d(x5,x4,bins=nbins,alpha=0.95)
+  h_sort=sort(vec(h))
+  sig1=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.683))
+  sig2=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.955))
+  c=ax5.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),colors="white",levels=[h_sort[sig2[1]],h_sort[sig1[1]]])
+  tick_params(left=false,labelleft=false,labelbottom=false,bottom=false) 
   # ax9.tick_params(which="both",direction="out",top=true,right=false,
   #     labelleft=true,labelbottom=false)
-
-  ax5=fig.add_subplot(6,6,15)
-  ax5.hist(x4,bins=nbins,histtype="step",color="black")
-  ax5.axvline(truex4,linestyle="--",color="black")
-  ax5.axvspan(quantile(vec(x4),0.1587),quantile(vec(x4),0.8413),color="limegreen",alpha=0.35)
-  tick_params(left=false,labelleft=false,labelbottom=false)
+  ax6=fig.add_subplot(6,6,15)
+  ax6.hist(x4,bins=nbins,histtype="step",color="black")
+  ax6.axvline(truex4,linestyle="--",color="black")
+  ax6.axvspan(quantile(vec(x4),0.1587),quantile(vec(x4),0.8413),color="limegreen",alpha=0.35)
+  tick_params(left=false,labelleft=false,labelbottom=false,bottom=false)
   # ax5.minorticks_on()
   # ax5.tick_params(which="both",direction="in",
   #     left=false,right=false,top=true,bottom=true,
   #     labelbottom=false,labeltop=false,labelleft=false,labelright=false) 
-
-  ax6=fig.add_subplot(6,6,19,sharex=ax1)
+  ax7=fig.add_subplot(6,6,19,sharex=ax1)
   # ax6.hist2d(x6,x3,bins=nbins,cmin=1,cmax=100000)
-  h,xedges,yedges=np.histogram2d(x6,x3,nbins)
-  c=ax6.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
-  ax6.set_ylabel(label3)
-  tick_params(labelbottom=false)
+  h,xedges,yedges=ax7.hist2d(x6,x3,bins=nbins,alpha=0.95)
+  h_sort=sort(vec(h))
+  sig1=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.683))
+  sig2=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.955))
+  c=ax7.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),colors="white",levels=[h_sort[sig2[1]],h_sort[sig1[1]]])
+  ax7.set_ylabel(label3)
+  tick_params(left=false,labelleft=false,labelbottom=false,bottom=false)
   # ax6.minorticks_on()
   # ax6.tick_params(which="both",direction="out",top=true,right=false,
   #     labelleft=false,labelbottom=false)
-
-  ax7=fig.add_subplot(6,6,20)
+  ax8=fig.add_subplot(6,6,20,sharex=ax3)
   # ax7.hist2d(x5,x3,bins=nbins,cmin=1,cmax=100000)
-  h,xedges,yedges=np.histogram2d(x5,x3,nbins)
-  c=ax7.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
-  tick_params(left=false,labelleft=false,labelbottom=false)
-  # ax7.minorticks_on()
+  h,xedges,yedges=ax8.hist2d(x5,x3,bins=nbins,alpha=0.95)
+  h_sort=sort(vec(h))
+  sig1=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.683))
+  sig2=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.955))
+  c=ax8.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),colors="white",levels=[h_sort[sig2[1]],h_sort[sig1[1]]])
+  tick_params(left=false,labelleft=false,labelbottom=false,bottom=false) 
   # ax7.tick_params(which="both",direction="out",top=true,right=false,
   #     labelleft=false,labelbottom=false)
-
-  ax8=fig.add_subplot(6,6,21)
+  ax9=fig.add_subplot(6,6,21,sharex=ax6)
   # ax8.hist2d(x4,x3,bins=nbins,cmin=1,cmax=100000)
-  h,xedges,yedges=np.histogram2d(x4,x3,nbins)
-  c=ax8.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
-  tick_params(left=false,labelleft=false,labelbottom=false)
+  h,xedges,yedges=ax9.hist2d(x4,x3,bins=nbins,alpha=0.95)
+  h_sort=sort(vec(h))
+  sig1=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.683))
+  sig2=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.955))
+  c=ax9.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),colors="white",levels=[h_sort[sig2[1]],h_sort[sig1[1]]])
+  tick_params(left=false,labelleft=false,labelbottom=false,bottom=false)
   # ax8.minorticks_on()
   # ax8.tick_params(which="both",direction="out",top=true,right=false,
   #     labelleft=false,labelbottom=false)
-
-  ax9=fig.add_subplot(6,6,22)
-  ax9.hist(x3,bins=nbins,histtype="step",color="black")
-  ax9.axvline(truex3,linestyle="--",color="black")
-  ax9.axvspan(quantile(vec(x3),0.1587),quantile(vec(x3),0.8413),color="limegreen",alpha=0.35)
-  tick_params(left=false,labelleft=false,labelbottom=false)
+  ax10=fig.add_subplot(6,6,22)
+  ax10.hist(x3,bins=nbins,histtype="step",color="black")
+  ax10.axvline(truex3,linestyle="--",color="black")
+  ax10.axvspan(quantile(vec(x3),0.1587),quantile(vec(x3),0.8413),color="limegreen",alpha=0.35)
+  tick_params(left=false,labelleft=false,labelbottom=false,bottom=false)
   # ax9.minorticks_on()
   # ax9.tick_params(which="both",direction="in",
   #     left=false,right=false,top=true,bottom=true,
   #     labelbottom=false,labeltop=false,labelleft=false,labelright=false) 
-
-  ax10=fig.add_subplot(6,6,25,sharex=ax1)
-    h,xedges,yedges=np.histogram2d(x6,x2,nbins)
-  c=ax10.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
-  ax10.set_ylabel(label2)
-  tick_params(labelbottom=false)
+  ax11=fig.add_subplot(6,6,25,sharex=ax1)
+  h,xedges,yedges=ax11.hist2d(x6,x2,bins=nbins,alpha=0.95)
+  h_sort=sort(vec(h))
+  sig1=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.683))
+  sig2=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.955))
+  c=ax11.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),colors="white",levels=[h_sort[sig2[1]],h_sort[sig1[1]]])
+  ax11.set_ylabel(label2)
+  tick_params(left=false,labelleft=false,labelbottom=false,bottom=false)
       #     labelleft=false,labelbottom=false)
-
-  ax11=fig.add_subplot(6,6,26)
-    h,xedges,yedges=np.histogram2d(x5,x2,nbins)
-  c=ax11.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
-  tick_params(left=false,labelleft=false,labelbottom=false)
+  ax12=fig.add_subplot(6,6,26,sharex=ax3)
+  h,xedges,yedges=ax12.hist2d(x5,x2,bins=nbins,alpha=0.95)
+  h_sort=sort(vec(h))
+  sig1=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.683))
+  sig2=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.955))
+  c=ax12.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),colors="white",levels=[h_sort[sig2[1]],h_sort[sig1[1]]])
+  tick_params(left=false,labelleft=false,labelbottom=false,bottom=false)
       #     labelleft=false,labelbottom=false)
-
-  ax12=fig.add_subplot(6,6,27)
-    h,xedges,yedges=np.histogram2d(x4,x2,nbins)
-  c=ax12.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
-  tick_params(left=false,labelleft=false,labelbottom=false)
+  ax13=fig.add_subplot(6,6,27,sharex=ax6)
+  h,xedges,yedges=ax13.hist2d(x4,x2,bins=nbins,alpha=0.95)
+  h_sort=sort(vec(h))
+  sig1=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.683))
+  sig2=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.955))
+  c=ax13.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),colors="white",levels=[h_sort[sig2[1]],h_sort[sig1[1]]])
+  tick_params(left=false,labelleft=false,labelbottom=false,bottom=false)
       #     labelleft=false,labelbottom=false)
-
-  ax13=fig.add_subplot(6,6,28)
-    h,xedges,yedges=np.histogram2d(x3,x2,nbins)
-  c=ax13.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
-  tick_params(left=false,labelleft=false,labelbottom=false)
+  ax14=fig.add_subplot(6,6,28,sharex=ax10)
+  h,xedges,yedges=ax14.hist2d(x3,x2,bins=nbins,alpha=0.95)
+  h_sort=sort(vec(h))
+  sig1=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.683))
+  sig2=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.955))
+  c=ax14.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),colors="white",levels=[h_sort[sig2[1]],h_sort[sig1[1]]])
+  tick_params(left=false,labelleft=false,labelbottom=false,bottom=false)
       #     labelleft=false,labelbottom=false)
-
-  ax14=fig.add_subplot(6,6,29)
-  ax14.hist(x2,bins=nbins,histtype="step",color="black")
-  ax14.axvline(truex2,linestyle="--",color="black")
-  ax14.axvspan(quantile(vec(x2),0.1587),quantile(vec(x2),0.8413),color="limegreen",alpha=0.35)
-  tick_params(left=false,labelleft=false,labelbottom=false)
+  ax15=fig.add_subplot(6,6,29)
+  ax15.hist(x2,bins=nbins,histtype="step",color="black")
+  ax15.axvline(truex2,linestyle="--",color="black")
+  ax15.axvspan(quantile(vec(x2),0.1587),quantile(vec(x2),0.8413),color="limegreen",alpha=0.35)
+  tick_params(left=false,labelleft=false,labelbottom=false,bottom=false)
       #     left=false,right=false,top=true,bottom=true,
   #     labelbottom=false,labeltop=false,labelleft=false,labelright=false) 
-
-  ax15=fig.add_subplot(6,6,31,sharex=ax1)
-    h,xedges,yedges=np.histogram2d(x6,x1,nbins)
-  c=ax15.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
-  ax15.set_xlabel(label6)
-  ax15.set_ylabel(label1)
-      #     labelbottom=true,labelleft=true)
-
-  ax16=fig.add_subplot(6,6,32)
-    h,xedges,yedges=np.histogram2d(x5,x1,nbins)
-  c=ax16.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
-  ax16.set_xlabel(label5)
-  tick_params(left=false,labelleft=false)
+  ax16=fig.add_subplot(6,6,31,sharex=ax1)
+  h,xedges,yedges=ax16.hist2d(x6,x1,bins=nbins,alpha=0.95)
+  h_sort=sort(vec(h))
+  sig1=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.683))
+  sig2=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.955))
+  c=ax16.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),colors="white",levels=[h_sort[sig2[1]],h_sort[sig1[1]]])
+  ax16.set_xlabel(label6)
+  ax16.set_ylabel(label1)
+  tick_params(left=false,bottom=false,labelbottom=false,labelleft=false)
+  ax17=fig.add_subplot(6,6,32,sharex=ax3)
+  h,xedges,yedges=ax17.hist2d(x5,x1,bins=nbins,alpha=0.95)
+  h_sort=sort(vec(h))
+  sig1=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.683))
+  sig2=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.955))
+  c=ax17.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),colors="white",levels=[h_sort[sig2[1]],h_sort[sig1[1]]])
+  ax17.set_xlabel(label5)
+  tick_params(left=false,labelleft=false,labelbottom=false,bottom=false)
+  # tick_params(axis="x",labelrotation=15)
       #     labelleft=false,labelbottom=true)
-
-  ax17=fig.add_subplot(6,6,33)
-    h,xedges,yedges=np.histogram2d(x4,x1,nbins)
-  c=ax17.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
-  ax17.set_xlabel(label4)
-  tick_params(left=false,labelleft=false)
+  ax18=fig.add_subplot(6,6,33,sharex=ax6)
+  h,xedges,yedges=ax18.hist2d(x4,x1,bins=nbins,alpha=0.95)
+  h_sort=sort(vec(h))
+  sig1=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.683))
+  sig2=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.955))
+  c=ax18.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),colors="white",levels=[h_sort[sig2[1]],h_sort[sig1[1]]])
+  ax18.set_xlabel(label4)
+  tick_params(left=false,labelleft=false,labelbottom=false,bottom=false)
+  # tick_params(axis="x",labelrotation=15)
       #     labelleft=false,labelbottom=true)
-
-  ax18=fig.add_subplot(6,6,34)
-    h,xedges,yedges=np.histogram2d(x3,x1,nbins)
-  c=ax18.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
-  ax18.set_xlabel(label3)
-  tick_params(left=false,labelleft=false)
+  ax19=fig.add_subplot(6,6,34,sharex=ax10)
+  h,xedges,yedges=ax19.hist2d(x3,x1,bins=nbins,alpha=0.95)
+  h_sort=sort(vec(h))
+  sig1=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.683))
+  sig2=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.955))
+  c=ax19.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),colors="white",levels=[h_sort[sig2[1]],h_sort[sig1[1]]])
+  ax19.set_xlabel(label3)
+  tick_params(left=false,labelleft=false,labelbottom=false,bottom=false)
+  # tick_params(axis="x",labelrotation=15)
       #     labelleft=false,labelbottom=true)
-
-  ax19=fig.add_subplot(6,6,35)
-    h,xedges,yedges=np.histogram2d(x2,x1,nbins)
-  c=ax19.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
-  ax19.set_xlabel(label2)
-  tick_params(left=false,labelleft=false)
+  ax20=fig.add_subplot(6,6,35,sharex=ax15)
+  h,xedges,yedges=ax20.hist2d(x2,x1,bins=nbins,alpha=0.95)
+  h_sort=sort(vec(h))
+  sig1=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.683))
+  sig2=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.955))
+  c=ax20.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),colors="white",levels=[h_sort[sig2[1]],h_sort[sig1[1]]])
+  ax20.set_xlabel(label2)
+  tick_params(left=false,labelleft=false,labelbottom=false,bottom=false)
+  # tick_params(axis="x",labelrotation=15)
       #     labelleft=false,labelbottom=true)
-
-  ax20=fig.add_subplot(6,6,36)
-  ax20.hist(x1,bins=nbins,histtype="step",color="black")
-  ax20.axvline(truex1,linestyle="--",color="black")
-  ax20.axvspan(quantile(vec(x1),0.1587),quantile(vec(x1),0.8413),color="limegreen",alpha=0.35)
-  ax20.set_xlabel(label1)
-  tick_params(left=false,labelleft=false)
+  ax21=fig.add_subplot(6,6,36)
+  ax21.hist(x1,bins=nbins,histtype="step",color="black")
+  ax21.axvline(truex1,linestyle="--",color="black")
+  ax21.axvspan(quantile(vec(x1),0.1587),quantile(vec(x1),0.8413),color="limegreen",alpha=0.35)
+  ax21.set_xlabel(label1)
+  tick_params(left=false,labelleft=false,labelbottom=false,bottom=false)
+  # tick_params(axis="x",labelrotation=15)
+  fig.autofmt_xdate()
+  fig.align_ylabels()
+  fig.align_xlabels()
       #     left=false,right=false,top=true,bottom=true,
   #     labelbottom=true,labeltop=false,labelleft=false,labelright=false)
   # tight_layout()
   # tick_params(left=false,labelleft=false,bottom=false,labelbottom=false)
  # return fig
+
 end
 # Corner plot for posterior distributions of 8 parameters, compared to true values
 function corner(xs,true_xs,labels,nbins,model::LaTeXString)
+  @assert (isdefined(true_xs))
+  @assert (length(labels)==size(xs)[1])
   x1,x2,x3,x4,x5,x6,x7,x8=xs[1],xs[2],xs[3],xs[4],xs[5],xs[6],xs[7],xs[8]
   truex1,truex2,truex3,truex4,truex5,truex6,truex7,truex8=true_xs
   label1,label2,label3,label4,label5,label6,label7,label8=labels
+
   fig=figure(figsize=(8,6),dpi=150)
   fig.subplots_adjust(hspace=0.2,wspace=0.2)
   # fig.suptitle(string("Posteriors for [30 yr span] with model: ",model))
@@ -289,9 +321,11 @@ function corner(xs,true_xs,labels,nbins,model::LaTeXString)
   #     labelbottom=false,labeltop=false,labelleft=false,labelright=false)
 
   ax2=fig.add_subplot(8,8,9,sharex=ax1)
-  # ax2.hist2d(x6,x5,bins=nbins,cmin=1,cmax=100000)
-  h,xedges,yedges=np.histogram2d(x8,x7,nbins)
-  c=ax2.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  h,xedges,yedges=ax2.hist2d(x8,x7,bins=nbins,alpha=0.95)
+  h_sort=sort(vec(h))
+  sig1=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.683))
+  sig2=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.955))
+  c=ax2.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),colors="white",levels=[h_sort[sig2[1]],h_sort[sig1[1]]])
   ax2.set_ylabel(label7,fontsize="large")
   tick_params(labelbottom=false,labelsize="small")
   # ax2.minorticks_on()
@@ -302,7 +336,7 @@ function corner(xs,true_xs,labels,nbins,model::LaTeXString)
   ax3.hist(x7,bins=nbins,histtype="step",color="black")
   ax3.axvline(truex7,linestyle="--",color="black")
   ax3.axvspan(quantile(vec(x7),0.1587),quantile(vec(x7),0.8413),color="limegreen",alpha=0.35)
-  tick_params(left=false,labelleft=false,labelrotation=15,labelbottom=false)
+  # tick_params(left=false,labelleft=false,labelrotation=15,labelbottom=false)
   # ax6.minorticks_on()
   # ax6.tick_params(which="both",direction="in",
   #     left=false,right=false,top=true,bottom=true,
@@ -310,8 +344,11 @@ function corner(xs,true_xs,labels,nbins,model::LaTeXString)
 
   ax4=fig.add_subplot(8,8,17,sharex=ax1)
   # ax3.hist2d(x6,x4,bins=nbins,cmin=1,cmax=100000)
-  h,xedges,yedges=np.histogram2d(x8,x6,nbins)
-  c=ax4.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  h,xedges,yedges=ax4.hist2d(x8,x6,bins=nbins,alpha=0.95)
+  h_sort=sort(vec(h))
+  sig1=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.683))
+  sig2=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.955))
+  c=ax4.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),colors="white",levels=[h_sort[sig2[1]],h_sort[sig1[1]]])
   ax4.set_ylabel(label6,fontsize="large")
   tick_params(labelbottom=false,labelsize="small")
   # ax9.minorticks_on()
@@ -319,9 +356,11 @@ function corner(xs,true_xs,labels,nbins,model::LaTeXString)
   #     labelleft=true,labelbottom=false)
 
   ax5=fig.add_subplot(8,8,18,sharex=ax3,sharey=ax4)
-  # ax4.hist2d(x5,x4,bins=nbins,cmin=1,cmax=100000)
-  h,xedges,yedges=np.histogram2d(x7,x6,nbins)
-  c=ax5.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  h,xedges,yedges=ax5.hist2d(x7,x6,bins=nbins,alpha=0.95)
+  h_sort=sort(vec(h))
+  sig1=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.683))
+  sig2=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.955))
+  c=ax5.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),colors="white",levels=[h_sort[sig2[1]],h_sort[sig1[1]]])
   tick_params(left=false,labelleft=false,labelbottom=false)
   # ax9.minorticks_on()
   # ax9.tick_params(which="both",direction="out",top=true,right=false,
@@ -331,16 +370,18 @@ function corner(xs,true_xs,labels,nbins,model::LaTeXString)
   ax6.hist(x6,bins=nbins,histtype="step",color="black")
   ax6.axvline(truex6,linestyle="--",color="black")
   ax6.axvspan(quantile(vec(x6),0.1587),quantile(vec(x6),0.8413),color="limegreen",alpha=0.35)
-  tick_params(left=false,labelleft=false,labelrotation=15,labelbottom=false)
+  # tick_params(left=false,labelleft=false,labelrotation=15,labelbottom=false)
   # ax5.minorticks_on()
   # ax5.tick_params(which="both",direction="in",
   #     left=false,right=false,top=true,bottom=true,
   #     labelbottom=false,labeltop=false,labelleft=false,labelright=false) 
 
   ax7=fig.add_subplot(8,8,25,sharex=ax1)
-  # ax6.hist2d(x6,x3,bins=nbins,cmin=1,cmax=100000)
-  h,xedges,yedges=np.histogram2d(x8,x5,nbins)
-  c=ax7.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  h,xedges,yedges=ax7.hist2d(x8,x5,bins=nbins,alpha=0.95)
+  h_sort=sort(vec(h))
+  sig1=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.683))
+  sig2=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.955))
+  c=ax7.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),colors="white",levels=[h_sort[sig2[1]],h_sort[sig1[1]]])
   ax7.set_ylabel(label5,fontsize="large")
   tick_params(labelbottom=false,labelsize="small")
   # ax6.minorticks_on()
@@ -349,17 +390,22 @@ function corner(xs,true_xs,labels,nbins,model::LaTeXString)
 
   ax8=fig.add_subplot(8,8,26,sharex=ax3,sharey=ax7)
   # ax7.hist2d(x5,x3,bins=nbins,cmin=1,cmax=100000)
-  h,xedges,yedges=np.histogram2d(x7,x5,nbins)
-  c=ax8.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  h,xedges,yedges=ax8.hist2d(x7,x5,bins=nbins,alpha=0.95)
+  h_sort=sort(vec(h))
+  sig1=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.683))
+  sig2=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.955))
+  c=ax8.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),colors="white",levels=[h_sort[sig2[1]],h_sort[sig1[1]]])
   tick_params(left=false,labelleft=false,labelbottom=false)
   # ax7.minorticks_on()
   # ax7.tick_params(which="both",direction="out",top=true,right=false,
   #     labelleft=false,labelbottom=false)
 
   ax9=fig.add_subplot(8,8,27,sharex=ax6,sharey=ax7)
-  # ax8.hist2d(x4,x3,bins=nbins,cmin=1,cmax=100000)
-  h,xedges,yedges=np.histogram2d(x6,x5,nbins)
-  c=ax9.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  h,xedges,yedges=ax9.hist2d(x6,x5,bins=nbins,alpha=0.95)
+  h_sort=sort(vec(h))
+  sig1=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.683))
+  sig2=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.955))
+  c=ax9.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),colors="white",levels=[h_sort[sig2[1]],h_sort[sig1[1]]])
   tick_params(left=false,labelleft=false,labelbottom=false)
   # ax8.minorticks_on()
   # ax8.tick_params(which="both",direction="out",top=true,right=false,
@@ -369,34 +415,46 @@ function corner(xs,true_xs,labels,nbins,model::LaTeXString)
   ax10.hist(x5,bins=nbins,histtype="step",color="black")
   ax10.axvline(truex5,linestyle="--",color="black")
   ax10.axvspan(quantile(vec(x5),0.1587),quantile(vec(x5),0.8413),color="limegreen",alpha=0.35)
-  tick_params(left=false,labelleft=false,labelrotation=15,labelbottom=false)
+  # tick_params(left=false,labelleft=false,labelrotation=15,labelbottom=false)
   # ax9.minorticks_on()
   # ax9.tick_params(which="both",direction="in",
   #     left=false,right=false,top=true,bottom=true,
   #     labelbottom=false,labeltop=false,labelleft=false,labelright=false) 
 
   ax11=fig.add_subplot(8,8,33,sharex=ax1)
-    h,xedges,yedges=np.histogram2d(x8,x4,nbins)
-  c=ax11.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  h,xedges,yedges=ax11.hist2d(x8,x4,bins=nbins,alpha=0.95)
+  h_sort=sort(vec(h))
+  sig1=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.683))
+  sig2=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.955))
+  c=ax11.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),colors="white",levels=[h_sort[sig2[1]],h_sort[sig1[1]]])
   ax11.set_ylabel(label4,fontsize="large")
   tick_params(labelbottom=false,labelsize="small")
       #     labelleft=false,labelbottom=false)
 
   ax12=fig.add_subplot(8,8,34,sharex=ax3,sharey=ax11)
-    h,xedges,yedges=np.histogram2d(x7,x4,nbins)
-  c=ax12.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  h,xedges,yedges=ax12.hist2d(x7,x4,bins=nbins,alpha=0.95)
+  h_sort=sort(vec(h))
+  sig1=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.683))
+  sig2=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.955))
+  c=ax12.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),colors="white",levels=[h_sort[sig2[1]],h_sort[sig1[1]]])
   tick_params(left=false,labelleft=false,labelbottom=false)
       #     labelleft=false,labelbottom=false)
 
   ax13=fig.add_subplot(8,8,35,sharex=ax6,sharey=ax11)
-    h,xedges,yedges=np.histogram2d(x6,x4,nbins)
-  c=ax13.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  h,xedges,yedges=ax13.hist2d(x6,x4,bins=nbins,alpha=0.95)
+  h_sort=sort(vec(h))
+  sig1=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.683))
+  sig2=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.955))
+  c=ax13.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),colors="white",levels=[h_sort[sig2[1]],h_sort[sig1[1]]])
   tick_params(left=false,labelleft=false,labelbottom=false)
       #     labelleft=false,labelbottom=false)
 
   ax14=fig.add_subplot(8,8,36,sharex=ax10,sharey=ax11)
-    h,xedges,yedges=np.histogram2d(x5,x4,nbins)
-  c=ax14.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  h,xedges,yedges=ax14.hist2d(x5,x4,bins=nbins,alpha=0.95)
+  h_sort=sort(vec(h))
+  sig1=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.683))
+  sig2=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.955))
+  c=ax14.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),colors="white",levels=[h_sort[sig2[1]],h_sort[sig1[1]]])
   tick_params(left=false,labelleft=false,labelbottom=false)
       #     labelleft=false,labelbottom=false)
 
@@ -404,40 +462,49 @@ function corner(xs,true_xs,labels,nbins,model::LaTeXString)
   ax16.hist(x4,bins=nbins,histtype="step",color="black")
   ax16.axvline(truex4,linestyle="--",color="black")
   ax16.axvspan(quantile(vec(x4),0.1587),quantile(vec(x4),0.8413),color="limegreen",alpha=0.35)
-  tick_params(left=false,labelleft=false,labelrotation=15,labelbottom=false)
+  # tick_params(left=false,labelleft=false,labelrotation=15,labelbottom=false)
       #     left=false,right=false,top=true,bottom=true,
   #     labelbottom=false,labeltop=false,labelleft=false,labelright=false) 
 
   ax17=fig.add_subplot(8,8,41,sharex=ax1)
-  h,xedges,yedges=np.histogram2d(x8,x3,nbins)
-  c=ax17.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  h,xedges,yedges=ax17.hist2d(x8,x3,bins=nbins,alpha=0.95)
+  h_sort=sort(vec(h))
+  sig1=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.683))
+  sig2=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.955))
+  c=ax17.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),colors="white",levels=[h_sort[sig2[1]],h_sort[sig1[1]]])
   ax17.set_ylabel(label3,fontsize="large")
   tick_params(labelbottom=false,labelsize="small")
 
       #     labelbottom=true,labelleft=true)
 
   ax18=fig.add_subplot(8,8,42,sharex=ax3,sharey=ax17)
-  h,xedges,yedges=np.histogram2d(x7,x3,nbins)
-  c=ax18.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  h,xedges,yedges=ax18.hist2d(x7,x3,bins=nbins,alpha=0.95)
+  h_sort=sort(vec(h))
+  sig1=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.683))
+  sig2=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.955))
+  c=ax18.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),colors="white",levels=[h_sort[sig2[1]],h_sort[sig1[1]]])
   # ax18.set_xlabel(label7)
   tick_params(left=false,labelleft=false,labelbottom=false)
       #     labelleft=false,labelbottom=true)
 
   ax19=fig.add_subplot(8,8,43,sharex=ax6,sharey=ax17)
-    h,xedges,yedges=np.histogram2d(x6,x3,nbins)
-  c=ax19.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  h,xedges,yedges=ax19.hist2d(x6,x3,bins=nbins,alpha=0.95)
+  h_sort=sort(vec(h))
+  sig1=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.683))
+  sig2=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.955))
+  c=ax19.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),colors="white",levels=[h_sort[sig2[1]],h_sort[sig1[1]]])
   tick_params(left=false,labelleft=false,labelbottom=false)
       #     labelleft=false,labelbottom=true)
 
   ax20=fig.add_subplot(8,8,44,sharex=ax10,sharey=ax17)
     h,xedges,yedges=np.histogram2d(x5,x3,nbins)
-  c=ax20.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  c=ax20.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),cmap="viridis")
   tick_params(left=false,labelleft=false,labelbottom=false)
       #     labelleft=false,labelbottom=true)
 
   ax21=fig.add_subplot(8,8,45,sharex=ax16,sharey=ax17)
     h,xedges,yedges=np.histogram2d(x4,x3,nbins)
-  c=ax21.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  c=ax21.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),cmap="viridis")
   tick_params(left=false,labelleft=false,labelbottom=false)
       #     labelleft=false,labelbottom=true)
 
@@ -445,42 +512,42 @@ function corner(xs,true_xs,labels,nbins,model::LaTeXString)
   ax22.hist(x3,bins=nbins,histtype="step",color="black")
   ax22.axvline(truex3,linestyle="--",color="black")
   ax22.axvspan(quantile(vec(x3),0.1587),quantile(vec(x3),0.8413),color="limegreen",alpha=0.35)
-  tick_params(left=false,labelleft=false,labelrotation=15,labelbottom=false)
+  # tick_params(left=false,labelleft=false,labelrotation=15,labelbottom=false)
 
   ax23=fig.add_subplot(8,8,49,sharex=ax1)
     h,xedges,yedges=np.histogram2d(x8,x2,nbins)
   ax23.set_ylabel(label2,fontsize="large")
-  c=ax23.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  c=ax23.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),cmap="viridis")
       #     labelbottom=true,labelleft=true)
     tick_params(labelbottom=false,labelsize="small")
 
   ax24=fig.add_subplot(8,8,50,sharex=ax3,sharey=ax23)
     h,xedges,yedges=np.histogram2d(x7,x2,nbins)
-  c=ax24.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  c=ax24.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),cmap="viridis")
   tick_params(left=false,labelleft=false,labelbottom=false)
       #     labelleft=false,labelbottom=true)
 
   ax25=fig.add_subplot(8,8,51,sharex=ax6,sharey=ax23)
     h,xedges,yedges=np.histogram2d(x6,x2,nbins)
-  c=ax25.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  c=ax25.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),cmap="viridis")
   tick_params(left=false,labelleft=false,labelbottom=false)
       #     labelleft=false,labelbottom=true)
 
   ax26=fig.add_subplot(8,8,52,sharex=ax10,sharey=ax23)
     h,xedges,yedges=np.histogram2d(x5,x2,nbins)
-  c=ax26.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  c=ax26.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),cmap="viridis")
   tick_params(left=false,labelleft=false,labelbottom=false)
       #     labelleft=false,labelbottom=true)
 
   ax27=fig.add_subplot(8,8,53,sharex=ax16,sharey=ax23)
     h,xedges,yedges=np.histogram2d(x4,x2,nbins)
-  c=ax27.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  c=ax27.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),cmap="viridis")
   tick_params(left=false,labelleft=false,labelbottom=false)
       #     labelleft=false,labelbottom=true)
   
   ax28=fig.add_subplot(8,8,54,sharex=ax22,sharey=ax23)
     h,xedges,yedges=np.histogram2d(x3,x2,nbins)
-  c=ax28.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  c=ax28.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),cmap="viridis")
   tick_params(left=false,labelleft=false,labelbottom=false)
       #     labelleft=false,labelbottom=true)
 
@@ -488,11 +555,11 @@ function corner(xs,true_xs,labels,nbins,model::LaTeXString)
   ax29.hist(x2,bins=nbins,histtype="step",color="black")
   ax29.axvline(truex2,linestyle="--",color="black")
   ax29.axvspan(quantile(vec(x2),0.1587),quantile(vec(x2),0.8413),color="limegreen",alpha=0.35)
-  tick_params(left=false,labelleft=false,labelrotation=15,labelbottom=false)
+  # tick_params(left=false,labelleft=false,labelrotation=15,labelbottom=false)
 
   ax30=fig.add_subplot(8,8,57,sharex=ax1)
     h,xedges,yedges=np.histogram2d(x8,x1,nbins)
-  c=ax30.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  c=ax30.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),cmap="viridis")
   ax30.set_xlabel(label8,fontsize="large")
   ax30.set_ylabel(label1,fontsize="large")
   tick_params(axis="x",labelrotation=20,labelsize="small")
@@ -501,45 +568,45 @@ function corner(xs,true_xs,labels,nbins,model::LaTeXString)
 
   ax31=fig.add_subplot(8,8,58,sharex=ax3,sharey=ax30)
     h,xedges,yedges=np.histogram2d(x7,x1,nbins)
-  c=ax31.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  c=ax31.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),cmap="viridis")
   ax31.set_xlabel(label7,fontsize="large")
-  tick_params(left=false,labelleft=false,labelrotation=20,labelsize="small")
+  # tick_params(left=false,labelleft=false,labelrotation=20,labelsize="small")
   # ax31.set_ylabel(label1)
       #     labelbottom=true,labelleft=true)
 
   ax32=fig.add_subplot(8,8,59,sharex=ax6,sharey=ax30)
     h,xedges,yedges=np.histogram2d(x6,x1,nbins)
-  c=ax32.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  c=ax32.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),cmap="viridis")
   ax32.set_xlabel(label6,fontsize="large")
-  tick_params(left=false,labelleft=false,labelrotation=20,labelsize="small")
+  # tick_params(left=false,labelleft=false,labelrotation=20,labelsize="small")
       #     labelleft=false,labelbottom=true)
 
   ax33=fig.add_subplot(8,8,60,sharex=ax10,sharey=ax30)
     h,xedges,yedges=np.histogram2d(x5,x1,nbins)
-  c=ax33.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  c=ax33.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),cmap="viridis")
   ax33.set_xlabel(label5,fontsize="large")
-  tick_params(left=false,labelleft=false,labelrotation=20,labelsize="small")
+  # tick_params(left=false,labelleft=false,labelrotation=20,labelsize="small")
 
       #     labelleft=false,labelbottom=true)
   ax34=fig.add_subplot(8,8,61,sharex=ax16,sharey=ax30)
     h,xedges,yedges=np.histogram2d(x4,x1,nbins)
-  c=ax34.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  c=ax34.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),cmap="viridis")
   ax34.set_xlabel(label4,fontsize="large")
-  tick_params(left=false,labelleft=false,labelrotation=20,labelsize="small")
+  # tick_params(left=false,labelleft=false,labelrotation=20,labelsize="small")
       #     labelleft=false,labelbottom=true)
   
   ax35=fig.add_subplot(8,8,62,sharex=ax22,sharey=ax30)
   h,xedges,yedges=np.histogram2d(x3,x1,nbins)
-  c=ax35.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  c=ax35.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),cmap="viridis")
   ax35.set_xlabel(label3,fontsize="large")
-  tick_params(left=false,labelleft=false,labelrotation=20,labelsize="small")
+  # tick_params(left=false,labelleft=false,labelrotation=20,labelsize="small")
       #     labelleft=false,labelbottom=true)
 
   ax36=fig.add_subplot(8,8,63,sharex=ax29,sharey=ax30)
     h,xedges,yedges=np.histogram2d(x2,x1,nbins)
-  c=ax36.contour(xedges[1:end-1],yedges[1:end-1],h,cmap="viridis",normalize=true)
+  c=ax36.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),cmap="viridis")
   ax36.set_xlabel(label2,fontsize="large")
-  tick_params(left=false,labelleft=false,labelrotation=20,labelsize="small")
+  # tick_params(left=false,labelleft=false,labelrotation=20,labelsize="small")
       #     labelleft=false,labelbottom=true)
 
   ax37=fig.add_subplot(8,8,64)
@@ -547,12 +614,12 @@ function corner(xs,true_xs,labels,nbins,model::LaTeXString)
   ax37.axvline(truex1,linestyle="--",color="black")
   ax37.axvspan(quantile(vec(x1),0.1587),quantile(vec(x1),0.8413),color="limegreen",alpha=0.35)
   ax37.set_xlabel(label1,fontsize="large")
-  tick_params(left=false,labelleft=false,labelrotation=20,labelsize="small")
+  # tick_params(left=false,labelleft=false,labelrotation=20,labelsize="small")
   fig.align_ylabels()
   fig.align_xlabels()
   # tight_layout()
 
- # return fig
+ return fig
 end
 
 # Create a corner plot for significant posterior distributions of planet parameters
@@ -683,7 +750,7 @@ function corner_hist(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
     x1=vec(par_mcmc[:,iburn:nsteps,16])
     x2=vec(par_mcmc[:,iburn:nsteps,17])
     x3=vec(par_mcmc[:,iburn:nsteps,18])#.*57.2957795
-    truetmax=calc_tmax(CGS.AU,CGS.AMOON*CGS.AU,CGS.MEARTH,CGS.MMOON,365.256355) #0.0018
+    truetmax=calc_tmax(CGS.AU,CGS.AMOON*CGS.AU,CGS.MEARTtranspose(H),CGS.MMOON,365.256355) #0.0018
     truex2=0.01
     truex3=2.31586#.*57.2957795
     title=string("IMAGES/discussion/case",case_num,grid_type_nplanet,"Moon2-",sigma,"secs",nyear,"yrs.png")
@@ -735,7 +802,7 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
    # println(pname[i]," = ",avg[i]," + ",abs(plus1sig[i]-avg[i])," _ ",abs(avg[i]-minus1sig[i]))
   end
   # stable=false 
-  # mutual_radius=mutual_Hill(avg[2],avg[1].*CGS.MSUN/CGS.MEARTH,CGS.MSUN,avg[7],avg[6].*CGS.MSUN/CGS.MEARTH)
+  # mutual_radius=mutual_Hill(avg[2],avg[1].*CGS.MSUN/CGS.MEARTtranspose(H),CGS.MSUN,avg[7],avg[6].*CGS.MSUN/CGS.MEARTH)
  # if mutual_radius <
  # Calculate Bayesian Inference Criterion (BIC) 
   function calc_BIC(prob)
@@ -774,20 +841,20 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
   # @show
 
   # Find Percentage of walkers where difference between median and quantile value is >100
-  bad_walk=[]
-  for i in 1:nwalkers
-    for j in 1:nparam
-      walker_med,walker_quant=quantile!(par_mcmc[i,jldmc["iburn"]+1:end,j],[0.5,0.9])
-      walk_start=par_mcmc[i,jldmc["iburn"]+1,j] 
-      walk_end = par_mcmc[i,jldmc["iburn"]+1,j]
-      ratio = walk_end/walk_start
-      walker_prob=median(lprob_mcmc[i,jldmc["iburn"]+1:end])
-      if abs(walk_end-walk_start)/walk_start > 0.1
-        #abs(walker_med-walker_end)>30
-        # println(i," ",walker_prob[i])
-        append!(bad_walk,i)
-      end
-    end
+  # bad_walk=[]
+  # for i in 1:nwalkers
+  #   for j in 1:nparam
+  #     walker_med,walker_quant=quantile!(par_mcmc[i,jldmc["iburn"]+1:end,j],[0.5,0.9])
+  #     walk_start=par_mcmc[i,jldmc["iburn"]+1,j] 
+  #     walk_end = par_mcmc[i,jldmc["iburn"]+1,j]
+  #     ratio = walk_end/walk_start
+  #     walker_prob=median(lprob_mcmc[i,jldmc["iburn"]+1:end])
+  #     if abs(walk_end-walk_start)/walk_start > 0.1
+  #       #abs(walker_med-walker_end)>30
+  #       # println(i," ",walker_prob[i])
+  #       append!(bad_walk,i)
+  #     end
+  #   end
   # If prob for a given chain is low, reject it
 
   #     # If systematic uncertainty > injected uncertainty, reject
@@ -815,7 +882,7 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
     L"$μ_4$ [$M_{⋆}$]",L"$P_4$ [days]",L"$t_{0,4}$",L"$e_4 cos(ω_4)$",L"$e_4 sin(ω_4)$",
     L"$μ_5$ [$M_{⋆}$]",L"$P_5$ [days]",L"$t_{0,5}$",L"$e_4 cos(ω_5)$",L"$e_5 sin(ω_5)$",
     L"$t_{max} sin(ϕ_0)$",L"$t_{max} cos(ϕ_0)$",L"$Δϕ$ [rad]",L"$σ_{sys}^2$ [days]"]
-  function plot_traces()
+  #  plot_traces()
     # fig=figure(figsize=(8,6))
     # fig,axs=plt.subplots(nrows=5,ncols=nplanet)
     # fig.suptitle(string(model," traces; BIC=",BIC))
@@ -827,7 +894,7 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
     #   ax.set_ylabel(pname[i])
     #   end
     # end
-    # title=string("IMAGES/trace/",grid_type_nplanet,"-",sigma,"secs",nyear,"yrs.png")
+    # title=string("IMAGES/trace/case",case_num,grid_type_nplanet,"-",sigma,"secs",nyear,"yrs.png")
     # savefig(title)
     figure(figsize=(8,6))
     for i=1:5
@@ -838,7 +905,7 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
     ax1.set_ylabel(parname[i])
     end
     tight_layout()
-    title=string("IMAGES/trace/",grid_type_nplanet,"Venus-",sigma,"secs",nyear,"yrs.png")
+    title=string("IMAGES/trace/case",case_num,grid_type_nplanet,"Venus-",sigma,"secs",nyear,"yrs.png")
     savefig(title)
     clf()
     figure(figsize=(8,6))
@@ -853,7 +920,7 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
       ax2.set_ylabel(parname[i+5])
     end
     tight_layout()
-    title=string("IMAGES/trace/",grid_type_nplanet,"Earth-",sigma,"secs",nyear,"yrs.png")
+    title=string("IMAGES/trace/case",case_num,grid_type_nplanet,"Earth-",sigma,"secs",nyear,"yrs.png")
     savefig(title)
     clf()
 
@@ -867,7 +934,7 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
       ax3.set_ylabel(parname[i+20])
       end
       tight_layout()
-      title=string("IMAGES/trace/",grid_type_nplanet,"Saturn-",sigma,"secs",nyear,"yrs.png")
+      title=string("IMAGES/trace/case",case_num,grid_type_nplanet,"Saturn-",sigma,"secs",nyear,"yrs.png")
       savefig(title)
       clf()
       figure(figsize=(8,6))
@@ -879,7 +946,7 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
       ax3.set_ylabel(parname[i+10])
       end
       tight_layout()
-      title=string("IMAGES/trace/",grid_type_nplanet,"Mars-",sigma,"secs",nyear,"yrs.png")
+      title=string("IMAGES/trace/case",case_num,grid_type_nplanet,"Mars-",sigma,"secs",nyear,"yrs.png")
       savefig(title)
       #    println("Hit return to continue")
       #    read(STDIN,Char)
@@ -898,7 +965,7 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
         ax4.set_ylabel(parname[end])
       end
       tight_layout()
-      title=string("IMAGES/trace/",grid_type_nplanet,"Jupiter-",sigma,"secs",nyear,"yrs.png")
+      title=string("IMAGES/trace/case",case_num,grid_type_nplanet,"Jupiter-",sigma,"secs",nyear,"yrs.png")
       savefig(title)
       clf()
     elseif nplanet==4
@@ -911,7 +978,7 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
         ax3.set_ylabel(parname[i+10])
       end
       tight_layout()
-      title=string("IMAGES/trace/",grid_type_nplanet,"Mars-",sigma,"secs",nyear,"yrs.png")
+      title=string("IMAGES/trace/case",case_num,grid_type_nplanet,"Mars-",sigma,"secs",nyear,"yrs.png")
       savefig(title)
       clf()
       figure(figsize=(8,6))
@@ -928,7 +995,7 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
         ax4.set_ylabel(parname[end])
       end
       tight_layout()
-      title=string("IMAGES/trace/",grid_type_nplanet,"Jupiter-",sigma,"secs",nyear,"yrs.png")
+      title=string("IMAGES/trace/case",case_num,grid_type_nplanet,"Jupiter-",sigma,"secs",nyear,"yrs.png")
       savefig(title)
       clf()
     else
@@ -946,7 +1013,7 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
         ax4.set_ylabel(parname[end])
       end
       tight_layout()
-      title=string("IMAGES/trace/",grid_type_nplanet,"Jupiter-",sigma,"secs",nyear,"yrs.png")
+      title=string("IMAGES/trace/case",case_num,grid_type_nplanet,"Jupiter-",sigma,"secs",nyear,"yrs.png")
       savefig(title)
       clf()
     end
@@ -965,151 +1032,184 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
       # ylabel(L"$logProb$")
       # end
       tight_layout()
-      title=string("IMAGES/trace/",grid_type_nplanet,"Moon-",sigma,"secs",nyear,"yrs.png")
+      title=string("IMAGES/trace/case",case_num,grid_type_nplanet,"Moon-",sigma,"secs",nyear,"yrs.png")
       savefig(title)
       clf()
     end
-  end
-  #   for i=1:nparam
-  #     for j=1:nwalkers 
-  #     # ax.plot(par_mcmc[j,iburn:end,i])
-  #     end
-  #     # ax.set_ylabel(pname[i])
-  #     # tight_layout()
-  #     title=string("IMAGES/trace/",grid_type_nplanet,"-",sigma,"secs",nyear,"yrs.png")
-  #     savefig(title)
-  #     #    println("Hit return to continue")
-  #     #    read(STDIN,Char)
-  #     clf()
-  #   end
-  # end
-  function plot_dist()
+
+  # function plot_dist()
     # True values based on "PlanetaryBodyData.pdf" (source?)
     offset_p1=224.70
     m1=vec(par_mcmc[:,iburn:nsteps,1]).* CGS.MSUN/CGS.MEARTH
     ec1=vec(par_mcmc[:,iburn:nsteps,4])#.*sqrt.(vec(par_mcmc[11:20,iburn:nsteps,4]).^2 .+ vec(par_mcmc[11:20,iburn:nsteps,5]).^2)
     es1=vec(par_mcmc[:,iburn:nsteps,5])#.*sqrt.(vec(par_mcmc[11:20,iburn:nsteps,4]).^2 .+ vec(par_mcmc[11:20,iburn:nsteps,5]).^2)
-    p1=vec(par_mcmc[:,iburn:nsteps,2]).-offset_p1
+    p1=vec(par_mcmc[:,iburn:nsteps,2])#.-offset_p1
     truem1=0.815
     trueec1=calc_evec1(0.00677323,131.53298)
     truees1=calc_evec2(0.00677323,131.53298)
-    truep1=224.7007992.-offset_p1
+    truep1=224.7007992#.-offset_p1
     # lim=0.00076,0.00081
     lim=minimum(p1),maximum(p1)#0.0064,0.00652
     label=L"Per$_1 - 224.7$ [days]"
-    title=string("IMAGES/corner/case",case_num,grid_type_nplanet,"Venus-",sigma,"secs",nyear,"yrs.png")
-    fig1=corner(m1,ec1,es1,p1,truem1,trueec1,truees1,truep1,nbins,lim,label)
-    fig1.suptitle(string(model," Posteriors for Planet 1"))
-    fig1.text(0.36,0.8,string(L"$\sigma_{sys}=$",sigsys," sec",'\n',L"$\sigma_{tot}=$",sigtot," sec",'\n',"BIC= ",BIC,'\n',L"$\chi^2 =$",chi))
-    savefig(title)
-    clf()
-
     offset_p2=365.25
     m2=vec(par_mcmc[:,iburn:nsteps,6]).* CGS.MSUN/CGS.MEARTH;
     ec2=vec(par_mcmc[:,iburn:nsteps,9]);#.*sqrt.(vec(par_mcmc[:,1:nsteps,9]).^2 .+ vec(par_mcmc[:,1:nsteps,10]).^2)
     es2=vec(par_mcmc[:,iburn:nsteps,10]);#.*sqrt.(vec(par_mcmc[:,1:nsteps,9]).^2 .+ vec(par_mcmc[:,1:nsteps,10]).^2)
-    p2=vec(par_mcmc[:,iburn:nsteps,7]).-offset_p2;
+    p2=vec(par_mcmc[:,iburn:nsteps,7])#.-offset_p2;
     truem2=1
     trueec2=calc_evec1(0.01671022,102.94719)
     truees2=calc_evec2(0.01671022,102.94719)
-    truep2=365.256355-offset_p2 #365.256355
-    lim=minimum(p2),maximum(p2)#0.0064,0.00652
-    label=L"Per$_2 - 365.25$ [days]"
-    title=string("IMAGES/corner/case",case_num,grid_type_nplanet,"Earth-",sigma,"secs",nyear,"yrs.png")
-    fig2=corner(m2,ec2,es2,p2,truem2,trueec2,truees2,truep2,nbins,lim,label)
-    fig2.suptitle(string(model," Posteriors for Planet 2"))
-    fig2.text(0.36,0.8,string(L"$\sigma_{sys}=$",sigsys," sec",'\n',L"$\sigma_{tot}=$",sigtot," sec",'\n',"BIC= ",BIC,'\n',L"$\chi^2 =$",chi))
-    savefig(title)
-    clf()
-    if grid_type_nplanet=="p4" || grid_type_nplanet=="p3moonp4" || grid_type_nplanet=="widep3moonp4" || grid_type_nplanet=="widep4"
-      m3=vec(par_mcmc[:,iburn:nsteps,11]).* CGS.MSUN/CGS.MEARTH
-      ec3=vec(par_mcmc[:,iburn:nsteps,14])#.*sqrt.(vec(par_mcmc[:,1:nsteps,14]).^2 .+ vec(par_mcmc[:,1:nsteps,15]).^2)
-      es3=vec(par_mcmc[:,iburn:nsteps,15])#.*sqrt.(vec(par_mcmc[:,1:nsteps,14]).^2 .+ vec(par_mcmc[:,1:nsteps,15]).^2)
-      p3=vec(par_mcmc[:,iburn:nsteps,12])
-      truem3=0.1074
-      trueec3=calc_evec1(0.09341233,336.04084)
-      truees3=calc_evec2(0.09341233,336.04084)
-      truep3=686.9795859
-      lim=minimum(p3),maximum(p3)
-      label=L"Per$_4$ [days]"
-      title=string("IMAGES/corner/case",case_num,grid_type_nplanet,"Mars-",sigma,"secs",nyear,"yrs.png")
-      fig3=corner(m3,ec3,es3,p3,truem3,trueec3,truees3,truep3,nbins,lim,label)
-      fig3.suptitle(string(model," Posteriors for Planet 4"))
-      fig3.text(0.36,0.8,string(L"$\sigma_{sys}=$",sigsys," sec",'\n',L"$\sigma_{tot}=$",sigtot," sec",'\n',"BIC= ",BIC,'\n',L"$\chi^2 =$",chi))
-      savefig(title)
-      clf()
-      #  println("Mars= ",minimum(m3)," ",minimum(p3)," ",minimum(ec3)," ",minimum(es3))
-      #  println("Mars= ",maximum(m3)," ",maximum(p3)," ",maximum(ec3)," ",maximum(es3))
-      m4=vec(par_mcmc[:,iburn:nsteps,16]).* CGS.MSUN/CGS.MEARTH
-      ec4=vec(par_mcmc[:,iburn:nsteps,19])#.*sqrt.(vec(par_mcmc[:,1:nsteps,14]).^2 .+ vec(par_mcmc[:,1:nsteps,15]).^2)
-      es4=vec(par_mcmc[:,iburn:nsteps,20])#.*sqrt.(vec(par_mcmc[:,1:nsteps,14]).^2 .+ vec(par_mcmc[:,1:nsteps,15]).^2)
-      p4=vec(par_mcmc[:,iburn:nsteps,17])
-      truem4=317.8
-      trueec4=calc_evec1(0.04839266,14.75385)
-      truees4=calc_evec2(0.04839266,14.75385)
-      truep4=4332.82012875
-      lim=minimum(p4),maximum(p4)
-      label=L"Per$_3$ [days]"
-      title=string("IMAGES/corner/case",case_num,grid_type_nplanet,"Jupiter-",sigma,"secs",nyear,"yrs.png")
-       # println("Jupiter= ",minimum(m4)," ",minimum(p4)," ",minimum(ec4)," ",minimum(es4))
-       # println("Jupiter= ",maximum(m4)," ",maximum(p4)," ",maximum(ec4)," ",maximum(es4))
-      fig4=corner(m4,ec4,es4,p4,truem4,trueec4,truees4,truep4,nbins,lim,label)
-      fig4.suptitle(string(model," Posteriors for Planet 3"))
-      fig4.text(0.36,0.8,string(L"$\sigma_{sys}=$",sigsys," sec",'\n',L"$\sigma_{tot}=$",sigtot," sec",'\n',"BIC= ",BIC,'\n',L"$\chi^2 =$",chi))
-      savefig(title)
-      clf()
-    elseif grid_type_nplanet=="p3" || grid_type_nplanet=="widep3" || grid_type_nplanet=="p3moon"
-      m3=vec(par_mcmc[:,iburn:nsteps,11]).* CGS.MSUN/CGS.MEARTH
-      ec3=vec(par_mcmc[:,iburn:nsteps,14])#.*sqrt.(vec(par_mcmc[:,1:nsteps,14]).^2 .+ vec(par_mcmc[:,1:nsteps,15]).^2)
-      es3=vec(par_mcmc[:,iburn:nsteps,15])#.*sqrt.(vec(par_mcmc[:,1:nsteps,14]).^2 .+ vec(par_mcmc[:,1:nsteps,15]).^2)
-      p3=vec(par_mcmc[:,iburn:nsteps,12])
-      truem3=317.8
-      trueec3=calc_evec1(0.04839266,14.75385)
-      truees3=calc_evec2(0.04839266,14.75385)
-      truep3=4332.82012875
-      lim=minimum(p3),maximum(p3)
-      label=L"Per$_3$ [days]"
-      title=string("IMAGES/corner/case",case_num,grid_type_nplanet,"Jupiter-",sigma,"secs",nyear,"yrs.png")
-       # println("Jupiter= ",minimum(m3)," ",minimum(p3)," ",minimum(ec3)," ",minimum(es3))
-       # println("Jupiter= ",maximum(m3)," ",maximum(p3)," ",maximum(ec3)," ",maximum(es3))
-      fig3=corner(m3,ec3,es3,p3,truem3,trueec3,truees3,truep3,nbins,lim,label)
-      fig3.suptitle(string(model," Posteriors for Planet 3"))
-      fig3.text(0.36,0.8,string(L"$\sigma_{sys}=$",sigsys," sec",'\n',L"$\sigma_{tot}=$",sigtot," sec",'\n',"BIC= ",BIC,'\n',L"$\chi^2 =$",chi))
-      savefig(title)
-      clf()
-    end
-    if include_moon && grid_type_nplanet=="p3moon"
-     tmax=sqrt.(vec(par_mcmc[:,iburn:nsteps,16]).^2 .+ vec(par_mcmc[:,iburn:nsteps,17]).^2)
-     x1=vec(par_mcmc[:,iburn:nsteps,16])
-     x2=vec(par_mcmc[:,iburn:nsteps,17])
-     x3=vec(par_mcmc[:,iburn:nsteps,18])#.*57.2957795
-     truetmax=calc_tmax(CGS.AU,CGS.AMOON*CGS.AU,CGS.MEARTH,CGS.MMOON,365.256355) #0.0018
-     truex2=0.01
-     truex3=2.31586#.*57.2957795
-     title=string("IMAGES/corner/case",case_num,grid_type_nplanet,"Moon2-",sigma,"secs",nyear,"yrs.png")
-     fig5=corner(tmax,x3,truetmax,truex3,nbins)
-     fig5.suptitle(string(model," Posteriors for Satellite"))
-     fig5.text(0.575,0.725,string(L"$\sigma_{sys}=$",sigsys," sec",'\n',L"$\sigma_{tot}=$",sigtot," sec",'\n',"BIC= ",BIC,'\n',L"$\chi^2 =$",chi))
-      # corner(x1,x2,x3,nbins)
-     savefig(title)
-     clf()
-     elseif include_moon 
-       tmax=sqrt.(vec(par_mcmc[:,iburn:nsteps,21]).^2 .+ vec(par_mcmc[:,iburn:nsteps,22]).^2) .* 24*60
-       x1=vec(par_mcmc[:,iburn:nsteps,21])
-       x2=vec(par_mcmc[:,iburn:nsteps,22])
-       x3=vec(par_mcmc[:,iburn:nsteps,23])#.*57.2957795
-       truetmax=calc_tmax(CGS.AU,CGS.AMOON*CGS.AU,CGS.MEARTH,CGS.MMOON,365.256355) .* 24*60#0.0018
-       truex2=0.01
-       truex3=2.31586#.*57.2957795
-       title=string("IMAGES/corner/case",case_num,grid_type_nplanet,"Moon2-",sigma,"secs",nyear,"yrs.png")
-       fig5=corner(tmax,x3,truetmax,truex3,nbins)
-       fig5.suptitle(string(model," Posteriors for Satellite"))
-       fig5.text(0.575,0.725,string(L"$\sigma_{sys}=$",sigsys," sec",'\n',L"$\sigma_{tot}=$",sigtot," sec",'\n',"BIC= ",BIC,'\n',L"$\chi^2 =$",chi))
-        #corner(x1,x2,x3,nbins)
-       savefig(title)
-       clf()
-     end
-  end
-  plot_traces()
+    truep2=365.256355#-offset_p2 #365.256355
+    labels=[parname[1];parname[4];parname[2];
+        parname[6];parname[9];parname[7]]
+        # parname[14]]
+  
+    # title=string("IMAGES/corner/case",case_num,grid_type_nplanet,"Venus-",sigma,"secs",nyear,"yrs.png")
+    # fig1=corner([m1,ec1,p1,m2,ec2,p2],[truem1,trueec1,truep1,truem2,trueec2,truep2],labels,nbins)
+    # fig1.suptitle(string(model," Posteriors for Planet 1"))
+    # fig1.text(0.36,0.8,string(L"$\sigma_{sys}=$",sigsys," sec",'\n',L"$\sigma_{tot}=$",sigtot," sec",'\n',"BIC= ",BIC,'\n',L"$\chi^2 =$",chi))
+    # savefig(title)
+    # clf()
+
+    # lim=minimum(p2),maximum(p2)#0.0064,0.00652
+    # label=L"Per$_2 - 365.25$ [days]"
+    # title=string("IMAGES/corner/case",case_num,grid_type_nplanet,"Earth-",sigma,"secs",nyear,"yrs.png")
+    # # fig2=corner([m2,ec2,es2,p2],[truem2,trueec2,truees2,truep2],nbins,lim,label)
+    # fig2.suptitle(string(model," Posteriors for Planet 2"))
+    # fig2.text(0.36,0.8,string(L"$\sigma_{sys}=$",sigsys," sec",'\n',L"$\sigma_{tot}=$",sigtot," sec",'\n',"BIC= ",BIC,'\n',L"$\chi^2 =$",chi))
+    # savefig(title)
+    # clf()
+    # if grid_type_nplanet=="p4" || grid_type_nplanet=="p3moonp4" || grid_type_nplanet=="widep3moonp4" || grid_type_nplanet=="widep4"
+    #   m3=vec(par_mcmc[:,iburn:nsteps,11]).* CGS.MSUN/CGS.MEARTH
+    #   ec3=vec(par_mcmc[:,iburn:nsteps,14])#.*sqrt.(vec(par_mcmc[:,1:nsteps,14]).^2 .+ vec(par_mcmc[:,1:nsteps,15]).^2)
+    #   es3=vec(par_mcmc[:,iburn:nsteps,15])#.*sqrt.(vec(par_mcmc[:,1:nsteps,14]).^2 .+ vec(par_mcmc[:,1:nsteps,15]).^2)
+    #   p3=vec(par_mcmc[:,iburn:nsteps,12])
+    #   truem3=0.1074
+    #   trueec3=calc_evec1(0.09341233,336.04084)
+    #   truees3=calc_evec2(0.09341233,336.04084)
+    #   truep3=686.9795859
+    #   lim=minimum(p3),maximum(p3)
+    #   label=L"Per$_4$ [days]"
+    #   title=string("IMAGES/corner/case",case_num,grid_type_nplanet,"Mars-",sigma,"secs",nyear,"yrs.png")
+    #   fig3=corner([m3,ec3,es3,p3],[truem3,trueec3,truees3,truep3],nbins,lim,label)
+    #   fig3.suptitle(string(model," Posteriors for Planet 4"))
+    #   fig3.text(0.36,0.8,string(L"$\sigma_{sys}=$",sigsys," sec",'\n',L"$\sigma_{tot}=$",sigtot," sec",'\n',"BIC= ",BIC,'\n',L"$\chi^2 =$",chi))
+    #   savefig(title)
+    #   clf()
+    #   #  println("Mars= ",minimum(m3)," ",minimum(p3)," ",minimum(ec3)," ",minimum(es3))
+    #   #  println("Mars= ",maximum(m3)," ",maximum(p3)," ",maximum(ec3)," ",maximum(es3))
+    #   m4=vec(par_mcmc[:,iburn:nsteps,16]).* CGS.MSUN/CGS.MEARTH
+    #   ec4=vec(par_mcmc[:,iburn:nsteps,19])#.*sqrt.(vec(par_mcmc[:,1:nsteps,14]).^2 .+ vec(par_mcmc[:,1:nsteps,15]).^2)
+    #   es4=vec(par_mcmc[:,iburn:nsteps,20])#.*sqrt.(vec(par_mcmc[:,1:nsteps,14]).^2 .+ vec(par_mcmc[:,1:nsteps,15]).^2)
+    #   p4=vec(par_mcmc[:,iburn:nsteps,17])
+    #   truem4=317.8
+    #   trueec4=calc_evec1(0.04839266,14.75385)
+    #   truees4=calc_evec2(0.04839266,14.75385)
+    #   truep4=4332.82012875
+    #   lim=minimum(p4),maximum(p4)
+    #   label=L"Per$_3$ [days]"
+    #   title=string("IMAGES/corner/case",case_num,grid_type_nplanet,"Jupiter-",sigma,"secs",nyear,"yrs.png")
+    #    # println("Jupiter= ",minimum(m4)," ",minimum(p4)," ",minimum(ec4)," ",minimum(es4))
+    #    # println("Jupiter= ",maximum(m4)," ",maximum(p4)," ",maximum(ec4)," ",maximum(es4))
+    #   fig4=corner([m4,ec4,es4,p4],[truem4,trueec4,truees4,truep4],nbins,lim,label)
+    #   fig4.suptitle(string(model," Posteriors for Planet 3"))
+    #   fig4.text(0.36,0.8,string(L"$\sigma_{sys}=$",sigsys," sec",'\n',L"$\sigma_{tot}=$",sigtot," sec",'\n',"BIC= ",BIC,'\n',L"$\chi^2 =$",chi))
+    #   savefig(title)
+    #   clf()
+    # elseif grid_type_nplanet=="p3" || grid_type_nplanet=="widep3" || grid_type_nplanet=="p3moon"
+    #   m3=vec(par_mcmc[:,iburn:nsteps,11]).* CGS.MSUN/CGS.MEARTH
+    #   ec3=vec(par_mcmc[:,iburn:nsteps,14])#.*sqrt.(vec(par_mcmc[:,1:nsteps,14]).^2 .+ vec(par_mcmc[:,1:nsteps,15]).^2)
+    #   es3=vec(par_mcmc[:,iburn:nsteps,15])#.*sqrt.(vec(par_mcmc[:,1:nsteps,14]).^2 .+ vec(par_mcmc[:,1:nsteps,15]).^2)
+    #   p3=vec(par_mcmc[:,iburn:nsteps,12])
+    #   truem3=317.8
+    #   trueec3=calc_evec1(0.04839266,14.75385)
+    #   truees3=calc_evec2(0.04839266,14.75385)
+    #   truep3=4332.82012875
+    #   lim=minimum(p3),maximum(p3)
+    #   label=L"Per$_3$ [days]"
+    #   title=string("IMAGES/corner/case",case_num,grid_type_nplanet,"Jupiter-",sigma,"secs",nyear,"yrs.png")
+    #    # println("Jupiter= ",minimum(m3)," ",minimum(p3)," ",minimum(ec3)," ",minimum(es3))
+    #    # println("Jupiter= ",maximum(m3)," ",maximum(p3)," ",maximum(ec3)," ",maximum(es3))
+    #   fig3=corner(m3,ec3,es3,p3,truem3,trueec3,truees3,truep3,nbins,lim,label)
+    #   fig3.suptitle(string(model," Posteriors for Planet 3"))
+    #   fig3.text(0.36,0.8,string(L"$\sigma_{sys}=$",sigsys," sec",'\n',L"$\sigma_{tot}=$",sigtot," sec",'\n',"BIC= ",BIC,'\n',L"$\chi^2 =$",chi))
+    #   savefig(title)
+    #   clf()
+    # end
+    # if include_moon && grid_type_nplanet=="p3moon"
+    #  tmax=sqrt.(vec(par_mcmc[:,iburn:nsteps,16]).^2 .+ vec(par_mcmc[:,iburn:nsteps,17]).^2)
+    #  x1=vec(par_mcmc[:,iburn:nsteps,16])
+    #  x2=vec(par_mcmc[:,iburn:nsteps,17])
+    #  x3=vec(par_mcmc[:,iburn:nsteps,18])#.*57.2957795
+    #  truetmax=calc_tmax(CGS.AU,CGS.AMOON*CGS.AU,CGS.MEARTtranspose(H),CGS.MMOON,365.256355) #0.0018
+    #  truex2=0.01
+    #  truex3=2.31586#.*57.2957795
+    #  title=string("IMAGES/corner/case",case_num,grid_type_nplanet,"Moon2-",sigma,"secs",nyear,"yrs.png")
+    #  fig5=corner(tmax,x3,truetmax,truex3,nbins)
+    #  fig5.suptitle(string(model," Posteriors for Satellite"))
+    #  fig5.text(0.575,0.725,string(L"$\sigma_{sys}=$",sigsys," sec",'\n',L"$\sigma_{tot}=$",sigtot," sec",'\n',"BIC= ",BIC,'\n',L"$\chi^2 =$",chi))
+    #   # corner(x1,x2,x3,nbins)
+    #  savefig(title)
+    #  clf()
+    #  elseif include_moon 
+    #    tmax=sqrt.(vec(par_mcmc[:,iburn:nsteps,21]).^2 .+ vec(par_mcmc[:,iburn:nsteps,22]).^2) .* 24*60
+    #    x1=vec(par_mcmc[:,iburn:nsteps,21])
+    #    x2=vec(par_mcmc[:,iburn:nsteps,22])
+    #    x3=vec(par_mcmc[:,iburn:nsteps,23])#.*57.2957795
+    #    truetmax=calc_tmax(CGS.AU,CGS.AMOON*CGS.AU,CGS.MEARTtranspose(H),CGS.MMOON,365.256355) .* 24*60#0.0018
+    #    truex2=0.01
+    #    truex3=2.31586#.*57.2957795
+    #    title=string("IMAGES/corner/case",case_num,grid_type_nplanet,"Moon2-",sigma,"secs",nyear,"yrs.png")
+    #    fig5=corner(tmax,x3,truetmax,truex3,nbins)
+    #    fig5.suptitle(string(model," Posteriors for Satellite"))
+    #    fig5.text(0.575,0.725,string(L"$\sigma_{sys}=$",sigsys," sec",'\n',L"$\sigma_{tot}=$",sigtot," sec",'\n',"BIC= ",BIC,'\n',L"$\chi^2 =$",chi))
+    #     #corner(x1,x2,x3,nbins)
+    #    savefig(title)
+    #    clf()
+    #  end
+  # end
+  # plot_traces()
   # plot_dist()
+end
+# Basic corner plot for posterior distributions of 2 parameters
+function corner(x,y,nbins)
+  function scatter_hist(x, y, ax, ax_histx, ax_histy)
+    # no labels
+    ax_histx.tick_params(axis="x", labelbottom=false)
+    ax_histy.tick_params(axis="y", labelleft=false)
+    # the scatter plot:
+    # ax.scatter(x, y)
+    h,xedges,yedges=ax.hist2d(x,y,bins=nbins,alpha=0.9)
+    # the contour:
+    # M=meshgrid(x,y)
+    # xedges=h[2][2:end];yedges=h[3][2:end];
+    h_sort=sort(vec(h))
+    sig1=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.683))
+    sig2=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.955))
+    # sig3=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.997))
+    # println(h_sort[sig1[1]])
+    # ax.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),colors="black",levels=)
+    ax.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),levels=[h_sort[sig2[1]],h_sort[sig1[1]]],colors="white")
+    # now determine nice limits by hand:
+    # binwidth = 0.25
+    # xymax = maximum(maximum(abs.(x)), maximum(abs.(y)))
+    # lim = (int(xymax/binwidth) + 1) * binwidth
+    # bins = range(-lim, lim + binwidth, binwidth)
+    ax_histx.hist(x, bins=nbins,histtype="step",density=true)
+    ax_histy.hist(y, bins=nbins,histtype="step",density=true,orientation="horizontal")
+  end
+  fig=figure(figsize=(4,4))#,dpi=150)
+  # gs = fig.add_gridspec(2, 2)
+  # Add a gridspec with two rows and two columns and a ratio of 1 to 4 between
+  # the size of the marginal axes and the main axes in both directions.
+  gs = fig.add_gridspec(2, 2,  width_ratios=(4, 1), height_ratios=(1, 4),
+                      left=0.1, right=0.9, bottom=0.1, top=0.9,
+                      wspace=0.05, hspace=0.05)
+  # Create the Axes.
+  ax = fig.add_subplot(gs[2, 1])
+  ax_histx = fig.add_subplot(gs[1, 1], sharex=ax)
+  ax_histy = fig.add_subplot(gs[2, 2], sharey=ax)
+  # Draw the scatter plot and marginals.
+  scatter_hist(x, y, ax, ax_histx, ax_histy)
+    # return fig
 end

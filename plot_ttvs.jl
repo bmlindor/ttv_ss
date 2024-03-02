@@ -73,13 +73,6 @@ function plot_res(sigma::Real,nyear::Real,options,include_moon::Bool=false)
   ttv1,ttv2=(tt1.-time1).* (24 * 60),(tt2.-time2).* (24 * 60) #in minutes
   sigtt1,sigtt2=sigtt[1:n1].* (24*60),sigtt[n1+1:n1+n2].* (24 * 60) #in minutes
 
-  scatter1=(ttvmodel1.-ttv1)
-  scatter2=(ttvmodel2.-ttv2)
-  # println("Venus Peak amplitude of O-C: ", maximum(scatter1))
-  # println(label," Peak amplitude of O-C: ", maximum(scatter2))
-  # println("Mean: ",mean(scatter1)," ",mean(scatter2))
-  # println("Std: ",std(scatter1)," ",std(scatter2))
-
   sigsys=round(avg[end].*24*3600,sigdigits=3)
   sigsys2=round(avg2[end].*24*3600,sigdigits=3)
   sigsys3=round(avg3[end].*24*3600,sigdigits=3)
@@ -401,8 +394,11 @@ function plot_contrib(sigma::Real,nyear::Real,options::Array{String},include_moo
     ax1.plot(ttsim1,pair_ttvs[1,3,1:n1],color="firebrick",label="d",linewidth=1.5)
     ax2.plot(ttsim2,pair_ttvs[2,3,1:n2],color="firebrick",label="d",linewidth=1.5)
     ax1.set_title(L"Contributions to $\mathcal{H}_{PPP}$ Fit",fontsize="x-large")
+  elseif f["nplanet"]==2
+    total1=pair_ttvs[1,2,1:n1]
+    total2=pair_ttvs[2,1,1:n2]
   end
-  ax1.plot(ttsim1,total1,color="grey")
+  ax1.plot(ttsim1,vec(total1),color="grey")
   if include_moon 
     moon=moon_ttvs(ntrans,pbest_global) .* (24 * 60)
     ax2.plot(ttsim2,total2+moon,color="grey")
@@ -416,20 +412,28 @@ function plot_contrib(sigma::Real,nyear::Real,options::Array{String},include_moo
     # ax2.minorticks_on()
     # tick_params(which="both",direction="in",top=true,right=true)
   else
-    ax2.plot(ttsim2,total2,color="grey")
+    ax2.plot(ttsim2,vec(total2),color="grey")
   end
+  scatter1=abs.(ttv1.-total1)
+  scatter2=abs.(ttv2.-total2)
+
+  println("Venus Residual amplitude of O-C: ", maximum(scatter1))
+  println(label," Residual amplitude of O-C: ", maximum(scatter2))
+  # println("Mean: ",mean(scatter1)," ",mean(scatter2))
+  # println("Std: ",std(scatter1)," ",std(scatter2))
   sigsys=round(avg[end].*24*3600,sigdigits=3)
   sim_obs_label= string(L"$\sigma_{obs}=$",sigma," s",'\n',L"$\sigma_{sys}=$",sigsys," s")
   # ax1.set_title(L"Contributions to $\mathcal{H}_{PPPP}$ Fit",fontsize="x-large")
-  ax1.text(nyear-5,7,sim_obs_label)
+  ax1.text(nyear-6,5,sim_obs_label)
   # ax2.text(maximum(ttsim1)-5,5,sim_obs_label)
   ax1.legend(loc="lower left",fontsize="medium",ncol=nplanet)
   # ax1.legend(loc="lower left",fontsize="large",title="Contributions",title_fontsize="large",ncol=4)
   ax2.legend(loc="lower left",ncol=nplanet,fontsize="medium")#,mode="expand")
   tight_layout()
+  return ttv1,total1
   # legend(loc="upper right")
   # title=string("IMAGES/ttvs/",sim,fitmodel,"ttvs-",sigma,"secs",nyear,"yrs.png")
-  title=string("IMAGES/ttv/",grid_type_nplanet,"_",sigma,"s",nyear,"yrs.png")
-  savefig(title)
+  # title=string("IMAGES/ttv/",fit_type_nplanet,"_",sigma,"s",nyear,"yrs.png")
+  # savefig(title)
   # show()
 end

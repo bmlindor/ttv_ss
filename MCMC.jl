@@ -1,7 +1,7 @@
 include("bounds.jl")
 #include("CGS.jl")
 include("misc.jl")
-using TTVFaster,DelimitedFiles,JLD2
+using TTVFaster,DelimitedFiles,JLD2,LaTeXStrings,PyPlot
 using Statistics,StatsBase,MCMCDiagnostics
 
 # Run a Markov chain:
@@ -299,20 +299,37 @@ function mc_vals(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num=Int,
   sigsys_err=(std(vec(par_mcmc[:,iburn:end,end]))).* 3600*24
   sigtot=round(sqrt(sigsys^2 + sigma^2),sigdigits=4)
 
-    figure(figsize=(8,6))
-#    for i=1:nparam
-    ax1=subplot(2,2,1)
-   	ax2=subplot(2,2,2)
-    for j=1:nwalkers 
-    ax1.plot(par_mcmc[j,iburn:nsteps,end].*24*3600,lprob[iburn:nsteps])
-		#for iplanet=1:nplanet
-			#ax2.plot()
-    end
-		ax1.set_xlabel("σsys [sec]")
-	  ax1.set_ylabel("log Prob")
-    tight_layout()
-    title=string("IMAGES/trace/case",case_num,grid_type_nplanet,"-",sigma,"secs",nyear,"yrs.png")
-    savefig(title)
+  fig, axs = plt.subplots(4,nplanet,figsize=(3*nplanet,nplanet*3))
+  figtitle=string("MC Traces for ",sigma," s;",nyear," yr simulations of Venus and EMB")
+  fig.suptitle(figtitle)
+  count=0
+  for j=1:nwalkers
+      axs[1,1].plot(par_mcmc[j,iburn:nsteps,end].*24*3600,lprob_mcmc[j,iburn:nsteps])
+      axs[1,2].plot(lprob_mcmc[j,iburn:nsteps])
+      # axs[1,2].plot(par_mcmc[j,iburn:nsteps,end].*24*3600)
+      for iplanet=1:nplanet
+          axs[2,iplanet].plot(par_mcmc[j,iburn:end,(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH)
+          axs[3,iplanet].plot(par_mcmc[j,iburn:end,(iplanet-1)*5+2])
+          axs[4,iplanet].plot(par_mcmc[j,iburn:end,(iplanet-1)*5+4])
+  #         count+=1
+      end
+  end
+  # axs[1,4].set_ylabel("log Prob")
+  axs[1,1].set_xlabel(L"$σ_{sys}$ [s]")
+  axs[1,1].set_ylabel("log Prob")
+  axs[1,2].set_ylabel(L"$σ_{sys}$ [s]")
+  for iplanet=1:nplanet
+      axs[2,iplanet].set_ylabel(L"$M [M_{\oplus}]$")
+      axs[3,iplanet].set_ylabel(pname[(iplanet-1)*5+2])
+      axs[4,iplanet].set_ylabel(pname[(iplanet-1)*5+4])
+      if iplanet==3 || iplanet==4
+        plt.delaxes(ax=axs[1,iplanet])
+      end
+  end
+
+  # tight_layout()
+  title=string("IMAGES/trace/case",case_num,grid_type_nplanet,"-",sigma,"secs",nyear,"yrs.png")
+  # savefig(title)
   # Find percentage of walkers where diff. between median and quantile value is >100
   # bad_walk=[]
   # for i in 1:nwalkers
@@ -340,23 +357,26 @@ function mc_vals(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num=Int,
   low=zeros(nparam)
   errors=zeros((2,nparam))
   high=zeros(nparam)
+  st_dev=zeros(nparam)
   for i=1:nparam
    med[i],low[i],high[i]=quantile(vec(par_mcmc[:,iburn:end,i]),[0.5,0.1587,0.8413])
-   errors[1,i]=med[i]-low[i]; errors[2,i]=high[i]-med[i]
+   avg[i]=mean(vec(par_mcmc[:,iburn:end,i]))
+   errors[1,i]=high[i]-med[i]; errors[2,i]=med[i]-low[i]
+    st_dev[i]=std(vec(par_mcmc[:,iburn:end,i]))
    # println(pname[i]," = ",avg[i]," + ",abs(plus1sig[i]-avg[i])," _ ",abs(avg[i]-minus1sig[i]))
   end
   masses=[med[i-4] for i in 1:length(param) if i%5==0] .*CGS.MSUN/CGS.MEARTH
   ecc=[calc_ecc(med[i-1],med[i]) for i in 1:length(param) if i%5==0] 
 	periods=[med[i-3] for i in 1:length(param) if i%5==0]
 	
-  # println("Retrieved values.")
-  # println("M_p[M⊕]= ",masses)#" + ",masses.-mass_high," - ",masses.-mass_low)
-  # # println("std(M_p)= ",mass_errs)
+  println("Retrieved values.")
+  println("M_p[M⊕]= ",masses)#" + ",masses.-mass_high," - ",masses.-mass_low)
+  # println("std(M_p)= ",mass_errs)
   # # println("Per [d]= ",periods)#," +/- ",per_errs)
-  # println("eccen. =",ecc)#," +/- ",ecc_errs)
+  println("eccen. =",ecc)#," +/- ",ecc_errs)
   # println("σsys[s]= ",sigsys," +/- ",sigsys_err)
   # println("σtot[s]= ",sigtot)
-  return med,errors
+  return avg,st_dev,med,errors
 end
 
 function mc_table(sigma::Real,nyear::Real,options,include_moon::Bool=false)
@@ -471,24 +491,27 @@ function mc_table(sigma::Real,nyear::Real,options,include_moon::Bool=false)
   else
     name = string("OUTPUTS/EVmc_table_",sigma,"s",nyear,"yrs.tex")
   end
-  open(name,"w") do io
+  # open(name,"w") do io
 
-    println(io,"Model",'\t',model2,'\t',model3,'\t',model,"\\")
-    println(io,"BIC",'\t',BIC2,'\t',BIC3,'\t',BIC," \\")
- 		println(io,"χ^2",'\t',chi2,'\t',chi3,'\t',chi,"\\")
-    println(io,"reduced χ^2",'\t',reduced_chi2,'\t',reduced_chi3,'\t',reduced_chi,"\\")
+  #   println(io,"Model",'\t',model2,'\t',model3,'\t',model,"\\")
+  #   println(io,"BIC",'\t',BIC2,'\t',BIC3,'\t',BIC," \\")
+ 	# 	println(io,"χ^2",'\t',chi2,'\t',chi3,'\t',chi,"\\")
+  #   println(io,"reduced χ^2",'\t',reduced_chi2,'\t',reduced_chi3,'\t',reduced_chi,"\\")
   for i=1:length(avg)
-    if i<=10
-      println(io,parname[i],'\t',avg2[i],"_{-",avg2[i]-low2[i],"}^{+",high2[i]-avg2[i],"} & ",'\t',avg3[i],"_{-",avg3[i]-low3[i],"}^{+",high3[i]-avg3[i],"} & ",'\t',avg[i],"_{-",avg[i]-low[i],"}^{+",high[i]-avg[i],"} \\")
-    end 
-    if i in 11:15
-      println(io,parname[i],'\t','\t','\t',avg3[i],"_{-",avg3[i]-low3[i],"}^{+",high3[i]-avg3[i],"} & ",'\t',avg[i],"_{-",avg[i]-low[i],"}^{+",high[i]-avg[i],"} \\")
-    end
-    if i in 16:20
-      println(io,parname[i],'\t','\t','\t','\t','\t',avg[i],"_{-",avg[i]-low[i],"}^{+",high[i]-avg[i],"} \\")
-    end
+    println(avg[i]," -",low[i]," +",high[i])
   end
-  println(io,parname[end],'\t',avg2[end],"_{-",avg2[end]-low2[end],"}^{+",high2[end]-avg2[end],"} & ",'\t',avg3[end],"_{-",avg3[end]-low3[end],"}^{+",high3[end]-avg3[end],"} & ",'\t',avg[end],"_{-",avg[end]-low[end],"}^{+",high[end]-avg[end],"} \\")
-  end
+  #   if i<=10
+  #     println(io,parname[i],'\t',avg2[i],"_{-",avg2[i]-low2[i],"}^{+",high2[i]-avg2[i],"} & ",'\t',avg3[i],"_{-",avg3[i]-low3[i],"}^{+",high3[i]-avg3[i],"} & ",'\t',avg[i],"_{-",avg[i]-low[i],"}^{+",high[i]-avg[i],"} \\")
+  #   end 
+  #   if i >=11 && i <= 15
+  #     println(io,parname[i],'\t','\t','\t',avg3[i],"_{-",avg3[i]-low3[i],"}^{+",high3[i]-avg3[i],"} & ",'\t',avg[i],"_{-",avg[i]-low[i],"}^{+",high[i]-avg[i],"} \\")
+  #   end
+  #   if i >=16 && i <= 20
+  #     println(io,parname[i],'\t','\t','\t','\t','\t',avg[i],"_{-",avg[i]-low[i],"}^{+",high[i]-avg[i],"} \\")
+  #   end
+  # end
+  # println(io,parname[end],'\t',avg2[end],"_{-",avg2[end]-low2[end],"}^{+",high2[end]-avg2[end],"} & ",'\t',avg3[end],"_{-",avg3[end]-low3[end],"}^{+",high3[end]-avg3[end],"} & ",'\t',avg[end],"_{-",avg[end]-low[end],"}^{+",high[end]-avg[end],"} \\")
+  # end
+
   return 
 end
