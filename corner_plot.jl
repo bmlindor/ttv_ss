@@ -7,83 +7,82 @@ np = pyimport("numpy")
         
 # Corner plot for posterior distributions of 2 parameters, compared to true values
 function corner(xs,labels,bins=10;quantiles)
-K=length(xs)
-factor = 1.5  # size of one side of one panel
-lbdim = 0.5 * factor  # size of left/bottom margin
-trdim = 0.2 * factor  # size of top/right margin
-whspace = 0.05 * 2  # w/hspace size
-plotdim = factor * K + factor * (K - 1.0) * whspace
-dim = lbdim + plotdim + trdim
-@show dim
+  K=length(xs)
+  factor = 1.5  # size of one side of one panel
+  lbdim = 0.5 * factor  # size of left/bottom margin
+  trdim = 0.2 * factor  # size of top/right margin
+  whspace = 0.05 * 2  # w/hspace size
+  plotdim = factor * K + factor * (K - 1.0) * whspace
+  dim = lbdim + plotdim + trdim
+  @show dim
 
-fig, axes = plt.subplots(K, K, figsize=(dim, dim),dpi=150)
-lb = lbdim / dim
-tr = (lbdim + plotdim) / dim
-fig.subplots_adjust(
-    left=lb, bottom=lb, right=tr, top=tr, wspace=whspace, hspace=whspace)
+  fig, axes = plt.subplots(K, K, figsize=(dim, dim),dpi=150)
+  lb = lbdim / dim
+  tr = (lbdim + plotdim) / dim
+  fig.subplots_adjust(
+      left=lb, bottom=lb, right=tr, top=tr, wspace=whspace, hspace=whspace)
 
-for (i ,x) in enumerate(xs)
-    ax=axes[i,i]
-    ax.hist(x,bins=bins,histtype="step")
-#     ax.tick_params(left=false,labelleft=false)
-    if length(quantiles)>0
-        qvalues=quantile(x,quantiles)
-        ax.axvspan(qvalues[1],qvalues[2],linestyle="--",color="limegreen",alpha=0.3)            
-        for q in qvalues
-            ax.axvline(q,linestyle="--",color="k")
-        end
+  for (i ,x) in enumerate(xs)
+      ax=axes[i,i]
+      ax.hist(x,bins=bins,histtype="step")
+  #     ax.tick_params(left=false,labelleft=false)
+      if length(quantiles)>0
+          qvalues=quantile(x,quantiles)
+          ax.axvspan(qvalues[1],qvalues[2],linestyle="--",color="limegreen",alpha=0.3)            
+          for q in qvalues
+              ax.axvline(q,linestyle="--",color="k")
+          end
+      end
+      q_mid = median(x) 
+      q_lo,q_hi=quantile(x,quantiles)
+      q_m, q_p = q_mid - q_lo, q_hi - q_mid
+  #     fmt = "{{0:{0}}}".format(title_fmt).format
+  #     title = r"${{{0}}}_{{-{1}}}^{{+{2}}}$"
+  #     title = title.format(fmt(q_mid), fmt(q_m), fmt(q_p))
+  #     title=string(L"$=$",q_mid,L"$_{}")
+  #     ax.set_title(title)
+       ax.set_xticklabels([])
+       ax.set_yticklabels([])
+      ax.set_yticks([])
+
+      for (j, y) in enumerate(xs)
+          ax=axes[i,j]
+           if j > i
+                  ax.set_frame_on(false)
+                  ax.set_xticks([])
+                  ax.set_yticks([])
+                  continue
+              elseif j == i
+                  continue
+              end
+          h,xedges,yedges=ax.hist2d(y,x,bins=bins,alpha=0.9)
+          h_sort=sort(vec(h))
+        sig1=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.683))
+        sig2=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.955))
+      level1=h_sort[sig2[1]];level2=h_sort[sig1[1]]
+      if level1==level2
+      error("Too many bins or not enough data points")
+      end
+      ax.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),colors="white",levels=[level1,level2])
+      if length(labels)>0
+          if i < K 
+          ax.set_xticklabels([])
+          else
+          ax.set_xlabel(labels[j],fontsize="x-large")
+          end
+          if j>1
+          ax.set_yticklabels([])
+          else
+          ax.set_ylabel(labels[i],fontsize="x-large")
+
+          end
+      else
+      end
     end
-    q_mid = median(x) 
-    q_lo,q_hi=quantile(x,quantiles)
-    q_m, q_p = q_mid - q_lo, q_hi - q_mid
-#     fmt = "{{0:{0}}}".format(title_fmt).format
-#     title = r"${{{0}}}_{{-{1}}}^{{+{2}}}$"
-#     title = title.format(fmt(q_mid), fmt(q_m), fmt(q_p))
-#     title=string(L"$=$",q_mid,L"$_{}")
-#     ax.set_title(title)
-     ax.set_xticklabels([])
-     ax.set_yticklabels([])
-    ax.set_yticks([])
-
-    for (j, y) in enumerate(xs)
-        ax=axes[i,j]
-         if j > i
-                ax.set_frame_on(false)
-                ax.set_xticks([])
-                ax.set_yticks([])
-                continue
-            elseif j == i
-                continue
-            end
-        h,xedges,yedges=ax.hist2d(y,x,bins=bins,alpha=0.9)
-        h_sort=sort(vec(h))
-      sig1=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.683))
-      sig2=findall((cumsum(h_sort)/sum(h_sort)).>= (1-0.955))
-    level1=h_sort[sig2[1]];level2=h_sort[sig1[1]]
-    if level1==level2
-    error("Too many bins or not enough data points")
-    end
-    ax.contour(xedges[1:end-1],yedges[1:end-1],transpose(h),colors="white",levels=[level1,level2])
-    if length(labels)>0
-        if i < K 
-        ax.set_xticklabels([])
-        else
-        ax.set_xlabel(labels[j],fontsize="x-large")
-        end
-        if j>1
-        ax.set_yticklabels([])
-        else
-        ax.set_ylabel(labels[i],fontsize="x-large")
-
-        end
-    else
-    end
-    end
-end
-fig.align_ylabels()
-fig.align_xlabels()
-fig.autofmt_xdate()
-
+  end
+  fig.align_ylabels()
+  fig.align_xlabels()
+  fig.autofmt_xdate()
 end
 
 # Corner plot for posterior distributions of 6 parameters, compared to true values
@@ -302,7 +301,7 @@ function corner(xs,true_xs,labels,nbins)
 
 end
 # Corner plot for posterior distributions of 8 parameters, compared to true values
-function corner(xs,true_xs,labels,nbins,model::LaTeXString)
+function corner(xs,true_xs,labels,nbins;model::LaTeXString)
   @assert (isdefined(true_xs))
   @assert (length(labels)==size(xs)[1])
   x1,x2,x3,x4,x5,x6,x7,x8=xs[1],xs[2],xs[3],xs[4],xs[5],xs[6],xs[7],xs[8]
@@ -761,128 +760,7 @@ function corner_hist(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
     savefig(title)
     clf()
   end
-  # show()
-end
-# Create a corner plot for posterior distributions of planet parameters
-function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::Bool=false) 
-  EM=true
-  if case_num==1  #&& isfile(string("MCMC/fromEMB/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
-    mcfile=string("MCMC/fromEMB/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
-    fitfile=string("FITS/fromEMB/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
-  elseif case_num==2 #&& isfile(string("MCMC/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
-    mcfile=string("MCMC/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
-    fitfile=string("FITS/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
-  else
-    return  println("MCMC file for case",case_num," with ",grid_type_nplanet," model at ",sigma," secs and ",nyear," yrs doesn't exist!!!!")
-  end
-  if include_moon
-    EM=false
-  end
-
-  jldmc=jldopen(String(mcfile),"r")
-  jldfit=jldopen(String(fitfile),"r")
-  nwalkers,nsteps=jldmc["nwalkers"],jldmc["nsteps"]
-  iburn,samples=jldmc["iburn"], jldmc["indepsamples"]
-  par_mcmc=jldmc["par_mcmc"]; lprob_mcmc=jldmc["lprob_mcmc"]  ; param=jldmc["param"]
-  pname=jldmc["pname"]
- 
-  # println("# of independent samples: ",samples)
-  # println("Burn-in number: ",iburn," out of ",nsteps," steps")
-  tt0,tt,ttmodel,sigtt=jldfit["tt0"],jldfit["tt"],jldfit["ttmodel"],jldfit["sigtt"]
-  nplanet,ntrans=jldfit["nplanet"],jldfit["ntrans"]
-  nt1,nt2=jldfit["ntrans"][1],jldfit["ntrans"][2]
-  jmax=5
-  weight=ones(nt1+nt2)./ sigtt.^2 
-  nparam=length(par_mcmc[1,end,:])
-  avg=zeros(nparam)
-  minus1sig=zeros(nparam)
-  plus1sig=zeros(nparam)
-  for i=1:nparam
-   avg[i],minus1sig[i],plus1sig[i]=quantile(vec(par_mcmc[:,iburn:end,i]),[0.5,0.1587,0.8413])
-   # println(pname[i]," = ",avg[i]," + ",abs(plus1sig[i]-avg[i])," _ ",abs(avg[i]-minus1sig[i]))
-  end
-  # stable=false 
-  # mutual_radius=mutual_Hill(avg[2],avg[1].*CGS.MSUN/CGS.MEARTtranspose(H),CGS.MSUN,avg[7],avg[6].*CGS.MSUN/CGS.MEARTH)
- # if mutual_radius <
- # Calculate Bayesian Inference Criterion (BIC) 
-  function calc_BIC(prob)
-    function calc_chisq(par_mcmc)
-    chisq = 0.0  
-    tt_model = TTVFaster.ttv_wrapper(tt0,nplanet,ntrans,par_mcmc[1:nparam-1],jmax,EM) 
-      for j=1:length(tt)
-        chisq += (tt[j]-tt_model[j])^2 / (sigtt[j]^2 + par_mcmc[end]^2)
-      end
-    return chisq
-    end
-    chisq=calc_chisq(avg)
-    N=length(tt0) ; k=nparam
-    #println("[N_obs]= ",N," [no. of model params]= ",k)
-    reduced_chisq=chisq/(N-k)
-    BIC_chi(chisq,k,N)=chisq + k*log(N)
-    BIC=-2*log(prob) + k*log(N)
-    return reduced_chisq, BIC
-  end
-  prob=quantile(exp.(lprob_mcmc[iburn:nsteps]),0.5);prob_max = maximum(exp.(lprob_mcmc[iburn:nsteps]))
-  #println(" median Prob: ",prob,"      maximum Prob: ",prob_max)
-  #chi2_avg = chi_mcmc(tt0,nplanet,ntrans,mean_posteriors,tt,sigtt,jmax,EM)
-  chi,BIC=round.(calc_BIC(prob_max),sigdigits=4)
-  println("BIC= ",BIC ,'\t'," reduced χ^2: ",chi)
-
-  sigsys=round((median(vec(par_mcmc[:,iburn:end,end]))).* 3600*24,sigdigits=3)
-  sigsys_err=(std(vec(par_mcmc[:,iburn:end,end]))).* 3600*24
-  sigtot=round(sqrt(sigsys^2 + sigma^2),sigdigits=4)
-
-  #BIC,sigsys,sigtot,chi=mc_vals(sigma,nyear,grid_type_nplanet,case_num,include_moon)
-  # println("Loaded",mcfile,".")
-  # figure(figsize=(5,5))
-  # plot(vec(par_mcmc[:,iburn:end,end]),vec(lprob_mcmc[:,iburn:end]))
-  # xlabel(L"$σ_{sys}$")
-  # ylabel(L"$\log(P)$")
-  # @show
-
-  # Find Percentage of walkers where difference between median and quantile value is >100
-  # bad_walk=[]
-  # for i in 1:nwalkers
-  #   for j in 1:nparam
-  #     walker_med,walker_quant=quantile!(par_mcmc[i,jldmc["iburn"]+1:end,j],[0.5,0.9])
-  #     walk_start=par_mcmc[i,jldmc["iburn"]+1,j] 
-  #     walk_end = par_mcmc[i,jldmc["iburn"]+1,j]
-  #     ratio = walk_end/walk_start
-  #     walker_prob=median(lprob_mcmc[i,jldmc["iburn"]+1:end])
-  #     if abs(walk_end-walk_start)/walk_start > 0.1
-  #       #abs(walker_med-walker_end)>30
-  #       # println(i," ",walker_prob[i])
-  #       append!(bad_walk,i)
-  #     end
-  #   end
-  # If prob for a given chain is low, reject it
-
-  #     # If systematic uncertainty > injected uncertainty, reject
-  #   # if median(par_mcmc[i,jldmc["iburn"]:end,end]).*3600*24 >= sigma
-  #   #   # println("Reject results?")
-  #   #   append!(bad_walk,i)
-  #   # end
-  # end
-  # println("Bad walkers: ",bad_walk)
-
-  if  grid_type_nplanet=="p2" 
-    model=L"$\mathcal{H}_{PP}$"
-  elseif grid_type_nplanet=="p3" || grid_type_nplanet=="widep3"
-    model=L"$\mathcal{H}_{PPP}$"
-  elseif grid_type_nplanet=="p4" || grid_type_nplanet=="widep4"
-    model=L"$\mathcal{H}_{PPPP}$"
-  elseif grid_type_nplanet=="p3moon" || grid_type_nplanet=="widep3moon"
-    model=L"$\mathcal{H}_{PPsP}$"
-  elseif grid_type_nplanet=="p3moonp4" || grid_type_nplanet=="widep3moonp4"
-    model=L"$\mathcal{H}_{PPsPP}$"
-  end
-  parname=[L"$μ_1$ [$M_{⋆}$]",L"$P_1$ [days]",L"$t_{0,1}$",L"$e_1 cos(ω_1)$",L"$e_1 sin(ω_1)$",
-    L"$μ_2$ [$M_{⋆}$]",L"$P_2$ [days]",L"$t_{0,2}$",L"$e_2 cos(ω_2)$",L"$e_2 sin(ω_2)$",
-    L"$μ_3$ [$M_{⋆}$]",L"$P_3$ [days]",L"$t_{0,3}$",L"$e_3 cos(ω_3)$",L"$e_3 sin(ω_3)$",
-    L"$μ_4$ [$M_{⋆}$]",L"$P_4$ [days]",L"$t_{0,4}$",L"$e_4 cos(ω_4)$",L"$e_4 sin(ω_4)$",
-    L"$μ_5$ [$M_{⋆}$]",L"$P_5$ [days]",L"$t_{0,5}$",L"$e_4 cos(ω_5)$",L"$e_5 sin(ω_5)$",
-    L"$t_{max} sin(ϕ_0)$",L"$t_{max} cos(ϕ_0)$",L"$Δϕ$ [rad]",L"$σ_{sys}^2$ [days]"]
-  #  plot_traces()
+  function plot_traces()
     # fig=figure(figsize=(8,6))
     # fig,axs=plt.subplots(nrows=5,ncols=nplanet)
     # fig.suptitle(string(model," traces; BIC=",BIC))
@@ -1036,8 +914,130 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
       savefig(title)
       clf()
     end
+  end
 
-  # function plot_dist()
+  # show()
+end
+# Create a corner plot for posterior distributions of planet parameters
+function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::Bool=false) 
+  EM=true
+  if case_num==1  #&& isfile(string("MCMC/fromEMB/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
+    mcfile=string("MCMC/fromEMB/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+    fitfile=string("FITS/fromEMB/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
+  elseif case_num==2 #&& isfile(string("MCMC/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
+    mcfile=string("MCMC/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+    fitfile=string("FITS/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
+  else
+    return  println("MCMC file for case",case_num," with ",grid_type_nplanet," model at ",sigma," secs and ",nyear," yrs doesn't exist!!!!")
+  end
+  if include_moon
+    EM=false
+  end
+
+  jldmc=jldopen(String(mcfile),"r")
+  jldfit=jldopen(String(fitfile),"r")
+  nwalkers,nsteps=jldmc["nwalkers"],jldmc["nsteps"]
+  iburn,samples=jldmc["iburn"], jldmc["indepsamples"]
+  par_mcmc=jldmc["par_mcmc"]; lprob_mcmc=jldmc["lprob_mcmc"]  ; param=jldmc["param"]
+  pname=jldmc["pname"]
+ 
+  # println("# of independent samples: ",samples)
+  # println("Burn-in number: ",iburn," out of ",nsteps," steps")
+  tt0,tt,ttmodel,sigtt=jldfit["tt0"],jldfit["tt"],jldfit["ttmodel"],jldfit["sigtt"]
+  nplanet,ntrans=jldfit["nplanet"],jldfit["ntrans"]
+  nt1,nt2=jldfit["ntrans"][1],jldfit["ntrans"][2]
+  jmax=5
+  weight=ones(nt1+nt2)./ sigtt.^2 
+  nparam=length(par_mcmc[1,end,:])
+  avg=zeros(nparam)
+  minus1sig=zeros(nparam)
+  plus1sig=zeros(nparam)
+  for i=1:nparam
+   avg[i],minus1sig[i],plus1sig[i]=quantile(vec(par_mcmc[:,iburn:end,i]),[0.5,0.1587,0.8413])
+   # println(pname[i]," = ",avg[i]," + ",abs(plus1sig[i]-avg[i])," _ ",abs(avg[i]-minus1sig[i]))
+  end
+  # stable=false 
+  # mutual_radius=mutual_Hill(avg[2],avg[1].*CGS.MSUN/CGS.MEARTtranspose(H),CGS.MSUN,avg[7],avg[6].*CGS.MSUN/CGS.MEARTH)
+ # if mutual_radius <
+ # Calculate Bayesian Inference Criterion (BIC) 
+  function calc_BIC(prob)
+    function calc_chisq(par_mcmc)
+    chisq = 0.0  
+    tt_model = TTVFaster.ttv_wrapper(tt0,nplanet,ntrans,par_mcmc[1:nparam-1],jmax,EM) 
+      for j=1:length(tt)
+        chisq += (tt[j]-tt_model[j])^2 / (sigtt[j]^2 + par_mcmc[end]^2)
+      end
+    return chisq
+    end
+    chisq=calc_chisq(avg)
+    N=length(tt0) ; k=nparam
+    #println("[N_obs]= ",N," [no. of model params]= ",k)
+    reduced_chisq=chisq/(N-k)
+    BIC_chi(chisq,k,N)=chisq + k*log(N)
+    BIC=-2*log(prob) + k*log(N)
+    return reduced_chisq, BIC
+  end
+  prob=quantile(exp.(lprob_mcmc[iburn:nsteps]),0.5);prob_max = maximum(exp.(lprob_mcmc[iburn:nsteps]))
+  #println(" median Prob: ",prob,"      maximum Prob: ",prob_max)
+  #chi2_avg = chi_mcmc(tt0,nplanet,ntrans,mean_posteriors,tt,sigtt,jmax,EM)
+  chi,BIC=round.(calc_BIC(prob_max),sigdigits=4)
+  println("BIC= ",BIC ,'\t'," reduced χ^2: ",chi)
+
+  sigsys=round((median(vec(par_mcmc[:,iburn:end,end]))).* 3600*24,sigdigits=3)
+  sigsys_err=(std(vec(par_mcmc[:,iburn:end,end]))).* 3600*24
+  sigtot=round(sqrt(sigsys^2 + sigma^2),sigdigits=4)
+
+  #BIC,sigsys,sigtot,chi=mc_vals(sigma,nyear,grid_type_nplanet,case_num,include_moon)
+  # println("Loaded",mcfile,".")
+  # figure(figsize=(5,5))
+  # plot(vec(par_mcmc[:,iburn:end,end]),vec(lprob_mcmc[:,iburn:end]))
+  # xlabel(L"$σ_{sys}$")
+  # ylabel(L"$\log(P)$")
+  # @show
+
+  # Find Percentage of walkers where difference between median and quantile value is >100
+  # bad_walk=[]
+  # for i in 1:nwalkers
+  #   for j in 1:nparam
+  #     walker_med,walker_quant=quantile!(par_mcmc[i,jldmc["iburn"]+1:end,j],[0.5,0.9])
+  #     walk_start=par_mcmc[i,jldmc["iburn"]+1,j] 
+  #     walk_end = par_mcmc[i,jldmc["iburn"]+1,j]
+  #     ratio = walk_end/walk_start
+  #     walker_prob=median(lprob_mcmc[i,jldmc["iburn"]+1:end])
+  #     if abs(walk_end-walk_start)/walk_start > 0.1
+  #       #abs(walker_med-walker_end)>30
+  #       # println(i," ",walker_prob[i])
+  #       append!(bad_walk,i)
+  #     end
+  #   end
+  # If prob for a given chain is low, reject it
+
+  #     # If systematic uncertainty > injected uncertainty, reject
+  #   # if median(par_mcmc[i,jldmc["iburn"]:end,end]).*3600*24 >= sigma
+  #   #   # println("Reject results?")
+  #   #   append!(bad_walk,i)
+  #   # end
+  # end
+  # println("Bad walkers: ",bad_walk)
+
+  if  grid_type_nplanet=="p2" 
+    model=L"$\mathcal{H}_{PP}$"
+  elseif grid_type_nplanet=="p3" || grid_type_nplanet=="widep3"
+    model=L"$\mathcal{H}_{PPP}$"
+  elseif grid_type_nplanet=="p4" || grid_type_nplanet=="widep4"
+    model=L"$\mathcal{H}_{PPPP}$"
+  elseif grid_type_nplanet=="p3moon" || grid_type_nplanet=="widep3moon"
+    model=L"$\mathcal{H}_{PPsP}$"
+  elseif grid_type_nplanet=="p3moonp4" || grid_type_nplanet=="widep3moonp4"
+    model=L"$\mathcal{H}_{PPsPP}$"
+  end
+  parname=[L"$μ_1$ [$M_{⋆}$]",L"$P_1$ [days]",L"$t_{0,1}$",L"$e_1 cos(ω_1)$",L"$e_1 sin(ω_1)$",
+    L"$μ_2$ [$M_{⋆}$]",L"$P_2$ [days]",L"$t_{0,2}$",L"$e_2 cos(ω_2)$",L"$e_2 sin(ω_2)$",
+    L"$μ_3$ [$M_{⋆}$]",L"$P_3$ [days]",L"$t_{0,3}$",L"$e_3 cos(ω_3)$",L"$e_3 sin(ω_3)$",
+    L"$μ_4$ [$M_{⋆}$]",L"$P_4$ [days]",L"$t_{0,4}$",L"$e_4 cos(ω_4)$",L"$e_4 sin(ω_4)$",
+    L"$μ_5$ [$M_{⋆}$]",L"$P_5$ [days]",L"$t_{0,5}$",L"$e_4 cos(ω_5)$",L"$e_5 sin(ω_5)$",
+    L"$t_{max} sin(ϕ_0)$",L"$t_{max} cos(ϕ_0)$",L"$Δϕ$ [rad]",L"$σ_{sys}^2$ [days]"]
+  
     # True values based on "PlanetaryBodyData.pdf" (source?)
     offset_p1=224.70
     m1=vec(par_mcmc[:,iburn:nsteps,1]).* CGS.MSUN/CGS.MEARTH
@@ -1060,9 +1060,25 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
     trueec2=calc_evec1(0.01671022,102.94719)
     truees2=calc_evec2(0.01671022,102.94719)
     truep2=365.256355#-offset_p2 #365.256355
-    labels=[parname[1];parname[4];parname[2];
-        parname[6];parname[9];parname[7]]
-        # parname[14]]
+
+    values=[ 
+    vec(par_mcmc[:,iburn:end,1]), 
+    vec(par_mcmc[:,iburn:end,2]),
+    vec(par_mcmc[:,iburn:end,4]), 
+    vec(par_mcmc[:,iburn:end,5]), 
+    vec(par_mcmc[:,iburn:end,6]), 
+    vec(par_mcmc[:,iburn:end,7]),
+    vec(par_mcmc[:,iburn:end,9]),
+    vec(par_mcmc[:,iburn:end,10])]#,vec(par_mcmc[:,iburn:end,11]), vec(par_mcmc[:,iburn:end,12]),vec(par_mcmc[:,iburn:end,14]), vec(par_mcmc[:,iburn:end,15]), vec(par_mcmc[:,iburn:end,16]), vec(par_mcmc[:,iburn:end,17]),vec(par_mcmc[:,iburn:end,19]), vec(par_mcmc[:,iburn:end,20])]
+    labels=[parname[1];
+    parname[2];
+    parname[4];
+    parname[5];
+    parname[6];
+    parname[7];
+    parname[9];
+    parname[10]]#;parname[11];parname[12];parname[14];parname[15];parname[16];parname[17];parname[19];parname[20]]
+    corner(values,labels,50;quantiles=[0.1587,0.8413])
   
     # title=string("IMAGES/corner/case",case_num,grid_type_nplanet,"Venus-",sigma,"secs",nyear,"yrs.png")
     # fig1=corner([m1,ec1,p1,m2,ec2,p2],[truem1,trueec1,truep1,truem2,trueec2,truep2],labels,nbins)
@@ -1168,8 +1184,6 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
     #    clf()
     #  end
   # end
-  # plot_traces()
-  # plot_dist()
 end
 # Basic corner plot for posterior distributions of 2 parameters
 function corner(x,y,nbins)

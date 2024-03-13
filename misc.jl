@@ -44,6 +44,14 @@ function mutual_Hill(Per1,mu1,Per2,mu2)
 	a2=calc_sma(Per2,mu2)
 	return ((mp1 + mp2)/(3 * mstar))^(1/3) * (a1 + a2)/2
 end
+  # Check stabilities
+  stable=true
+  radius=Hill_radius(avg[12],(avg[11].*CGS.MSUN/CGS.MEARTH),calc_ecc(avg[14],avg[15]),CGS.MSUN)
+  ab_mutual_radius=mutual_Hill(avg[2],avg[1].*CGS.MSUN/CGS.MEARTH,CGS.MSUN,avg[7],avg[6].*CGS.MSUN/CGS.MEARTH)
+  bc_mutual_radius=mutual_Hill(avg[7],avg[6].*CGS.MSUN/CGS.MEARTH,CGS.MSUN,avg[12],avg[11].*CGS.MSUN/CGS.MEARTH)
+  println("Planet a-b mutual Hill_radius: ",ab_mutual_radius)
+  println("Planet b-c mutual Hill_radius: ",bc_mutual_radius)
+  println("Planet c Hill radius: ",radius)
 
 function second_peak_params(grid_file::String)
 	#Read in as delm
