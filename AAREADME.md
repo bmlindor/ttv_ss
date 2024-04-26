@@ -97,6 +97,8 @@ must change grid search to accommodate for width of dist.
 
 Creating contours in corner plots: take all pixels in 2d histogram, 
 sort them from smallest to largest value. Find where 68% of values is about a point (i.e. greather than )
+
+If number of independent samples for each walker >= 100, get results. 
 09/22/2023 updated 12/13/2023
 ##########################	Current State	##########################
 0). Updated TTVFaster to be compatible with Julia v1.3+

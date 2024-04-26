@@ -456,9 +456,9 @@ function mc_table(sigma::Real,nyear::Real,options,include_moon::Bool=false)
     BIC=-2*log(prob_max) + k*log(N)
     return reduced_chisq, BIC,chisq
   end
-  prob=quantile(exp.(mc["lprob_mcmc"][mc["iburn"]:mc["nsteps"]]),0.5);#prob_max = maximum(exp.(mc["lprob_mcmc"][mc["iburn"]:mc["nsteps"]]))
-   prob2=quantile(exp.(mc2["lprob_mcmc"][mc2["iburn"]:mc2["nsteps"]]),0.5);#prob_max2 = maximum(exp.(mc2["lprob_mcmc"][mc2["iburn"]:mc2["nsteps"]]))
-    prob3=quantile(exp.(mc3["lprob_mcmc"][mc3["iburn"]:mc3["nsteps"]]),0.5);#prob_max3 = maximum(exp.(mc3["lprob_mcmc"][mc3["iburn"]:mc3["nsteps"]]))
+  # prob=quantile(exp.(mc["lprob_mcmc"][mc["iburn"]:mc["nsteps"]]),0.5);#prob_max = maximum(exp.(mc["lprob_mcmc"][mc["iburn"]:mc["nsteps"]]))
+  #  prob2=quantile(exp.(mc2["lprob_mcmc"][mc2["iburn"]:mc2["nsteps"]]),0.5);#prob_max2 = maximum(exp.(mc2["lprob_mcmc"][mc2["iburn"]:mc2["nsteps"]]))
+  #   prob3=quantile(exp.(mc3["lprob_mcmc"][mc3["iburn"]:mc3["nsteps"]]),0.5);#prob_max3 = maximum(exp.(mc3["lprob_mcmc"][mc3["iburn"]:mc3["nsteps"]]))
   #println(" median Prob: ",prob,"      maximum Prob: ",prob_max)
   #chi2_avg = chi_mcmc(tt0,nplanet,ntrans,mean_posteriors,tt,sigtt,jmax,EM)
   reduced_chi,BIC,chi=round.(calc_BIC(mc["lprob_mcmc"][:,mc["iburn"]:mc["nsteps"]],f["nplanet"],f["ntrans"],vals),sigdigits=6)
@@ -493,10 +493,10 @@ function mc_table(sigma::Real,nyear::Real,options,include_moon::Bool=false)
   end
   # open(name,"w") do io
 
-  #   println(io,"Model",'\t',model2,'\t',model3,'\t',model,"\\")
-  #   println(io,"BIC",'\t',BIC2,'\t',BIC3,'\t',BIC," \\")
- 	# 	println(io,"χ^2",'\t',chi2,'\t',chi3,'\t',chi,"\\")
-  #   println(io,"reduced χ^2",'\t',reduced_chi2,'\t',reduced_chi3,'\t',reduced_chi,"\\")
+    println("Model",'\t',model2,'\t',model3,'\t',model,"\\")
+    println("BIC",'\t',BIC2,'\t',BIC3,'\t',BIC," \\")
+ 		println("χ^2",'\t',chi2,'\t',chi3,'\t',chi,"\\")
+    println("reduced χ^2",'\t',reduced_chi2,'\t',reduced_chi3,'\t',reduced_chi,"\\")
   for i=1:length(avg)
     println(avg[i]," -",low[i]," +",high[i])
   end
