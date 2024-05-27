@@ -192,7 +192,7 @@ end
 
  	true_per3=1.8808476
  	true_per4=11.862615
-	sim_obs_label= string(nyear," yr span",'\n',L"$\sigma_{obs}=$",sigma,"s")
+	sim_obs_label= string("[",nyear," yr span]",'\n',L"$\sigma_{obs}=$",sigma,"s")
 	fig=figure(figsize=(5,5),dpi=150)
 	# fig=figure(figsize=(5,5))
 	# subplots_adjust(hspace=0.2,wspace=0.15)
@@ -216,16 +216,16 @@ end
 
 	## plot Mars zoom-in
 	if include_moon
-	ax2=fig.add_subplot(223,title=string(label1,L"$\sigma_{sys}=$",round(sigsys3,sigdigits=4),"s"))
+	ax2=fig.add_subplot(223,title=string(label1,L"$\sigma_{sys}=$",round(sigsys3,sigdigits=3),"s"))
 	name=string("IMAGES/likelihood/wide_case",case_num,"_",sigma,"s",nyear,".png")
 	else
-	ax2=fig.add_subplot(223,title=string(L"$\mathcal{H}_{PPPP}$; ",L"$\sigma_{sys}=$",round(sigsys3,sigdigits=4)," s"))
+	ax2=fig.add_subplot(223,title=string(L"$\mathcal{H}_{PPPP}$, ",L"$\sigma_{sys}=$",round(sigsys3,sigdigits=3)," s"))
 	name=string("IMAGES/likelihood/wide_case",case_num,"_",sigma,"s",nyear,"_p4.png")
 	end
 	# text(1.83,1.1,"a)",fontweight="bold")
 	axvline(true_per3,linestyle="--",color="black")
 	text(1.89,0.96,"Mars",fontsize="medium")
-	xbin,xhist,xbin_square,hist_square=histogram(par_mcmc3,nbins)
+	xbin,xhist,xbin_square,hist_square=histogram(par_mcmc3,5000)
 	# ax2.hist(par_mcmc3,bins=nbins,histtype="step",density=tr,color="orange")
  	ax2.plot(fit3[:,12]./365.25,xprob(fit3[:,end]),color="orange",label="Fit")
  	ax2.plot(xbin_square,hist_square./maximum(hist_square),color="orange",label="Posterior",alpha=0.75)
@@ -246,7 +246,7 @@ end
 
 		phi_col,true_phi,color=18,2.31586,"purple"; label_xloc=2.75
 		# lim=f["dpin"],f["dpout"]
-	  ax3=fig.add_subplot(224,title=string(L"$\mathcal{H}_{PPsP}$; ",L"$\sigma_{sys}=$",round(sigsys4,sigdigits=4)," s"))
+	  ax3=fig.add_subplot(224,title=string(L"$\mathcal{H}_{PPsP}$, ",L"$\sigma_{sys}=$",round(sigsys4,sigdigits=3)," s"))
 		ax3.axvline(true_phi,linestyle="--",color="black")
 		ax3.text(2.33,0.96,"Moon",fontsize="medium")
 		ax3.plot(fit4[:,18],xprob(fit4[:,end]),color="purple")
@@ -269,7 +269,7 @@ end
 	  # 		right="true",labelright="true")
 	else
  	## plot Jupiter zoom-in
- 	ax3=fig.add_subplot(224,sharey=ax2,title=string(L"$\mathcal{H}_{PPP}$; ",L"$\sigma_{sys}=$",round(sigsys4,sigdigits=4),"s"))
+ 	ax3=fig.add_subplot(224,sharey=ax2,title=string(L"$\mathcal{H}_{PPP}$, ",L"$\sigma_{sys}=$",round(sigsys4,sigdigits=3),"s"))
 	# text(11,1.1,"b)",fontweight="bold")
  	axvline(true_per4,linestyle="--",color="black")
 	text(12,0.96,"Jupiter",fontsize="medium")
@@ -284,7 +284,7 @@ end
 	ax3.set_xlabel(L"Per$_3$ [yrs]",fontsize="large")
 	end
 	tight_layout()
- 	savefig(name)
+ 	savefig(name,dpi=150)
 	# if include_moon
 	# 	
 	#   #title2=string("IMAGES/likelihood/",grid_type_nplanet,"Moon",sigma,"s",nyear,"yrs.png")

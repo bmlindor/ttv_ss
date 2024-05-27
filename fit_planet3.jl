@@ -264,6 +264,11 @@ function fit_planet3(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
         lprob_p3[j] = lprob_phase[i]
         param_p3[1:nparam,j] = [fit.param[1:10];10^fit.param[11];p3_cur;fit.param[12:end]]
       end
+  #    if j<nper && (lprob_per[j+1]-lprob_per[j]) > 10
+  # # Check that best fit for current period is close to that of previous period
+  #   lprob_per[j+1] = lprob_per[j]
+  #   param_per[1:nparam,j+1] = param_per[1:nparam,j] #[fit.param[1:10];10^fit.param[11];per_cur;fit.param[12:end]]
+  # end
     end
     # println("Period: ",p3[j]," log Prob: ",lprob_p3[j]," Param: ",vec(param_p3[1:nparam,j]))
   end

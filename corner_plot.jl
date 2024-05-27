@@ -6,7 +6,7 @@ np = pyimport("numpy")
 # rc("lines",linewidth=1.5)
         
 # Corner plot for posterior distributions of 2 parameters, compared to true values
-function corner(xs,labels,bins=10;quantiles)
+function corner(xs,labels,bins=5;quantiles)
   K=length(xs)
   factor = 1.5  # size of one side of one panel
   lbdim = 0.5 * factor  # size of left/bottom margin
@@ -1031,11 +1031,12 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
   elseif grid_type_nplanet=="p3moonp4" || grid_type_nplanet=="widep3moonp4"
     model=L"$\mathcal{H}_{PPsPP}$"
   end
-  parname=[L"$μ_1$ [$M_{⋆}$]",L"$P_1$ [days]",L"$t_{0,1}$",L"$e_1 cos(ω_1)$",L"$e_1 sin(ω_1)$",
-    L"$μ_2$ [$M_{⋆}$]",L"$P_2$ [days]",L"$t_{0,2}$",L"$e_2 cos(ω_2)$",L"$e_2 sin(ω_2)$",
-    L"$μ_3$ [$M_{⋆}$]",L"$P_3$ [days]",L"$t_{0,3}$",L"$e_3 cos(ω_3)$",L"$e_3 sin(ω_3)$",
-    L"$μ_4$ [$M_{⋆}$]",L"$P_4$ [days]",L"$t_{0,4}$",L"$e_4 cos(ω_4)$",L"$e_4 sin(ω_4)$",
-    L"$μ_5$ [$M_{⋆}$]",L"$P_5$ [days]",L"$t_{0,5}$",L"$e_4 cos(ω_5)$",L"$e_5 sin(ω_5)$",
+  parname=[
+    L"$μ_b$ [$M_{⋆}$]",L"$P_b$ [days]",L"$t_{0,b}$",L"$e_b cos(ω_b)$",L"$e_b sin(ω_b)$",
+    L"$μ_c$ [$M_{⋆}$]",L"$P_c$ [days]",L"$t_{0,c}$",L"$e_c cos(ω_c)$",L"$e_c sin(ω_c)$",
+    #L"$μ_e$ [$M_{⋆}$]",L"$P_e$ [days]",L"$t_{0,e}$",L"$e_e cos(ω_e)$",L"$e_e sin(ω_e)$",
+    L"$μ_d$ [$M_{⋆}$]",L"$P_d$ [days]",L"$t_{0,d}$",L"$e_d cos(ω_d)$",L"$e_d sin(ω_d)$",
+    L"$μ_f$ [$M_{⋆}$]",L"$P_f$ [days]",L"$t_{0,f}$",L"$e_f cos(ω_f)$",L"$e_f sin(ω_f)$",
     L"$t_{max} sin(ϕ_0)$",L"$t_{max} cos(ϕ_0)$",L"$Δϕ$ [rad]",L"$σ_{sys}^2$ [days]"]
   
     # True values based on "PlanetaryBodyData.pdf" (source?)
@@ -1069,7 +1070,8 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
     vec(par_mcmc[:,iburn:end,6]), 
     vec(par_mcmc[:,iburn:end,7]),
     vec(par_mcmc[:,iburn:end,9]),
-    vec(par_mcmc[:,iburn:end,10])]#,vec(par_mcmc[:,iburn:end,11]), vec(par_mcmc[:,iburn:end,12]),vec(par_mcmc[:,iburn:end,14]), vec(par_mcmc[:,iburn:end,15]), vec(par_mcmc[:,iburn:end,16]), vec(par_mcmc[:,iburn:end,17]),vec(par_mcmc[:,iburn:end,19]), vec(par_mcmc[:,iburn:end,20])]
+    vec(par_mcmc[:,iburn:end,10])]#,vec(par_mcmc[:,iburn:end,11]), vec(par_mcmc[:,iburn:end,12]),vec(par_mcmc[:,iburn:end,14]), vec(par_mcmc[:,iburn:end,15])] 
+    #vec(par_mcmc[:,iburn:end,16]), vec(par_mcmc[:,iburn:end,17]),vec(par_mcmc[:,iburn:end,19]), vec(par_mcmc[:,iburn:end,20])]
     labels=[parname[1];
     parname[2];
     parname[4];
@@ -1077,15 +1079,15 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
     parname[6];
     parname[7];
     parname[9];
-    parname[10]]#;parname[11];parname[12];parname[14];parname[15];parname[16];parname[17];parname[19];parname[20]]
-    corner(values,labels,50;quantiles=[0.1587,0.8413])
+    parname[10]]#;parname[11];parname[12];parname[14];parname[15]]#;parname[16];parname[17];parname[19];parname[20]]
+    corner(values,labels,nbins;quantiles=[0.1587,0.8413])
   
-    # title=string("IMAGES/corner/case",case_num,grid_type_nplanet,"Venus-",sigma,"secs",nyear,"yrs.png")
+    title=string("IMAGES/corner/case",case_num,grid_type_nplanet,"-",sigma,"secs",nyear,"yrs.png")
     # fig1=corner([m1,ec1,p1,m2,ec2,p2],[truem1,trueec1,truep1,truem2,trueec2,truep2],labels,nbins)
     # fig1.suptitle(string(model," Posteriors for Planet 1"))
     # fig1.text(0.36,0.8,string(L"$\sigma_{sys}=$",sigsys," sec",'\n',L"$\sigma_{tot}=$",sigtot," sec",'\n',"BIC= ",BIC,'\n',L"$\chi^2 =$",chi))
-    # savefig(title)
-    # clf()
+    savefig(title)
+    clf()
 
     # lim=minimum(p2),maximum(p2)#0.0064,0.00652
     # label=L"Per$_2 - 365.25$ [days]"

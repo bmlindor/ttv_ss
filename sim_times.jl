@@ -234,7 +234,7 @@ function sim_obs_and_find_times(jd1::Float64,sigma::Real,nyear::Real,obs::String
   ttv2=(tt2 .- t2).*24*60
   trans=[round.(range(0,stop = nt1-1, length=nt1));  round.(range(0,stop = nt2-1, length=nt2))]
   function make_transit_times_table()
-    name= string("EMBtransit_times",nyear,".txt")
+    name= string("INPUTS/EMBtransit_times",nyear,".txt")
     open(name,"w") do io
       println(io,"# body ntrans  tcalc ttv noise sigma",'\n',"#   JED-2430000 min min min")
       for i=1:nt1
@@ -245,13 +245,13 @@ function sim_obs_and_find_times(jd1::Float64,sigma::Real,nyear::Real,obs::String
       end
     end
   end
-  # make_transit_times_table()
-  println("A_TTV1= ",maximum(abs.(ttv1)))
-  println("A_TTV2= ",maximum(abs.(ttv2)))
+  make_transit_times_table()
+  println("A_TTV1= ",abs((maximum(ttv1)))-abs(minimum(ttv1)))
+  println("A_TTV2= ",abs((maximum(ttv2)))-abs(minimum(ttv2)))
   return body,trans,tt,sigtt,tt0
-  # return body,tt
+  # return pva_venus,pva_earth
 end
-# body,tt0,tt,sigtt=sim_obs_and_find_times(2.4332825e6,30,30,"fromEV")
+# body,tt0,tt,sigtt=sim_obs_and_find_times(2.4332825e6,30,30,"fromEMB")
 # Simulate times starting at jd1 for nyear span with sigma Gaussian noise added, save to .txt
 function sim_times(jd1::Float64,sigma::Real,nyear::Real,obs::String,dir::String="INPUTS")
   body,tt0,tt,sigtt=sim_obs_and_find_times(jd1,sigma,nyear,obs)
@@ -302,29 +302,35 @@ function plot_orbits(dimension::Int,obs::String,nyear::Real=10)
       pva_earth[1:6,i] = compute(eph,t0[i],0.0,399,10,options)./AU
     end
   end
-  body,tt0,tt,sigtt=sim_obs_and_find_times(jd1,sigma,nyear,obs)
+  body,trans,tt,sigtt,tt0=sim_obs_and_find_times(jd1,sigma,nyear,obs)
   nt1 = sum(body .== 1.0)
   nt2 = sum(body .== 2.0)
   trans_pva_venus = zeros(6, jdsize)
   trans_pva_earth = zeros(6, jdsize)
+  trans_pva_mars = zeros(6, jdsize)
+  trans_pva_jup = zeros(6, jdsize)
+  trans_pva_sat = zeros(6, jdsize)
   trans_pva_emb = zeros(6, jdsize)
   trans_pva_moon = zeros(6, jdsize)
   for i=1:length(tt)
-    trans_pva_venus[1:6,i] = compute(eph,tt[i],0.0,2,10,options)./AU
+    trans_pva_venus[1:6,i] = compute(eph,tt[i],0.0,2,10,options)
+    trans_pva_mars[1:6,i] = compute(eph,tt[i],0.0,4,10,options)
+    trans_pva_jup[1:6,i] = compute(eph,tt[i],0.0,5,10,options)
+    trans_pva_sat[1:6,i] = compute(eph,tt[i],0.0,6,10,options)
     if obs=="fromEMB"
-      trans_pva_emb[1:6,i] = compute(eph,tt[i],0.0,3,10,options) ./AU
+      trans_pva_emb[1:6,i] = compute(eph,tt[i],0.0,3,10,options) 
     else
-      trans_pva_moon = compute(eph,tt[i],0.0,301,10,options)./AU
-      trans_pva_earth[1:6,i] = compute(eph,tt[i],0.0,399,10,options)./AU
-      
+      trans_pva_moon = compute(eph,tt[i],0.0,301,10,options)
+      trans_pva_earth[1:6,i] = compute(eph,tt[i],0.0,399,10,options)
     end
+
   end
 
   ## Find position of Moon w.r.t. Earth when Earth transit occurs
   # trans_pva_moon
   
-  if dimension==2
-  fig,ax=subplots(figsize=(5,5),dpi=150)
+
+  fig,ax=subplots(figsize=(4,4))#,dpi=150)
   title(string("Location over ",nyear,"yrs"))
   fill(xsun.*5,ysun.*5,color="yellow")
   plot(xsun,ysun,color="yellow")
@@ -332,15 +338,15 @@ function plot_orbits(dimension::Int,obs::String,nyear::Real=10)
   for i=1:nt1
   ax.scatter(trans_pva_venus[1,i],trans_pva_venus[2,i],marker="v",color="salmon",label=string(i))
   end
-  if obs=="fromEMB"
-    n_obs=calc_obs_loc(trans_pva_venus[1:3],trans_pva_venus[4:6],trans_pva_emb[1:3],trans_pva_emb[4:6])
-    plot(pva_emb[1,:],pva_emb[2,:],color="forestgreen",linewidth=1,alpha=0.5)
-    ax.scatter(trans_pva_emb[1,nt1+1:nt1+nt2],trans_pva_emb[2,nt1+1:nt1+nt2],marker=".",color="forestgreen",label="EMB")
-  else
-  n_obs=calc_obs_loc(trans_pva_venus[1:3],trans_pva_venus[4:6],trans_pva_earth[1:3],trans_pva_earth[4:6])
-  plot(pva_earth[1,:],pva_earth[2,:],color="forestgreen",linewidth=1,alpha=0.5)
-  ax.scatter(trans_pva_earth[1,nt1+1:nt1+nt2],trans_pva_earth[2,nt1+1:nt1+nt2],marker=".",color="forestgreen",label="Earth")
-  end
+    if obs=="fromEMB"
+      n_obs=calc_obs_loc(trans_pva_venus[1:3],trans_pva_venus[4:6],trans_pva_emb[1:3],trans_pva_emb[4:6])
+      plot(pva_emb[1,:],pva_emb[2,:],color="forestgreen",linewidth=1,alpha=0.5)
+      ax.scatter(trans_pva_emb[1,nt1+1:nt1+nt2],trans_pva_emb[2,nt1+1:nt1+nt2],marker=".",color="forestgreen",label="EMB")
+    else
+    n_obs=calc_obs_loc(trans_pva_venus[1:3],trans_pva_venus[4:6],trans_pva_earth[1:3],trans_pva_earth[4:6])
+    plot(pva_earth[1,:],pva_earth[2,:],color="forestgreen",linewidth=1,alpha=0.5)
+    ax.scatter(trans_pva_earth[1,nt1+1:nt1+nt2],trans_pva_earth[2,nt1+1:nt1+nt2],marker=".",color="forestgreen",label="Earth")
+    end
   # arrow(0.0,0.0,n_obs[1],n_obs[2],facecolor="black")
   plot([0,n_obs[1]*1.1],[0,n_obs[2]*1.1],"k--",linewidth=1,alpha=0.5)
   annotate("Line of sight",xy=[n_obs[1];n_obs[2]], xytext=[n_obs[1]+0.05;n_obs[2]],xycoords="data",fontsize="medium") 
@@ -349,7 +355,7 @@ function plot_orbits(dimension::Int,obs::String,nyear::Real=10)
   ylabel("y [au]",fontsize="large")
   ylim(-1,1)
   xlim(-1.1,1.1)
-  ax.legend(title="Mid-Transit",fontsize="medium",title_fontsize="medium",markerscale=1.5,loc="upper left")
+  # ax.legend(title="Mid-Transit",fontsize="medium",title_fontsize="medium",markerscale=1.5,loc="upper left")
   # fill(xsun,ysun,color="yellow")
   # plot(xsun,ysun,color="black")
   # plot(pva_venus[1,:],pva_venus[2,:],color="orange",linewidth=1,alpha=0.5)
@@ -362,28 +368,28 @@ function plot_orbits(dimension::Int,obs::String,nyear::Real=10)
   # xlabel("x [au]",fontsize=20)
   # ylabel("y [au]",fontsize=20)
   tight_layout()
-  end
+  @show
 
   if dimension==3
-  fig=figure(figsize=(6,6))
-  PyPlot.scatter3D(xsun,ysun,0,marker="o",color=:yellow)
-  PyPlot.plot3D(vec(pva_venus[1,:]), vec(pva_venus[2,:]), vec(pva_venus[3,:]),alpha=0.25,color=:orange)
-  PyPlot.plot3D(vec(pva_earth[1,:]), vec(pva_earth[2,:]), vec(pva_earth[3,:]),alpha=0.25,color=:forestgreen)
-  PyPlot.plot3D([0,n_obs[1]*1.2],[0,n_obs[2]*1.2],[0,n_obs[3]*1.2],linestyle="--",color=:grey)
-  # PyPlot.scatter3D(vec(trans_pva_sun[1,:]), vec(trans_pva_sun[2,:]), vec(trans_pva_sun[3,:]),color=:yellow)
-  PyPlot.scatter3D(vec(trans_pva_venus[1,1:nt1]),vec(trans_pva_venus[2,1:nt1]),vec(trans_pva_venus[3,1:nt1]),color=:orange,marker=".")
-  PyPlot.scatter3D(vec(trans_pva_earth[1,nt1+1:nt1+nt2]),vec(trans_pva_earth[2,nt1+1:nt1+nt2]),vec(trans_pva_earth[3,nt1+1:nt1+nt2]),color=:forestgreen,marker=".")
-  PyPlot.tick_params(which="major",
-      left=false,right=false,top=false,bottom=false)
-  # xlim(-1,1)
-  # ylim(-1,1)
-  xlabel("x [au]",fontsize=20)
-  ylabel("y [au]",fontsize=20)
-  zlabel("z [au]",fontsize=20) 
+    fig=figure(figsize=(6,6))
+    PyPlot.scatter3D(xsun,ysun,0,marker="o",color=:yellow)
+    PyPlot.plot3D(vec(pva_venus[1,:]), vec(pva_venus[2,:]), vec(pva_venus[3,:]),alpha=0.25,color=:orange)
+    PyPlot.plot3D(vec(pva_earth[1,:]), vec(pva_earth[2,:]), vec(pva_earth[3,:]),alpha=0.25,color=:forestgreen)
+    PyPlot.plot3D([0,n_obs[1]*1.2],[0,n_obs[2]*1.2],[0,n_obs[3]*1.2],linestyle="--",color=:grey)
+    # PyPlot.scatter3D(vec(trans_pva_sun[1,:]), vec(trans_pva_sun[2,:]), vec(trans_pva_sun[3,:]),color=:yellow)
+    PyPlot.scatter3D(vec(trans_pva_venus[1,1:nt1]),vec(trans_pva_venus[2,1:nt1]),vec(trans_pva_venus[3,1:nt1]),color=:orange,marker=".")
+    PyPlot.scatter3D(vec(trans_pva_earth[1,nt1+1:nt1+nt2]),vec(trans_pva_earth[2,nt1+1:nt1+nt2]),vec(trans_pva_earth[3,nt1+1:nt1+nt2]),color=:forestgreen,marker=".")
+    PyPlot.tick_params(which="major",
+        left=false,right=false,top=false,bottom=false)
+    # xlim(-1,1)
+    # ylim(-1,1)
+    xlabel("x [au]",fontsize=20)
+    ylabel("y [au]",fontsize=20)
+    zlabel("z [au]",fontsize=20) 
   end
   #   println(n_obs) 
-  # return tt 
-  savefig("IMAGES/orbits.pdf")
+  return trans_pva_venus,trans_pva_emb,trans_pva_mars,trans_pva_jup,trans_pva_sat
+
   # close()
 end
 function moon_times(jd1::Float64,sigma::Real,nyear::Real)

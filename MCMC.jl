@@ -238,6 +238,28 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,nsteps
    avg[i],minus1sig[i],plus1sig[i]=quantile(vec(par_mcmc[:,iburn:end,i]),[0.5,0.1587,0.8413])
    println(pname[i]," = ",avg[i]," + ",abs(plus1sig[i]-avg[i])," _ ",abs(avg[i]-minus1sig[i]))
   end
+# Find percentage of walkers where diff. between median and quantile value is >100
+  # bad_walk=[]
+  # for i in 1:nwalkers
+  #   for j in 1:nparam
+  #     walker_med,walker_quant=quantile!(par_mcmc[i,jldmc["iburn"]+1:end,j],[0.5,0.9])
+  #     walk_start=par_mcmc[i,jldmc["iburn"]+1,j] 
+  #     walk_end = par_mcmc[i,jldmc["iburn"]+1,j]
+  #     ratio = walk_end/walk_start
+  #     walker_prob=median(lprob_mcmc[i,jldmc["iburn"]+1:end])
+  #     if abs(walk_end-walk_start)/walk_start > 0.1
+  #       #abs(walker_med-walker_end)>30
+  #       # println(i," ",walker_prob[i])
+  #       append!(bad_walk,i)
+  #     end
+  #   end
+  #     # If systematic uncertainty > injected uncertainty, reject
+  #   # if median(par_mcmc[i,jldmc["iburn"]:end,end]).*3600*24 >= sigma
+  #   #   println("Reject results?")
+  #   #   append(bad_walk,i)
+  #   # end
+  # end
+  # println("Bad walkers: ",bad_walk)
 
   # Plot traces
   # for i=2:nparam
@@ -298,7 +320,7 @@ function mc_vals(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num=Int,
   sigsys=round((median(vec(par_mcmc[:,iburn:end,end]))).* 3600*24,sigdigits=3)
   sigsys_err=(std(vec(par_mcmc[:,iburn:end,end]))).* 3600*24
   sigtot=round(sqrt(sigsys^2 + sigma^2),sigdigits=4)
-
+  # function plot_trace()
   fig, axs = plt.subplots(4,nplanet,figsize=(3*nplanet,nplanet*3))
   figtitle=string("MC Traces for ",sigma," s;",nyear," yr simulations of Venus and EMB")
   fig.suptitle(figtitle)
@@ -329,54 +351,37 @@ function mc_vals(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num=Int,
 
   # tight_layout()
   title=string("IMAGES/trace/case",case_num,grid_type_nplanet,"-",sigma,"secs",nyear,"yrs.png")
-  # savefig(title)
-  # Find percentage of walkers where diff. between median and quantile value is >100
-  # bad_walk=[]
-  # for i in 1:nwalkers
-  #   for j in 1:nparam
-  #     walker_med,walker_quant=quantile!(par_mcmc[i,jldmc["iburn"]+1:end,j],[0.5,0.9])
-  #     walk_start=par_mcmc[i,jldmc["iburn"]+1,j] 
-  #     walk_end = par_mcmc[i,jldmc["iburn"]+1,j]
-  #     ratio = walk_end/walk_start
-  #     walker_prob=median(lprob_mcmc[i,jldmc["iburn"]+1:end])
-  #     if abs(walk_end-walk_start)/walk_start > 0.1
-  #       #abs(walker_med-walker_end)>30
-  #       # println(i," ",walker_prob[i])
-  #       append!(bad_walk,i)
-  #     end
-  #   end
-  #     # If systematic uncertainty > injected uncertainty, reject
-  #   # if median(par_mcmc[i,jldmc["iburn"]:end,end]).*3600*24 >= sigma
-  #   #   println("Reject results?")
-  #   #   append(bad_walk,i)
-  #   # end
+  savefig(title)
   # end
-  # println("Bad walkers: ",bad_walk)
+  vals=jldmc["par_mcmc"][:,jldmc["iburn"]:end,:]#,sigdigits=6)
+  reduced_chisq, BIC,chisq=round.(calc_BIC(jldmc["lprob_mcmc"][:,jldmc["iburn"]:jldmc["nsteps"]],jldfit["tt0"],jldfit["tt"],jldfit["sigtt"],jldfit["nplanet"],jldfit["ntrans"],vals),sigdigits=6)
+  # @show BIC
 	avg=zeros(nparam)
   med=zeros(nparam)
   low=zeros(nparam)
   errors=zeros((2,nparam))
   high=zeros(nparam)
-  st_dev=zeros(nparam)
+  # st_dev=zeros(nparam)
+
   for i=1:nparam
    med[i],low[i],high[i]=quantile(vec(par_mcmc[:,iburn:end,i]),[0.5,0.1587,0.8413])
    avg[i]=mean(vec(par_mcmc[:,iburn:end,i]))
-   errors[1,i]=high[i]-med[i]; errors[2,i]=med[i]-low[i]
-    st_dev[i]=std(vec(par_mcmc[:,iburn:end,i]))
+   errors[1,i]=med[i]-low[i]; errors[2,i]=high[i]-med[i]
+    # st_dev[i]=std(vec(par_mcmc[:,iburn:end,i]))
    # println(pname[i]," = ",avg[i]," + ",abs(plus1sig[i]-avg[i])," _ ",abs(avg[i]-minus1sig[i]))
   end
   masses=[med[i-4] for i in 1:length(param) if i%5==0] .*CGS.MSUN/CGS.MEARTH
-  ecc=[calc_ecc(med[i-1],med[i]) for i in 1:length(param) if i%5==0] 
-	periods=[med[i-3] for i in 1:length(param) if i%5==0]
+  # ecc=[calc_ecc(med[i-1],med[i]) for i in 1:length(param) if i%5==0] 
+	# periods=[med[i-3] for i in 1:length(param) if i%5==0]
 	
   println("Retrieved values.")
   println("M_p[M⊕]= ",masses)#" + ",masses.-mass_high," - ",masses.-mass_low)
   # println("std(M_p)= ",mass_errs)
   # # println("Per [d]= ",periods)#," +/- ",per_errs)
-  println("eccen. =",ecc)#," +/- ",ecc_errs)
+  # println("eccen. =",ecc)#," +/- ",ecc_errs)
   # println("σsys[s]= ",sigsys," +/- ",sigsys_err)
   # println("σtot[s]= ",sigtot)
-  return avg,st_dev,med,errors
+  return med,errors
 end
 
 function mc_table(sigma::Real,nyear::Real,options,include_moon::Bool=false)
@@ -434,28 +439,6 @@ function mc_table(sigma::Real,nyear::Real,options,include_moon::Bool=false)
   high2=round.([quantile(vec(mc2["par_mcmc"][:,mc2["iburn"]:end,i]),0.8413) for i=1:11],sigdigits=6)
   high3=round.([quantile(vec(mc3["par_mcmc"][:,mc3["iburn"]:end,i]),0.8413) for i=1:16],sigdigits=6)
 
-  function calc_BIC(lprob,nplanet,ntrans,par_mcmc)
-    imax=argmax(lprob)
-    prob_max=exp.(lprob[imax])
-    function calc_chisq(par_mcmc,nplanet,ntrans)
-    chisq = 0.0  
-    jmax=5
-    tt_model = TTVFaster.ttv_wrapper(tt0,nplanet,ntrans,vec(par_mcmc[imax,1:(nplanet*5)+1]),jmax,EM) 
-      for j=1:length(tt)
-        chisq += (tt[j]-tt_model[j])^2 / (sigtt[j]^2 + par_mcmc[imax,(nplanet*5)+1]^2)
-      end
-    return chisq
-    end
-    chisq=calc_chisq(par_mcmc,nplanet,ntrans)
-    N=length(tt0) ; k=nplanet*5 + 1
-    #println("[N_obs]= ",N," [no. of model params]= ",k)
-    #println("chi^2=",chisq)
-    # println("max Prob=",prob_max)
-    reduced_chisq=chisq/(N-k)
-    BIC_chi(chisq,k,N)=chisq + k*log(N)
-    BIC=-2*log(prob_max) + k*log(N)
-    return reduced_chisq, BIC,chisq
-  end
   # prob=quantile(exp.(mc["lprob_mcmc"][mc["iburn"]:mc["nsteps"]]),0.5);#prob_max = maximum(exp.(mc["lprob_mcmc"][mc["iburn"]:mc["nsteps"]]))
   #  prob2=quantile(exp.(mc2["lprob_mcmc"][mc2["iburn"]:mc2["nsteps"]]),0.5);#prob_max2 = maximum(exp.(mc2["lprob_mcmc"][mc2["iburn"]:mc2["nsteps"]]))
   #   prob3=quantile(exp.(mc3["lprob_mcmc"][mc3["iburn"]:mc3["nsteps"]]),0.5);#prob_max3 = maximum(exp.(mc3["lprob_mcmc"][mc3["iburn"]:mc3["nsteps"]]))
