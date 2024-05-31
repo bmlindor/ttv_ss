@@ -321,41 +321,41 @@ function mc_vals(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num=Int,
   sigsys_err=(std(vec(par_mcmc[:,iburn:end,end]))).* 3600*24
   sigtot=round(sqrt(sigsys^2 + sigma^2),sigdigits=4)
   # function plot_trace()
-  fig, axs = plt.subplots(4,nplanet,figsize=(3*nplanet,nplanet*3))
-  figtitle=string("MC Traces for ",sigma," s;",nyear," yr simulations of Venus and EMB")
-  fig.suptitle(figtitle)
-  count=0
-  for j=1:nwalkers
-      axs[1,1].plot(par_mcmc[j,iburn:nsteps,end].*24*3600,lprob_mcmc[j,iburn:nsteps])
-      axs[1,2].plot(lprob_mcmc[j,iburn:nsteps])
-      # axs[1,2].plot(par_mcmc[j,iburn:nsteps,end].*24*3600)
-      for iplanet=1:nplanet
-          axs[2,iplanet].plot(par_mcmc[j,iburn:end,(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH)
-          axs[3,iplanet].plot(par_mcmc[j,iburn:end,(iplanet-1)*5+2])
-          axs[4,iplanet].plot(par_mcmc[j,iburn:end,(iplanet-1)*5+4])
-  #         count+=1
-      end
-  end
-  # axs[1,4].set_ylabel("log Prob")
-  axs[1,1].set_xlabel(L"$σ_{sys}$ [s]")
-  axs[1,1].set_ylabel("log Prob")
-  axs[1,2].set_ylabel(L"$σ_{sys}$ [s]")
-  for iplanet=1:nplanet
-      axs[2,iplanet].set_ylabel(L"$M [M_{\oplus}]$")
-      axs[3,iplanet].set_ylabel(pname[(iplanet-1)*5+2])
-      axs[4,iplanet].set_ylabel(pname[(iplanet-1)*5+4])
-      if iplanet==3 || iplanet==4
-        plt.delaxes(ax=axs[1,iplanet])
-      end
-  end
-
-  # tight_layout()
-  title=string("IMAGES/trace/case",case_num,grid_type_nplanet,"-",sigma,"secs",nyear,"yrs.png")
-  savefig(title)
+  # fig, axs = plt.subplots(4,nplanet,figsize=(3*nplanet,nplanet*3))
+  # figtitle=string("MC Traces for ",sigma," s;",nyear," yr simulations of Venus and EMB")
+  # fig.suptitle(figtitle)
+  # count=0
+  # for j=1:nwalkers
+  #     axs[1,1].plot(par_mcmc[j,iburn:nsteps,end].*24*3600,lprob_mcmc[j,iburn:nsteps])
+  #     axs[1,2].plot(lprob_mcmc[j,iburn:nsteps])
+  #     # axs[1,2].plot(par_mcmc[j,iburn:nsteps,end].*24*3600)
+  #     for iplanet=1:nplanet
+  #         axs[2,iplanet].plot(par_mcmc[j,iburn:end,(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH)
+  #         axs[3,iplanet].plot(par_mcmc[j,iburn:end,(iplanet-1)*5+2])
+  #         axs[4,iplanet].plot(par_mcmc[j,iburn:end,(iplanet-1)*5+4])
+  # #         count+=1
+  #     end
   # end
+  # # axs[1,4].set_ylabel("log Prob")
+  # axs[1,1].set_xlabel(L"$σ_{sys}$ [s]")
+  # axs[1,1].set_ylabel("log Prob")
+  # axs[1,2].set_ylabel(L"$σ_{sys}$ [s]")
+  # for iplanet=1:nplanet
+  #     axs[2,iplanet].set_ylabel(L"$M [M_{\oplus}]$")
+  #     axs[3,iplanet].set_ylabel(pname[(iplanet-1)*5+2])
+  #     axs[4,iplanet].set_ylabel(pname[(iplanet-1)*5+4])
+  #     if iplanet==3 || iplanet==4
+  #       plt.delaxes(ax=axs[1,iplanet])
+  #     end
+  # end
+
+  # # tight_layout()
+  # title=string("IMAGES/trace/case",case_num,grid_type_nplanet,"-",sigma,"secs",nyear,"yrs.png")
+  # savefig(title)
+  # # end
   vals=jldmc["par_mcmc"][:,jldmc["iburn"]:end,:]#,sigdigits=6)
-  reduced_chisq, BIC,chisq=round.(calc_BIC(jldmc["lprob_mcmc"][:,jldmc["iburn"]:jldmc["nsteps"]],jldfit["tt0"],jldfit["tt"],jldfit["sigtt"],jldfit["nplanet"],jldfit["ntrans"],vals),sigdigits=6)
-  # @show BIC
+  reduced_chisq, BIC,chisq=round.(calc_BIC(jldmc["lprob_mcmc"][:,jldmc["iburn"]:jldmc["nsteps"]],jldfit["tt0"],jldfit["tt"],jldfit["sigtt"],jldfit["nplanet"],jldfit["ntrans"],vals,EM=EM),sigdigits=6)
+  @show BIC,chisq,reduced_chisq
 	avg=zeros(nparam)
   med=zeros(nparam)
   low=zeros(nparam)
@@ -371,14 +371,15 @@ function mc_vals(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num=Int,
    # println(pname[i]," = ",avg[i]," + ",abs(plus1sig[i]-avg[i])," _ ",abs(avg[i]-minus1sig[i]))
   end
   masses=[med[i-4] for i in 1:length(param) if i%5==0] .*CGS.MSUN/CGS.MEARTH
-  # ecc=[calc_ecc(med[i-1],med[i]) for i in 1:length(param) if i%5==0] 
+  ecc=[calc_ecc(med[i-1],med[i]) for i in 1:length(param) if i%5==0] 
+  ecc_errs=[calc_quad_errs(med[i-1],med[i],errors[1,i-1],errors[1,i]) for i in 1:length(param) if i%5==0 ]
 	# periods=[med[i-3] for i in 1:length(param) if i%5==0]
 	
   println("Retrieved values.")
   println("M_p[M⊕]= ",masses)#" + ",masses.-mass_high," - ",masses.-mass_low)
   # println("std(M_p)= ",mass_errs)
   # # println("Per [d]= ",periods)#," +/- ",per_errs)
-  # println("eccen. =",ecc)#," +/- ",ecc_errs)
+  println("eccen. =",ecc," +/- ",ecc_errs)
   # println("σsys[s]= ",sigsys," +/- ",sigsys_err)
   # println("σtot[s]= ",sigtot)
   return med,errors
@@ -444,9 +445,9 @@ function mc_table(sigma::Real,nyear::Real,options,include_moon::Bool=false)
   #   prob3=quantile(exp.(mc3["lprob_mcmc"][mc3["iburn"]:mc3["nsteps"]]),0.5);#prob_max3 = maximum(exp.(mc3["lprob_mcmc"][mc3["iburn"]:mc3["nsteps"]]))
   #println(" median Prob: ",prob,"      maximum Prob: ",prob_max)
   #chi2_avg = chi_mcmc(tt0,nplanet,ntrans,mean_posteriors,tt,sigtt,jmax,EM)
-  reduced_chi,BIC,chi=round.(calc_BIC(mc["lprob_mcmc"][:,mc["iburn"]:mc["nsteps"]],f["nplanet"],f["ntrans"],vals),sigdigits=6)
-  reduced_chi2,BIC2,chi2=round.(calc_BIC(mc2["lprob_mcmc"][:,mc2["iburn"]:mc2["nsteps"]],f2["nplanet"],f2["ntrans"],vals2),sigdigits=6)
-  reduced_chi3,BIC3,chi3=round.(calc_BIC(mc3["lprob_mcmc"][:,mc3["iburn"]:mc3["nsteps"]],f3["nplanet"],f3["ntrans"],vals3),sigdigits=6)
+  reduced_chi,BIC,chi=round.(calc_BIC(mc["lprob_mcmc"][:,mc["iburn"]:mc["nsteps"]],f["nplanet"],f["ntrans"],vals,EM=EM),sigdigits=6)
+  reduced_chi2,BIC2,chi2=round.(calc_BIC(mc2["lprob_mcmc"][:,mc2["iburn"]:mc2["nsteps"]],f2["nplanet"],f2["ntrans"],vals2,EM=EM),sigdigits=6)
+  reduced_chi3,BIC3,chi3=round.(calc_BIC(mc3["lprob_mcmc"][:,mc3["iburn"]:mc3["nsteps"]],f3["nplanet"],f3["ntrans"],vals3,EM=EM),sigdigits=6)
 
   # scatter1=(ttvmodel1.-ttv1)
   # scatter2=(ttvmodel2.-ttv2)
@@ -458,10 +459,10 @@ function mc_table(sigma::Real,nyear::Real,options,include_moon::Bool=false)
   #sigsys=round(avg[end].*24*3600,sigdigits=3)
   #sigsys2=round(avg2[end].*24*3600,sigdigits=3)
   #sigsys3=round(avg3[end].*24*3600,sigdigits=3)
-  parname=[L"$\mu_1 \times 10^{-6}$",L"$P_1$ [days]",L"$t_{0,1}$ [days]",L"$e_1 \cos{\omega_1}$",L"$e_1 \sin{\omega_1}$",
-            L"$\mu_2 \times 10^{-6}$",L"$P_2$ [days]",L"$t_{0,2}$ [days]",L"$e_2 \cos{\omega_2}$",L"$e_2 \sin{\omega_2}$",
-            L"$\mu_3$",               L"$P_3$ [days]",L"$t_{0,3}$ [days]",L"$e_3 \cos{\omega_3}$",L"$e_3 \sin{\omega_3}$",
-            L"$\mu_4 \times 10^{-6}$",L"$P_4$ [days]",L"$t_{0,4}$ [days]",L"$e_4 \cos{\omega_4}$",L"$e_4 \sin{\omega_4}$",
+  parname=[L"$\mu_b \times 10^{-6}$",L"$P_1$ [days]",L"$t_{0,1}$ [days]",L"$e_1 \cos{\omega_1}$",L"$e_1 \sin{\omega_1}$",
+            L"$\mu_c \times 10^{-6}$",L"$P_2$ [days]",L"$t_{0,2}$ [days]",L"$e_2 \cos{\omega_2}$",L"$e_2 \sin{\omega_2}$",
+            L"$\mu_d$",               L"$P_3$ [days]",L"$t_{0,3}$ [days]",L"$e_3 \cos{\omega_3}$",L"$e_3 \sin{\omega_3}$",
+            L"$\mu_e \times 10^{-6}$",L"$P_4$ [days]",L"$t_{0,4}$ [days]",L"$e_4 \cos{\omega_4}$",L"$e_4 \sin{\omega_4}$",
             L"$\mu_5$",               L"$P_5$ [days]",L"$t_{0,5}$ [days]",L"$e_4 \cos{\omega_5}$",L"$e_5 \sin{\omega_5}$",
             L"$t_{max} \sin{\phi_0}$",L"$t_{max} \cos{\phi_0}$",L"$\Delta \phi$ [rad]",L"$\sigma_{sys}^2$ [days]"]
    model2=L"$\mathcal{H}_{PP}$"

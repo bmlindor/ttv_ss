@@ -3,7 +3,7 @@ using JLD2,PyPlot,Statistics,Distributions,LinearAlgebra,PyCall
 include("MCMC.jl")
 np = pyimport("numpy")
 # rc("font",family="sans-serif")
-# rc("lines",linewidth=1.5)
+# rc("lines",linewidth=2)
         
 # Corner plot for posterior distributions of 2 parameters, compared to true values
 function corner(xs,labels,bins=5;quantiles)
@@ -24,7 +24,7 @@ function corner(xs,labels,bins=5;quantiles)
 
   for (i ,x) in enumerate(xs)
       ax=axes[i,i]
-      ax.hist(x,bins=bins,histtype="step")
+      ax.hist(x,bins=bins,histtype="step",linewidth=2)
   #     ax.tick_params(left=false,labelleft=false)
       if length(quantiles)>0
           qvalues=quantile(x,quantiles)
@@ -620,303 +620,20 @@ function corner(xs,true_xs,labels,nbins;model::LaTeXString)
 
  return fig
 end
-
-# Create a corner plot for significant posterior distributions of planet parameters
-function corner_hist(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::Bool=false) 
-  if case_num==1  && isfile(string("MCMC/fromEMB/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
-    mcfile=string("MCMC/fromEMB/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
-  elseif case_num==2 && isfile(string("MCMC/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
-    mcfile=string("MCMC/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
-  else
-    return  println("MCMC file for case: ",case_num," with ",grid_type_nplanet," model at ",sigma," secs and ",nyear," yrs doesn't exist!!!!")
-  end
-  m=jldopen(String(mcfile),"r")
-  par_mcmc= m["par_mcmc"]
-  lprob_mcmc=m["lprob_mcmc"]
-  nwalkers=m["nwalkers"]
-  nsteps=m["nsteps"]
-  iburn=m["iburn"]
-  indepsamples=m["indepsamples"]
-  # True values based on "PlanetaryBodyData.pdf" (source?)
-  offset=224.70
-  m1=vec(par_mcmc[:,iburn:nsteps,1]).* CGS.MSUN/CGS.MEARTH
-  ec1=vec(par_mcmc[:,iburn:nsteps,4])#.*sqrt.(vec(par_mcmc[11:20,iburn:nsteps,4]).^2 .+ vec(par_mcmc[11:20,iburn:nsteps,5]).^2)
-  es1=vec(par_mcmc[:,iburn:nsteps,5])#.*sqrt.(vec(par_mcmc[11:20,iburn:nsteps,4]).^2 .+ vec(par_mcmc[11:20,iburn:nsteps,5]).^2)
-  p1=vec(par_mcmc[:,iburn:nsteps,2]).-offset
-  e1=sqrt.(vec(par_mcmc[:,iburn:nsteps,4]).^2 .+ vec(par_mcmc[:,iburn:nsteps,5]).^2)
-  truem1=0.815
-  trueec1=calc_evec1(0.00677323,131.53298)
-  truees1=calc_evec2(0.00677323,131.53298)
-  truep1=224.7007992.-offset
-  truee1=0.00677323
-  lim=0.00076,0.00081
-  offset=365.25
-  m2=vec(par_mcmc[:,iburn:nsteps,6]).* CGS.MSUN/CGS.MEARTH
-  ec2=vec(par_mcmc[:,iburn:nsteps,9])
-  es2=vec(par_mcmc[:,iburn:nsteps,10])#.*sqrt.(vec(par_mcmc[:,1:nsteps,9]).^2 .+ vec(par_mcmc[:,1:nsteps,10]).^2)
-  p2=vec(par_mcmc[:,iburn:nsteps,7]).-offset
-  e2=sqrt.(vec(par_mcmc[:,iburn:nsteps,9]).^2 .+ vec(par_mcmc[:,iburn:nsteps,10]).^2)
-  truem2=1
-  trueec2=calc_evec1(0.01671022,102.94719)
-  truees2=calc_evec2(0.01671022,102.94719)
-  truep2=365.2564-offset #365.256355
-  truee2=0.01671022
-  lim=0.0064,0.00652
-  corner(m1,m2,truem1,truem2,nbins)
-  ylabel(L"Mass of Earth [$M_{Earth}$]")
-  xlabel(L"Mass of Venus [$M_{Earth}$]")
-  tight_layout()
-  title=string("IMAGES/discussion/case",case_num,grid_type_nplanet,"masses",sigma,"secs",nyear,"yrs.png")
-  savefig(title)
-  clf()
-  corner(e1,e2,truee1,truee2,nbins)
-  ylabel("Eccentricity of Earth")
-  xlabel("Eccentricity of Venus")
-  tight_layout()
-  title=string("IMAGES/discussion/case",case_num,grid_type_nplanet,"eccs",sigma,"secs",nyear,"yrs.png")
-  savefig(title)
-  clf()
-  corner(ec1,ec2,trueec1,trueec2,nbins)
-  ylabel(L"$e \cos \varpi$ for Earth")
-  xlabel(L"$e \cos \varpi$ for Venus")
-  tight_layout()
-  title=string("IMAGES/discussion/case",case_num,grid_type_nplanet,"ecos",sigma,"secs",nyear,"yrs.png")
-  savefig(title)
-  clf()
-  corner(es1,es2,truees1,truees2,nbins)
-  ylabel(L"$e \sin \varpi$ for Earth")
-  xlabel(L"$e \sin \varpi$ for Venus")
-  tight_layout()
-  title=string("IMAGES/discussion/case",case_num,grid_type_nplanet,"esin",sigma,"secs",nyear,"yrs.png")
-  savefig(title)
-  clf()
-  if grid_type_nplanet=="p4"
-    m3=vec(par_mcmc[:,iburn:nsteps,11]).* CGS.MSUN/CGS.MEARTH
-    ec3=vec(par_mcmc[:,iburn:nsteps,14])#.*sqrt.(vec(par_mcmc[:,1:nsteps,14]).^2 .+ vec(par_mcmc[:,1:nsteps,15]).^2)
-    es3=vec(par_mcmc[:,iburn:nsteps,15])#.*sqrt.(vec(par_mcmc[:,1:nsteps,14]).^2 .+ vec(par_mcmc[:,1:nsteps,15]).^2)
-    p3=vec(par_mcmc[:,iburn:nsteps,12])
-    e3=sqrt.(vec(par_mcmc[:,iburn:nsteps,14]).^2 .+ vec(par_mcmc[:,iburn:nsteps,15]).^2)
-    truem3=0.1074
-    trueec3=calc_evec1(0.09341233,336.04084)
-    truees3=calc_evec2(0.09341233,336.04084)
-    truep3=686.9795859
-    truee3=0.09341233
-    corner(m3,e3,truem3,truee3,nbins)
-    xlabel(L"Mass of Mars [$M_{Earth}$]")
-    ylabel("Eccentricity of Mars")
-    tight_layout()
-    title=string("IMAGES/discussion/case",case_num,grid_type_nplanet,"Vmecc",sigma,"secs",nyear,"yrs.png")
-    savefig(title)
-    clf()
-    m4=vec(par_mcmc[:,iburn:nsteps,16]).* CGS.MSUN/CGS.MEARTH
-    ec4=vec(par_mcmc[:,iburn:nsteps,19])#.*sqrt.(vec(par_mcmc[:,1:nsteps,14]).^2 .+ vec(par_mcmc[:,1:nsteps,15]).^2)
-    es4=vec(par_mcmc[:,iburn:nsteps,20])#.*sqrt.(vec(par_mcmc[:,1:nsteps,14]).^2 .+ vec(par_mcmc[:,1:nsteps,15]).^2)
-    p4=vec(par_mcmc[:,iburn:nsteps,17])
-    e4=sqrt.(vec(par_mcmc[:,iburn:nsteps,19]).^2 .+ vec(par_mcmc[:,iburn:nsteps,20]).^2)
-    truem4=317.8
-    trueec4=calc_evec1(0.04839266,14.75385)
-    truees4=calc_evec2(0.04839266,14.75385)
-    truep4=4332.82012875
-    truee4=0.04839266
-    corner(m4,e4,truem4,truee4,nbins)
-    xlabel(L"Mass of Jupiter [$M_{Earth}$]")
-    ylabel("Eccentricity of Jupiter")
-    tight_layout()
-    title=string("IMAGES/discussion/case",case_num,grid_type_nplanet,"Jmecc",sigma,"secs",nyear,"yrs.png")
-    savefig(title)
-    clf()
-  else 
-    m3=vec(par_mcmc[:,iburn:nsteps,11]).* CGS.MSUN/CGS.MEARTH
-    ec3=vec(par_mcmc[:,iburn:nsteps,14])#.*sqrt.(vec(par_mcmc[:,1:nsteps,14]).^2 .+ vec(par_mcmc[:,1:nsteps,15]).^2)
-    es3=vec(par_mcmc[:,iburn:nsteps,15])#.*sqrt.(vec(par_mcmc[:,1:nsteps,14]).^2 .+ vec(par_mcmc[:,1:nsteps,15]).^2)
-    p3=vec(par_mcmc[:,iburn:nsteps,12])
-    e3=sqrt.(vec(par_mcmc[:,iburn:nsteps,14]).^2 .+ vec(par_mcmc[:,iburn:nsteps,15]).^2)
-    truem3=317.8
-    trueec3=calc_evec1(0.04839266,14.75385)
-    truees3=calc_evec2(0.04839266,14.75385)
-    truep3=4332.82012875
-    truee3=0.04839266
-    corner(m3,e3,truem3,truee3,nbins)
-    xlabel(L"Mass of Jupiter [$M_{Earth}$]")
-    ylabel("Eccentricity of Jupiter")
-    tight_layout()
-    title=string("IMAGES/discussion/case",case_num,grid_type_nplanet,"mecc",sigma,"secs",nyear,"yrs.png")
-    savefig(title)
-    clf()
-  end
-  if include_moon
-    tmax=sqrt.(vec(par_mcmc[:,iburn:nsteps,16]).^2 .+ vec(par_mcmc[:,iburn:nsteps,17]).^2)
-    x1=vec(par_mcmc[:,iburn:nsteps,16])
-    x2=vec(par_mcmc[:,iburn:nsteps,17])
-    x3=vec(par_mcmc[:,iburn:nsteps,18])#.*57.2957795
-    truetmax=calc_tmax(CGS.AU,CGS.AMOON*CGS.AU,CGS.MEARTtranspose(H),CGS.MMOON,365.256355) #0.0018
-    truex2=0.01
-    truex3=2.31586#.*57.2957795
-    title=string("IMAGES/discussion/case",case_num,grid_type_nplanet,"Moon2-",sigma,"secs",nyear,"yrs.png")
-    corner(tmax,x3,truetmax,truex3,nbins)
-    xlabel(L"$t_{max}$ [days]")
-    ylabel(L"$\Delta \phi$ [rad]")
-    tight_layout()
-    savefig(title)
-    clf()
-  end
-  function plot_traces()
-    # fig=figure(figsize=(8,6))
-    # fig,axs=plt.subplots(nrows=5,ncols=nplanet)
-    # fig.suptitle(string(model," traces; BIC=",BIC))
-    # for ax in axs
-    #   for i=1:nparam
-    #   for j=1:nwalkers 
-    #   ax.plot(par_mcmc[j,iburn:end,i])
-    #   end
-    #   ax.set_ylabel(pname[i])
-    #   end
-    # end
-    # title=string("IMAGES/trace/case",case_num,grid_type_nplanet,"-",sigma,"secs",nyear,"yrs.png")
-    # savefig(title)
-    figure(figsize=(8,6))
-    for i=1:5
-    ax1=subplot(3,2,i)
+function plot_traces()
+  fig=figure(figsize=(8,6))
+  fig,axs=plt.subplots(nrows=5,ncols=nplanet)
+  fig.suptitle(string(model," traces; BIC=",BIC))
+  for ax in axs
+    for i=1:nparam
     for j=1:nwalkers 
-    ax1.plot(par_mcmc[j,iburn:nsteps,i])
+    ax.plot(par_mcmc[j,iburn:end,i])
     end
-    ax1.set_ylabel(parname[i])
-    end
-    tight_layout()
-    title=string("IMAGES/trace/case",case_num,grid_type_nplanet,"Venus-",sigma,"secs",nyear,"yrs.png")
-    savefig(title)
-    clf()
-    figure(figsize=(8,6))
-    for i=1:5
-      ax2=subplot(3,2,i)
-      # for i=1:nparam
-      # ax=subplot(nplanet,5,i)
-      for j=1:nwalkers 
-      ax2.plot(par_mcmc[j,iburn:nsteps,i+5])
-      # ax.plot(par_mcmc[j,iburn:end,i])
-      end
-      ax2.set_ylabel(parname[i+5])
-    end
-    tight_layout()
-    title=string("IMAGES/trace/case",case_num,grid_type_nplanet,"Earth-",sigma,"secs",nyear,"yrs.png")
-    savefig(title)
-    clf()
-
-    if nplanet==5
-      figure(figsize=(8,6))
-      for i=1:5
-      ax3=subplot(3,2,i)
-      for j=1:nwalkers 
-      ax3.plot(par_mcmc[j,iburn:nsteps,i+20])
-      end
-      ax3.set_ylabel(parname[i+20])
-      end
-      tight_layout()
-      title=string("IMAGES/trace/case",case_num,grid_type_nplanet,"Saturn-",sigma,"secs",nyear,"yrs.png")
-      savefig(title)
-      clf()
-      figure(figsize=(8,6))
-      for i=1:5
-      ax3=subplot(3,2,i)
-      for j=1:nwalkers 
-      ax3.plot(par_mcmc[j,iburn:nsteps,i+10])
-      end
-      ax3.set_ylabel(parname[i+10])
-      end
-      tight_layout()
-      title=string("IMAGES/trace/case",case_num,grid_type_nplanet,"Mars-",sigma,"secs",nyear,"yrs.png")
-      savefig(title)
-      #    println("Hit return to continue")
-      #    read(STDIN,Char)
-      clf()
-      figure(figsize=(8,6))
-      for i=1:5
-      ax3=subplot(3,2,i)
-      for j=1:nwalkers 
-      ax3.plot(par_mcmc[j,iburn:nsteps,i+15])
-      end
-      ax3.set_ylabel(parname[i+15])
-      end
-      ax4=subplot(3,2,6)
-      for j=1:nwalkers
-        ax4.plot(par_mcmc[j,iburn:nsteps,end])
-        ax4.set_ylabel(parname[end])
-      end
-      tight_layout()
-      title=string("IMAGES/trace/case",case_num,grid_type_nplanet,"Jupiter-",sigma,"secs",nyear,"yrs.png")
-      savefig(title)
-      clf()
-    elseif nplanet==4
-      figure(figsize=(8,6))
-      for i=1:5
-        ax3=subplot(3,2,i)
-        for j=1:nwalkers 
-        ax3.plot(par_mcmc[j,iburn:nsteps,i+10])
-        end
-        ax3.set_ylabel(parname[i+10])
-      end
-      tight_layout()
-      title=string("IMAGES/trace/case",case_num,grid_type_nplanet,"Mars-",sigma,"secs",nyear,"yrs.png")
-      savefig(title)
-      clf()
-      figure(figsize=(8,6))
-      for i=1:5
-        ax3=subplot(3,2,i)
-        for j=1:nwalkers 
-        ax3.plot(par_mcmc[j,iburn:nsteps,i+15])
-        end
-        ax3.set_ylabel(parname[i+15])
-      end
-      ax4=subplot(3,2,6)
-      for j=1:nwalkers
-        ax4.plot(par_mcmc[j,iburn:nsteps,end])
-        ax4.set_ylabel(parname[end])
-      end
-      tight_layout()
-      title=string("IMAGES/trace/case",case_num,grid_type_nplanet,"Jupiter-",sigma,"secs",nyear,"yrs.png")
-      savefig(title)
-      clf()
-    else
-      figure(figsize=(8,6))
-      for i=1:5
-      ax3=subplot(3,2,i)
-      for j=1:nwalkers 
-      ax3.plot(par_mcmc[j,iburn:nsteps,i+10])
-      end
-      ax3.set_ylabel(parname[i+10])
-      end
-      ax4=subplot(3,2,6)
-      for j=1:nwalkers
-        ax4.plot(par_mcmc[j,iburn:nsteps,end])
-        ax4.set_ylabel(parname[end])
-      end
-      tight_layout()
-      title=string("IMAGES/trace/case",case_num,grid_type_nplanet,"Jupiter-",sigma,"secs",nyear,"yrs.png")
-      savefig(title)
-      clf()
-    end
-    if include_moon
-      figure(figsize=(7,5))
-      for i=1:3
-      ax5=subplot(2,2,i)
-      for j=1:nwalkers 
-      ax5.plot(par_mcmc[j,1:nsteps,i+15])
-      end
-      ax5.set_ylabel(parname[i+20])
-      end
-      # subplot(2,2,4)
-      # for j=1:nwalkers
-      # plot(lprob_mcmc[j,iburn:nsteps])  
-      # ylabel(L"$logProb$")
-      # end
-      tight_layout()
-      title=string("IMAGES/trace/case",case_num,grid_type_nplanet,"Moon-",sigma,"secs",nyear,"yrs.png")
-      savefig(title)
-      clf()
+    ax.set_ylabel(pname[i])
     end
   end
-
-  # show()
+  title=string("IMAGES/trace/case",case_num,grid_type_nplanet,"-",sigma,"secs",nyear,"yrs.png")
+  savefig(title)
 end
 # Create a corner plot for posterior distributions of planet parameters
 function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::Bool=false) 
@@ -960,28 +677,31 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
   # mutual_radius=mutual_Hill(avg[2],avg[1].*CGS.MSUN/CGS.MEARTtranspose(H),CGS.MSUN,avg[7],avg[6].*CGS.MSUN/CGS.MEARTH)
  # if mutual_radius <
  # Calculate Bayesian Inference Criterion (BIC) 
-  function calc_BIC(prob)
-    function calc_chisq(par_mcmc)
-    chisq = 0.0  
-    tt_model = TTVFaster.ttv_wrapper(tt0,nplanet,ntrans,par_mcmc[1:nparam-1],jmax,EM) 
-      for j=1:length(tt)
-        chisq += (tt[j]-tt_model[j])^2 / (sigtt[j]^2 + par_mcmc[end]^2)
-      end
-    return chisq
-    end
-    chisq=calc_chisq(avg)
-    N=length(tt0) ; k=nparam
-    #println("[N_obs]= ",N," [no. of model params]= ",k)
-    reduced_chisq=chisq/(N-k)
-    BIC_chi(chisq,k,N)=chisq + k*log(N)
-    BIC=-2*log(prob) + k*log(N)
-    return reduced_chisq, BIC
-  end
-  prob=quantile(exp.(lprob_mcmc[iburn:nsteps]),0.5);prob_max = maximum(exp.(lprob_mcmc[iburn:nsteps]))
-  #println(" median Prob: ",prob,"      maximum Prob: ",prob_max)
-  #chi2_avg = chi_mcmc(tt0,nplanet,ntrans,mean_posteriors,tt,sigtt,jmax,EM)
-  chi,BIC=round.(calc_BIC(prob_max),sigdigits=4)
-  println("BIC= ",BIC ,'\t'," reduced χ^2: ",chi)
+  # function calc_BIC(prob)
+  #   function calc_chisq(par_mcmc)
+  #   chisq = 0.0  
+  #   tt_model = TTVFaster.ttv_wrapper(tt0,nplanet,ntrans,par_mcmc[1:nparam-1],jmax,EM) 
+  #     for j=1:length(tt)
+  #       chisq += (tt[j]-tt_model[j])^2 / (sigtt[j]^2 + par_mcmc[end]^2)
+  #     end
+  #   return chisq
+  #   end
+
+  #   chisq=calc_chisq(avg)
+  #   N=length(tt0) ; k=nparam
+  #   #println("[N_obs]= ",N," [no. of model params]= ",k)
+  #   reduced_chisq=chisq/(N-k)
+  #   BIC_chi(chisq,k,N)=chisq + k*log(N)
+  #   BIC=-2*log(prob) + k*log(N)
+  #   return reduced_chisq, BIC
+  # end
+  # # prob=quantile(exp.(lprob_mcmc[iburn:nsteps]),0.5);prob_max = maximum(exp.(lprob_mcmc[iburn:nsteps]))
+  # #println(" median Prob: ",prob,"      maximum Prob: ",prob_max)
+  # #chi2_avg = chi_mcmc(tt0,nplanet,ntrans,mean_posteriors,tt,sigtt,jmax,EM)
+  # chi,BIC=round.(calc_BIC(prob_max),sigdigits=4)
+  vals=jldmc["par_mcmc"][:,jldmc["iburn"]:end,:]#,sigdigits=6)
+  reduced_chisq, BIC,chisq=round.(calc_BIC(jldmc["lprob_mcmc"][:,jldmc["iburn"]:jldmc["nsteps"]],jldfit["tt0"],jldfit["tt"],jldfit["sigtt"],jldfit["nplanet"],jldfit["ntrans"],vals,EM=EM),sigdigits=6)
+  println("BIC= ",BIC ,'\t'," reduced χ^2: ",reduced_chisq,'\t'," χ^2: ",chisq)
 
   sigsys=round((median(vec(par_mcmc[:,iburn:end,end]))).* 3600*24,sigdigits=3)
   sigsys_err=(std(vec(par_mcmc[:,iburn:end,end]))).* 3600*24
@@ -1032,11 +752,11 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
     model=L"$\mathcal{H}_{PPsPP}$"
   end
   parname=[
-    L"$μ_b$ [$M_{⋆}$]",L"$P_b$ [days]",L"$t_{0,b}$",L"$e_b cos(ω_b)$",L"$e_b sin(ω_b)$",
-    L"$μ_c$ [$M_{⋆}$]",L"$P_c$ [days]",L"$t_{0,c}$",L"$e_c cos(ω_c)$",L"$e_c sin(ω_c)$",
-    #L"$μ_e$ [$M_{⋆}$]",L"$P_e$ [days]",L"$t_{0,e}$",L"$e_e cos(ω_e)$",L"$e_e sin(ω_e)$",
-    L"$μ_d$ [$M_{⋆}$]",L"$P_d$ [days]",L"$t_{0,d}$",L"$e_d cos(ω_d)$",L"$e_d sin(ω_d)$",
-    L"$μ_f$ [$M_{⋆}$]",L"$P_f$ [days]",L"$t_{0,f}$",L"$e_f cos(ω_f)$",L"$e_f sin(ω_f)$",
+    L"$m_b / M_{⋆}$",L"$P_b$ [days]",L"$t_{0,b}$",L"$e_b cos(ω_b)$",L"$e_b sin(ω_b)$",
+    L"$m_c / M_{⋆}$",L"$P_c$ [days]",L"$t_{0,c}$",L"$e_c cos(ω_c)$",L"$e_c sin(ω_c)$",
+    L"$m_e / M_{⋆}$",L"$P_e$ [days]",L"$t_{0,e}$",L"$e_e cos(ω_e)$",L"$e_e sin(ω_e)$",
+    L"$m_d / M_{⋆}$",L"$P_d$ [days]",L"$t_{0,d}$",L"$e_d cos(ω_d)$",L"$e_d sin(ω_d)$",
+    L"$μ_f$",L"$P_f$ [days]",L"$t_{0,f}$",L"$e_f cos(ω_f)$",L"$e_f sin(ω_f)$",
     L"$t_{max} sin(ϕ_0)$",L"$t_{max} cos(ϕ_0)$",L"$Δϕ$ [rad]",L"$σ_{sys}^2$ [days]"]
   
     # True values based on "PlanetaryBodyData.pdf" (source?)
@@ -1070,8 +790,9 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
     vec(par_mcmc[:,iburn:end,6]), 
     vec(par_mcmc[:,iburn:end,7]),
     vec(par_mcmc[:,iburn:end,9]),
-    vec(par_mcmc[:,iburn:end,10])]#,vec(par_mcmc[:,iburn:end,11]), vec(par_mcmc[:,iburn:end,12]),vec(par_mcmc[:,iburn:end,14]), vec(par_mcmc[:,iburn:end,15])] 
-    #vec(par_mcmc[:,iburn:end,16]), vec(par_mcmc[:,iburn:end,17]),vec(par_mcmc[:,iburn:end,19]), vec(par_mcmc[:,iburn:end,20])]
+    vec(par_mcmc[:,iburn:end,10]),
+    vec(par_mcmc[:,iburn:end,11]), vec(par_mcmc[:,iburn:end,12]),vec(par_mcmc[:,iburn:end,14]), vec(par_mcmc[:,iburn:end,15]),
+    vec(par_mcmc[:,iburn:end,16]), vec(par_mcmc[:,iburn:end,17]),vec(par_mcmc[:,iburn:end,19]), vec(par_mcmc[:,iburn:end,20])]
     labels=[parname[1];
     parname[2];
     parname[4];
@@ -1079,15 +800,18 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
     parname[6];
     parname[7];
     parname[9];
-    parname[10]]#;parname[11];parname[12];parname[14];parname[15]]#;parname[16];parname[17];parname[19];parname[20]]
+    parname[10];
+   parname[11];parname[12];parname[14];parname[15];
+   parname[16];parname[17];parname[19];parname[20]]
     corner(values,labels,nbins;quantiles=[0.1587,0.8413])
-  
+    println("Plotting ",size(values)," values with ",size(labels),"labels.")
+    show()
     title=string("IMAGES/corner/case",case_num,grid_type_nplanet,"-",sigma,"secs",nyear,"yrs.png")
     # fig1=corner([m1,ec1,p1,m2,ec2,p2],[truem1,trueec1,truep1,truem2,trueec2,truep2],labels,nbins)
     # fig1.suptitle(string(model," Posteriors for Planet 1"))
     # fig1.text(0.36,0.8,string(L"$\sigma_{sys}=$",sigsys," sec",'\n',L"$\sigma_{tot}=$",sigtot," sec",'\n',"BIC= ",BIC,'\n',L"$\chi^2 =$",chi))
     savefig(title)
-    clf()
+    # clf()
 
     # lim=minimum(p2),maximum(p2)#0.0064,0.00652
     # label=L"Per$_2 - 365.25$ [days]"
@@ -1185,6 +909,56 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
     #    savefig(title)
     #    clf()
     #  end
+  # end
+  #   corner(m1,m2,truem1,truem2,nbins)
+  # ylabel(L"Mass of Earth [$M_{Earth}$]")
+  # xlabel(L"Mass of Venus [$M_{Earth}$]")
+  # tight_layout()
+  # title=string("IMAGES/discussion/case",case_num,grid_type_nplanet,"masses",sigma,"secs",nyear,"yrs.png")
+  # savefig(title)
+  # clf()
+  # corner(e1,e2,truee1,truee2,nbins)
+  # ylabel("Eccentricity of Earth")
+  # xlabel("Eccentricity of Venus")
+  # tight_layout()
+  # title=string("IMAGES/discussion/case",case_num,grid_type_nplanet,"eccs",sigma,"secs",nyear,"yrs.png")
+  # savefig(title)
+  # clf()
+  # corner(ec1,ec2,trueec1,trueec2,nbins)
+  # ylabel(L"$e \cos \varpi$ for Earth")
+  # xlabel(L"$e \cos \varpi$ for Venus")
+  # tight_layout()
+  # title=string("IMAGES/discussion/case",case_num,grid_type_nplanet,"ecos",sigma,"secs",nyear,"yrs.png")
+  # savefig(title)
+  # clf()
+  # corner(es1,es2,truees1,truees2,nbins)
+  # ylabel(L"$e \sin \varpi$ for Earth")
+  # xlabel(L"$e \sin \varpi$ for Venus")
+  # tight_layout()
+  # title=string("IMAGES/discussion/case",case_num,grid_type_nplanet,"esin",sigma,"secs",nyear,"yrs.png")
+  # savefig(title)
+  # clf()
+    #  corner(m3,e3,truem3,truee3,nbins)
+    # xlabel(L"Mass of Mars [$M_{Earth}$]")
+    # ylabel("Eccentricity of Mars")
+    # tight_layout()
+    # title=string("IMAGES/discussion/case",case_num,grid_type_nplanet,"Vmecc",sigma,"secs",nyear,"yrs.png")
+    # savefig(title)
+    # clf()
+    # corner(m4,e4,truem4,truee4,nbins)
+    # xlabel(L"Mass of Jupiter [$M_{Earth}$]")
+    # ylabel("Eccentricity of Jupiter")
+    # tight_layout()
+    # title=string("IMAGES/discussion/case",case_num,grid_type_nplanet,"Jmecc",sigma,"secs",nyear,"yrs.png")
+    # savefig(title)
+    # clf()
+  #   title=string("IMAGES/discussion/case",case_num,grid_type_nplanet,"Moon2-",sigma,"secs",nyear,"yrs.png")
+  #   corner(tmax,x3,truetmax,truex3,nbins)
+  #   xlabel(L"$t_{max}$ [days]")
+  #   ylabel(L"$\Delta \phi$ [rad]")
+  #   tight_layout()
+  #   savefig(title)
+  #   clf()
   # end
 end
 # Basic corner plot for posterior distributions of 2 parameters
