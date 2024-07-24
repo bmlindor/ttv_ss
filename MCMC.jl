@@ -314,6 +314,9 @@ function mc_vals(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num=Int,
   nplanet,ntrans=jldfit["nplanet"],jldfit["ntrans"]
   nt1,nt2=jldfit["ntrans"][1],jldfit["ntrans"][2]
   jmax=5
+
+  pl_num=parse(Int,grid_type_nplanet[end])
+  @show jldfit[string("best_p",pl_num)]
   # weight=ones(nt1+nt2)./ sigtt.^2 
   nparam=length(pname)
   prob_max=maximum(lprob_mcmc[:,iburn:end])

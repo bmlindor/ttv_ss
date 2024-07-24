@@ -1003,3 +1003,206 @@ function corner(x,y,nbins)
   scatter_hist(x, y, ax, ax_histx, ax_histy)
     # return fig
 end
+
+function plot_acc(nyear,nplanet)
+med90,errors90=mc_vals(90,nyear,"p3",1)
+med60,errors60=mc_vals(60,nyear,"p3",1)
+med30,errors30=mc_vals(30,nyear,"p3",1)
+med10,errors10=mc_vals(10,nyear,"p3",1)
+labels=["planet b",
+  "planet c",
+# "planet e",
+  "planet d"]
+colors=["salmon",
+  "forestgreen",
+# "orange",
+  "firebrick"]
+true_x=[.815,
+  1.012,
+# 0.1074,
+  317.8]
+noise1=[10,10,10,10]
+noise3=[30,30,30,30]
+noise6=[60,60,60,60]
+noise9=[90,90,90,90]
+   fig,ax=plt.subplots(figsize=(6,4))
+   function plot_noise(ax)
+   ax.set_title(string("[",nyear," yr span]"),fontsize="large")
+   for iplanet=1:nplanet
+       ax.errorbar(noise1[iplanet],med10[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH,yerr=[errors10[1,(iplanet-1)*5+1] errors10[2,(iplanet-1)*5+1]].*CGS.MSUN/CGS.MEARTH,fmt="o",color=colors[iplanet])
+       ax.errorbar(noise3[iplanet],med30[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH,yerr=[errors30[1,(iplanet-1)*5+1] errors30[2,(iplanet-1)*5+1]].*CGS.MSUN/CGS.MEARTH,fmt="o",color=colors[iplanet])
+       ax.errorbar(noise6[iplanet],med60[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH,yerr=[errors60[1,(iplanet-1)*5+1] errors60[2,(iplanet-1)*5+1]].*CGS.MSUN/CGS.MEARTH,fmt="o",color=colors[iplanet])
+      
+  if isdefined(med90)
+      ax.errorbar(noise9[iplanet],med90[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH,yerr=[errors90[1,(iplanet-1)*5+1] errors90[2,(iplanet-1)*5+1]].*CGS.MSUN/CGS.MEARTH,fmt="o",color=colors[iplanet])
+      end
+       ax.axhline(true_x[iplanet],color="k",linestyle="--")
+       end
+       ax.set_ylabel(L"M$_p$ [$M_{\oplus}$]",fontsize="large")
+       ax.set_xlabel(L"$\sigma_{obs}$ [secs]",fontsize="large")
+       ax.minorticks_on()
+       ax.set_xlim(0,120)
+       tight_layout()
+       ax.text(40,true_x[3].*1.05,string(labels[3]),fontsize="medium")
+       ax2=fig.add_axes([0.65,0.3,0.26,0.5])
+#      gs=fig.add_gridspec(2,1 ,left=0.6,right=0.9,bottom=0.3,top=0.8,wspace=0.05,hspace=0.05)
+#      ax1=fig.add_subplot(gs[2,1]);ax2=fig.add_subplot(gs[1,1],sharex=ax1)
+#      ax1.spines["top"].set_visible(false);ax2.spines["bottom"].set_visible(false)
+#      ax1.tick_params(labeltop=false);ax2.tick_params(labelbottom=false,bottom=false)
+#      d=0.02
+#      ax2.plot((-d, +d),(-d,+d),transform=ax2.transAxes,clip_on=false,linewidth=0.8,color="k")
+#      ax2.plot((1-d, 1+d),(-d,+d),transform=ax2.transAxes,clip_on=false,linewidth=0.8,color="k")
+#      ax1.plot((1-d, 1+d),(1-d,1+d),transform=ax1.transAxes,clip_on=false,linewidth=0.8,color="k")
+#      ax1.plot((-d, +d),(1-d,1+d),transform=ax1.transAxes,clip_on=false,linewidth=0.8,color="k")
+       ax2.text(65,true_x[1].*1.05,"b",fontsize="medium")
+       ax2.text(65,true_x[2].*1.025,"c",fontsize="medium")
+    #   ax2.text(40,true_x[3].*1.5,string(labels[3]),fontsize="medium")
+       for iplanet=1:2
+           #for j=1:length(noise)
+       ax2.errorbar(noise1[iplanet],med10[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH,yerr=[errors10[1,(iplanet-1)*5+1] errors10[2,(iplanet-1)*5+1]].*CGS.MSUN/CGS.MEARTH,fmt="o",color=colors[iplanet])
+       ax2.errorbar(noise3[iplanet],med30[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH,yerr=[errors30[1,(iplanet-1)*5+1] errors30[2,(iplanet-1)*5+1]].*CGS.MSUN/CGS.MEARTH,fmt="o",color=colors[iplanet])
+       ax2.errorbar(noise6[iplanet],med60[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH,yerr=[errors60[1,(iplanet-1)*5+1] errors60[2,(iplanet-1)*5+1]].*CGS.MSUN/CGS.MEARTH,fmt="o",color=colors[iplanet])
+ ax2.errorbar(noise9[iplanet],med90[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH,yerr=[errors90[1,(iplanet-1)*5+1] errors90[2,(iplanet-1)*5+1]].*CGS.MSUN/CGS.MEARTH,fmt="o",color=colors[iplanet])
+       ax2.axhline(true_x[iplanet],color="k",linestyle="--")
+     end
+#    iplanet=3
+#      ax1.errorbar(noise1[iplanet],med10[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH,yerr=[errors10[1,(iplanet-1)*5+1] errors10[2,(iplanet-1)*5+1]].*CGS.MSUN/CGS.MEARTH,fmt="o",color=colors[iplanet])
+#      ax1.errorbar(noise1[iplanet],med10[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH,yerr=[errors10[1,(iplanet-1)*5+1] errors10[2,(iplanet-1)*5+1]].*CGS.MSUN/CGS.MEARTH,fmt="o",color=colors[iplanet])
+       ax2.minorticks_on();ax2.set_xlim(0,75);#ax2.set_ylim(0,1.1)
+       end
+plot_noise(ax)
+savefig(string("IMAGES/discussion/",nplanet,"_case1",nyear,".png"),dpi=200)
+end
+function plot_param(grid_type_nplanet,nplanet::Real,case::Real=1,comparison_value::String="%err")
+    sigmas=[10,30,60,90,120]
+    nyears=[15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30]
+ #   sigs=[];yrs=[]
+     values_2d=zeros(length(sigmas),length(nyears)) .*NaN
+     errors_2d=zeros(length(sigmas),length(nyears)) .*NaN
+  if  grid_type_nplanet=="p2" 
+    model=L"$\mathcal{H}_{PP}$"
+  elseif grid_type_nplanet=="p3" || grid_type_nplanet=="widep3"
+    model=L"$\mathcal{H}_{PPP}$"
+  elseif grid_type_nplanet=="p4" || grid_type_nplanet=="widep4"
+    model=L"$\mathcal{H}_{PPPP}$"
+  elseif grid_type_nplanet=="p3moon" || grid_type_nplanet=="widep3moon"
+    model=L"$\mathcal{H}_{PPsP}$"
+  elseif grid_type_nplanet=="p3moonp4" || grid_type_nplanet=="widep3moonp4"
+    model=L"$\mathcal{H}_{PPsPP}$"
+  end  
+  fig=figure(figsize=(8,4))
+  #gs=fig.add_gridspec(2,1)
+  ax1=fig.add_subplot(1,nplanet,1)
+  ax2=fig.add_subplot(1,nplanet,2)
+  function make_plot(param_col,errors_2d,values_2d,ax)
+    for (i,sigma) in enumerate(sigmas)
+        for (j,nyear) in enumerate(nyears)
+            mcfile=string("MCMC/fromEMB/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+      if case==2
+            mcfile=string("MCMC/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+      end
+            if isfile(mcfile)
+                mc=jldopen(mcfile,"r")
+                med=median( vec(mc["par_mcmc"][:,mc["iburn"]:end,param_col]))
+                st_dev=std( vec(mc["par_mcmc"][:,mc["iburn"]:end,param_col]))
+                av=mean( vec(mc["par_mcmc"][:,mc["iburn"]:end,param_col]))
+#                 low=quantile( vec(mc["par_mcmc"][:,mc["iburn"]:end,param_col]),0.1587)
+#                 high=quantile( vec(mc["par_mcmc"][:,mc["iburn"]:end,param_col]),0.8413)
+#                 worst=max(st_dev,med.-low,high.-med)
+#                 err_ratio=worst/med 
+#                push!(sigs,sigma);push!(yrs,nyear)
+   if st_dev/av < 1
+    errors_2d[i,j]=(st_dev/av)*100
+    values_2d[i,j]=(abs(true_vals[param_col]-av)/st_dev)
+    end
+#                 values_2d[i,j]=(med-true_vals[param_col])/true_vals[param_col]
+            end
+        end
+    end
+
+ #   fig,ax=plt.subplots(figsize=(6,5))
+#     h,xedges,yedges,im=ax.hist2d(yrs,sigs,weights=errors,bins=[length(yrs),length(sigs)],cmin=0.000001)
+    if comparison_value=="%err"
+        im=ax.imshow(errors_2d,aspect=1,cmap="plasma",origin="lower",vmin=0.00001,extent=[0.0,120,0.0,120])
+        colorbar(im,ax=ax)
+  ax.set_title(string("% Error in ",parname[param_col]," for ",model,),fontsize="large")
+    elseif comparison_value=="true"
+        im=ax.imshow(values_2d,aspect=1,cmap="plasma",origin="lower",vmin=0.00001,extent=[0.0,120,0.0,120])
+        colorbar(im,ax=ax)
+# ax.text(string(L"$\sigma$ "," of the Measurement of ",parname[param_col]," for ",model,),fontsize="large")
+   end
+   ax.set_xticks(collect(range(0,length=length(nyears)+1,stop=nyears[end])),labels=["15","","17","","19","","21","","23","","25","","27","","29","","31"])
+   end
+#     ylim=(0,120)
+ #    ax.set_ylabel(string("Injected Noise, ",L"$\sigma_{obs}$ [secs]"),fontsize="large")
+  #   ax.set_xlabel(string("Observing Span, ",L"$n_{year}$ [yrs]"),fontsize="large")
+   make_plot(1,errors_2d,values_2d,ax1)
+     values_2d=zeros(length(sigmas),length(nyears)) .*NaN
+     errors_2d=zeros(length(sigmas),length(nyears)) .*NaN
+   make_plot(6,errors_2d,values_2d,ax2)
+ #xticks(collect(range(0,length=length(nyears)+1,stop=nyears)),["15","","17","","19","","21","","23","","25","","27","","29","","31"])
+ name=string("IMAGES/discussion/err","_",grid_type_nplanet,".jpg")  
+ #  savefig(name,dpi=200)
+end
+
+
+function comp_BIC(grid_type_nplanet,case=1,include_moon=false;grid_type_nplanet2::String="p2")
+EM =true
+  if include_moon
+      EM=false
+    end
+ if  grid_type_nplanet=="p2" 
+    model=L"$\mathcal{H}_{PP}$"
+  elseif grid_type_nplanet=="p3" || grid_type_nplanet=="widep3"
+    model=L"$\mathcal{H}_{PPP}$"
+  elseif grid_type_nplanet=="p4" || grid_type_nplanet=="widep4"
+    model=L"$\mathcal{H}_{PPPP}$"
+  elseif grid_type_nplanet=="p3moon" || grid_type_nplanet=="widep3moon"
+    model=L"$\mathcal{H}_{PPsP}$"
+  elseif grid_type_nplanet=="p3moonp4" || grid_type_nplanet=="widep3moonp4"
+    model=L"$\mathcal{H}_{PPsPP}$"
+  end  
+    sigmas=[10,30,60,90,120]
+    nyears=[15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30]
+ #   sigs=[];yrs=[]
+    values_pn=ones(length(sigmas),length(nyears)) .* NaN
+    values_p2=ones(length(sigmas),length(nyears)) .* NaN
+    for (i,sigma) in enumerate(sigmas)
+        for (j,nyear) in enumerate(nyears)
+  mcfile2=string("MCMC/fromEMB/",grid_type_nplanet2,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+        mcfile=string("MCMC/fromEMB/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+      fitfile=string("FITS/fromEMB/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
+  fitfile2=string("FITS/fromEMB/",grid_type_nplanet2,"_fit",sigma,"s",nyear,"yrs.jld2")
+    if case==2
+    mcfile2=string("MCMC/",grid_type_nplanet2,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+  mcfile=string("MCMC/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+      fitfile=string("FITS/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
+      fitfile2=string("FITS",grid_type_nplanet2,"_fit",sigma,"s",nyear,"yrs.jld2")
+    end
+        if isfile(mcfile) && isfile(mcfile2) ##&& isfile(fitfile2) && isfile(fitfile)
+    f=jldopen(String(fitfile),"r")
+    f2=jldopen(String(fitfile2),"r")
+        mc=jldopen(mcfile,"r")
+    mc2=jldopen(mcfile2,"r")
+  vals=mc["par_mcmc"][:,mc["iburn"]:end,:]#,sigdigits=6)
+  vals2=mc2["par_mcmc"][:,mc2["iburn"]:end,:]#,sigdigits=6)
+#   tt,tt0,sigtt,ttmodel=f["tt"],f["tt0"],f["sigtt"],f["ttmodel"]
+    
+  values_pn[i,j]=calc_BIC(mc["lprob_mcmc"][:,mc["iburn"]:mc["nsteps"]],f["tt0"],f["nplanet"],f["ntrans"],f["tt"],f["sigtt"],vals)#,sigdigits=6)
+  # values_p2[i,j]=calc_BIC(mc2["lprob_mcmc"][:,mc2["iburn"]:mc2["nsteps"]],f2["tt0"],f2["nplanet"],f2["ntrans"],f2["tt"],f2["sigtt"],vals2)#,sigdigits=6)  
+         end
+   end
+   end
+fig,ax=plt.subplots(figsize=(6,5))
+ #     im=ax.imshow(abs.(values_pn).-abs.(values_p2),aspect=1,cmap="viridis",origin="lower",extent=[0.0,120,0.0,120])
+     im=ax.imshow(values_pn,aspect=1,cmap="viridis",origin="lower",extent=[0.0,120,0.0,120])
+      colorbar(im)
+#     plt.title(string(L"$\Delta$","BIC"),fontsize="x-large")
+      name=string("IMAGES/discussion/BIC",case,"_",grid_type_nplanet,".jpg") 
+     ax.set_ylabel(string("Injected Noise, ",L"$\sigma_{obs}$ [secs]"),fontsize="large")
+     ax.set_xlabel(string("Observing Span, ",L"$n_{year}$ [yrs]"),fontsize="large")
+    xticks(collect(range(0,length=length(nyears)+1,stop=120)),
+    ["15","","17","","19","","21","","23","","25","","27","","29","","31"])
+    savefig(name,dpi=200)
+end
+

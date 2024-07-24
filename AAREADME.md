@@ -43,9 +43,12 @@ NaifID:
 
 Observer is calculating barycentic julian date for theings outside SS, with light travel time correction.
 
-1). Simulate transit times from JPLEphemeris. Add noise option to data.
+1). Simulate transit times from JPLEphemeris. Add noise option to data. 
 
 sim_obs_and_find_times(jd1::Float64,sigma::Real,nyear::Real,obs::String)
+NB:
+12/18/23 : Somehow, routine with TTVFaster skips the transit for Venus (at t=14513.936223576813).
+1/09/24 : Added break to while loop. Now stopping before t0[end]. pre-2024 runs dont have this constraint
 
 2a). Carry out a linear fit to the transit times. 
 
@@ -100,6 +103,10 @@ sort them from smallest to largest value. Find where 68% of values is about a po
 
 If number of independent samples for each walker >= 100, get results. 
 09/22/2023 updated 12/13/2023
+12/18/23 : Somehow, routine with TTVFaster skips the transit for Venus (at t=14513.936223576813). 
+1/09/24 : Added break to while loop. Now stopping before t0[end]. Pre-2024 runs dont have this constraint, so they have   include a transit time after the end of our observation time (for each planet). Only noticed while comparing with NbodyGradient; and I'm not redoing the runs - since I don't think it would matter.
+%The values in parentheses are the actual transit counts, while the preceding values were including a transit time after the end of our observation' time.  
+
 ##########################	Current State	##########################
 0). Updated TTVFaster to be compatible with Julia v1.3+
 1). With transit times of Earth & Venus, can constrain both of their masses

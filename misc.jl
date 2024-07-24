@@ -1,13 +1,6 @@
 include("CGS.jl")
-using TTVFaster,DataFrames,CSV,LsqFit
-# calc_omega(pomega,Omega) = pomega - Omega
-calc_MeanAnom(t,t0,P)=2pi .* (t.-t0) ./ P
-calc_Long(t,t0,P,esinw)=((360/P) .* (t.-t0)) .+ 2*esinw ;
-calc_Long(t,t0,P,e,w)=((360/P) .* (t.-t0)) .+ 2*e*sind(w) ;
-calc_evec1(e,omega)=e* cos(omega-77)
-calc_evec2(e,omega)=e* sin(omega-77)
-calc_ecc(ecosom,esinom)=sqrt(ecosom^2 + esinom^2)
-calc_tmax(a_p,a_s,m_p,m_s,P_p)=(a_s*m_s*P_p) / (2*pi*a_p*(m_s+m_p))
+using TTVFaster,DataFrames,CSV,LsqFit,Statistics,JLD2,PyPlot
+
 function chisquare(tt0,nplanet,ntrans,params,tt,sigtt,jmax,EM)
   chisq = 0.0  #check memory allocation >>>>>>>>>>>>
   tt_model = ttv_wrapper(tt0,nplanet,ntrans,params,jmax,EM) 
@@ -16,15 +9,9 @@ function chisquare(tt0,nplanet,ntrans,params,tt,sigtt,jmax,EM)
   end
   return chisq
 end
-# avg(x,y)=(x + y)/2
+avg(x,y)=(x + y)/2
 gaussian(x,mu,sig)=exp.(-((x .- mu).^2) ./ (2 * sig^.2))
-function fit_BIC(tt0,nplanet,ntrans,params,tt,sigtt,jmax,EM)
-	chi2 = chisquare(tt0,nplanet,ntrans,params,tt,sigtt,jmax,EM)
-	N=length(tt0) ; k=length(params)
-	BIC=chi2 + k*ln(N)
-	return chi2,BIC
-end
-  function calc_BIC(lprob,tt0,tt,sigtt,nplanet,ntrans,par_mcmc;EM=false)
+function calc_BIC(lprob,tt0,tt,sigtt,nplanet,ntrans,par_mcmc;EM=false)
     imax=argmax(lprob)
     prob_max=exp.(lprob[imax])
     function calc_chisq(par_mcmc,nplanet,ntrans)
@@ -44,38 +31,32 @@ end
     reduced_chisq=chisq/(N-k)
     BIC_chi(chisq,k,N)=chisq + k*log(N)
     BIC=-2*log(prob_max) + k*log(N)
+    @show BIC
     return reduced_chisq, BIC,chisq
   end
+
+function fit_BIC(tt0,nplanet,ntrans,params,tt,sigtt,jmax,EM)
+	chi2 = chisquare(tt0,nplanet,ntrans,params,tt,sigtt,jmax,EM)
+	N=length(tt0) ; k=length(params)
+	BIC=chi2 + k*ln(N)
+	return chi2,BIC
+end
 G=CGS.GRAV /1e3 #in MKS units
 AU=CGS.AU /1e2 #in MKS units
 
-calc_sma(Per,mp,mstar)=((G*(mstar + mp)* (Per*24*3600)^2) /(4*pi^2))^(1/3) 
-Hill_radius(Per,mp,ecc,mstar)=(calc_sma(Per,mp,mstar) * (1-ecc) * (mp/(3 * mstar))^(1/3)) / AU
-#Hill_radius((1733*24*3600),(27*5.9742e24),0.4,1.99e30)
+Kepler_law(Per,mp,mstar)=((G*(mstar + mp)* (Per*24*3600)^2) /(4*pi^2))^(1/3) 
+Hill_radius(Per,mp,ecc,mstar)=(Kepler_law(Per,mp,mstar) * (1-ecc) * (mp/(3 * mstar))^(1/3)) / AU
 RV_semiamplitude(Per,mp,ecc,inc,mstar) = (((mp*sin(inc))^3/((Per*24*3600) * (1-ecc^2)^3/2)) * (2pi*G/(mstar+mp)^2))^(1/3)
-
-function calc_sma(Per::Real,mu::Real) 
-  # mp=mu .* (CGS.MSUN/CGS.MEARTH)/CGS.KILOGRAM
-  # mstar=CGS.MSUN/CGS.KILOGRAM
-  a=((((CGS.GRAV*CGS.MSUN) .+ mu).* (Per.*24*3600).^2) /(4*pi^2)).^(1/3) 
-  return a #(AU/1e2) # returns semi-major axis in AU
-end
-calc_P(a,mu)=
-function mutual_Hill(Per1,mu1,Per2,mu2) 
-#Hill_stability(μ1::Real,μ2::Real,a1::Real,a2::Real,Cx::Real)
-	@assert(Per1 <= Per2)
-	a1=calc_sma(Per1,mu1)
-	a2=calc_sma(Per2,mu2)
+calc_deg(value)=value * 180/pi
+calc_evec1(e,omega)=e* cos(omega-77)
+calc_evec2(e,omega)=e* sin(omega-77)
+calc_ecc(ecosomega,esinomega)=sqrt(ecosomega^2 + esinomega^2)
+calc_tmax(a_p,a_s,m_p,m_s,P_p)=(a_s*m_s*P_p) / (2*pi*a_p*(m_s+m_p))
+#Hill_radius((1733*24*3600),(27*5.9742e24),0.4,1.99e30)
+function mutual_Hill(Per1,mp1,mstar,Per2,mp2)
+	a1,a2 = Kepler_law(Per1,mp1,mstar),Kepler_law(Per2,mp2,mstar)	
 	return ((mp1 + mp2)/(3 * mstar))^(1/3) * (a1 + a2)/2
 end
-  # Check stabilities
-  # stable=true
-  # radius=Hill_radius(avg[12],(avg[11].*CGS.MSUN/CGS.MEARTH),calc_ecc(avg[14],avg[15]),CGS.MSUN)
-  # ab_mutual_radius=mutual_Hill(avg[2],avg[1].*CGS.MSUN/CGS.MEARTH,CGS.MSUN,avg[7],avg[6].*CGS.MSUN/CGS.MEARTH)
-  # bc_mutual_radius=mutual_Hill(avg[7],avg[6].*CGS.MSUN/CGS.MEARTH,CGS.MSUN,avg[12],avg[11].*CGS.MSUN/CGS.MEARTH)
-  # println("Planet a-b mutual Hill_radius: ",ab_mutual_radius)
-  # println("Planet b-c mutual Hill_radius: ",bc_mutual_radius)
-  # println("Planet c Hill radius: ",radius)
 
 function second_peak_params(grid_file::String)
 	#Read in as delm
@@ -97,6 +78,15 @@ function second_peak_params(grid_file::String)
       end
      end
   end
+
+	# function peaks(df)
+  #   for i=1:length(df.lprob)
+  #    	if xprob(df.lprob)[i] > .8 && xprob(df.lprob)[i]!=1
+  #      println("indx: ",i," Lprob: ", xprob(df.lprob)[i])
+  #      append!(indxs,i)
+  #     end
+  #    end
+  # end
   peaks(df)
   new_params=df[indxs,:]
 	return new_params
@@ -105,23 +95,19 @@ function calc_quad_errs(xcos,xcos_err,xsin,xsin_err)
 	x = sqrt(xcos^2 .+ xsin^2)
 	return sqrt(((xcos^2 * xcos_err^2) + (xsin^2 * xsin_err^2))/x^2)
 end
-"""
-secular perturbations from Solar System Dynamics book, Appendix A.3 & A.4 has approx rates of change for solar system object per century. Check that these agree with the longitude difference we found of 77 degrees
-# elements .+ el_rates.*T
-"""
-# J2000 = 2451545.0
-# T=(jd1-J2000)/36525
-# e, I, L ,\vapi, \Omega
-elements=[
-    0.00677672 3.39467605 181.97909950 131.60246718 76.67984255;
-0.01671123 -0.00001531 100.46457166 102.93768193 0.0;
-0.09339410 1.84969142 -4.55343205 -23.94362959 49.55953891;
-0.04838624 1.30439695 34.39644051 14.72847983 100.47390909;
-0.05386179 2.48599187 49.95424423 92.59887831 113.66242448]
-el_rates=[
-    -0.00004107 -0.00078890 58517.81538729 0.00268329 -0.27769418;
-    -0.00004392 -0.01294668 35999.37244981 0.32327364 0.0;
-    0.00007882 -0.00813131 19140.30268499 0.44441088 -0.29257343;
-    -0.00013253 -0.00183714 3034.74612775 0.21252668 0.20469106;
-    -0.00050991 0.00193609 1222.49362201 -0.41897216 -0.28867794
-]
+
+parname=[
+	L"$m_b / M_{\odot}$",L"$P_b$",L"$t_{0,b}$",L"$e_b cos(ω_b)$",L"$e_b sin(ω_b)$",
+    	L"$m_c / M_{\odot}$",L"$P_c$",L"$t_{0,c}$",L"$e_c cos(ω_c)$",L"$e_c sin(ω_c)$",
+ #  	L"$m_e / M_{\odot}$",L"$P_e$",L"$t_{0,e}$",L"$e_e cos(ω_e)$",L"$e_e sin(ω_e)$",
+   	L"$m_d / M_{\odot}$",L"$P_d$",L"$t_{0,d}$",L"$e_d cos(ω_d)$",L"$e_d sin(ω_d)$",
+#   	L"$μ_5$ ",L"$P_5$ [days]",L"$t_{0,5}$",L"$e_4 cos(ω_5)$",L"$e_5 sin(ω_5)$",
+    	L"$t_{max} sin(ϕ_0)$",L"$t_{max} cos(ϕ_0)$",L"$Δϕ$ [rad]",L"$σ_{sys}^2$ [days]"]
+truem1,truem2,truem3,truem4=0.815.*CGS.MEARTH/CGS.MSUN,1.0.*CGS.MEARTH/CGS.MSUN,0.1074.*CGS.MEARTH/CGS.MSUN,317.8.*CGS.MEARTH/CGS.MSUN
+truep1,truep2,truep3,truep4=224.7007992,365.2564,686.9795859,4332.82012875
+trueec1,trueec2,trueec3,trueec4=calc_evec1(0.00677323,131.53298),calc_evec1(0.01671022,102.94719),calc_evec1(0.09341233,336.04084),calc_evec1(0.04839266,14.75385)
+truees1,truees2,truees3,truees4=calc_evec2(0.00677323,131.53298),calc_evec2(0.01671022,102.94719),calc_evec2(0.09341233,336.04084),calc_evec2(0.04839266,14.75385)
+truee1,truee2,truee3,truee4=0.00677323,0.01671022,0.09341233,0.04839266
+true_vals=[truem1;truep1;0.0;trueec1;truees1;truem2;truep2;0.0;trueec2;truees2;
+#    truem3;truep3;0.0;trueec3;truees3;
+truem4;truep4;0.0;trueec4;truees4]
