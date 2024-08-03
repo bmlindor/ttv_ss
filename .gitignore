@@ -12,3 +12,4 @@ MCMC/
 TTVFaster/src/*.mem
 .DS_Store
 corner_plot.sublime-workspace
+/test
