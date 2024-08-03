@@ -22,6 +22,7 @@ function fit_planet3(filename::String,jmax::Int,jd1::Float64,sigma::Real,nyear::
   sigtt2 = data1[nt1+1:nt1+nt2,4]
 
   # Okay,let's do a linear fit to the transit times (third column):
+  
   p1est = median(tt1[2:end] - tt1[1:end-1])
   p2est = median(tt2[2:end] - tt2[1:end-1])
   x1,t01,per1 = linear_fit(tt1,p1est,sigtt1)
@@ -109,6 +110,7 @@ function fit_planet3(filename::String,jmax::Int,jd1::Float64,sigma::Real,nyear::
       while maximum(abs.(param1 .- param3)) > tol && niter < 20
         param1 = param3
         fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,[params[1:10];10^params[11];p3_cur;params[12:end]],jmax,true),tt0,tt,weight,param3)
+
         param3 = fit.param
         niter+=1
         # println("init_param: ",param3)
@@ -121,11 +123,14 @@ function fit_planet3(filename::String,jmax::Int,jd1::Float64,sigma::Real,nyear::
         lprob_best = lprob_phase[i]
         p3best = [fit.param[1:10];10^fit.param[11];p3_cur;fit.param[12:end]]
       end
+      
       if lprob_phase[i] > lprob_p3[j] 
       # checks best fit over all phases of jupiter for this particular period
+
         lprob_p3[j] = lprob_phase[i]
         param_p3[1:nparam,j] =  [fit.param[1:10];10^fit.param[11];p3_cur;fit.param[12:end]]
       end
+
       # if j>1 && abs(lprob_p3[j] - lprob_p3[j-1])>5
       #   # Check that best fit for current period is close to that of previous period
       #   lprob_p3[j] = lprob_p3[j-1]
@@ -134,6 +139,7 @@ function fit_planet3(filename::String,jmax::Int,jd1::Float64,sigma::Real,nyear::
     end
     # println("Period: ",p3[j]," log Prob: ",lprob_p3[j]," Param: ",vec(param_p3[1:nparam,j]))
   end
+
   println("Finished 3-planet fit w/ fixed period: ",p3best," in ",niter," iterations")
   # Make likelihood profile continuous???
       # for j=1:np3
