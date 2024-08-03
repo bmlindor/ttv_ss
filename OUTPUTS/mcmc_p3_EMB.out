@@ -1,0 +1,929 @@
+args = ["Hppp", "mcmc", "fromEMB", "20000"]
+JLDFile /astro/users/blindor/research/ttv_ss/FITS/fromEMB/p3_fit30s30yrs.jld2 (read-only) loaded.
+15 parameters from fit: [2.542212381541762e-6, 224.70078014625247, 3503.7653490614966, -0.0026348581610255747, 0.007069584190492371, 3.0256015835562095e-6, 365.2564540142101, 3624.402173466576, 0.012058812205771268, 0.008296886284403504, 0.0007712419920704964, 4210.124349280342, 603.992164587136, 0.016166300438965824, -0.0424915317268965]
+Maximum log Prob from fit: -183.18487509703178
+No Walkers: 75 No. steps: 20000
+Number of steps: 1000 Acceptance Rate: 0.3128533333333333
+Number of steps: 2000 Acceptance Rate: 0.6134266666666667
+Number of steps: 3000 Acceptance Rate: 0.9232266666666666
+Number of steps: 4000 Acceptance Rate: 1.2307733333333333
+Number of steps: 5000 Acceptance Rate: 1.5371466666666667
+Number of steps: 6000 Acceptance Rate: 1.8404933333333333
+Number of steps: 7000 Acceptance Rate: 2.156066666666667
+Number of steps: 8000 Acceptance Rate: 2.4732666666666665
+Number of steps: 9000 Acceptance Rate: 2.783933333333333
+Number of steps: 10000 Acceptance Rate: 3.09564
+Number of steps: 11000 Acceptance Rate: 3.4151066666666665
+Number of steps: 12000 Acceptance Rate: 3.7260666666666666
+Number of steps: 13000 Acceptance Rate: 4.039066666666667
+Number of steps: 14000 Acceptance Rate: 4.350413333333333
+Number of steps: 15000 Acceptance Rate: 4.656373333333334
+Number of steps: 16000 Acceptance Rate: 4.971706666666667
+Number of steps: 17000 Acceptance Rate: 5.289706666666667
+Number of steps: 18000 Acceptance Rate: 5.60352
+Number of steps: 19000 Acceptance Rate: 5.914186666666667
+Number of steps: 20000 Acceptance Rate: 6.226453333333334
+Burn-in Number (ends): 2968
+Independent Sample Size: 4023.993786081666
+Mean posteriors after burn-in: [2.5291529184618836e-6, 224.70078027482774, 3503.765350017891, -0.0011732658573275312, 0.0017431992534585204, 3.0268632752776448e-6, 365.25645423850057, 3624.402170422065, 0.01310900059236663, 0.00378541475766415, 0.0007080084004916663, 4204.215514745938, 680.6518209059049, -0.004005749203779373, -0.037524473795130395]
+MCMC chi-square: 111.45628409643078 for total timing uncertainty of: [38.8071385144879] secs.
+689.695258 seconds (84.61 M allocations: 133.118 GiB, 1.33% gc time)
+JLDFile /astro/users/blindor/research/ttv_ss/FITS/fromEMB/p3_fit30s29yrs.jld2 (read-only) loaded.
+15 parameters from fit: [2.2884275428400917e-6, 224.70077539175338, 3503.765425467852, 0.0028451834370882027, -0.0029224614419610423, 3.1533095063388906e-6, 365.2564531089128, 3624.402249405604, 0.013898097567494022, -0.0015621243079300203, 0.0008281254059316603, 4206.5753935710545, 692.8717010098179, 0.005056337319589807, -0.033999743530736926]
+Maximum log Prob from fit: -173.63734435745778
+No Walkers: 75 No. steps: 20000
+Number of steps: 1000 Acceptance Rate: 0.31544
+Number of steps: 2000 Acceptance Rate: 0.6207866666666667
+Number of steps: 3000 Acceptance Rate: 0.93436
+Number of steps: 4000 Acceptance Rate: 1.2468666666666666
+Number of steps: 5000 Acceptance Rate: 1.5599733333333334
+Number of steps: 6000 Acceptance Rate: 1.8733466666666667
+Number of steps: 7000 Acceptance Rate: 2.1896666666666667
+Number of steps: 8000 Acceptance Rate: 2.5008933333333334
+Number of steps: 9000 Acceptance Rate: 2.8131866666666667
+Number of steps: 10000 Acceptance Rate: 3.1224666666666665
+Number of steps: 11000 Acceptance Rate: 3.4306533333333333
+Number of steps: 12000 Acceptance Rate: 3.73896
+Number of steps: 13000 Acceptance Rate: 4.049453333333333
+Number of steps: 14000 Acceptance Rate: 4.365026666666667
+Number of steps: 15000 Acceptance Rate: 4.679373333333333
+Number of steps: 16000 Acceptance Rate: 4.994293333333333
+Number of steps: 17000 Acceptance Rate: 5.303266666666667
+Number of steps: 18000 Acceptance Rate: 5.613
+Number of steps: 19000 Acceptance Rate: 5.930213333333334
+Number of steps: 20000 Acceptance Rate: 6.239026666666667
+Burn-in Number (ends): 2663
+Independent Sample Size: 3973.2722092376557
+Mean posteriors after burn-in: [2.2626679119729153e-6, 224.7007756007307, 3503.765422549739, 0.0013754003931089735, -0.003250746338054856, 3.1371572713079633e-6, 365.256453859143, 3624.402240755176, 0.012581904784004904, -0.0019509737323010385, 0.0008081739989390067, 4203.915013712796, 715.3475779226037, -0.003952705219757339, -0.03109864942640063]
+MCMC chi-square: 97.4738062339253 for total timing uncertainty of: [36.591138703816654] secs.
+990.934497 seconds (53.97 M allocations: 133.522 GiB, 1.18% gc time)
+JLDFile /astro/users/blindor/research/ttv_ss/FITS/fromEMB/p3_fit30s28yrs.jld2 (read-only) loaded.
+15 parameters from fit: [2.3602324857465235e-6, 224.7007807379929, 3503.765383964921, -0.0030337212244570893, -0.0006712935916638496, 3.1516249194411605e-6, 365.2564567383052, 3624.4022777607684, 0.010583049005444335, 0.004205816529405485, 0.0014031225225985915, 4314.295564442249, 413.41219070185934, 0.07220374732713726, -0.03176977898180345]
+Maximum log Prob from fit: -159.79210304658847
+No Walkers: 75 No. steps: 20000
+Number of steps: 1000 Acceptance Rate: 0.32012
+Number of steps: 2000 Acceptance Rate: 0.63196
+Number of steps: 3000 Acceptance Rate: 0.95412
+Number of steps: 4000 Acceptance Rate: 1.2831066666666666
+Number of steps: 5000 Acceptance Rate: 1.6089066666666667
+Number of steps: 6000 Acceptance Rate: 1.9354666666666667
+Number of steps: 7000 Acceptance Rate: 2.260893333333333
+Number of steps: 8000 Acceptance Rate: 2.5880666666666667
+Number of steps: 9000 Acceptance Rate: 2.9118933333333334
+Number of steps: 10000 Acceptance Rate: 3.2338133333333334
+Number of steps: 11000 Acceptance Rate: 3.5641066666666665
+Number of steps: 12000 Acceptance Rate: 3.8922133333333333
+Number of steps: 13000 Acceptance Rate: 4.217826666666666
+Number of steps: 14000 Acceptance Rate: 4.5455733333333335
+Number of steps: 15000 Acceptance Rate: 4.869426666666667
+Number of steps: 16000 Acceptance Rate: 5.197773333333333
+Number of steps: 17000 Acceptance Rate: 5.52616
+Number of steps: 18000 Acceptance Rate: 5.85224
+Number of steps: 19000 Acceptance Rate: 6.18364
+Number of steps: 20000 Acceptance Rate: 6.50732
+Burn-in Number (ends): 2946
+Independent Sample Size: 5664.10470476925
+Mean posteriors after burn-in: [2.3658128814001535e-6, 224.70078061291042, 3503.7653851835425, -0.0010241266829252088, -0.0006598565343477354, 3.1624537544363456e-6, 365.25645676054506, 3624.402280934409, 0.012070118321954848, 0.003906213797656627, 0.001305032586917097, 4314.224467935374, 417.36455344423786, 0.06653093815752291, -0.03419817192349115]
+MCMC chi-square: 80.22725787101571 for total timing uncertainty of: [33.75463088725562] secs.
+954.498440 seconds (52.08 M allocations: 112.243 GiB, 1.19% gc time)
+JLDFile /astro/users/blindor/research/ttv_ss/FITS/fromEMB/p3_fit30s27yrs.jld2 (read-only) loaded.
+15 parameters from fit: [2.550033468121459e-6, 224.7007877090039, 3503.7652369964435, -0.005905946556198439, 0.016353832545391935, 2.87720942238968e-6, 365.2564607113986, 3624.4022184365813, 0.008111764242473672, 0.017386320215571273, 0.0009618776409464492, 4206.371000379473, 484.66684581180067, 0.040514067262952785, -0.044581986252395095]
+Maximum log Prob from fit: -159.70034822315708
+No Walkers: 75 No. steps: 20000
+Number of steps: 1000 Acceptance Rate: 0.3232933333333333
+Number of steps: 2000 Acceptance Rate: 0.6282266666666667
+Number of steps: 3000 Acceptance Rate: 0.945
+Number of steps: 4000 Acceptance Rate: 1.26136
+Number of steps: 5000 Acceptance Rate: 1.5813333333333333
+Number of steps: 6000 Acceptance Rate: 1.8988666666666667
+Number of steps: 7000 Acceptance Rate: 2.2134933333333335
+Number of steps: 8000 Acceptance Rate: 2.5292933333333334
+Number of steps: 9000 Acceptance Rate: 2.8421066666666666
+Number of steps: 10000 Acceptance Rate: 3.1592533333333335
+Number of steps: 11000 Acceptance Rate: 3.47352
+Number of steps: 12000 Acceptance Rate: 3.78588
+Number of steps: 13000 Acceptance Rate: 4.10024
+Number of steps: 14000 Acceptance Rate: 4.42
+Number of steps: 15000 Acceptance Rate: 4.739826666666667
+Number of steps: 16000 Acceptance Rate: 5.056426666666667
+Number of steps: 17000 Acceptance Rate: 5.373466666666666
+Number of steps: 18000 Acceptance Rate: 5.687773333333333
+Number of steps: 19000 Acceptance Rate: 6.005973333333333
+Number of steps: 20000 Acceptance Rate: 6.321266666666666
+Burn-in Number (ends): 2536
+Independent Sample Size: 4074.0961005655577
+Mean posteriors after burn-in: [2.5448125391017236e-6, 224.70078705263808, 3503.7652510250145, -0.0009345772271479929, 0.009373407585980294, 2.9057452770044865e-6, 365.2564610956764, 3624.402214405423, 0.012286872085989695, 0.011518869948067806, 0.000852453246574856, 4198.806692576028, 577.8342953897865, 0.018567259030316998, -0.04248573255387896]
+MCMC chi-square: 98.86713134686124 for total timing uncertainty of: [39.24576669537062] secs.
+949.486764 seconds (54.18 M allocations: 125.868 GiB, 1.19% gc time)
+JLDFile /astro/users/blindor/research/ttv_ss/FITS/fromEMB/p3_fit30s26yrs.jld2 (read-only) loaded.
+15 parameters from fit: [2.4839336615563673e-6, 224.70077984690678, 3503.7652774739636, 0.0073332713238707875, -0.011042065455629876, 3.0776945927182484e-6, 365.25646307452115, 3624.4020768959444, 0.018503980749647462, -0.007987551736392163, 0.0007686146205384906, 4227.429749497522, 4864.710290889721, 0.01578982525733293, -0.0587680434248631]
+Maximum log Prob from fit: -161.50258496304528
+No Walkers: 75 No. steps: 20000
+Number of steps: 1000 Acceptance Rate: 0.3131466666666667
+Number of steps: 2000 Acceptance Rate: 0.6054666666666667
+Number of steps: 3000 Acceptance Rate: 0.9131066666666666
+Number of steps: 4000 Acceptance Rate: 1.2215466666666666
+Number of steps: 5000 Acceptance Rate: 1.5308533333333334
+Number of steps: 6000 Acceptance Rate: 1.8415333333333332
+Number of steps: 7000 Acceptance Rate: 2.1479733333333333
+Number of steps: 8000 Acceptance Rate: 2.4432133333333335
+Number of steps: 9000 Acceptance Rate: 2.7385733333333335
+Number of steps: 10000 Acceptance Rate: 3.0432266666666665
+Number of steps: 11000 Acceptance Rate: 3.3467333333333333
+Number of steps: 12000 Acceptance Rate: 3.646386666666667
+Number of steps: 13000 Acceptance Rate: 3.9426666666666668
+Number of steps: 14000 Acceptance Rate: 4.242173333333334
+Number of steps: 15000 Acceptance Rate: 4.543653333333333
+Number of steps: 16000 Acceptance Rate: 4.847386666666667
+Number of steps: 17000 Acceptance Rate: 5.1492
+Number of steps: 18000 Acceptance Rate: 5.448893333333333
+Number of steps: 19000 Acceptance Rate: 5.75192
+Number of steps: 20000 Acceptance Rate: 6.053826666666667
+Burn-in Number (ends): 2815
+Independent Sample Size: 3144.9835942868044
+Mean posteriors after burn-in: [2.474671166089432e-6, 224.70077963315524, 3503.765279456441, 0.005135285405677866, -0.006414754656405018, 3.052044573497842e-6, 365.2564617865866, 3624.4020856121856, 0.016622751861384306, -0.004540471520234544, 0.0007308585723710213, 4221.512653518081, 4843.741677040286, 0.0013983511129489561, -0.06510053552420347]
+MCMC chi-square: 118.5271859745256 for total timing uncertainty of: [43.941023139172266] secs.
+1004.892837 seconds (54.73 M allocations: 146.956 GiB, 1.21% gc time)
+JLDFile /astro/users/blindor/research/ttv_ss/FITS/fromEMB/p3_fit30s25yrs.jld2 (read-only) loaded.
+15 parameters from fit: [2.526438982844136e-6, 224.70077350176712, 3503.765593791869, 0.006912949224257376, 0.005883329683090615, 3.079204218734319e-6, 365.25646419908344, 3624.4021860746916, 0.01823166986797013, 0.006505527185168527, 0.0008676884932470097, 4252.925724667179, 4658.6201410536905, 0.033413107594474765, -0.05564885270324585]
+Maximum log Prob from fit: -146.0302206663509
+No Walkers: 75 No. steps: 20000
+Number of steps: 1000 Acceptance Rate: 0.31146666666666667
+Number of steps: 2000 Acceptance Rate: 0.61208
+Number of steps: 3000 Acceptance Rate: 0.9217333333333333
+Number of steps: 4000 Acceptance Rate: 1.2344266666666666
+Number of steps: 5000 Acceptance Rate: 1.5464
+Number of steps: 6000 Acceptance Rate: 1.8515466666666667
+Number of steps: 7000 Acceptance Rate: 2.163
+Number of steps: 8000 Acceptance Rate: 2.4783466666666665
+Number of steps: 9000 Acceptance Rate: 2.79204
+Number of steps: 10000 Acceptance Rate: 3.105426666666667
+Number of steps: 11000 Acceptance Rate: 3.4121866666666665
+Number of steps: 12000 Acceptance Rate: 3.7162
+Number of steps: 13000 Acceptance Rate: 4.01488
+Number of steps: 14000 Acceptance Rate: 4.320866666666666
+Number of steps: 15000 Acceptance Rate: 4.62928
+Number of steps: 16000 Acceptance Rate: 4.940733333333333
+Number of steps: 17000 Acceptance Rate: 5.25172
+Number of steps: 18000 Acceptance Rate: 5.56808
+Number of steps: 19000 Acceptance Rate: 5.88464
+Number of steps: 20000 Acceptance Rate: 6.199813333333333
+Burn-in Number (ends): 2911
+Independent Sample Size: 3390.337472669527
+Mean posteriors after burn-in: [2.5031253227089094e-6, 224.70077351443558, 3503.765596940015, 0.006016526233335194, 0.0015644980548622732, 3.067228655309574e-6, 365.2564635376186, 3624.4021880396385, 0.017619575661533934, 0.002859652913337306, 0.0008249573744415758, 4248.464905395369, 4701.14351494431, 0.017246900041491108, -0.05508376807808441]
+MCMC chi-square: 91.38823179495482 for total timing uncertainty of: [39.20548482323372] secs.
+1006.227706 seconds (54.52 M allocations: 144.061 GiB, 1.14% gc time)
+JLDFile /astro/users/blindor/research/ttv_ss/FITS/fromEMB/p3_fit30s24yrs.jld2 (read-only) loaded.
+15 parameters from fit: [2.2609654378642035e-6, 224.70078361711523, 3503.765415200286, -0.005450636227606201, -0.006188333475999734, 2.9011159089262345e-6, 365.2564818359346, 3624.4018083301858, 0.007947725451953916, -0.002323409103674813, 0.0010347457463936946, 4190.1433329919655, 646.6620143375062, 0.043929553642494436, -0.05110977709426375]
+Maximum log Prob from fit: -138.3596037282163
+No Walkers: 75 No. steps: 20000
+Number of steps: 1000 Acceptance Rate: 0.31122666666666665
+Number of steps: 2000 Acceptance Rate: 0.6096933333333333
+Number of steps: 3000 Acceptance Rate: 0.9212933333333333
+Number of steps: 4000 Acceptance Rate: 1.2374133333333333
+Number of steps: 5000 Acceptance Rate: 1.5545066666666667
+Number of steps: 6000 Acceptance Rate: 1.8704533333333333
+Number of steps: 7000 Acceptance Rate: 2.178933333333333
+Number of steps: 8000 Acceptance Rate: 2.493533333333333
+Number of steps: 9000 Acceptance Rate: 2.80344
+Number of steps: 10000 Acceptance Rate: 3.1091466666666667
+Number of steps: 11000 Acceptance Rate: 3.4146533333333333
+Number of steps: 12000 Acceptance Rate: 3.7264666666666666
+Number of steps: 13000 Acceptance Rate: 4.032426666666667
+Number of steps: 14000 Acceptance Rate: 4.345466666666667
+Number of steps: 15000 Acceptance Rate: 4.65688
+Number of steps: 16000 Acceptance Rate: 4.9703333333333335
+Number of steps: 17000 Acceptance Rate: 5.28324
+Number of steps: 18000 Acceptance Rate: 5.592386666666667
+Number of steps: 19000 Acceptance Rate: 5.902146666666667
+Number of steps: 20000 Acceptance Rate: 6.212906666666667
+Burn-in Number (ends): 3029
+Independent Sample Size: 3612.3673393045297
+Mean posteriors after burn-in: [2.28647210711449e-6, 224.70078364972028, 3503.7654123316074, -0.003649231982473249, -0.004591523211485787, 2.895790232148213e-6, 365.25648122470585, 3624.401822334589, 0.00906076647532608, -0.0014440462941873013, 0.0009133421266895916, 4192.501052516296, 637.7044670193276, 0.026791912465776266, -0.05735292653328157]
+MCMC chi-square: 82.63056557031679 for total timing uncertainty of: [37.78787551848378] secs.
+755.791633 seconds (53.97 M allocations: 133.289 GiB, 1.21% gc time)
+JLDFile /astro/users/blindor/research/ttv_ss/FITS/fromEMB/p3_fit30s23yrs.jld2 (read-only) loaded.
+15 parameters from fit: [2.1620697242608297e-6, 224.70077168982098, 3503.7656529513933, 0.0004135589682743476, -0.011332784368507057, 3.02373402857934e-6, 365.256463192853, 3624.4020407731196, 0.01342743003752601, -0.004951137401796092, 0.0009437111945661088, 4140.8959510482155, 746.3632457666301, 0.05223127395211083, -0.03847638039751427]
+Maximum log Prob from fit: -134.4200653265748
+No Walkers: 75 No. steps: 20000
+Number of steps: 1000 Acceptance Rate: 0.3161333333333333
+Number of steps: 2000 Acceptance Rate: 0.6236933333333333
+Number of steps: 3000 Acceptance Rate: 0.9422
+Number of steps: 4000 Acceptance Rate: 1.25388
+Number of steps: 5000 Acceptance Rate: 1.5653466666666667
+Number of steps: 6000 Acceptance Rate: 1.8777466666666667
+Number of steps: 7000 Acceptance Rate: 2.1876533333333334
+Number of steps: 8000 Acceptance Rate: 2.498013333333333
+Number of steps: 9000 Acceptance Rate: 2.8074133333333333
+Number of steps: 10000 Acceptance Rate: 3.1166133333333335
+Number of steps: 11000 Acceptance Rate: 3.4263333333333335
+Number of steps: 12000 Acceptance Rate: 3.7384666666666666
+Number of steps: 13000 Acceptance Rate: 4.051053333333333
+Number of steps: 14000 Acceptance Rate: 4.3646666666666665
+Number of steps: 15000 Acceptance Rate: 4.681453333333334
+Number of steps: 16000 Acceptance Rate: 4.994453333333333
+Number of steps: 17000 Acceptance Rate: 5.312626666666667
+Number of steps: 18000 Acceptance Rate: 5.633706666666667
+Number of steps: 19000 Acceptance Rate: 5.95396
+Number of steps: 20000 Acceptance Rate: 6.26884
+Burn-in Number (ends): 2973
+Independent Sample Size: 3749.3463321187155
+Mean posteriors after burn-in: [2.188982454673911e-6, 224.70077216727995, 3503.7656438392414, 0.0015859731824130652, -0.00747330717810393, 3.0163953757665304e-6, 365.256462929945, 3624.4020487715475, 0.014052071088102133, -0.002261730228052575, 0.0008278253006077918, 4143.510413197598, 725.5277786051714, 0.03400455668056048, -0.04310975363006746]
+MCMC chi-square: 90.99876085554563 for total timing uncertainty of: [41.48249413761642] secs.
+666.856881 seconds (54.33 M allocations: 128.756 GiB, 1.07% gc time)
+JLDFile /astro/users/blindor/research/ttv_ss/FITS/fromEMB/p3_fit30s22yrs.jld2 (read-only) loaded.
+15 parameters from fit: [2.273893440395764e-6, 224.70078933790867, 3503.7652534771382, 0.007828188734896263, -0.004216106352598337, 2.9885466956876145e-6, 365.25647567161207, 3624.402050524788, 0.01686135660950878, 8.365968307510312e-6, 0.0009430493207560957, 4259.422077832916, 4811.938685319363, 0.03756461512650961, -0.03877834584261014]
+Maximum log Prob from fit: -116.6767682340593
+No Walkers: 75 No. steps: 20000
+Number of steps: 1000 Acceptance Rate: 0.3137466666666667
+Number of steps: 2000 Acceptance Rate: 0.6101466666666666
+Number of steps: 3000 Acceptance Rate: 0.9118666666666667
+Number of steps: 4000 Acceptance Rate: 1.2268533333333334
+Number of steps: 5000 Acceptance Rate: 1.53328
+Number of steps: 6000 Acceptance Rate: 1.8392666666666666
+Number of steps: 7000 Acceptance Rate: 2.1446
+Number of steps: 8000 Acceptance Rate: 2.4554533333333333
+Number of steps: 9000 Acceptance Rate: 2.7628933333333334
+Number of steps: 10000 Acceptance Rate: 3.06312
+Number of steps: 11000 Acceptance Rate: 3.365466666666667
+Number of steps: 12000 Acceptance Rate: 3.6672266666666666
+Number of steps: 13000 Acceptance Rate: 3.9714133333333335
+Number of steps: 14000 Acceptance Rate: 4.277973333333334
+Number of steps: 15000 Acceptance Rate: 4.58516
+Number of steps: 16000 Acceptance Rate: 4.89204
+Number of steps: 17000 Acceptance Rate: 5.192986666666667
+Number of steps: 18000 Acceptance Rate: 5.502373333333333
+Number of steps: 19000 Acceptance Rate: 5.806546666666667
+Number of steps: 20000 Acceptance Rate: 6.116746666666667
+Burn-in Number (ends): 3502
+Independent Sample Size: 3320.971005504122
+Mean posteriors after burn-in: [2.2771559580062004e-6, 224.70078970073504, 3503.765247768844, 0.007159629508897675, -0.0036856585379002635, 2.9778214336890162e-6, 365.2564756001437, 3624.4020533300923, 0.01623381939702256, 0.00023469667283957348, 0.0009010530538174393, 4261.695526217905, 4811.7391247026, 0.025770025074453532, -0.04064293964579808]
+MCMC chi-square: 61.30705693436725 for total timing uncertainty of: [34.24674848465534] secs.
+641.039387 seconds (52.81 M allocations: 145.178 GiB, 1.12% gc time)
+JLDFile /astro/users/blindor/research/ttv_ss/FITS/fromEMB/p3_fit30s21yrs.jld2 (read-only) loaded.
+15 parameters from fit: [2.484726968099237e-6, 224.70078643105836, 3503.7652721611535, 0.0006269464831732932, 0.007475631441229793, 2.988173777954146e-6, 365.2564532653536, 3624.4023453398936, 0.013406421494609211, 0.007778255246995111, 0.001028289159787262, 4152.679977955214, 633.2985075510817, 0.05691195836625234, -0.04200907021877032]
+Maximum log Prob from fit: -117.86636001931141
+No Walkers: 75 No. steps: 20000
+Number of steps: 1000 Acceptance Rate: 0.31072
+Number of steps: 2000 Acceptance Rate: 0.6165733333333333
+Number of steps: 3000 Acceptance Rate: 0.9314
+Number of steps: 4000 Acceptance Rate: 1.2498266666666666
+Number of steps: 5000 Acceptance Rate: 1.57236
+Number of steps: 6000 Acceptance Rate: 1.89
+Number of steps: 7000 Acceptance Rate: 2.2074933333333333
+Number of steps: 8000 Acceptance Rate: 2.5279333333333334
+Number of steps: 9000 Acceptance Rate: 2.8478666666666665
+Number of steps: 10000 Acceptance Rate: 3.1707733333333334
+Number of steps: 11000 Acceptance Rate: 3.494013333333333
+Number of steps: 12000 Acceptance Rate: 3.8148933333333335
+Number of steps: 13000 Acceptance Rate: 4.13632
+Number of steps: 14000 Acceptance Rate: 4.4543333333333335
+Number of steps: 15000 Acceptance Rate: 4.777173333333334
+Number of steps: 16000 Acceptance Rate: 5.1038266666666665
+Number of steps: 17000 Acceptance Rate: 5.424106666666667
+Number of steps: 18000 Acceptance Rate: 5.7398
+Number of steps: 19000 Acceptance Rate: 6.06024
+Number of steps: 20000 Acceptance Rate: 6.37984
+Burn-in Number (ends): 3552
+Independent Sample Size: 4402.0126654765745
+Mean posteriors after burn-in: [2.478452795314749e-6, 224.70078630063247, 3503.7652770337313, 0.0015418607904454094, 0.003459079089329979, 2.983312139879104e-6, 365.2564508172317, 3624.4023726845635, 0.013931547220403972, 0.004246619204637854, 0.0009494184080516256, 4165.727383140391, 647.0180122994694, 0.043138409703469716, -0.043666905649054184]
+MCMC chi-square: 74.31643409134688 for total timing uncertainty of: [39.37688054110848] secs.
+661.527184 seconds (53.94 M allocations: 127.133 GiB, 1.12% gc time)
+JLDFile /astro/users/blindor/research/ttv_ss/FITS/fromEMB/p3_fit30s20yrs.jld2 (read-only) loaded.
+15 parameters from fit: [2.3648196978881416e-6, 224.70079273190282, 3503.765138063317, 0.013337465527787123, -0.009037557687617118, 3.083488992407546e-6, 365.25646379918106, 3624.402138653378, 0.02286576055055706, -0.003495868159104126, 0.0008394439483091365, 4145.354350753345, 695.1921565466282, 0.024909487882685547, -0.060934319301024775]
+Maximum log Prob from fit: -105.69296925761626
+No Walkers: 75 No. steps: 20000
+Number of steps: 1000 Acceptance Rate: 0.31634666666666666
+Number of steps: 2000 Acceptance Rate: 0.6140533333333333
+Number of steps: 3000 Acceptance Rate: 0.9166133333333333
+Number of steps: 4000 Acceptance Rate: 1.2249466666666666
+Number of steps: 5000 Acceptance Rate: 1.52936
+Number of steps: 6000 Acceptance Rate: 1.8308133333333334
+Number of steps: 7000 Acceptance Rate: 2.1381866666666665
+Number of steps: 8000 Acceptance Rate: 2.44368
+Number of steps: 9000 Acceptance Rate: 2.75576
+Number of steps: 10000 Acceptance Rate: 3.0654
+Number of steps: 11000 Acceptance Rate: 3.3772933333333333
+Number of steps: 12000 Acceptance Rate: 3.68828
+Number of steps: 13000 Acceptance Rate: 3.99064
+Number of steps: 14000 Acceptance Rate: 4.295813333333333
+Number of steps: 15000 Acceptance Rate: 4.605026666666666
+Number of steps: 16000 Acceptance Rate: 4.91392
+Number of steps: 17000 Acceptance Rate: 5.223
+Number of steps: 18000 Acceptance Rate: 5.52356
+Number of steps: 19000 Acceptance Rate: 5.827493333333333
+Number of steps: 20000 Acceptance Rate: 6.1368133333333335
+Burn-in Number (ends): 3169
+Independent Sample Size: 3205.318404693639
+Mean posteriors after burn-in: [2.3501572478544944e-6, 224.70079250755532, 3503.765140030962, 0.010615062869426834, -0.006456761062685503, 3.0614888532235133e-6, 365.256461189233, 3624.4021624970487, 0.020726533885812286, -0.0016037425279618134, 0.0008450124950609549, 4165.711726235179, 655.9130083233061, 0.017033690225148876, -0.06331823366001144]
+MCMC chi-square: 60.25979821901774 for total timing uncertainty of: [36.19583483959986] secs.
+653.313009 seconds (53.83 M allocations: 155.889 GiB, 1.13% gc time)
+JLDFile /astro/users/blindor/research/ttv_ss/FITS/fromEMB/p3_fit30s19yrs.jld2 (read-only) loaded.
+15 parameters from fit: [2.291254689174496e-6, 224.70079333651202, 3503.765216276092, 0.01798028440249694, -0.013645877633953508, 3.2125836275342427e-6, 365.2564258404634, 3624.4024695220714, 0.028018334474141326, -0.007656761977193086, 0.0008036037636498125, 4329.266805311853, 4796.463314485246, 0.01397791355450022, -0.04251834003268952]
+Maximum log Prob from fit: -99.5655278700711
+No Walkers: 75 No. steps: 20000
+Number of steps: 1000 Acceptance Rate: 0.31484
+Number of steps: 2000 Acceptance Rate: 0.6098533333333334
+Number of steps: 3000 Acceptance Rate: 0.9063066666666667
+Number of steps: 4000 Acceptance Rate: 1.20976
+Number of steps: 5000 Acceptance Rate: 1.51284
+Number of steps: 6000 Acceptance Rate: 1.8186
+Number of steps: 7000 Acceptance Rate: 2.12652
+Number of steps: 8000 Acceptance Rate: 2.4325466666666666
+Number of steps: 9000 Acceptance Rate: 2.736013333333333
+Number of steps: 10000 Acceptance Rate: 3.0411733333333335
+Number of steps: 11000 Acceptance Rate: 3.34316
+Number of steps: 12000 Acceptance Rate: 3.648346666666667
+Number of steps: 13000 Acceptance Rate: 3.9501466666666665
+Number of steps: 14000 Acceptance Rate: 4.256173333333333
+Number of steps: 15000 Acceptance Rate: 4.56568
+Number of steps: 16000 Acceptance Rate: 4.87008
+Number of steps: 17000 Acceptance Rate: 5.17328
+Number of steps: 18000 Acceptance Rate: 5.47432
+Number of steps: 19000 Acceptance Rate: 5.7748
+Number of steps: 20000 Acceptance Rate: 6.085
+Burn-in Number (ends): 3829
+Independent Sample Size: 3398.1840209442557
+Mean posteriors after burn-in: [2.2905160410011083e-6, 224.7007933739887, 3503.7652179578586, 0.015090253480097167, -0.01272630456047622, 3.1852436363242395e-6, 365.256425543814, 3624.402471449254, 0.02561328075666793, -0.007058294658239497, 0.000803492000368218, 4334.547868161201, 4797.39277843673, 0.003486952426461225, -0.04118910341371926]
+MCMC chi-square: 59.9475804526434 for total timing uncertainty of: [37.930578588288434] secs.
+651.221010 seconds (53.67 M allocations: 141.137 GiB, 1.07% gc time)
+JLDFile /astro/users/blindor/research/ttv_ss/FITS/fromEMB/p3_fit30s18yrs.jld2 (read-only) loaded.
+15 parameters from fit: [2.721150170443136e-6, 224.7007903106671, 3503.7652876003, 0.03448655111888847, 0.017230484507267444, 3.3668038943580155e-6, 365.25640003224566, 3624.4026708562997, 0.04182074960843073, 0.012836658938388657, 0.000682927286408134, 4512.21642015559, 4513.317580230607, -0.015640232037260733, -0.0874908304413462]
+Maximum log Prob from fit: -100.05946285781931
+No Walkers: 75 No. steps: 20000
+Number of steps: 1000 Acceptance Rate: 0.31550666666666666
+Number of steps: 2000 Acceptance Rate: 0.6123333333333333
+Number of steps: 3000 Acceptance Rate: 0.9238266666666667
+Number of steps: 4000 Acceptance Rate: 1.23052
+Number of steps: 5000 Acceptance Rate: 1.5290933333333334
+Number of steps: 6000 Acceptance Rate: 1.82936
+Number of steps: 7000 Acceptance Rate: 2.1235333333333335
+Number of steps: 8000 Acceptance Rate: 2.4240266666666668
+Number of steps: 9000 Acceptance Rate: 2.7212133333333335
+Number of steps: 10000 Acceptance Rate: 3.0281066666666665
+Number of steps: 11000 Acceptance Rate: 3.327253333333333
+Number of steps: 12000 Acceptance Rate: 3.63196
+Number of steps: 13000 Acceptance Rate: 3.932533333333333
+Number of steps: 14000 Acceptance Rate: 4.232866666666666
+Number of steps: 15000 Acceptance Rate: 4.535106666666667
+Number of steps: 16000 Acceptance Rate: 4.829466666666667
+Number of steps: 17000 Acceptance Rate: 5.137026666666666
+Number of steps: 18000 Acceptance Rate: 5.441746666666667
+Number of steps: 19000 Acceptance Rate: 5.7436533333333335
+Number of steps: 20000 Acceptance Rate: 6.043213333333333
+Burn-in Number (ends): 3314
+Independent Sample Size: 3047.797951378043
+Mean posteriors after burn-in: [2.5066262679319687e-6, 224.7007912821405, 3503.7652785448845, 0.019774377934439296, 0.00945320219795329, 3.262163250992086e-6, 365.25641036417323, 3624.4025800475843, 0.030205211850776795, 0.006851614643946034, 0.0007854879343478157, 4489.5250768422575, 4581.255652998562, -0.011708834576404065, -0.07556986788358316]
+MCMC chi-square: 74.21991065263633 for total timing uncertainty of: [44.252779819460194] secs.
+663.745292 seconds (54.71 M allocations: 154.885 GiB, 1.08% gc time)
+JLDFile /astro/users/blindor/research/ttv_ss/FITS/fromEMB/p3_fit30s17yrs.jld2 (read-only) loaded.
+15 parameters from fit: [3.6625800699763295e-6, 224.70079001430082, 3503.7653563702133, 0.09059382034030446, 0.010917402365611782, 3.721859573982226e-6, 365.25644760400155, 3624.402155616472, 0.08521684094870918, 0.009813784821343244, 0.000306911122382825, 4223.624797521171, 401.1620445799927, -0.14423698291345716, -0.18195598015843387]
+Maximum log Prob from fit: -74.48559833683318
+No Walkers: 75 No. steps: 20000
+Number of steps: 1000 Acceptance Rate: 0.3184666666666667
+Number of steps: 2000 Acceptance Rate: 0.6193866666666666
+Number of steps: 3000 Acceptance Rate: 0.9269733333333333
+Number of steps: 4000 Acceptance Rate: 1.2353866666666666
+Number of steps: 5000 Acceptance Rate: 1.5403733333333334
+Number of steps: 6000 Acceptance Rate: 1.84464
+Number of steps: 7000 Acceptance Rate: 2.15756
+Number of steps: 8000 Acceptance Rate: 2.46672
+Number of steps: 9000 Acceptance Rate: 2.7738533333333333
+Number of steps: 10000 Acceptance Rate: 3.0802266666666664
+Number of steps: 11000 Acceptance Rate: 3.3869466666666668
+Number of steps: 12000 Acceptance Rate: 3.697173333333333
+Number of steps: 13000 Acceptance Rate: 4.002506666666667
+Number of steps: 14000 Acceptance Rate: 4.30272
+Number of steps: 15000 Acceptance Rate: 4.61032
+Number of steps: 16000 Acceptance Rate: 4.922186666666667
+Number of steps: 17000 Acceptance Rate: 5.227146666666667
+Number of steps: 18000 Acceptance Rate: 5.534173333333333
+Number of steps: 19000 Acceptance Rate: 5.84828
+Number of steps: 20000 Acceptance Rate: 6.1584666666666665
+Burn-in Number (ends): 2799
+Independent Sample Size: 3288.267296837909
+Mean posteriors after burn-in: [3.2740573382710283e-6, 224.70078853950554, 3503.7653846753165, 0.06728398598449639, 0.008632405127899426, 3.540209392885868e-6, 365.25644650922163, 3624.4021893415807, 0.06684802327700251, 0.008193229979332762, 0.00040601026445732843, 4268.851681048071, 408.93012061437383, -0.08865278073294838, -0.13530566889931725]
+MCMC chi-square: 31.62465669409594 for total timing uncertainty of: [31.734148259363895] secs.
+607.145460 seconds (50.48 M allocations: 147.848 GiB, 1.21% gc time)
+JLDFile /astro/users/blindor/research/ttv_ss/FITS/fromEMB/p3_fit30s16yrs.jld2 (read-only) loaded.
+15 parameters from fit: [2.2041516716226566e-6, 224.7008008636636, 3503.765293386005, -0.008920387575107542, -0.022456704743316326, 3.1047413582396963e-6, 365.25644742652077, 3624.4022777943687, 0.00961608107527096, -0.018634649203458573, 0.001068502416984937, 4170.021212273743, 831.8232339144756, 0.03763610343530626, -0.030992956658556458]
+Maximum log Prob from fit: -81.19322601526153
+No Walkers: 75 No. steps: 20000
+Number of steps: 1000 Acceptance Rate: 0.31396
+Number of steps: 2000 Acceptance Rate: 0.6156266666666667
+Number of steps: 3000 Acceptance Rate: 0.9252666666666667
+Number of steps: 4000 Acceptance Rate: 1.23044
+Number of steps: 5000 Acceptance Rate: 1.53824
+Number of steps: 6000 Acceptance Rate: 1.8509733333333334
+Number of steps: 7000 Acceptance Rate: 2.15016
+Number of steps: 8000 Acceptance Rate: 2.45536
+Number of steps: 9000 Acceptance Rate: 2.7607733333333333
+Number of steps: 10000 Acceptance Rate: 3.066333333333333
+Number of steps: 11000 Acceptance Rate: 3.3707066666666665
+Number of steps: 12000 Acceptance Rate: 3.6737066666666665
+Number of steps: 13000 Acceptance Rate: 3.9751733333333332
+Number of steps: 14000 Acceptance Rate: 4.27192
+Number of steps: 15000 Acceptance Rate: 4.57168
+Number of steps: 16000 Acceptance Rate: 4.874973333333333
+Number of steps: 17000 Acceptance Rate: 5.181386666666667
+Number of steps: 18000 Acceptance Rate: 5.49044
+Number of steps: 19000 Acceptance Rate: 5.794133333333333
+Number of steps: 20000 Acceptance Rate: 6.0969066666666665
+Burn-in Number (ends): 3018
+Independent Sample Size: 3526.6009234424278
+Mean posteriors after burn-in: [2.335908397544634e-6, 224.7008016631971, 3503.765279345271, -0.002738982822404628, -0.017671041714933243, 3.109648177316166e-6, 365.25644751980184, 3624.4023121589503, 0.01355739413411602, -0.014935071623395127, 0.0009004625103242843, 4224.272395788883, 708.7869424716883, 0.014765132051324327, -0.04024222040733479]
+MCMC chi-square: 51.34624140418116 for total timing uncertainty of: [38.964244338067985] secs.
+651.048302 seconds (53.87 M allocations: 149.272 GiB, 0.97% gc time)
+JLDFile /astro/users/blindor/research/ttv_ss/FITS/fromEMB/p3_fit30s15yrs.jld2 (read-only) loaded.
+15 parameters from fit: [3.12303442950651e-6, 224.700789816103, 3503.7652268288125, 0.0638083523847511, 0.014669323210006267, 3.67373933910073e-6, 365.2563408494756, 3624.403002052959, 0.06600527152380564, 0.014395297312452253, 0.0005176799681626907, 4679.58009527325, -238.94135537308514, -0.04956824235416991, -0.09810652444207943]
+Maximum log Prob from fit: -70.50643219042591
+No Walkers: 75 No. steps: 20000
+Number of steps: 1000 Acceptance Rate: 0.31506666666666666
+Number of steps: 2000 Acceptance Rate: 0.6034933333333333
+Number of steps: 3000 Acceptance Rate: 0.8881466666666666
+Number of steps: 4000 Acceptance Rate: 1.1828266666666667
+Number of steps: 5000 Acceptance Rate: 1.4743733333333333
+Number of steps: 6000 Acceptance Rate: 1.76796
+Number of steps: 7000 Acceptance Rate: 2.0533866666666665
+Number of steps: 8000 Acceptance Rate: 2.3472933333333335
+Number of steps: 9000 Acceptance Rate: 2.64192
+Number of steps: 10000 Acceptance Rate: 2.93144
+Number of steps: 11000 Acceptance Rate: 3.216266666666667
+Number of steps: 12000 Acceptance Rate: 3.5067466666666665
+Number of steps: 13000 Acceptance Rate: 3.7858266666666665
+Number of steps: 14000 Acceptance Rate: 4.067586666666666
+Number of steps: 15000 Acceptance Rate: 4.356826666666667
+Number of steps: 16000 Acceptance Rate: 4.649333333333334
+Number of steps: 17000 Acceptance Rate: 4.93996
+Number of steps: 18000 Acceptance Rate: 5.229266666666667
+Number of steps: 19000 Acceptance Rate: 5.518693333333333
+Number of steps: 20000 Acceptance Rate: 5.81984
+Burn-in Number (ends): 4000
+Independent Sample Size: 2514.010919113385
+Mean posteriors after burn-in: [2.624763212453655e-6, 224.70078942747904, 3503.7652282846784, 0.030168580932512137, 0.001895869370791684, 3.429069931201342e-6, 365.2563455630541, 3624.4029243499394, 0.039519253131534336, 0.0046489670736367525, 0.0007098378166612065, 4628.410155894245, -25.692888787173523, -0.02053869243877733, -0.06336936593132969]
+MCMC chi-square: 42.537703475438335 for total timing uncertainty of: [36.80032605949761] secs.
+648.622594 seconds (53.86 M allocations: 193.160 GiB, 1.29% gc time)
+JLDFile /astro/users/blindor/research/ttv_ss/FITS/fromEMB/p3_fit10s30yrs.jld2 (read-only) loaded.
+15 parameters from fit: [2.374129396148031e-6, 224.70077558365247, 3503.765455247347, 0.0039893168254653165, -0.004350778474540148, 3.063902261029476e-6, 365.2564527458781, 3624.4022974788054, 0.016376930080817188, -0.001033725982100686, 0.0009397626501933241, 4253.470685559791, 569.4585692671711, 0.03174309095852763, -0.03419996750067221]
+Maximum log Prob from fit: -240.81925673185808
+No Walkers: 75 No. steps: 20000
+Number of steps: 1000 Acceptance Rate: 0.3227333333333333
+Number of steps: 2000 Acceptance Rate: 0.65196
+Number of steps: 3000 Acceptance Rate: 0.97712
+Number of steps: 4000 Acceptance Rate: 1.2968
+Number of steps: 5000 Acceptance Rate: 1.6179066666666666
+Number of steps: 6000 Acceptance Rate: 1.93532
+Number of steps: 7000 Acceptance Rate: 2.257093333333333
+Number of steps: 8000 Acceptance Rate: 2.57824
+Number of steps: 9000 Acceptance Rate: 2.89888
+Number of steps: 10000 Acceptance Rate: 3.222
+Number of steps: 11000 Acceptance Rate: 3.54312
+Number of steps: 12000 Acceptance Rate: 3.8678933333333334
+Number of steps: 13000 Acceptance Rate: 4.18764
+Number of steps: 14000 Acceptance Rate: 4.509146666666667
+Number of steps: 15000 Acceptance Rate: 4.824573333333333
+Number of steps: 16000 Acceptance Rate: 5.144266666666667
+Number of steps: 17000 Acceptance Rate: 5.466413333333334
+Number of steps: 18000 Acceptance Rate: 5.790906666666666
+Number of steps: 19000 Acceptance Rate: 6.11436
+Number of steps: 20000 Acceptance Rate: 6.4324
+Burn-in Number (ends): 2041
+Independent Sample Size: 5256.607968371971
+Mean posteriors after burn-in: [2.370257779998234e-6, 224.70077571947883, 3503.7654527398854, 0.0030150056296164756, -0.002968067181274413, 3.0571737239109926e-6, 365.2564529094554, 3624.4022945259358, 0.015545841285453815, -4.017164022458801e-5, 0.0009247932789112417, 4251.872864186274, 565.5897069269103, 0.028086556740661486, -0.03493448050518823]
+MCMC chi-square: 483.70446530036276 for total timing uncertainty of: [27.565247926760097] secs.
+682.893359 seconds (54.20 M allocations: 111.425 GiB, 1.21% gc time)
+JLDFile /astro/users/blindor/research/ttv_ss/FITS/fromEMB/p3_fit10s29yrs.jld2 (read-only) loaded.
+15 parameters from fit: [2.48357080047937e-6, 224.70077642628, 3503.7654261821967, 0.005284019339735567, -0.0022612021327825787, 3.038858824901114e-6, 365.25645234861975, 3624.4022528540254, 0.017405921091643344, 0.00034102241044960244, 0.0008422302492754382, 4236.658543318895, 4836.510017536668, 0.019854999307242792, -0.03703848241268175]
+Maximum log Prob from fit: -238.56691596582192
+No Walkers: 75 No. steps: 20000
+Number of steps: 1000 Acceptance Rate: 0.32476
+Number of steps: 2000 Acceptance Rate: 0.64736
+Number of steps: 3000 Acceptance Rate: 0.95804
+Number of steps: 4000 Acceptance Rate: 1.2771866666666667
+Number of steps: 5000 Acceptance Rate: 1.5995333333333333
+Number of steps: 6000 Acceptance Rate: 1.9220533333333334
+Number of steps: 7000 Acceptance Rate: 2.2458666666666667
+Number of steps: 8000 Acceptance Rate: 2.5686133333333334
+Number of steps: 9000 Acceptance Rate: 2.88832
+Number of steps: 10000 Acceptance Rate: 3.2084533333333334
+Number of steps: 11000 Acceptance Rate: 3.5252133333333333
+Number of steps: 12000 Acceptance Rate: 3.841066666666667
+Number of steps: 13000 Acceptance Rate: 4.160826666666667
+Number of steps: 14000 Acceptance Rate: 4.47892
+Number of steps: 15000 Acceptance Rate: 4.79644
+Number of steps: 16000 Acceptance Rate: 5.113946666666667
+Number of steps: 17000 Acceptance Rate: 5.434786666666667
+Number of steps: 18000 Acceptance Rate: 5.752186666666667
+Number of steps: 19000 Acceptance Rate: 6.07344
+Number of steps: 20000 Acceptance Rate: 6.397453333333333
+Burn-in Number (ends): 2608
+Independent Sample Size: 4578.3169438716095
+Mean posteriors after burn-in: [2.467827124911014e-6, 224.70077661210848, 3503.76542241745, 0.0037500737264368096, -0.0017116796074760454, 3.026055756643371e-6, 365.25645261852014, 3624.4022515865718, 0.016176402824724757, 0.0006448054613874416, 0.0008327543667254412, 4235.174768864287, 4841.990308473705, 0.015115049157812185, -0.03665937541279836]
+MCMC chi-square: 536.8304088768496 for total timing uncertainty of: [29.471259618602534] secs.
+686.977283 seconds (54.40 M allocations: 118.790 GiB, 1.23% gc time)
+JLDFile /astro/users/blindor/research/ttv_ss/FITS/fromEMB/p3_fit10s28yrs.jld2 (read-only) loaded.
+15 parameters from fit: [2.364100711736245e-6, 224.7007748437473, 3503.76549581428, -0.0015005237572869013, -0.0036100666549481585, 3.056795341611905e-6, 365.2564525349671, 3624.4022575634444, 0.012761411436109574, 0.00016531348107454562, 0.001016719127956871, 4251.052382992276, 564.7302973950485, 0.04088730140042088, -0.033409253885911296]
+Maximum log Prob from fit: -222.11901201865436
+No Walkers: 75 No. steps: 20000
+Number of steps: 1000 Acceptance Rate: 0.32034666666666667
+Number of steps: 2000 Acceptance Rate: 0.6480133333333333
+Number of steps: 3000 Acceptance Rate: 0.9683466666666667
+Number of steps: 4000 Acceptance Rate: 1.2913733333333333
+Number of steps: 5000 Acceptance Rate: 1.61136
+Number of steps: 6000 Acceptance Rate: 1.9362133333333333
+Number of steps: 7000 Acceptance Rate: 2.2614
+Number of steps: 8000 Acceptance Rate: 2.584426666666667
+Number of steps: 9000 Acceptance Rate: 2.90524
+Number of steps: 10000 Acceptance Rate: 3.2312933333333334
+Number of steps: 11000 Acceptance Rate: 3.555546666666667
+Number of steps: 12000 Acceptance Rate: 3.878746666666667
+Number of steps: 13000 Acceptance Rate: 4.205213333333333
+Number of steps: 14000 Acceptance Rate: 4.532666666666667
+Number of steps: 15000 Acceptance Rate: 4.858333333333333
+Number of steps: 16000 Acceptance Rate: 5.183066666666667
+Number of steps: 17000 Acceptance Rate: 5.504733333333333
+Number of steps: 18000 Acceptance Rate: 5.82884
+Number of steps: 19000 Acceptance Rate: 6.148986666666667
+Number of steps: 20000 Acceptance Rate: 6.475773333333334
+Burn-in Number (ends): 2003
+Independent Sample Size: 4885.263255957121
+Mean posteriors after burn-in: [2.3805991254882537e-6, 224.70077485053818, 3503.765495848116, -0.0001422442879541029, -0.002412432973149699, 3.063187651605581e-6, 365.2564525849343, 3624.402262235971, 0.01371964397165915, 0.0008760095218451019, 0.0009536793402201829, 4252.265800984663, 556.745231390341, 0.03332501340475447, -0.03553333973413989]
+MCMC chi-square: 442.924330798007 for total timing uncertainty of: [27.456158193201375] secs.
+685.105463 seconds (54.20 M allocations: 110.198 GiB, 1.25% gc time)
+JLDFile /astro/users/blindor/research/ttv_ss/FITS/fromEMB/p3_fit10s27yrs.jld2 (read-only) loaded.
+15 parameters from fit: [2.40001550695648e-6, 224.70077999162055, 3503.7654093542637, 0.009659610779839093, -0.0028386874280442558, 3.09407333504067e-6, 365.25645522571585, 3624.4022510242166, 0.02104714894337887, 0.0004529240312662433, 0.000895363332923319, 4292.1178561262595, 497.5350671099043, 0.03349921701889758, -0.03232766836991603]
+Maximum log Prob from fit: -212.4000274246958
+No Walkers: 75 No. steps: 20000
+Number of steps: 1000 Acceptance Rate: 0.32581333333333334
+Number of steps: 2000 Acceptance Rate: 0.6535866666666666
+Number of steps: 3000 Acceptance Rate: 0.9719733333333334
+Number of steps: 4000 Acceptance Rate: 1.2821733333333334
+Number of steps: 5000 Acceptance Rate: 1.5958533333333333
+Number of steps: 6000 Acceptance Rate: 1.9118666666666666
+Number of steps: 7000 Acceptance Rate: 2.2261066666666665
+Number of steps: 8000 Acceptance Rate: 2.5386533333333334
+Number of steps: 9000 Acceptance Rate: 2.8584266666666664
+Number of steps: 10000 Acceptance Rate: 3.180946666666667
+Number of steps: 11000 Acceptance Rate: 3.4928933333333334
+Number of steps: 12000 Acceptance Rate: 3.8067066666666665
+Number of steps: 13000 Acceptance Rate: 4.116733333333333
+Number of steps: 14000 Acceptance Rate: 4.4348
+Number of steps: 15000 Acceptance Rate: 4.7503866666666665
+Number of steps: 16000 Acceptance Rate: 5.064533333333333
+Number of steps: 17000 Acceptance Rate: 5.380386666666666
+Number of steps: 18000 Acceptance Rate: 5.700146666666667
+Number of steps: 19000 Acceptance Rate: 6.01288
+Number of steps: 20000 Acceptance Rate: 6.3311866666666665
+Burn-in Number (ends): 2492
+Independent Sample Size: 4123.245229123905
+Mean posteriors after burn-in: [2.3852127668566353e-6, 224.70077979834377, 3503.7654099828474, 0.008311157400936083, -0.0022231961258444666, 3.0791807446195793e-6, 365.25645530706385, 3624.4022459350763, 0.019996440999707876, 0.0008058552335120197, 0.0008778173718238729, 4284.666937364518, 512.2125667280482, 0.027518263678846293, -0.032430943749844725]
+MCMC chi-square: 437.3010773124082 for total timing uncertainty of: [28.13339749503489] secs.
+681.911089 seconds (54.60 M allocations: 125.604 GiB, 1.19% gc time)
+JLDFile /astro/users/blindor/research/ttv_ss/FITS/fromEMB/p3_fit10s26yrs.jld2 (read-only) loaded.
+15 parameters from fit: [2.3304013644139455e-6, 224.70077926782608, 3503.7653954399616, 0.0066407009156991765, -0.005289833472164088, 3.096886450769288e-6, 365.2564600145132, 3624.4022013428016, 0.018434475340094555, -0.0020042212831969594, 0.0009276320641620065, 4251.605991244181, 554.4158526799515, 0.03439232838298893, -0.042333214099873326]
+Maximum log Prob from fit: -203.04714622958002
+No Walkers: 75 No. steps: 20000
+Number of steps: 1000 Acceptance Rate: 0.3240266666666667
+Number of steps: 2000 Acceptance Rate: 0.6554533333333333
+Number of steps: 3000 Acceptance Rate: 0.9739333333333333
+Number of steps: 4000 Acceptance Rate: 1.2934133333333333
+Number of steps: 5000 Acceptance Rate: 1.60744
+Number of steps: 6000 Acceptance Rate: 1.9293066666666667
+Number of steps: 7000 Acceptance Rate: 2.248
+Number of steps: 8000 Acceptance Rate: 2.57144
+Number of steps: 9000 Acceptance Rate: 2.8854933333333332
+Number of steps: 10000 Acceptance Rate: 3.20216
+Number of steps: 11000 Acceptance Rate: 3.5194666666666667
+Number of steps: 12000 Acceptance Rate: 3.8363733333333334
+Number of steps: 13000 Acceptance Rate: 4.154253333333333
+Number of steps: 14000 Acceptance Rate: 4.471586666666667
+Number of steps: 15000 Acceptance Rate: 4.789066666666667
+Number of steps: 16000 Acceptance Rate: 5.11
+Number of steps: 17000 Acceptance Rate: 5.432813333333334
+Number of steps: 18000 Acceptance Rate: 5.750813333333333
+Number of steps: 19000 Acceptance Rate: 6.06876
+Number of steps: 20000 Acceptance Rate: 6.38708
+Burn-in Number (ends): 2078
+Independent Sample Size: 4641.411994965324
+Mean posteriors after burn-in: [2.326825134052867e-6, 224.70077915654724, 3503.7653964831816, 0.0051227252523810855, -0.00364957601307197, 3.0841586253866906e-6, 365.2564596870132, 3624.4022016396507, 0.01721081576359142, -0.0007812665826953921, 0.0009179297025365421, 4249.17081920291, 551.6129436135839, 0.03058440397429188, -0.042794746868886555]
+MCMC chi-square: 396.37706103280215 for total timing uncertainty of: [27.27096628221091] secs.
+676.926993 seconds (54.49 M allocations: 119.693 GiB, 1.09% gc time)
+JLDFile /astro/users/blindor/research/ttv_ss/FITS/fromEMB/p3_fit10s25yrs.jld2 (read-only) loaded.
+15 parameters from fit: [2.329498618498453e-6, 224.70077883254427, 3503.7654042477334, 0.0010223016948065194, -0.0035398549368142193, 3.0867740270886193e-6, 365.25646868075427, 3624.402119273378, 0.015119441278725743, -0.00018023690638592076, 0.0009417338727281136, 4237.267121930667, 4768.362879373145, 0.04043879438313348, -0.05176883951148306]
+Maximum log Prob from fit: -193.11828558804208
+No Walkers: 75 No. steps: 20000
+Number of steps: 1000 Acceptance Rate: 0.32012
+Number of steps: 2000 Acceptance Rate: 0.6421733333333334
+Number of steps: 3000 Acceptance Rate: 0.9683866666666666
+Number of steps: 4000 Acceptance Rate: 1.2937866666666666
+Number of steps: 5000 Acceptance Rate: 1.6168666666666667
+Number of steps: 6000 Acceptance Rate: 1.94228
+Number of steps: 7000 Acceptance Rate: 2.2655333333333334
+Number of steps: 8000 Acceptance Rate: 2.5923866666666666
+Number of steps: 9000 Acceptance Rate: 2.91696
+Number of steps: 10000 Acceptance Rate: 3.241293333333333
+Number of steps: 11000 Acceptance Rate: 3.5659733333333334
+Number of steps: 12000 Acceptance Rate: 3.88828
+Number of steps: 13000 Acceptance Rate: 4.212653333333333
+Number of steps: 14000 Acceptance Rate: 4.53248
+Number of steps: 15000 Acceptance Rate: 4.85728
+Number of steps: 16000 Acceptance Rate: 5.184186666666666
+Number of steps: 17000 Acceptance Rate: 5.508733333333334
+Number of steps: 18000 Acceptance Rate: 5.832506666666666
+Number of steps: 19000 Acceptance Rate: 6.160266666666667
+Number of steps: 20000 Acceptance Rate: 6.484133333333333
+Burn-in Number (ends): 2309
+Independent Sample Size: 5113.564226423679
+Mean posteriors after burn-in: [2.332313959507544e-6, 224.70077887168404, 3503.765401940635, 0.0009885187622038541, -0.00237337199744403, 3.0850507646245572e-6, 365.25646801785217, 3624.4021276716503, 0.01505515708267535, 0.0005576103634103981, 0.0009068416204673124, 4238.564635209163, 4763.309973934252, 0.03483865664514482, -0.053489379739864416]
+MCMC chi-square: 383.35746896289817 for total timing uncertainty of: [27.479613175300344] secs.
+676.509272 seconds (54.27 M allocations: 111.948 GiB, 1.17% gc time)
+JLDFile /astro/users/blindor/research/ttv_ss/FITS/fromEMB/p3_fit10s24yrs.jld2 (read-only) loaded.
+15 parameters from fit: [2.4362681334878217e-6, 224.70077973328986, 3503.765437111147, -0.00037703742197920054, -0.005048643825095884, 3.034177325598838e-6, 365.256465081238, 3624.4021632907175, 0.013558764687252796, -0.001878607725984101, 0.0009353225375873587, 4211.436636064411, 4815.270033659831, 0.0343181177549754, -0.046799405988046015]
+Maximum log Prob from fit: -185.59257278238044
+No Walkers: 75 No. steps: 20000
+Number of steps: 1000 Acceptance Rate: 0.32265333333333335
+Number of steps: 2000 Acceptance Rate: 0.6504666666666666
+Number of steps: 3000 Acceptance Rate: 0.9707466666666666
+Number of steps: 4000 Acceptance Rate: 1.29376
+Number of steps: 5000 Acceptance Rate: 1.6177066666666666
+Number of steps: 6000 Acceptance Rate: 1.9382266666666668
+Number of steps: 7000 Acceptance Rate: 2.2594666666666665
+Number of steps: 8000 Acceptance Rate: 2.57516
+Number of steps: 9000 Acceptance Rate: 2.8958933333333334
+Number of steps: 10000 Acceptance Rate: 3.217146666666667
+Number of steps: 11000 Acceptance Rate: 3.543346666666667
+Number of steps: 12000 Acceptance Rate: 3.865866666666667
+Number of steps: 13000 Acceptance Rate: 4.189346666666666
+Number of steps: 14000 Acceptance Rate: 4.510946666666666
+Number of steps: 15000 Acceptance Rate: 4.83408
+Number of steps: 16000 Acceptance Rate: 5.15788
+Number of steps: 17000 Acceptance Rate: 5.474026666666667
+Number of steps: 18000 Acceptance Rate: 5.789346666666667
+Number of steps: 19000 Acceptance Rate: 6.1071333333333335
+Number of steps: 20000 Acceptance Rate: 6.426893333333333
+Burn-in Number (ends): 2075
+Independent Sample Size: 4920.317149195498
+Mean posteriors after burn-in: [2.4520820643791183e-6, 224.7007796814244, 3503.7654366446386, 0.00032816359765385904, -0.0032354503110416473, 3.0343312402074334e-6, 365.25646449955127, 3624.402173652668, 0.01399183135777785, -0.0006005184748152786, 0.0008878336679239621, 4213.7454070317635, 4804.43845691606, 0.026681586082334303, -0.04927817566068604]
+MCMC chi-square: 366.0840441670694 for total timing uncertainty of: [27.392876638351368] secs.
+676.489625 seconds (54.38 M allocations: 116.061 GiB, 1.16% gc time)
+JLDFile /astro/users/blindor/research/ttv_ss/FITS/fromEMB/p3_fit10s23yrs.jld2 (read-only) loaded.
+15 parameters from fit: [2.3924755778211847e-6, 224.70078318751646, 3503.765382826904, 0.0076903833141901716, -0.004570458777187827, 3.0942950106322708e-6, 365.2564645587475, 3624.402162383212, 0.019480128383973245, -0.0016185836653812033, 0.0008334657712657418, 4210.01169842251, 585.9736736155265, 0.03231007165756553, -0.05064148587903439]
+Maximum log Prob from fit: -176.6302064104746
+No Walkers: 75 No. steps: 20000
+Number of steps: 1000 Acceptance Rate: 0.32422666666666666
+Number of steps: 2000 Acceptance Rate: 0.64928
+Number of steps: 3000 Acceptance Rate: 0.9690933333333334
+Number of steps: 4000 Acceptance Rate: 1.2821466666666668
+Number of steps: 5000 Acceptance Rate: 1.5964
+Number of steps: 6000 Acceptance Rate: 1.91152
+Number of steps: 7000 Acceptance Rate: 2.230426666666667
+Number of steps: 8000 Acceptance Rate: 2.54816
+Number of steps: 9000 Acceptance Rate: 2.8659733333333333
+Number of steps: 10000 Acceptance Rate: 3.1792933333333333
+Number of steps: 11000 Acceptance Rate: 3.4985866666666667
+Number of steps: 12000 Acceptance Rate: 3.8100533333333333
+Number of steps: 13000 Acceptance Rate: 4.129
+Number of steps: 14000 Acceptance Rate: 4.44524
+Number of steps: 15000 Acceptance Rate: 4.762146666666666
+Number of steps: 16000 Acceptance Rate: 5.07808
+Number of steps: 17000 Acceptance Rate: 5.396386666666666
+Number of steps: 18000 Acceptance Rate: 5.710333333333334
+Number of steps: 19000 Acceptance Rate: 6.022186666666666
+Number of steps: 20000 Acceptance Rate: 6.340346666666667
+Burn-in Number (ends): 2737
+Independent Sample Size: 4276.729654570204
+Mean posteriors after burn-in: [2.383103612760899e-6, 224.7007833151273, 3503.7653801087095, 0.005510984755641724, -0.003078446207637655, 3.0758332037395048e-6, 365.25646494610544, 3624.402158780484, 0.017755331918305833, -0.0004958516423540367, 0.0008306872678141817, 4208.535999606312, 583.7039645523643, 0.02802909832459042, -0.05140415724880851]
+MCMC chi-square: 365.2464389418094 for total timing uncertainty of: [28.227492301212692] secs.
+671.195957 seconds (54.48 M allocations: 120.576 GiB, 1.13% gc time)
+JLDFile /astro/users/blindor/research/ttv_ss/FITS/fromEMB/p3_fit10s22yrs.jld2 (read-only) loaded.
+15 parameters from fit: [2.448522671365184e-6, 224.70079123330487, 3503.7652544982843, 0.017555696610278285, -0.005223860359972673, 3.1683771389230824e-6, 365.25646388730763, 3624.4021361895907, 0.025642167772028487, -0.0017410603068431568, 0.0006290196638398826, 4207.0243805765085, 4777.734134122026, -0.006665515320130094, -0.06935372888279857]
+Maximum log Prob from fit: -160.7462084296383
+No Walkers: 75 No. steps: 20000
+Number of steps: 1000 Acceptance Rate: 0.322
+Number of steps: 2000 Acceptance Rate: 0.64568
+Number of steps: 3000 Acceptance Rate: 0.9552
+Number of steps: 4000 Acceptance Rate: 1.2615066666666668
+Number of steps: 5000 Acceptance Rate: 1.56336
+Number of steps: 6000 Acceptance Rate: 1.86616
+Number of steps: 7000 Acceptance Rate: 2.1672
+Number of steps: 8000 Acceptance Rate: 2.4692
+Number of steps: 9000 Acceptance Rate: 2.774906666666667
+Number of steps: 10000 Acceptance Rate: 3.0789866666666668
+Number of steps: 11000 Acceptance Rate: 3.3848933333333333
+Number of steps: 12000 Acceptance Rate: 3.6793066666666667
+Number of steps: 13000 Acceptance Rate: 3.9745333333333335
+Number of steps: 14000 Acceptance Rate: 4.275173333333333
+Number of steps: 15000 Acceptance Rate: 4.58
+Number of steps: 16000 Acceptance Rate: 4.88956
+Number of steps: 17000 Acceptance Rate: 5.19368
+Number of steps: 18000 Acceptance Rate: 5.50224
+Number of steps: 19000 Acceptance Rate: 5.812453333333333
+Number of steps: 20000 Acceptance Rate: 6.121826666666666
+Burn-in Number (ends): 2601
+Independent Sample Size: 3176.277317596134
+Mean posteriors after burn-in: [2.4007562920603115e-6, 224.70079107713804, 3503.765255571098, 0.012024645443563664, -0.004362765379771758, 3.1265935191780346e-6, 365.2564647508138, 3624.402127123316, 0.021321421480543383, -0.0009617243151506436, 0.0006818740866495714, 4205.825206546824, 4781.156827505701, -0.0037447067756718397, -0.06588533528214353]
+MCMC chi-square: 289.73226463831526 for total timing uncertainty of: [25.91103450289379] secs.
+680.750860 seconds (55.04 M allocations: 140.865 GiB, 1.16% gc time)
+JLDFile /astro/users/blindor/research/ttv_ss/FITS/fromEMB/p3_fit10s21yrs.jld2 (read-only) loaded.
+15 parameters from fit: [2.313575165946192e-6, 224.70078814758006, 3503.7653188062905, 0.008535890942953001, 0.0028527504436874113, 3.216486609667431e-6, 365.2564615697364, 3624.40220407176, 0.018662405710729094, 0.004666486588801719, 0.0007196716734149617, 4170.211989167516, 588.0472081991803, 0.020789255619485424, -0.06474331875126785]
+Maximum log Prob from fit: -151.25548456492197
+No Walkers: 75 No. steps: 20000
+Number of steps: 1000 Acceptance Rate: 0.32064
+Number of steps: 2000 Acceptance Rate: 0.6385066666666667
+Number of steps: 3000 Acceptance Rate: 0.9487066666666667
+Number of steps: 4000 Acceptance Rate: 1.2583466666666667
+Number of steps: 5000 Acceptance Rate: 1.56764
+Number of steps: 6000 Acceptance Rate: 1.88212
+Number of steps: 7000 Acceptance Rate: 2.19148
+Number of steps: 8000 Acceptance Rate: 2.50444
+Number of steps: 9000 Acceptance Rate: 2.81872
+Number of steps: 10000 Acceptance Rate: 3.12904
+Number of steps: 11000 Acceptance Rate: 3.4459733333333333
+Number of steps: 12000 Acceptance Rate: 3.7633733333333335
+Number of steps: 13000 Acceptance Rate: 4.07636
+Number of steps: 14000 Acceptance Rate: 4.389013333333334
+Number of steps: 15000 Acceptance Rate: 4.7074533333333335
+Number of steps: 16000 Acceptance Rate: 5.025906666666667
+Number of steps: 17000 Acceptance Rate: 5.3409466666666665
+Number of steps: 18000 Acceptance Rate: 5.656306666666667
+Number of steps: 19000 Acceptance Rate: 5.97192
+Number of steps: 20000 Acceptance Rate: 6.287866666666667
+Burn-in Number (ends): 2785
+Independent Sample Size: 4018.385890953429
+Mean posteriors after burn-in: [2.290698076135155e-6, 224.70078785941675, 3503.7653229079215, 0.005373020697893848, 0.0010210347545644895, 3.190732129741278e-6, 365.25646156090437, 3624.4022054562643, 0.0161767931332274, 0.0032403075077149864, 0.0007410200397567024, 4174.025107100286, 596.2836970295482, 0.017690657691619247, -0.0629099264140484]
+MCMC chi-square: 249.34758063932284 for total timing uncertainty of: [24.65863927695034] secs.
+674.084656 seconds (54.77 M allocations: 128.939 GiB, 1.06% gc time)
+JLDFile /astro/users/blindor/research/ttv_ss/FITS/fromEMB/p3_fit10s20yrs.jld2 (read-only) loaded.
+15 parameters from fit: [2.3224271050570218e-6, 224.70079191746734, 3503.7652584553807, 0.007210051235346087, -0.00020558475993649248, 3.0282394040240408e-6, 365.2564523065609, 3624.4022359469573, 0.018120416354259216, 0.002731251866062148, 0.0008076303673394652, 4272.816519058954, 462.2651513450233, 0.028739191664459606, -0.05896685980888226]
+Maximum log Prob from fit: -135.00194252360166
+No Walkers: 75 No. steps: 20000
+Number of steps: 1000 Acceptance Rate: 0.32228
+Number of steps: 2000 Acceptance Rate: 0.6440933333333333
+Number of steps: 3000 Acceptance Rate: 0.9618933333333334
+Number of steps: 4000 Acceptance Rate: 1.27868
+Number of steps: 5000 Acceptance Rate: 1.5943466666666666
+Number of steps: 6000 Acceptance Rate: 1.9153466666666668
+Number of steps: 7000 Acceptance Rate: 2.2361733333333333
+Number of steps: 8000 Acceptance Rate: 2.5498
+Number of steps: 9000 Acceptance Rate: 2.86852
+Number of steps: 10000 Acceptance Rate: 3.190933333333333
+Number of steps: 11000 Acceptance Rate: 3.5100933333333333
+Number of steps: 12000 Acceptance Rate: 3.8333333333333335
+Number of steps: 13000 Acceptance Rate: 4.152986666666667
+Number of steps: 14000 Acceptance Rate: 4.469
+Number of steps: 15000 Acceptance Rate: 4.78776
+Number of steps: 16000 Acceptance Rate: 5.10588
+Number of steps: 17000 Acceptance Rate: 5.4224266666666665
+Number of steps: 18000 Acceptance Rate: 5.737933333333333
+Number of steps: 19000 Acceptance Rate: 6.057386666666667
+Number of steps: 20000 Acceptance Rate: 6.371666666666667
+Burn-in Number (ends): 2232
+Independent Sample Size: 4353.772269341895
+Mean posteriors after burn-in: [2.3054559822478816e-6, 224.7007916475622, 3503.765262760159, 0.004870460439852627, -0.0005139001121679793, 3.0105418934745325e-6, 365.25645110301843, 3624.402245166355, 0.01630754034381653, 0.002504810975296932, 0.0008239852188847039, 4283.0862852363225, 450.971208537364, 0.02661073558792343, -0.05843743853788791]
+MCMC chi-square: 182.58310067394498 for total timing uncertainty of: [21.9229748744902] secs.
+677.339451 seconds (54.58 M allocations: 122.332 GiB, 1.08% gc time)
+JLDFile /astro/users/blindor/research/ttv_ss/FITS/fromEMB/p3_fit10s19yrs.jld2 (read-only) loaded.
+15 parameters from fit: [2.3358237935298004e-6, 224.70078701536647, 3503.7653533917883, 0.014572404286376659, -0.0003425447797122474, 3.1550156035102563e-6, 365.2564381763756, 3624.4023294080553, 0.02418632826502777, 0.002694237541631691, 0.0007658203411679585, 4345.296969789255, 4691.856016651135, 0.009903678291207457, -0.062445453221899816]
+Maximum log Prob from fit: -132.36302845530503
+No Walkers: 75 No. steps: 20000
+Number of steps: 1000 Acceptance Rate: 0.32341333333333333
+Number of steps: 2000 Acceptance Rate: 0.6479733333333333
+Number of steps: 3000 Acceptance Rate: 0.96168
+Number of steps: 4000 Acceptance Rate: 1.2707466666666667
+Number of steps: 5000 Acceptance Rate: 1.58152
+Number of steps: 6000 Acceptance Rate: 1.88952
+Number of steps: 7000 Acceptance Rate: 2.1973066666666665
+Number of steps: 8000 Acceptance Rate: 2.508373333333333
+Number of steps: 9000 Acceptance Rate: 2.8232266666666668
+Number of steps: 10000 Acceptance Rate: 3.1292133333333334
+Number of steps: 11000 Acceptance Rate: 3.4388266666666665
+Number of steps: 12000 Acceptance Rate: 3.7450266666666665
+Number of steps: 13000 Acceptance Rate: 4.05224
+Number of steps: 14000 Acceptance Rate: 4.36568
+Number of steps: 15000 Acceptance Rate: 4.6744666666666665
+Number of steps: 16000 Acceptance Rate: 4.9856
+Number of steps: 17000 Acceptance Rate: 5.297293333333333
+Number of steps: 18000 Acceptance Rate: 5.606293333333333
+Number of steps: 19000 Acceptance Rate: 5.91396
+Number of steps: 20000 Acceptance Rate: 6.22332
+Burn-in Number (ends): 2189
+Independent Sample Size: 3655.9461554327336
+Mean posteriors after burn-in: [2.3144738126550367e-6, 224.70078729778606, 3503.7653508569547, 0.011706996674334481, -0.00091416569001941, 3.136730086515085e-6, 365.25643774393603, 3624.4023330678738, 0.021977690159534047, 0.002244684615111844, 0.0007898397751378624, 4350.722830444489, 4696.51678925667, 0.006308381837950515, -0.061570476689701]
+MCMC chi-square: 227.99093083447613 for total timing uncertainty of: [25.63562108364259] secs.
+670.668761 seconds (54.93 M allocations: 135.791 GiB, 1.10% gc time)
+JLDFile /astro/users/blindor/research/ttv_ss/FITS/fromEMB/p3_fit10s18yrs.jld2 (read-only) loaded.
+15 parameters from fit: [2.7334066634744343e-6, 224.70079028538956, 3503.7653277041345, 0.034677029055225274, 0.010115219485403318, 3.203879590865807e-6, 365.25644208586465, 3624.402290530429, 0.039430673133073454, 0.009354316277677775, 0.0005119428078382459, 4297.873447832831, 315.9970677374882, -0.028278038586639007, -0.100033130772126]
+Maximum log Prob from fit: -123.56457473071046
+No Walkers: 75 No. steps: 20000
+Number of steps: 1000 Acceptance Rate: 0.31948
+Number of steps: 2000 Acceptance Rate: 0.6419866666666667
+Number of steps: 3000 Acceptance Rate: 0.9502266666666667
+Number of steps: 4000 Acceptance Rate: 1.25596
+Number of steps: 5000 Acceptance Rate: 1.5527066666666667
+Number of steps: 6000 Acceptance Rate: 1.8490933333333333
+Number of steps: 7000 Acceptance Rate: 2.1454133333333334
+Number of steps: 8000 Acceptance Rate: 2.44876
+Number of steps: 9000 Acceptance Rate: 2.7548266666666668
+Number of steps: 10000 Acceptance Rate: 3.0472133333333336
+Number of steps: 11000 Acceptance Rate: 3.3469866666666666
+Number of steps: 12000 Acceptance Rate: 3.65008
+Number of steps: 13000 Acceptance Rate: 3.95284
+Number of steps: 14000 Acceptance Rate: 4.25596
+Number of steps: 15000 Acceptance Rate: 4.553426666666667
+Number of steps: 16000 Acceptance Rate: 4.85972
+Number of steps: 17000 Acceptance Rate: 5.15744
+Number of steps: 18000 Acceptance Rate: 5.461173333333333
+Number of steps: 19000 Acceptance Rate: 5.768453333333333
+Number of steps: 20000 Acceptance Rate: 6.0684
+Burn-in Number (ends): 2624
+Independent Sample Size: 2593.9372017015885
+Mean posteriors after burn-in: [2.58872672370342e-6, 224.70079023722784, 3503.765331623095, 0.023843219717119998, 0.005937642217344462, 3.1354225357228924e-6, 365.2564447645333, 3624.402271542608, 0.03090526137464161, 0.006273495231178135, 0.0006048685900894606, 4296.415726481772, 359.0664843389368, -0.016035032966607517, -0.08608341646961931]
+MCMC chi-square: 203.65981939442267 for total timing uncertainty of: [24.61791824810198] secs.
+675.760741 seconds (55.69 M allocations: 168.393 GiB, 1.00% gc time)
+JLDFile /astro/users/blindor/research/ttv_ss/FITS/fromEMB/p3_fit10s17yrs.jld2 (read-only) loaded.
+15 parameters from fit: [2.7688618622885987e-6, 224.70079294231263, 3503.765225581371, 0.03718291439847119, 0.00015484865064693473, 3.2438860020844105e-6, 365.25641305396704, 3624.40256148189, 0.04241285005141672, 0.0016994617058222964, 0.0005401651562644445, 4432.814114277898, 4626.151460471016, -0.045813931946497355, -0.08892137408026254]
+Maximum log Prob from fit: -112.86028536414291
+No Walkers: 75 No. steps: 20000
+Number of steps: 1000 Acceptance Rate: 0.31849333333333335
+Number of steps: 2000 Acceptance Rate: 0.6348533333333334
+Number of steps: 3000 Acceptance Rate: 0.9478133333333333
+Number of steps: 4000 Acceptance Rate: 1.24624
+Number of steps: 5000 Acceptance Rate: 1.5451066666666666
+Number of steps: 6000 Acceptance Rate: 1.8450533333333334
+Number of steps: 7000 Acceptance Rate: 2.13636
+Number of steps: 8000 Acceptance Rate: 2.4341866666666667
+Number of steps: 9000 Acceptance Rate: 2.7301866666666665
+Number of steps: 10000 Acceptance Rate: 3.0214
+Number of steps: 11000 Acceptance Rate: 3.31284
+Number of steps: 12000 Acceptance Rate: 3.6075066666666666
+Number of steps: 13000 Acceptance Rate: 3.8981066666666666
+Number of steps: 14000 Acceptance Rate: 4.200426666666667
+Number of steps: 15000 Acceptance Rate: 4.5030133333333335
+Number of steps: 16000 Acceptance Rate: 4.8074666666666666
+Number of steps: 17000 Acceptance Rate: 5.109506666666666
+Number of steps: 18000 Acceptance Rate: 5.404066666666667
+Number of steps: 19000 Acceptance Rate: 5.70432
+Number of steps: 20000 Acceptance Rate: 6.0065333333333335
+Burn-in Number (ends): 4863
+Independent Sample Size: 2521.717067138118
+Mean posteriors after burn-in: [2.6001025978814863e-6, 224.70079279494598, 3503.765227766621, 0.023686504112476477, -0.0020533679602529756, 3.160649380021911e-6, 365.25641725877875, 3624.402524933259, 0.031810998669978996, 0.0002001109420389167, 0.0006627375450687486, 4421.937933309156, 4670.8668967953145, -0.02506864633516497, -0.07339664768960225]
+MCMC chi-square: 181.31664509345902 for total timing uncertainty of: [24.362725732518925] secs.
+680.921664 seconds (55.68 M allocations: 168.901 GiB, 1.18% gc time)
+JLDFile /astro/users/blindor/research/ttv_ss/FITS/fromEMB/p3_fit10s16yrs.jld2 (read-only) loaded.
+15 parameters from fit: [2.7043739775777652e-6, 224.70079759957534, 3503.765240448544, 0.03116313015024223, 0.0038908973553376616, 3.262330326357868e-6, 365.25641584615056, 3624.4024801746205, 0.037720526768662256, 0.004266080822164751, 0.0006319346105700195, 4348.9046172199005, 243.18814638272121, -0.009322224254640176, -0.09240711969789848]
+Maximum log Prob from fit: -100.233595233373
+No Walkers: 75 No. steps: 20000
+Number of steps: 1000 Acceptance Rate: 0.32094666666666666
+Number of steps: 2000 Acceptance Rate: 0.63788
+Number of steps: 3000 Acceptance Rate: 0.9533733333333333
+Number of steps: 4000 Acceptance Rate: 1.2607066666666666
+Number of steps: 5000 Acceptance Rate: 1.5715866666666667
+Number of steps: 6000 Acceptance Rate: 1.8772133333333334
+Number of steps: 7000 Acceptance Rate: 2.1926
+Number of steps: 8000 Acceptance Rate: 2.509786666666667
+Number of steps: 9000 Acceptance Rate: 2.82656
+Number of steps: 10000 Acceptance Rate: 3.13268
+Number of steps: 11000 Acceptance Rate: 3.4437866666666666
+Number of steps: 12000 Acceptance Rate: 3.7542666666666666
+Number of steps: 13000 Acceptance Rate: 4.0694
+Number of steps: 14000 Acceptance Rate: 4.377413333333333
+Number of steps: 15000 Acceptance Rate: 4.68688
+Number of steps: 16000 Acceptance Rate: 4.994186666666667
+Number of steps: 17000 Acceptance Rate: 5.30192
+Number of steps: 18000 Acceptance Rate: 5.61704
+Number of steps: 19000 Acceptance Rate: 5.929493333333333
+Number of steps: 20000 Acceptance Rate: 6.238466666666667
+Burn-in Number (ends): 2419
+Independent Sample Size: 3425.8329808240956
+Mean posteriors after burn-in: [2.623747854518168e-6, 224.70079756793248, 3503.7652409303337, 0.02429528490099791, 0.001401160823914593, 3.2183692902223946e-6, 365.25641868327335, 3624.4024505048933, 0.03236258247938404, 0.00238338010720879, 0.0006943046443615673, 4332.01058817662, 293.47648531427365, -0.0037453795431004705, -0.0850409938575506]
+MCMC chi-square: 123.46204332232443 for total timing uncertainty of: [21.057680166906305] secs.
+672.965087 seconds (54.96 M allocations: 137.408 GiB, 1.14% gc time)
+JLDFile /astro/users/blindor/research/ttv_ss/FITS/fromEMB/p3_fit10s15yrs.jld2 (read-only) loaded.
+15 parameters from fit: [2.6579745353977708e-6, 224.70080737602098, 3503.765137108132, 0.026345714902175018, 0.002990788029337626, 3.1814710944725283e-6, 365.256427506969, 3624.402425972931, 0.03341791307483251, 0.004121670928402018, 0.000630666607075235, 4365.495884966472, 4634.497256904679, -0.008566930899586173, -0.0848888907015876]
+Maximum log Prob from fit: -88.38653582252387
+No Walkers: 75 No. steps: 20000
+Number of steps: 1000 Acceptance Rate: 0.31933333333333336
+Number of steps: 2000 Acceptance Rate: 0.6320133333333333
+Number of steps: 3000 Acceptance Rate: 0.9373333333333334
+Number of steps: 4000 Acceptance Rate: 1.2439333333333333
+Number of steps: 5000 Acceptance Rate: 1.55296
+Number of steps: 6000 Acceptance Rate: 1.86492
+Number of steps: 7000 Acceptance Rate: 2.17804
+Number of steps: 8000 Acceptance Rate: 2.4885333333333333
+Number of steps: 9000 Acceptance Rate: 2.7988
+Number of steps: 10000 Acceptance Rate: 3.10764
+Number of steps: 11000 Acceptance Rate: 3.416533333333333
+Number of steps: 12000 Acceptance Rate: 3.72176
+Number of steps: 13000 Acceptance Rate: 4.025706666666666
+Number of steps: 14000 Acceptance Rate: 4.3344933333333335
+Number of steps: 15000 Acceptance Rate: 4.643293333333333
+Number of steps: 16000 Acceptance Rate: 4.95172
+Number of steps: 17000 Acceptance Rate: 5.263026666666667
+Number of steps: 18000 Acceptance Rate: 5.571013333333333
+Number of steps: 19000 Acceptance Rate: 5.878853333333334
+Number of steps: 20000 Acceptance Rate: 6.177773333333334
+Burn-in Number (ends): 2302
+Independent Sample Size: 3213.821364119511
+Mean posteriors after burn-in: [2.5824901432186363e-6, 224.70080694659163, 3503.7651420035277, 0.02006291514045665, 0.0016764363098974544, 3.1431602783362513e-6, 365.25642790936075, 3624.402412431358, 0.028498618799372478, 0.0031141885978897806, 0.0006803839004461979, 4348.127385862853, 4656.957018205321, -0.005623146431144706, -0.07982521229889303]
+MCMC chi-square: 98.3975582023699 for total timing uncertainty of: [19.78079052538617] secs.
+667.047124 seconds (55.22 M allocations: 146.101 GiB, 1.03% gc time)

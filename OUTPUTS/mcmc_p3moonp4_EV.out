@@ -1,0 +1,1161 @@
+args = ["Hppmpp", "mcmc", "fromEV", "100"]
+23 parameters from fit: [2.2612113370866193e-6, 224.70077116554344, 3503.7688755167, -0.002285388687173895, -0.0025615901877651735, 3.0167883030425766e-6, 365.25645819603926, 3624.4074710810073, 0.010952269761637847, 0.001048655048881739, 2.0055775773746604e-7, 686.446097637533, 372.4385003405606, -0.00756492218050526, -0.20793047379673352, 0.001146738832473497, 4349.160002493804, 356.52397552802785, 0.03258939303477366, -0.03234492522528122, 0.00012290461942381306, -0.0017907569885874273, 2.3146938823142285]
+Maximum log Prob from fit: -112.27445650320148
+No Walkers: 75 No. steps: 50000
+Number of steps: 1000 Acceptance Rate: 0.27698666666666666
+Number of steps: 2000 Acceptance Rate: 0.5044533333333333
+Number of steps: 3000 Acceptance Rate: 0.71804
+Number of steps: 4000 Acceptance Rate: 0.9322
+Number of steps: 5000 Acceptance Rate: 1.1305866666666666
+Number of steps: 6000 Acceptance Rate: 1.3235333333333332
+Number of steps: 7000 Acceptance Rate: 1.51752
+Number of steps: 8000 Acceptance Rate: 1.71436
+Number of steps: 9000 Acceptance Rate: 1.9179733333333333
+Number of steps: 10000 Acceptance Rate: 2.1108666666666664
+Number of steps: 11000 Acceptance Rate: 2.3029333333333333
+Number of steps: 12000 Acceptance Rate: 2.49684
+Number of steps: 13000 Acceptance Rate: 2.6868
+Number of steps: 14000 Acceptance Rate: 2.887373333333333
+Number of steps: 15000 Acceptance Rate: 3.07608
+Number of steps: 16000 Acceptance Rate: 3.2698666666666667
+Number of steps: 17000 Acceptance Rate: 3.46396
+Number of steps: 18000 Acceptance Rate: 3.6534
+Number of steps: 19000 Acceptance Rate: 3.8501333333333334
+Number of steps: 20000 Acceptance Rate: 4.041226666666667
+Number of steps: 21000 Acceptance Rate: 4.226613333333334
+Number of steps: 22000 Acceptance Rate: 4.407533333333333
+Number of steps: 23000 Acceptance Rate: 4.59288
+Number of steps: 24000 Acceptance Rate: 4.774186666666667
+Number of steps: 25000 Acceptance Rate: 4.9554
+Number of steps: 26000 Acceptance Rate: 5.144546666666667
+Number of steps: 27000 Acceptance Rate: 5.332506666666666
+Number of steps: 28000 Acceptance Rate: 5.52248
+Number of steps: 29000 Acceptance Rate: 5.71432
+Number of steps: 30000 Acceptance Rate: 5.90228
+Number of steps: 31000 Acceptance Rate: 6.087266666666666
+Number of steps: 32000 Acceptance Rate: 6.2666
+Number of steps: 33000 Acceptance Rate: 6.446386666666666
+Number of steps: 34000 Acceptance Rate: 6.619106666666666
+Number of steps: 35000 Acceptance Rate: 6.7967466666666665
+Number of steps: 36000 Acceptance Rate: 6.98028
+Number of steps: 37000 Acceptance Rate: 7.1610933333333335
+Number of steps: 38000 Acceptance Rate: 7.33916
+Number of steps: 39000 Acceptance Rate: 7.52028
+Number of steps: 40000 Acceptance Rate: 7.703053333333333
+Number of steps: 41000 Acceptance Rate: 7.88852
+Number of steps: 42000 Acceptance Rate: 8.080653333333334
+Number of steps: 43000 Acceptance Rate: 8.276306666666667
+Number of steps: 44000 Acceptance Rate: 8.48104
+Number of steps: 45000 Acceptance Rate: 8.67444
+Number of steps: 46000 Acceptance Rate: 8.857293333333333
+Number of steps: 47000 Acceptance Rate: 9.0458
+Number of steps: 48000 Acceptance Rate: 9.23184
+Number of steps: 49000 Acceptance Rate: 9.41304
+Number of steps: 50000 Acceptance Rate: 9.60264
+Burn-in Number (ends): 7146
+Independent Sample Size: 1543.516670146418
+Mean posteriors after burn-in: [2.6621447466088018e-6, 224.7007692927329, 3503.768887003149, -0.0031324133704184053, 0.00715368690943336, 3.0193573657344e-6, 365.256450672285, 3624.4075878421763, 0.010237696297555896, 0.008139832372529297, 2.9688246890166096e-7, 686.2084215741472, 375.6130651209319, 0.03790621380605649, -0.05822124315996815, 0.0011261350953592289, 4455.330044213004, 1.5743690508338979, 0.02272328823137659, -0.050121695200308986, 0.00014293471079293089, -0.0015867214892959578, 2.310589487421321]
+MCMC chi-square: 41.320035250900084 for total timing uncertainty of: [30.343675917443544] secs.
+1653.270100 seconds (214.97 M allocations: 2.021 TiB, 1.03% gc time)
+23 parameters from fit: [2.2570523458670435e-6, 224.7007709855242, 3503.7688782374275, -0.0022719493753867726, -0.002684963605743375, 3.0201582446678123e-6, 365.25645834470185, 3624.4074698106315, 0.010962776070886327, 0.000957764585866941, 2.0000296507910438e-7, 686.4286091620503, 372.33245838031263, -0.008268638152025418, -0.21020673274186785, 0.0011453254109752287, 4349.59230661608, 357.1550352346078, 0.03230843414114158, -0.032218176561428016, 0.00012022856823667253, -0.0017924586193564611, 2.314581839540122]
+Maximum log Prob from fit: -109.32807042624285
+No Walkers: 75 No. steps: 50000
+Number of steps: 1000 Acceptance Rate: 0.27021333333333336
+Number of steps: 2000 Acceptance Rate: 0.4983066666666667
+Number of steps: 3000 Acceptance Rate: 0.70792
+Number of steps: 4000 Acceptance Rate: 0.90652
+Number of steps: 5000 Acceptance Rate: 1.1073333333333333
+Number of steps: 6000 Acceptance Rate: 1.30252
+Number of steps: 7000 Acceptance Rate: 1.4901733333333333
+Number of steps: 8000 Acceptance Rate: 1.6735466666666667
+Number of steps: 9000 Acceptance Rate: 1.8585466666666666
+Number of steps: 10000 Acceptance Rate: 2.0458266666666667
+Number of steps: 11000 Acceptance Rate: 2.2342666666666666
+Number of steps: 12000 Acceptance Rate: 2.42536
+Number of steps: 13000 Acceptance Rate: 2.6089333333333333
+Number of steps: 14000 Acceptance Rate: 2.8007866666666668
+Number of steps: 15000 Acceptance Rate: 2.992173333333333
+Number of steps: 16000 Acceptance Rate: 3.178106666666667
+Number of steps: 17000 Acceptance Rate: 3.36696
+Number of steps: 18000 Acceptance Rate: 3.55316
+Number of steps: 19000 Acceptance Rate: 3.7472666666666665
+Number of steps: 20000 Acceptance Rate: 3.9440666666666666
+Number of steps: 21000 Acceptance Rate: 4.13684
+Number of steps: 22000 Acceptance Rate: 4.33208
+Number of steps: 23000 Acceptance Rate: 4.526293333333333
+Number of steps: 24000 Acceptance Rate: 4.723293333333333
+Number of steps: 25000 Acceptance Rate: 4.917853333333333
+Number of steps: 26000 Acceptance Rate: 5.104866666666667
+Number of steps: 27000 Acceptance Rate: 5.28824
+Number of steps: 28000 Acceptance Rate: 5.47388
+Number of steps: 29000 Acceptance Rate: 5.658773333333333
+Number of steps: 30000 Acceptance Rate: 5.8374
+Number of steps: 31000 Acceptance Rate: 6.012786666666667
+Number of steps: 32000 Acceptance Rate: 6.188306666666667
+Number of steps: 33000 Acceptance Rate: 6.35936
+Number of steps: 34000 Acceptance Rate: 6.528106666666667
+Number of steps: 35000 Acceptance Rate: 6.70156
+Number of steps: 36000 Acceptance Rate: 6.878466666666666
+Number of steps: 37000 Acceptance Rate: 7.052573333333333
+Number of steps: 38000 Acceptance Rate: 7.229093333333333
+Number of steps: 39000 Acceptance Rate: 7.40932
+Number of steps: 40000 Acceptance Rate: 7.589746666666667
+Number of steps: 41000 Acceptance Rate: 7.777706666666667
+Number of steps: 42000 Acceptance Rate: 7.95732
+Number of steps: 43000 Acceptance Rate: 8.144026666666667
+Number of steps: 44000 Acceptance Rate: 8.32844
+Number of steps: 45000 Acceptance Rate: 8.5206
+Number of steps: 46000 Acceptance Rate: 8.712946666666667
+Number of steps: 47000 Acceptance Rate: 8.89872
+Number of steps: 48000 Acceptance Rate: 9.074453333333333
+Number of steps: 49000 Acceptance Rate: 9.245506666666667
+Number of steps: 50000 Acceptance Rate: 9.4292
+Burn-in Number (ends): 5557
+Independent Sample Size: 1421.032746196689
+Mean posteriors after burn-in: [2.6494424021332076e-6, 224.7007698753618, 3503.7688840733117, -0.0013821091743241815, 0.008070598124946935, 3.031101623448283e-6, 365.2564518314123, 3624.4075841936624, 0.011829372604680286, 0.008793955532574735, 2.905475858528105e-7, 686.6572422409748, 369.636801314321, 0.03840236901652649, -0.053611107762579296, 0.0010637612974399556, 4458.746260981872, 1.5620974222725512, 0.018270485913810367, -0.05111424593840512, 0.00010920986698292349, -0.001607315400577005, 2.308575500722494]
+MCMC chi-square: 41.055474689965884 for total timing uncertainty of: [30.36322003115603] secs.
+1673.259095 seconds (186.51 M allocations: 2.186 TiB, 1.01% gc time)
+23 parameters from fit: [2.2563552836233034e-6, 224.70077130984757, 3503.768874293727, -0.002223836410613615, -0.0029373697054817117, 3.0234639399250588e-6, 365.25645819554956, 3624.407471530766, 0.011050850051838836, 0.0007935770888913945, 1.9849781753437136e-7, 686.5158993423915, 371.3074080651985, -0.006763600851724798, -0.20897368793829912, 0.0011455943162429184, 4348.929531546002, 360.1228401508336, 0.03263489045598228, -0.03210366203771897, 0.00011878868853574058, -0.0017914829556643478, 2.3145407329040175]
+Maximum log Prob from fit: -104.8338946304499
+No Walkers: 75 No. steps: 50000
+Number of steps: 1000 Acceptance Rate: 0.26437333333333335
+Number of steps: 2000 Acceptance Rate: 0.49204
+Number of steps: 3000 Acceptance Rate: 0.70668
+Number of steps: 4000 Acceptance Rate: 0.91644
+Number of steps: 5000 Acceptance Rate: 1.12068
+Number of steps: 6000 Acceptance Rate: 1.3180266666666667
+Number of steps: 7000 Acceptance Rate: 1.51444
+Number of steps: 8000 Acceptance Rate: 1.70636
+Number of steps: 9000 Acceptance Rate: 1.8934133333333334
+Number of steps: 10000 Acceptance Rate: 2.0790933333333332
+Number of steps: 11000 Acceptance Rate: 2.261066666666667
+Number of steps: 12000 Acceptance Rate: 2.444026666666667
+Number of steps: 13000 Acceptance Rate: 2.626533333333333
+Number of steps: 14000 Acceptance Rate: 2.8101333333333334
+Number of steps: 15000 Acceptance Rate: 2.9897733333333334
+Number of steps: 16000 Acceptance Rate: 3.17008
+Number of steps: 17000 Acceptance Rate: 3.349066666666667
+Number of steps: 18000 Acceptance Rate: 3.5283333333333333
+Number of steps: 19000 Acceptance Rate: 3.7061333333333333
+Number of steps: 20000 Acceptance Rate: 3.8891466666666665
+Number of steps: 21000 Acceptance Rate: 4.07116
+Number of steps: 22000 Acceptance Rate: 4.253373333333333
+Number of steps: 23000 Acceptance Rate: 4.437013333333334
+Number of steps: 24000 Acceptance Rate: 4.62436
+Number of steps: 25000 Acceptance Rate: 4.807133333333334
+Number of steps: 26000 Acceptance Rate: 4.983933333333334
+Number of steps: 27000 Acceptance Rate: 5.162013333333333
+Number of steps: 28000 Acceptance Rate: 5.341706666666667
+Number of steps: 29000 Acceptance Rate: 5.5228
+Number of steps: 30000 Acceptance Rate: 5.710506666666666
+Number of steps: 31000 Acceptance Rate: 5.89284
+Number of steps: 32000 Acceptance Rate: 6.072186666666667
+Number of steps: 33000 Acceptance Rate: 6.250746666666666
+Number of steps: 34000 Acceptance Rate: 6.42712
+Number of steps: 35000 Acceptance Rate: 6.60712
+Number of steps: 36000 Acceptance Rate: 6.7834
+Number of steps: 37000 Acceptance Rate: 6.9529733333333334
+Number of steps: 38000 Acceptance Rate: 7.123573333333334
+Number of steps: 39000 Acceptance Rate: 7.2949866666666665
+Number of steps: 40000 Acceptance Rate: 7.47168
+Number of steps: 41000 Acceptance Rate: 7.642066666666667
+Number of steps: 42000 Acceptance Rate: 7.821186666666667
+Number of steps: 43000 Acceptance Rate: 8.001093333333333
+Number of steps: 44000 Acceptance Rate: 8.1822
+Number of steps: 45000 Acceptance Rate: 8.373106666666667
+Number of steps: 46000 Acceptance Rate: 8.56308
+Number of steps: 47000 Acceptance Rate: 8.750413333333332
+Number of steps: 48000 Acceptance Rate: 8.947853333333333
+Number of steps: 49000 Acceptance Rate: 9.138506666666666
+Number of steps: 50000 Acceptance Rate: 9.3252
+Burn-in Number (ends): 6529
+Independent Sample Size: 1372.8496485035419
+Mean posteriors after burn-in: [2.6319399189977065e-6, 224.70076899464252, 3503.7688982996287, -0.0016007224249396353, 0.007588364782800908, 3.0288151142717766e-6, 365.2564524123669, 3624.407582831378, 0.01168326996347178, 0.008470025017131828, 3.0520879328936173e-7, 686.520445856258, 368.977036235369, 0.0321910412607858, -0.05714991857633707, 0.0010928047194918478, 4463.974908079819, 1.5756039539595381, 0.020253008803812082, -0.04861623602996892, 0.00012163697209354833, -0.0016230782738133216, 2.309545008147803]
+MCMC chi-square: 41.96148431117169 for total timing uncertainty of: [30.393784574093097] secs.
+1674.030817 seconds (186.58 M allocations: 2.207 TiB, 0.96% gc time)
+23 parameters from fit: [2.3185779256598916e-6, 224.7007682588545, 3503.7689047166346, -0.002929853968142982, -0.002621250370970726, 3.012052171711364e-6, 365.25646126674616, 3624.407443171316, 0.0105422977351439, 0.0009825456455594436, 2.2852705630524112e-7, 684.915988042647, 386.13982679417893, 0.008690279540939627, -0.20704408532100174, 0.0012130724718763001, 4364.827709334648, 331.0012500328368, 0.03330344514951682, -0.03136961918082062, 0.00013412157805609847, -0.0017590801090217626, 2.3157658669913133]
+Maximum log Prob from fit: -99.39066996584585
+No Walkers: 75 No. steps: 50000
+Number of steps: 1000 Acceptance Rate: 0.2716
+Number of steps: 2000 Acceptance Rate: 0.50856
+Number of steps: 3000 Acceptance Rate: 0.72224
+Number of steps: 4000 Acceptance Rate: 0.92092
+Number of steps: 5000 Acceptance Rate: 1.11856
+Number of steps: 6000 Acceptance Rate: 1.3055733333333333
+Number of steps: 7000 Acceptance Rate: 1.4909466666666666
+Number of steps: 8000 Acceptance Rate: 1.6661066666666666
+Number of steps: 9000 Acceptance Rate: 1.8518266666666667
+Number of steps: 10000 Acceptance Rate: 2.0326933333333335
+Number of steps: 11000 Acceptance Rate: 2.2044
+Number of steps: 12000 Acceptance Rate: 2.37752
+Number of steps: 13000 Acceptance Rate: 2.5539066666666668
+Number of steps: 14000 Acceptance Rate: 2.7328133333333335
+Number of steps: 15000 Acceptance Rate: 2.9148
+Number of steps: 16000 Acceptance Rate: 3.102106666666667
+Number of steps: 17000 Acceptance Rate: 3.28812
+Number of steps: 18000 Acceptance Rate: 3.465133333333333
+Number of steps: 19000 Acceptance Rate: 3.642106666666667
+Number of steps: 20000 Acceptance Rate: 3.8228
+Number of steps: 21000 Acceptance Rate: 4.001746666666667
+Number of steps: 22000 Acceptance Rate: 4.181
+Number of steps: 23000 Acceptance Rate: 4.35552
+Number of steps: 24000 Acceptance Rate: 4.52788
+Number of steps: 25000 Acceptance Rate: 4.699653333333333
+Number of steps: 26000 Acceptance Rate: 4.8671066666666665
+Number of steps: 27000 Acceptance Rate: 5.032133333333333
+Number of steps: 28000 Acceptance Rate: 5.201346666666667
+Number of steps: 29000 Acceptance Rate: 5.362973333333334
+Number of steps: 30000 Acceptance Rate: 5.52316
+Number of steps: 31000 Acceptance Rate: 5.6850933333333336
+Number of steps: 32000 Acceptance Rate: 5.8480533333333335
+Number of steps: 33000 Acceptance Rate: 6.010466666666667
+Number of steps: 34000 Acceptance Rate: 6.180386666666666
+Number of steps: 35000 Acceptance Rate: 6.355106666666667
+Number of steps: 36000 Acceptance Rate: 6.521013333333333
+Number of steps: 37000 Acceptance Rate: 6.689946666666667
+Number of steps: 38000 Acceptance Rate: 6.854773333333333
+Number of steps: 39000 Acceptance Rate: 7.02564
+Number of steps: 40000 Acceptance Rate: 7.191626666666667
+Number of steps: 41000 Acceptance Rate: 7.35064
+Number of steps: 42000 Acceptance Rate: 7.51492
+Number of steps: 43000 Acceptance Rate: 7.67708
+Number of steps: 44000 Acceptance Rate: 7.838866666666667
+Number of steps: 45000 Acceptance Rate: 8.000026666666667
+Number of steps: 46000 Acceptance Rate: 8.165226666666667
+Number of steps: 47000 Acceptance Rate: 8.333626666666667
+Number of steps: 48000 Acceptance Rate: 8.495946666666667
+Number of steps: 49000 Acceptance Rate: 8.65616
+Number of steps: 50000 Acceptance Rate: 8.816466666666667
+Burn-in Number (ends): 7383
+Independent Sample Size: 1098.3395859700381
+Mean posteriors after burn-in: [2.7545254745341885e-6, 224.70076700802372, 3503.7689116310253, -0.0017649321925630088, 0.007329988549386209, 3.0157589180805505e-6, 365.256455909497, 3624.407548957322, 0.011596701157858188, 0.00815745682136647, 3.2818254888845243e-7, 685.6903548186082, 376.64370436152825, 0.019711824498369408, -0.049240554508037666, 0.0011501606196434014, 4463.363237146715, 1.5715225998010345, 0.024445434238974096, -0.04756947450731567, 0.00012262861782043124, -0.0015401633854346048, 2.309059846380659]
+MCMC chi-square: 48.791553502408 for total timing uncertainty of: [30.42841111015479] secs.
+1715.426712 seconds (188.86 M allocations: 2.518 TiB, 0.92% gc time)
+23 parameters from fit: [2.344476034577762e-6, 224.70076644455207, 3503.7689399161018, -0.0029991019795651804, -0.0023079072637633333, 3.024375418348258e-6, 365.25645914944465, 3624.4074656354737, 0.010592209569179918, 0.0013195929497818635, 2.500493793217986e-7, 685.1715499046378, 383.8846398986733, -0.004348043221106485, -0.21026292414508235, 0.0012308095939505396, 4386.473297648947, 299.4566674444028, 0.032107127040773266, -0.02839922410847285, 0.00016945237968824753, -0.0017373133037111943, 2.3180448160467857]
+Maximum log Prob from fit: -95.19391747309191
+No Walkers: 75 No. steps: 50000
+Number of steps: 1000 Acceptance Rate: 0.27185333333333334
+Number of steps: 2000 Acceptance Rate: 0.50524
+Number of steps: 3000 Acceptance Rate: 0.7177866666666667
+Number of steps: 4000 Acceptance Rate: 0.92428
+Number of steps: 5000 Acceptance Rate: 1.1357733333333333
+Number of steps: 6000 Acceptance Rate: 1.3383733333333334
+Number of steps: 7000 Acceptance Rate: 1.5361866666666666
+Number of steps: 8000 Acceptance Rate: 1.7194533333333333
+Number of steps: 9000 Acceptance Rate: 1.90172
+Number of steps: 10000 Acceptance Rate: 2.09176
+Number of steps: 11000 Acceptance Rate: 2.283053333333333
+Number of steps: 12000 Acceptance Rate: 2.4646266666666667
+Number of steps: 13000 Acceptance Rate: 2.64872
+Number of steps: 14000 Acceptance Rate: 2.82552
+Number of steps: 15000 Acceptance Rate: 3.00232
+Number of steps: 16000 Acceptance Rate: 3.17664
+Number of steps: 17000 Acceptance Rate: 3.3541733333333332
+Number of steps: 18000 Acceptance Rate: 3.52544
+Number of steps: 19000 Acceptance Rate: 3.69148
+Number of steps: 20000 Acceptance Rate: 3.86156
+Number of steps: 21000 Acceptance Rate: 4.03252
+Number of steps: 22000 Acceptance Rate: 4.20232
+Number of steps: 23000 Acceptance Rate: 4.366133333333333
+Number of steps: 24000 Acceptance Rate: 4.5285866666666665
+Number of steps: 25000 Acceptance Rate: 4.6933066666666665
+Number of steps: 26000 Acceptance Rate: 4.865906666666667
+Number of steps: 27000 Acceptance Rate: 5.0382533333333335
+Number of steps: 28000 Acceptance Rate: 5.21296
+Number of steps: 29000 Acceptance Rate: 5.383013333333333
+Number of steps: 30000 Acceptance Rate: 5.556333333333333
+Number of steps: 31000 Acceptance Rate: 5.727733333333333
+Number of steps: 32000 Acceptance Rate: 5.89656
+Number of steps: 33000 Acceptance Rate: 6.060773333333334
+Number of steps: 34000 Acceptance Rate: 6.2314533333333335
+Number of steps: 35000 Acceptance Rate: 6.4033066666666665
+Number of steps: 36000 Acceptance Rate: 6.570333333333333
+Number of steps: 37000 Acceptance Rate: 6.736373333333334
+Number of steps: 38000 Acceptance Rate: 6.90572
+Number of steps: 39000 Acceptance Rate: 7.075186666666666
+Number of steps: 40000 Acceptance Rate: 7.247573333333333
+Number of steps: 41000 Acceptance Rate: 7.416613333333333
+Number of steps: 42000 Acceptance Rate: 7.591386666666667
+Number of steps: 43000 Acceptance Rate: 7.771093333333333
+Number of steps: 44000 Acceptance Rate: 7.951426666666666
+Number of steps: 45000 Acceptance Rate: 8.12668
+Number of steps: 46000 Acceptance Rate: 8.3008
+Number of steps: 47000 Acceptance Rate: 8.473
+Number of steps: 48000 Acceptance Rate: 8.641026666666667
+Number of steps: 49000 Acceptance Rate: 8.813013333333334
+Number of steps: 50000 Acceptance Rate: 8.98392
+Burn-in Number (ends): 6932
+Independent Sample Size: 1314.1324554053206
+Mean posteriors after burn-in: [2.782300774295843e-6, 224.70076434750155, 3503.768973616279, -0.0019065407708502048, 0.005601883269655072, 3.0287414184043015e-6, 365.2564511861896, 3624.4075898197175, 0.011734645367269104, 0.007007695532669462, 3.6734071776623036e-7, 685.9239378798243, 375.86956119338413, 0.010405676834196777, -0.07358578826824656, 0.0011911626125685952, 4492.793894873983, 1.6013814234055188, 0.020893546678587994, -0.03708313823579458, 0.0002012982665391832, -0.0014946616175428302, 2.3153491024876542]
+MCMC chi-square: 45.98324265892117 for total timing uncertainty of: [30.41338975608513] secs.
+1693.230707 seconds (186.98 M allocations: 2.377 TiB, 0.87% gc time)
+23 parameters from fit: [2.3912048248052295e-6, 224.70076739499294, 3503.768925351237, -0.0032897032025133084, -0.001598475338309512, 3.032442964326265e-6, 365.25645812578813, 3624.4074753050063, 0.010536346589369012, 0.0017273702666127625, 2.39519071443396e-7, 685.2080724757793, 379.4068502006957, 0.014247908931421136, -0.2155644327252083, 0.001233181915463592, 4389.42137698123, 289.18962528901847, 0.03190134416576789, -0.028485207611889503, 0.00014896789582197198, -0.0017100146329642955, 2.3164960351519723]
+Maximum log Prob from fit: -90.5649630812711
+No Walkers: 75 No. steps: 50000
+Number of steps: 1000 Acceptance Rate: 0.26470666666666665
+Number of steps: 2000 Acceptance Rate: 0.4953066666666667
+Number of steps: 3000 Acceptance Rate: 0.7044266666666666
+Number of steps: 4000 Acceptance Rate: 0.90012
+Number of steps: 5000 Acceptance Rate: 1.0891466666666667
+Number of steps: 6000 Acceptance Rate: 1.2818133333333332
+Number of steps: 7000 Acceptance Rate: 1.4806933333333334
+Number of steps: 8000 Acceptance Rate: 1.6768266666666667
+Number of steps: 9000 Acceptance Rate: 1.8612933333333332
+Number of steps: 10000 Acceptance Rate: 2.04568
+Number of steps: 11000 Acceptance Rate: 2.234853333333333
+Number of steps: 12000 Acceptance Rate: 2.412306666666667
+Number of steps: 13000 Acceptance Rate: 2.5881066666666666
+Number of steps: 14000 Acceptance Rate: 2.7626133333333334
+Number of steps: 15000 Acceptance Rate: 2.932106666666667
+Number of steps: 16000 Acceptance Rate: 3.0980666666666665
+Number of steps: 17000 Acceptance Rate: 3.2604
+Number of steps: 18000 Acceptance Rate: 3.416106666666667
+Number of steps: 19000 Acceptance Rate: 3.5770133333333334
+Number of steps: 20000 Acceptance Rate: 3.7419866666666666
+Number of steps: 21000 Acceptance Rate: 3.90412
+Number of steps: 22000 Acceptance Rate: 4.062866666666666
+Number of steps: 23000 Acceptance Rate: 4.222653333333334
+Number of steps: 24000 Acceptance Rate: 4.388706666666667
+Number of steps: 25000 Acceptance Rate: 4.54948
+Number of steps: 26000 Acceptance Rate: 4.716746666666666
+Number of steps: 27000 Acceptance Rate: 4.87988
+Number of steps: 28000 Acceptance Rate: 5.040373333333333
+Number of steps: 29000 Acceptance Rate: 5.2030666666666665
+Number of steps: 30000 Acceptance Rate: 5.372253333333333
+Number of steps: 31000 Acceptance Rate: 5.539386666666666
+Number of steps: 32000 Acceptance Rate: 5.710226666666666
+Number of steps: 33000 Acceptance Rate: 5.875946666666667
+Number of steps: 34000 Acceptance Rate: 6.039
+Number of steps: 35000 Acceptance Rate: 6.20068
+Number of steps: 36000 Acceptance Rate: 6.360146666666667
+Number of steps: 37000 Acceptance Rate: 6.52004
+Number of steps: 38000 Acceptance Rate: 6.685173333333333
+Number of steps: 39000 Acceptance Rate: 6.859146666666667
+Number of steps: 40000 Acceptance Rate: 7.031386666666666
+Number of steps: 41000 Acceptance Rate: 7.203306666666666
+Number of steps: 42000 Acceptance Rate: 7.375733333333334
+Number of steps: 43000 Acceptance Rate: 7.54024
+Number of steps: 44000 Acceptance Rate: 7.709266666666666
+Number of steps: 45000 Acceptance Rate: 7.872693333333333
+Number of steps: 46000 Acceptance Rate: 8.03164
+Number of steps: 47000 Acceptance Rate: 8.196493333333333
+Number of steps: 48000 Acceptance Rate: 8.356266666666667
+Number of steps: 49000 Acceptance Rate: 8.52232
+Number of steps: 50000 Acceptance Rate: 8.689133333333332
+Burn-in Number (ends): 8502
+Independent Sample Size: 983.4522908413788
+Mean posteriors after burn-in: [2.8515595999437175e-6, 224.70076650298356, 3503.7689379969875, -0.0018479996296629404, 0.006699136094262637, 3.044226830517565e-6, 365.2564493556139, 3624.4076064270503, 0.012043989980374878, 0.007569230006061281, 3.709676844686274e-7, 686.0064342141403, 371.0997796611239, 0.017926660714233558, -0.050744450113744906, 0.0011678245651962965, 4490.950137794534, 1.5709117712786553, 0.0180535561624144, -0.03762738907916212, 0.00014886817505269483, -0.0014610761278623507, 2.3110134025949725]
+MCMC chi-square: 49.742435321613065 for total timing uncertainty of: [30.451322696523036] secs.
+1693.067773 seconds (187.22 M allocations: 2.411 TiB, 0.91% gc time)
+23 parameters from fit: [2.4049542685944634e-6, 224.70076439323176, 3503.7689560564877, -0.004099997760484449, 0.0005381862429709754, 3.025019556417524e-6, 365.25645637065867, 3624.407487003379, 0.010119826317057035, 0.0034531869623823505, 2.821965747775012e-7, 684.0269734984392, 391.825843408918, 0.006253614316915683, -0.21698737010138058, 0.0013113696922571996, 4393.150679340429, 259.0535754120551, 0.03428173282982065, -0.027875934422344806, 0.00017507316431243942, -0.0017538118732990744, 2.3184211389232234]
+Maximum log Prob from fit: -85.19342684505797
+No Walkers: 75 No. steps: 50000
+Number of steps: 1000 Acceptance Rate: 0.2696266666666667
+Number of steps: 2000 Acceptance Rate: 0.5013866666666666
+Number of steps: 3000 Acceptance Rate: 0.7091466666666667
+Number of steps: 4000 Acceptance Rate: 0.9066666666666666
+Number of steps: 5000 Acceptance Rate: 1.09696
+Number of steps: 6000 Acceptance Rate: 1.28568
+Number of steps: 7000 Acceptance Rate: 1.4654933333333333
+Number of steps: 8000 Acceptance Rate: 1.6534933333333333
+Number of steps: 9000 Acceptance Rate: 1.83436
+Number of steps: 10000 Acceptance Rate: 2.011826666666667
+Number of steps: 11000 Acceptance Rate: 2.18572
+Number of steps: 12000 Acceptance Rate: 2.3568933333333333
+Number of steps: 13000 Acceptance Rate: 2.521586666666667
+Number of steps: 14000 Acceptance Rate: 2.68788
+Number of steps: 15000 Acceptance Rate: 2.8535866666666667
+Number of steps: 16000 Acceptance Rate: 3.015093333333333
+Number of steps: 17000 Acceptance Rate: 3.17488
+Number of steps: 18000 Acceptance Rate: 3.335053333333333
+Number of steps: 19000 Acceptance Rate: 3.499093333333333
+Number of steps: 20000 Acceptance Rate: 3.6648133333333335
+Number of steps: 21000 Acceptance Rate: 3.8231733333333335
+Number of steps: 22000 Acceptance Rate: 3.9786533333333334
+Number of steps: 23000 Acceptance Rate: 4.141266666666667
+Number of steps: 24000 Acceptance Rate: 4.299
+Number of steps: 25000 Acceptance Rate: 4.46252
+Number of steps: 26000 Acceptance Rate: 4.620986666666667
+Number of steps: 27000 Acceptance Rate: 4.783626666666667
+Number of steps: 28000 Acceptance Rate: 4.94512
+Number of steps: 29000 Acceptance Rate: 5.109826666666667
+Number of steps: 30000 Acceptance Rate: 5.271413333333333
+Number of steps: 31000 Acceptance Rate: 5.43464
+Number of steps: 32000 Acceptance Rate: 5.5979866666666664
+Number of steps: 33000 Acceptance Rate: 5.766613333333333
+Number of steps: 34000 Acceptance Rate: 5.932733333333333
+Number of steps: 35000 Acceptance Rate: 6.091453333333333
+Number of steps: 36000 Acceptance Rate: 6.25352
+Number of steps: 37000 Acceptance Rate: 6.414653333333334
+Number of steps: 38000 Acceptance Rate: 6.578426666666667
+Number of steps: 39000 Acceptance Rate: 6.74824
+Number of steps: 40000 Acceptance Rate: 6.915373333333333
+Number of steps: 41000 Acceptance Rate: 7.083746666666666
+Number of steps: 42000 Acceptance Rate: 7.24712
+Number of steps: 43000 Acceptance Rate: 7.410946666666667
+Number of steps: 44000 Acceptance Rate: 7.572346666666666
+Number of steps: 45000 Acceptance Rate: 7.737133333333333
+Number of steps: 46000 Acceptance Rate: 7.90732
+Number of steps: 47000 Acceptance Rate: 8.07112
+Number of steps: 48000 Acceptance Rate: 8.228373333333334
+Number of steps: 49000 Acceptance Rate: 8.392733333333334
+Number of steps: 50000 Acceptance Rate: 8.55596
+Burn-in Number (ends): 13028
+Independent Sample Size: 974.8856085108633
+Mean posteriors after burn-in: [2.8990381335352184e-6, 224.7007689647909, 3503.768887879401, -0.002623440193874415, 0.00757793689346628, 3.0366250363637943e-6, 365.25644986709995, 3624.407603955946, 0.011633438505682733, 0.008246783669493178, 3.6482351305533507e-7, 686.5174255895829, 363.94463640061167, 0.02153261623204904, -0.038054498988706206, 0.0011759335230526592, 4483.708829871729, 1.6282720253308645, 0.01996485001261212, -0.04013263150695031, 0.00011553733254532084, -0.0014349623239607028, 2.307879744647851]
+MCMC chi-square: 46.57153701018492 for total timing uncertainty of: [30.436293021465364] secs.
+1726.296484 seconds (189.10 M allocations: 2.598 TiB, 0.79% gc time)
+23 parameters from fit: [2.4598555995371315e-6, 224.70076630712956, 3503.7689188776785, -0.004244351592769762, 0.002124316863847787, 2.9973167539822293e-6, 365.2564574960627, 3624.4074704898985, 0.009775348705436237, 0.004868686838935623, 2.9943068415828184e-7, 683.3780314353896, 399.74545188017805, 0.018900787743371797, -0.20046405094760728, 0.0013083904039524828, 4384.434433451185, 248.7004254866524, 0.03333519368654422, -0.03126675776909279, 0.00018403881510661125, -0.0017341823837907458, 2.318475993065887]
+Maximum log Prob from fit: -78.63963421187795
+No Walkers: 75 No. steps: 50000
+Number of steps: 1000 Acceptance Rate: 0.27182666666666666
+Number of steps: 2000 Acceptance Rate: 0.50616
+Number of steps: 3000 Acceptance Rate: 0.72576
+Number of steps: 4000 Acceptance Rate: 0.9346933333333334
+Number of steps: 5000 Acceptance Rate: 1.1360266666666667
+Number of steps: 6000 Acceptance Rate: 1.3376533333333334
+Number of steps: 7000 Acceptance Rate: 1.54316
+Number of steps: 8000 Acceptance Rate: 1.7344
+Number of steps: 9000 Acceptance Rate: 1.93068
+Number of steps: 10000 Acceptance Rate: 2.1292
+Number of steps: 11000 Acceptance Rate: 2.32272
+Number of steps: 12000 Acceptance Rate: 2.50308
+Number of steps: 13000 Acceptance Rate: 2.680493333333333
+Number of steps: 14000 Acceptance Rate: 2.8648666666666665
+Number of steps: 15000 Acceptance Rate: 3.0394533333333333
+Number of steps: 16000 Acceptance Rate: 3.2143333333333333
+Number of steps: 17000 Acceptance Rate: 3.38568
+Number of steps: 18000 Acceptance Rate: 3.5574666666666666
+Number of steps: 19000 Acceptance Rate: 3.7326266666666665
+Number of steps: 20000 Acceptance Rate: 3.9123866666666665
+Number of steps: 21000 Acceptance Rate: 4.085093333333333
+Number of steps: 22000 Acceptance Rate: 4.24956
+Number of steps: 23000 Acceptance Rate: 4.418426666666667
+Number of steps: 24000 Acceptance Rate: 4.5853866666666665
+Number of steps: 25000 Acceptance Rate: 4.75864
+Number of steps: 26000 Acceptance Rate: 4.930066666666667
+Number of steps: 27000 Acceptance Rate: 5.096666666666667
+Number of steps: 28000 Acceptance Rate: 5.262146666666666
+Number of steps: 29000 Acceptance Rate: 5.4262
+Number of steps: 30000 Acceptance Rate: 5.590626666666667
+Number of steps: 31000 Acceptance Rate: 5.765853333333333
+Number of steps: 32000 Acceptance Rate: 5.942773333333333
+Number of steps: 33000 Acceptance Rate: 6.118746666666667
+Number of steps: 34000 Acceptance Rate: 6.294973333333333
+Number of steps: 35000 Acceptance Rate: 6.47288
+Number of steps: 36000 Acceptance Rate: 6.650333333333333
+Number of steps: 37000 Acceptance Rate: 6.8249466666666665
+Number of steps: 38000 Acceptance Rate: 7.0003866666666665
+Number of steps: 39000 Acceptance Rate: 7.17008
+Number of steps: 40000 Acceptance Rate: 7.344453333333333
+Number of steps: 41000 Acceptance Rate: 7.51868
+Number of steps: 42000 Acceptance Rate: 7.693453333333333
+Number of steps: 43000 Acceptance Rate: 7.854026666666667
+Number of steps: 44000 Acceptance Rate: 8.025253333333334
+Number of steps: 45000 Acceptance Rate: 8.200706666666667
+Number of steps: 46000 Acceptance Rate: 8.362786666666667
+Number of steps: 47000 Acceptance Rate: 8.523946666666667
+Number of steps: 48000 Acceptance Rate: 8.688306666666668
+Number of steps: 49000 Acceptance Rate: 8.850613333333333
+Number of steps: 50000 Acceptance Rate: 9.015066666666666
+Burn-in Number (ends): 8065
+Independent Sample Size: 1264.142787534406
+Mean posteriors after burn-in: [2.857270655857606e-6, 224.7007740813055, 3503.768832334097, -0.002523091605114407, 0.007161279330125074, 3.0085980626191542e-6, 365.25645724612565, 3624.4075433386747, 0.011282483946292539, 0.007949506568302565, 3.4176041069648223e-7, 688.2704459175447, 353.4004895675775, 0.033909616181741715, -0.04602135536785871, 0.0011551288270727404, 4489.620967128495, 1.5951220310609584, 0.018173372767324752, -0.042117164343855165, 9.551844034615822e-5, -0.0014681815230402338, 2.3062434995808467]
+MCMC chi-square: 31.832402530989604 for total timing uncertainty of: [30.556916009217826] secs.
+1749.130260 seconds (194.45 M allocations: 2.617 TiB, 0.84% gc time)
+23 parameters from fit: [2.3673262403246848e-6, 224.70077137546826, 3503.768861602185, -0.0003899502467485388, 0.0014904220411887659, 3.061042170179991e-6, 365.25645896776433, 3624.407455843633, 0.012292335861550974, 0.004045479637513329, 3.0312015131105363e-7, 683.3852970781072, 404.53179951682654, 0.013269769915347042, -0.18151415269132798, 0.0011705285998248154, 4364.011710791461, 296.98950092132264, 0.024103342843759232, -0.03387052330675011, 0.00022165437877205365, -0.001790993396012194, 2.3213173674166985]
+Maximum log Prob from fit: -68.85960689377926
+No Walkers: 75 No. steps: 50000
+Number of steps: 1000 Acceptance Rate: 0.26424
+Number of steps: 2000 Acceptance Rate: 0.49072
+Number of steps: 3000 Acceptance Rate: 0.6987733333333334
+Number of steps: 4000 Acceptance Rate: 0.90288
+Number of steps: 5000 Acceptance Rate: 1.1001733333333332
+Number of steps: 6000 Acceptance Rate: 1.3010133333333334
+Number of steps: 7000 Acceptance Rate: 1.4944666666666666
+Number of steps: 8000 Acceptance Rate: 1.6794266666666666
+Number of steps: 9000 Acceptance Rate: 1.8539466666666666
+Number of steps: 10000 Acceptance Rate: 2.0265333333333335
+Number of steps: 11000 Acceptance Rate: 2.2003466666666665
+Number of steps: 12000 Acceptance Rate: 2.3747333333333334
+Number of steps: 13000 Acceptance Rate: 2.545733333333333
+Number of steps: 14000 Acceptance Rate: 2.7038533333333334
+Number of steps: 15000 Acceptance Rate: 2.8558666666666666
+Number of steps: 16000 Acceptance Rate: 3.0030666666666668
+Number of steps: 17000 Acceptance Rate: 3.1548266666666667
+Number of steps: 18000 Acceptance Rate: 3.3037733333333335
+Number of steps: 19000 Acceptance Rate: 3.447426666666667
+Number of steps: 20000 Acceptance Rate: 3.58704
+Number of steps: 21000 Acceptance Rate: 3.73364
+Number of steps: 22000 Acceptance Rate: 3.8737466666666664
+Number of steps: 23000 Acceptance Rate: 4.012346666666667
+Number of steps: 24000 Acceptance Rate: 4.148786666666667
+Number of steps: 25000 Acceptance Rate: 4.281946666666666
+Number of steps: 26000 Acceptance Rate: 4.419373333333334
+Number of steps: 27000 Acceptance Rate: 4.5588
+Number of steps: 28000 Acceptance Rate: 4.698693333333333
+Number of steps: 29000 Acceptance Rate: 4.836773333333333
+Number of steps: 30000 Acceptance Rate: 4.97484
+Number of steps: 31000 Acceptance Rate: 5.110573333333333
+Number of steps: 32000 Acceptance Rate: 5.23796
+Number of steps: 33000 Acceptance Rate: 5.3618
+Number of steps: 34000 Acceptance Rate: 5.48832
+Number of steps: 35000 Acceptance Rate: 5.618346666666667
+Number of steps: 36000 Acceptance Rate: 5.751346666666667
+Number of steps: 37000 Acceptance Rate: 5.87628
+Number of steps: 38000 Acceptance Rate: 5.997026666666667
+Number of steps: 39000 Acceptance Rate: 6.1184666666666665
+Number of steps: 40000 Acceptance Rate: 6.245573333333334
+Number of steps: 41000 Acceptance Rate: 6.371466666666667
+Number of steps: 42000 Acceptance Rate: 6.50136
+Number of steps: 43000 Acceptance Rate: 6.618013333333334
+Number of steps: 44000 Acceptance Rate: 6.735786666666667
+Number of steps: 45000 Acceptance Rate: 6.857466666666666
+Number of steps: 46000 Acceptance Rate: 6.98676
+Number of steps: 47000 Acceptance Rate: 7.11188
+Number of steps: 48000 Acceptance Rate: 7.23168
+Number of steps: 49000 Acceptance Rate: 7.356413333333333
+Number of steps: 50000 Acceptance Rate: 7.47708
+Burn-in Number (ends): 11190
+Independent Sample Size: 757.445050684461
+Mean posteriors after burn-in: [2.8737882960723767e-6, 224.70078251748808, 3503.7687272317853, 0.0026543806653771176, 0.00792553542647101, 3.078044605575537e-6, 365.2564974186933, 3624.407237899597, 0.015208023148251747, 0.008089663867951258, 4.682855124164623e-7, 695.3589224733413, 296.2400979597909, 0.01928748013334273, -0.03627418999373324, 0.000985053423532797, 4487.044325765161, 1.7034111492917907, 0.004563794383047613, -0.056060293424326085, 0.00013374823272938868, -0.001469671026006943, 2.309044061627994]
+MCMC chi-square: 35.48129411622726 for total timing uncertainty of: [30.50418670950403] secs.
+1996.060548 seconds (212.52 M allocations: 3.759 TiB, 0.80% gc time)
+23 parameters from fit: [2.5424815411201818e-6, 224.70078771700557, 3503.768651052855, 0.00756843869151245, -0.0044588809800802575, 3.0777376476468474e-6, 365.26358088870455, 3624.363785016571, 0.01903165165165342, -0.001590712496929956, 2.4106958827460824e-6, 733.4984309932809, 116.66636890550748, 0.0972164959185666, 0.006744546162073079, 0.0008662247989235625, 4346.477680017232, 365.0909228852838, 0.010528186490073008, -0.052382043312019365, -6.116415016319533e-5, -0.0016487056826711567, 2.303594837080236]
+Maximum log Prob from fit: -65.24481060471342
+No Walkers: 75 No. steps: 50000
+Number of steps: 1000 Acceptance Rate: 0.20598666666666668
+Number of steps: 2000 Acceptance Rate: 0.34037333333333336
+Number of steps: 3000 Acceptance Rate: 0.45137333333333335
+Number of steps: 4000 Acceptance Rate: 0.54364
+Number of steps: 5000 Acceptance Rate: 0.62808
+Number of steps: 6000 Acceptance Rate: 0.7025866666666667
+Number of steps: 7000 Acceptance Rate: 0.77424
+Number of steps: 8000 Acceptance Rate: 0.8455466666666667
+Number of steps: 9000 Acceptance Rate: 0.91356
+Number of steps: 10000 Acceptance Rate: 0.9805733333333333
+Number of steps: 11000 Acceptance Rate: 1.04968
+Number of steps: 12000 Acceptance Rate: 1.1116133333333333
+Number of steps: 13000 Acceptance Rate: 1.1721733333333333
+Number of steps: 14000 Acceptance Rate: 1.2283333333333333
+Number of steps: 15000 Acceptance Rate: 1.28296
+Number of steps: 16000 Acceptance Rate: 1.33396
+Number of steps: 17000 Acceptance Rate: 1.3840933333333334
+Number of steps: 18000 Acceptance Rate: 1.4353066666666667
+Number of steps: 19000 Acceptance Rate: 1.4857866666666666
+Number of steps: 20000 Acceptance Rate: 1.5347733333333333
+Number of steps: 21000 Acceptance Rate: 1.5806666666666667
+Number of steps: 22000 Acceptance Rate: 1.62636
+Number of steps: 23000 Acceptance Rate: 1.67172
+Number of steps: 24000 Acceptance Rate: 1.71564
+Number of steps: 25000 Acceptance Rate: 1.75952
+Number of steps: 26000 Acceptance Rate: 1.7996666666666667
+Number of steps: 27000 Acceptance Rate: 1.83728
+Number of steps: 28000 Acceptance Rate: 1.8739733333333333
+Number of steps: 29000 Acceptance Rate: 1.9112533333333332
+Number of steps: 30000 Acceptance Rate: 1.94716
+Number of steps: 31000 Acceptance Rate: 1.9833333333333334
+Number of steps: 32000 Acceptance Rate: 2.0203333333333333
+Number of steps: 33000 Acceptance Rate: 2.0551066666666666
+Number of steps: 34000 Acceptance Rate: 2.08852
+Number of steps: 35000 Acceptance Rate: 2.1217733333333335
+Number of steps: 36000 Acceptance Rate: 2.1539466666666667
+Number of steps: 37000 Acceptance Rate: 2.186306666666667
+Number of steps: 38000 Acceptance Rate: 2.2181333333333333
+Number of steps: 39000 Acceptance Rate: 2.2488133333333336
+Number of steps: 40000 Acceptance Rate: 2.27932
+Number of steps: 41000 Acceptance Rate: 2.309293333333333
+Number of steps: 42000 Acceptance Rate: 2.3413733333333333
+Number of steps: 43000 Acceptance Rate: 2.3725066666666668
+Number of steps: 44000 Acceptance Rate: 2.40448
+Number of steps: 45000 Acceptance Rate: 2.4353466666666668
+Number of steps: 46000 Acceptance Rate: 2.4661066666666667
+Number of steps: 47000 Acceptance Rate: 2.49732
+Number of steps: 48000 Acceptance Rate: 2.528173333333333
+Number of steps: 49000 Acceptance Rate: 2.559013333333333
+Number of steps: 50000 Acceptance Rate: 2.58988
+Burn-in Number (ends): 50000
+Independent Sample Size: 380.48183055409413
+Mean posteriors after burn-in: [2.9223186869636573e-6, 224.70078782184723, 3503.7686631373, 0.0030372529546812055, 0.006142198631950632, 3.0428476584785874e-6, 365.2639072789812, 3624.363154891336, 0.016015935923587663, 0.006405408971617551, 2.2803635215182346e-6, 733.6859275500941, 116.33710800688544, 0.09486782592960666, 0.03427560810046957, 0.00092937710924713, 4488.153180636861, 1.5433242552963098, 0.010501628898314713, -0.0653064003113663, -2.632059487821566e-5, -0.0014578451874779018, 2.2994376914592882]
+MCMC chi-square: 18.6136543666079 for total timing uncertainty of: [30.086722505025147] secs.
+2558.780090 seconds (261.92 M allocations: 6.181 TiB, 0.91% gc time)
+23 parameters from fit: [2.261194441613519e-6, 224.70077116566353, 3503.768875511239, -0.0022854276031609956, -0.002561950030684885, 3.0167881422226867e-6, 365.256458196341, 3624.407471075735, 0.010952248479946122, 0.0010483555665190066, 2.0054759518828596e-7, 686.4459252172153, 372.4373215820738, -0.007553923769913758, -0.2079406968435964, 0.0011467386769683614, 4349.156482650767, 356.53793223246174, 0.0325889995794506, -0.03234429994947021, 0.00012290039900753887, -0.0017907663971827889, 2.314693920392183]
+Maximum log Prob from fit: -197.9662151135859
+No Walkers: 75 No. steps: 50000
+Number of steps: 1000 Acceptance Rate: 0.3031466666666667
+Number of steps: 2000 Acceptance Rate: 0.58012
+Number of steps: 3000 Acceptance Rate: 0.84904
+Number of steps: 4000 Acceptance Rate: 1.1031466666666667
+Number of steps: 5000 Acceptance Rate: 1.3432266666666666
+Number of steps: 6000 Acceptance Rate: 1.58076
+Number of steps: 7000 Acceptance Rate: 1.8038266666666667
+Number of steps: 8000 Acceptance Rate: 2.03516
+Number of steps: 9000 Acceptance Rate: 2.261826666666667
+Number of steps: 10000 Acceptance Rate: 2.4882
+Number of steps: 11000 Acceptance Rate: 2.7086533333333334
+Number of steps: 12000 Acceptance Rate: 2.9290533333333335
+Number of steps: 13000 Acceptance Rate: 3.1471066666666667
+Number of steps: 14000 Acceptance Rate: 3.3582533333333333
+Number of steps: 15000 Acceptance Rate: 3.567293333333333
+Number of steps: 16000 Acceptance Rate: 3.775506666666667
+Number of steps: 17000 Acceptance Rate: 3.98692
+Number of steps: 18000 Acceptance Rate: 4.1922266666666665
+Number of steps: 19000 Acceptance Rate: 4.392706666666666
+Number of steps: 20000 Acceptance Rate: 4.597133333333334
+Number of steps: 21000 Acceptance Rate: 4.800613333333334
+Number of steps: 22000 Acceptance Rate: 5.00604
+Number of steps: 23000 Acceptance Rate: 5.206533333333334
+Number of steps: 24000 Acceptance Rate: 5.41252
+Number of steps: 25000 Acceptance Rate: 5.6122
+Number of steps: 26000 Acceptance Rate: 5.80676
+Number of steps: 27000 Acceptance Rate: 6.004293333333333
+Number of steps: 28000 Acceptance Rate: 6.21372
+Number of steps: 29000 Acceptance Rate: 6.426613333333333
+Number of steps: 30000 Acceptance Rate: 6.63272
+Number of steps: 31000 Acceptance Rate: 6.8385066666666665
+Number of steps: 32000 Acceptance Rate: 7.043106666666667
+Number of steps: 33000 Acceptance Rate: 7.253
+Number of steps: 34000 Acceptance Rate: 7.464666666666667
+Number of steps: 35000 Acceptance Rate: 7.657733333333334
+Number of steps: 36000 Acceptance Rate: 7.850453333333333
+Number of steps: 37000 Acceptance Rate: 8.055346666666667
+Number of steps: 38000 Acceptance Rate: 8.258466666666667
+Number of steps: 39000 Acceptance Rate: 8.461386666666666
+Number of steps: 40000 Acceptance Rate: 8.668866666666666
+Number of steps: 41000 Acceptance Rate: 8.881213333333333
+Number of steps: 42000 Acceptance Rate: 9.091653333333333
+Number of steps: 43000 Acceptance Rate: 9.300786666666667
+Number of steps: 44000 Acceptance Rate: 9.514986666666667
+Number of steps: 45000 Acceptance Rate: 9.731106666666667
+Number of steps: 46000 Acceptance Rate: 9.942493333333333
+Number of steps: 47000 Acceptance Rate: 10.14884
+Number of steps: 48000 Acceptance Rate: 10.351066666666666
+Number of steps: 49000 Acceptance Rate: 10.55684
+Number of steps: 50000 Acceptance Rate: 10.764453333333334
+Burn-in Number (ends): 5071
+Independent Sample Size: 1253.4473946771998
+Mean posteriors after burn-in: [2.6816777826495148e-6, 224.70076866027486, 3503.7689020083285, -0.005647065848615217, 0.00798917432829281, 3.0023322352406448e-6, 365.25645248152466, 3624.407564347049, 0.008219103214092976, 0.009014255587473373, 2.87700348212055e-7, 685.665436446475, 383.19893138795135, 0.029759547267574505, -0.10836065689814858, 0.001195145447303858, 4448.863385580624, 1.6162085054127724, 0.03009685893902007, -0.04841502225772724, 0.00015587898135480997, -0.0015731168642727172, 2.3106935116886524]
+MCMC chi-square: 296.30115575628133 for total timing uncertainty of: [21.55392063142629] secs.
+1793.176638 seconds (201.88 M allocations: 1.988 TiB, 0.80% gc time)
+23 parameters from fit: [2.257049984457348e-6, 224.70077098551536, 3503.7688782403543, -0.0022719468313482233, -0.0026847733166347055, 3.0201579731688745e-6, 365.2564583445204, 3624.407469814967, 0.010962754278186142, 0.0009579133725683651, 2.0000699718358398e-7, 686.4287864909485, 372.3338120570013, -0.00828827089875497, -0.21020466236242838, 0.0011453226864053727, 4349.593070060772, 357.15141443207904, 0.032308745679664685, -0.03221820370362511, 0.00012023042913058653, -0.0017924586818121619, 2.314581841028137]
+Maximum log Prob from fit: -192.8226043205531
+No Walkers: 75 No. steps: 50000
+Number of steps: 1000 Acceptance Rate: 0.3029866666666667
+Number of steps: 2000 Acceptance Rate: 0.5906133333333333
+Number of steps: 3000 Acceptance Rate: 0.8536266666666666
+Number of steps: 4000 Acceptance Rate: 1.09848
+Number of steps: 5000 Acceptance Rate: 1.3337866666666667
+Number of steps: 6000 Acceptance Rate: 1.5669333333333333
+Number of steps: 7000 Acceptance Rate: 1.7993333333333332
+Number of steps: 8000 Acceptance Rate: 2.0303066666666667
+Number of steps: 9000 Acceptance Rate: 2.26552
+Number of steps: 10000 Acceptance Rate: 2.4964933333333335
+Number of steps: 11000 Acceptance Rate: 2.7288666666666668
+Number of steps: 12000 Acceptance Rate: 2.9581066666666667
+Number of steps: 13000 Acceptance Rate: 3.18816
+Number of steps: 14000 Acceptance Rate: 3.414093333333333
+Number of steps: 15000 Acceptance Rate: 3.6455866666666665
+Number of steps: 16000 Acceptance Rate: 3.87332
+Number of steps: 17000 Acceptance Rate: 4.09696
+Number of steps: 18000 Acceptance Rate: 4.318106666666667
+Number of steps: 19000 Acceptance Rate: 4.5422
+Number of steps: 20000 Acceptance Rate: 4.76012
+Number of steps: 21000 Acceptance Rate: 4.976306666666667
+Number of steps: 22000 Acceptance Rate: 5.182413333333334
+Number of steps: 23000 Acceptance Rate: 5.3876
+Number of steps: 24000 Acceptance Rate: 5.585826666666667
+Number of steps: 25000 Acceptance Rate: 5.780173333333333
+Number of steps: 26000 Acceptance Rate: 5.972026666666666
+Number of steps: 27000 Acceptance Rate: 6.168733333333333
+Number of steps: 28000 Acceptance Rate: 6.366453333333333
+Number of steps: 29000 Acceptance Rate: 6.573293333333333
+Number of steps: 30000 Acceptance Rate: 6.774946666666667
+Number of steps: 31000 Acceptance Rate: 6.970906666666667
+Number of steps: 32000 Acceptance Rate: 7.164306666666667
+Number of steps: 33000 Acceptance Rate: 7.36068
+Number of steps: 34000 Acceptance Rate: 7.558026666666667
+Number of steps: 35000 Acceptance Rate: 7.755386666666666
+Number of steps: 36000 Acceptance Rate: 7.94924
+Number of steps: 37000 Acceptance Rate: 8.136706666666667
+Number of steps: 38000 Acceptance Rate: 8.3272
+Number of steps: 39000 Acceptance Rate: 8.514826666666666
+Number of steps: 40000 Acceptance Rate: 8.704186666666667
+Number of steps: 41000 Acceptance Rate: 8.88364
+Number of steps: 42000 Acceptance Rate: 9.065533333333333
+Number of steps: 43000 Acceptance Rate: 9.248506666666668
+Number of steps: 44000 Acceptance Rate: 9.43316
+Number of steps: 45000 Acceptance Rate: 9.619693333333334
+Number of steps: 46000 Acceptance Rate: 9.811573333333333
+Number of steps: 47000 Acceptance Rate: 10.002933333333333
+Number of steps: 48000 Acceptance Rate: 10.194986666666667
+Number of steps: 49000 Acceptance Rate: 10.388333333333334
+Number of steps: 50000 Acceptance Rate: 10.584786666666666
+Burn-in Number (ends): 5540
+Independent Sample Size: 1431.4557701073738
+Mean posteriors after burn-in: [2.6559320987938927e-6, 224.7007695858783, 3503.768892061584, -0.004271175489105344, 0.008823611714502333, 3.0110606577344574e-6, 365.2564534370205, 3624.407560773817, 0.009435389620268965, 0.009576897402754098, 2.7318252040974933e-7, 686.129832868252, 377.41518013898843, 0.026992667373601342, -0.1032940150515841, 0.0011375474666100855, 4451.769626235139, 1.612070599649913, 0.027145306507544962, -0.048932743140992635, 0.0001360315522732493, -0.0015933560069494638, 2.309294738500266]
+MCMC chi-square: 304.02586000479516 for total timing uncertainty of: [21.743968433599683] secs.
+1788.866575 seconds (200.54 M allocations: 1.979 TiB, 0.88% gc time)
+23 parameters from fit: [2.256360206977919e-6, 224.70077130945518, 3503.7688743018134, -0.0022237778788346176, -0.0029372754902265816, 3.0234638863938013e-6, 365.2564581952437, 3624.4074715361426, 0.01105086689414546, 0.0007936633734004488, 1.985229201035133e-7, 686.5158704323472, 371.31663821269717, -0.006795256942334202, -0.20895341480497032, 0.0011455933818445303, 4348.9314278084175, 360.1173524331991, 0.0326348662386551, -0.032104025626928746, 0.00011879578987006247, -0.0017914808632274702, 2.3145409762591034]
+Maximum log Prob from fit: -185.03259165699342
+No Walkers: 75 No. steps: 50000
+Number of steps: 1000 Acceptance Rate: 0.30029333333333336
+Number of steps: 2000 Acceptance Rate: 0.5748266666666667
+Number of steps: 3000 Acceptance Rate: 0.83736
+Number of steps: 4000 Acceptance Rate: 1.0796266666666667
+Number of steps: 5000 Acceptance Rate: 1.3030133333333334
+Number of steps: 6000 Acceptance Rate: 1.5223733333333334
+Number of steps: 7000 Acceptance Rate: 1.73428
+Number of steps: 8000 Acceptance Rate: 1.9469466666666666
+Number of steps: 9000 Acceptance Rate: 2.156066666666667
+Number of steps: 10000 Acceptance Rate: 2.3650933333333333
+Number of steps: 11000 Acceptance Rate: 2.5693733333333335
+Number of steps: 12000 Acceptance Rate: 2.7738933333333335
+Number of steps: 13000 Acceptance Rate: 2.9712133333333335
+Number of steps: 14000 Acceptance Rate: 3.164746666666667
+Number of steps: 15000 Acceptance Rate: 3.364813333333333
+Number of steps: 16000 Acceptance Rate: 3.561026666666667
+Number of steps: 17000 Acceptance Rate: 3.7641733333333334
+Number of steps: 18000 Acceptance Rate: 3.96052
+Number of steps: 19000 Acceptance Rate: 4.160253333333333
+Number of steps: 20000 Acceptance Rate: 4.362813333333333
+Number of steps: 21000 Acceptance Rate: 4.56944
+Number of steps: 22000 Acceptance Rate: 4.774133333333333
+Number of steps: 23000 Acceptance Rate: 4.968733333333334
+Number of steps: 24000 Acceptance Rate: 5.1582
+Number of steps: 25000 Acceptance Rate: 5.3466933333333335
+Number of steps: 26000 Acceptance Rate: 5.54108
+Number of steps: 27000 Acceptance Rate: 5.73364
+Number of steps: 28000 Acceptance Rate: 5.928146666666667
+Number of steps: 29000 Acceptance Rate: 6.12332
+Number of steps: 30000 Acceptance Rate: 6.32132
+Number of steps: 31000 Acceptance Rate: 6.5229333333333335
+Number of steps: 32000 Acceptance Rate: 6.72128
+Number of steps: 33000 Acceptance Rate: 6.919546666666666
+Number of steps: 34000 Acceptance Rate: 7.1188
+Number of steps: 35000 Acceptance Rate: 7.312826666666667
+Number of steps: 36000 Acceptance Rate: 7.51212
+Number of steps: 37000 Acceptance Rate: 7.713386666666667
+Number of steps: 38000 Acceptance Rate: 7.912133333333333
+Number of steps: 39000 Acceptance Rate: 8.107493333333334
+Number of steps: 40000 Acceptance Rate: 8.302613333333333
+Number of steps: 41000 Acceptance Rate: 8.499413333333333
+Number of steps: 42000 Acceptance Rate: 8.697053333333333
+Number of steps: 43000 Acceptance Rate: 8.892333333333333
+Number of steps: 44000 Acceptance Rate: 9.0954
+Number of steps: 45000 Acceptance Rate: 9.301773333333333
+Number of steps: 46000 Acceptance Rate: 9.51252
+Number of steps: 47000 Acceptance Rate: 9.713786666666667
+Number of steps: 48000 Acceptance Rate: 9.910666666666666
+Number of steps: 49000 Acceptance Rate: 10.108453333333333
+Number of steps: 50000 Acceptance Rate: 10.30716
+Burn-in Number (ends): 7307
+Independent Sample Size: 1490.6704725575366
+Mean posteriors after burn-in: [2.6332111060288172e-6, 224.7007675680929, 3503.7689220248994, -0.0037343023158858024, 0.007808696298743703, 3.016864164778467e-6, 365.25645436891296, 3624.4075562508106, 0.009915944852404362, 0.008877286337393236, 2.9775045780719936e-7, 685.6302271370622, 382.7301992614473, 0.019598761494370436, -0.10799764220938599, 0.0011639828682401938, 4460.600048579568, 1.5856151294038707, 0.026009341272603112, -0.04676112478630081, 0.000151610157446591, -0.001617681820677917, 2.310809389603063]
+MCMC chi-square: 308.5560831639985 for total timing uncertainty of: [22.14046110383147] secs.
+1799.512242 seconds (201.32 M allocations: 2.138 TiB, 0.78% gc time)
+23 parameters from fit: [2.3185802428306423e-6, 224.70076825858925, 3503.7689047229674, -0.0029298201364801523, -0.0026211274499304974, 3.0120522275282508e-6, 365.25646126655676, 3624.407443173149, 0.010542313537106827, 0.0009826572450720732, 2.2854639440997336e-7, 684.9159690547035, 386.1457946245413, 0.008671723597707461, -0.2070282435600868, 0.0012130718772798877, 4364.826160510769, 331.0033515528782, 0.0333036303027764, -0.031369829024053, 0.0001341296971901022, -0.001759079526260117, 2.315766178985542]
+Maximum log Prob from fit: -176.29353008669364
+No Walkers: 75 No. steps: 50000
+Number of steps: 1000 Acceptance Rate: 0.3034
+Number of steps: 2000 Acceptance Rate: 0.5726266666666666
+Number of steps: 3000 Acceptance Rate: 0.8366933333333333
+Number of steps: 4000 Acceptance Rate: 1.0922
+Number of steps: 5000 Acceptance Rate: 1.3333733333333333
+Number of steps: 6000 Acceptance Rate: 1.5630533333333334
+Number of steps: 7000 Acceptance Rate: 1.7925333333333333
+Number of steps: 8000 Acceptance Rate: 2.017306666666667
+Number of steps: 9000 Acceptance Rate: 2.2472666666666665
+Number of steps: 10000 Acceptance Rate: 2.47472
+Number of steps: 11000 Acceptance Rate: 2.70296
+Number of steps: 12000 Acceptance Rate: 2.9268
+Number of steps: 13000 Acceptance Rate: 3.1508
+Number of steps: 14000 Acceptance Rate: 3.37176
+Number of steps: 15000 Acceptance Rate: 3.5927333333333333
+Number of steps: 16000 Acceptance Rate: 3.8092
+Number of steps: 17000 Acceptance Rate: 4.024413333333333
+Number of steps: 18000 Acceptance Rate: 4.24464
+Number of steps: 19000 Acceptance Rate: 4.4601733333333335
+Number of steps: 20000 Acceptance Rate: 4.675173333333333
+Number of steps: 21000 Acceptance Rate: 4.889426666666667
+Number of steps: 22000 Acceptance Rate: 5.1054
+Number of steps: 23000 Acceptance Rate: 5.3165466666666665
+Number of steps: 24000 Acceptance Rate: 5.53
+Number of steps: 25000 Acceptance Rate: 5.7460933333333335
+Number of steps: 26000 Acceptance Rate: 5.958946666666667
+Number of steps: 27000 Acceptance Rate: 6.179093333333333
+Number of steps: 28000 Acceptance Rate: 6.3913866666666665
+Number of steps: 29000 Acceptance Rate: 6.598106666666666
+Number of steps: 30000 Acceptance Rate: 6.809373333333333
+Number of steps: 31000 Acceptance Rate: 7.025826666666667
+Number of steps: 32000 Acceptance Rate: 7.244373333333334
+Number of steps: 33000 Acceptance Rate: 7.4614666666666665
+Number of steps: 34000 Acceptance Rate: 7.669066666666667
+Number of steps: 35000 Acceptance Rate: 7.870466666666666
+Number of steps: 36000 Acceptance Rate: 8.065653333333334
+Number of steps: 37000 Acceptance Rate: 8.262826666666667
+Number of steps: 38000 Acceptance Rate: 8.462773333333333
+Number of steps: 39000 Acceptance Rate: 8.66368
+Number of steps: 40000 Acceptance Rate: 8.86452
+Number of steps: 41000 Acceptance Rate: 9.061413333333334
+Number of steps: 42000 Acceptance Rate: 9.258533333333334
+Number of steps: 43000 Acceptance Rate: 9.452146666666666
+Number of steps: 44000 Acceptance Rate: 9.640853333333334
+Number of steps: 45000 Acceptance Rate: 9.829306666666668
+Number of steps: 46000 Acceptance Rate: 10.012346666666666
+Number of steps: 47000 Acceptance Rate: 10.19664
+Number of steps: 48000 Acceptance Rate: 10.373493333333334
+Number of steps: 49000 Acceptance Rate: 10.566946666666666
+Number of steps: 50000 Acceptance Rate: 10.757293333333333
+Burn-in Number (ends): 4848
+Independent Sample Size: 2181.9791808034506
+Mean posteriors after burn-in: [2.747332428877834e-6, 224.70076363207224, 3503.768967679564, -0.004055417322052342, 0.0076211531589368865, 3.0022483907447307e-6, 365.2564588076557, 3624.40751461103, 0.00960099782173206, 0.0085903990659305, 3.232216288447627e-7, 684.4669241272619, 396.4701493108357, 0.008589977049768667, -0.13149278916532978, 0.001247953149939828, 4463.128439724907, 1.667963797069395, 0.030027840660133347, -0.04414617394324822, 0.00018058712068476176, -0.0015488797120153926, 2.3124005903566545]
+MCMC chi-square: 274.93245829220547 for total timing uncertainty of: [21.783682525523894] secs.
+1790.651299 seconds (201.25 M allocations: 1.995 TiB, 0.84% gc time)
+23 parameters from fit: [2.344464123634329e-6, 224.70076644462796, 3503.768939918491, -0.002998938440886945, -0.002308029145236902, 3.0243763316659187e-6, 365.2564591492611, 3624.40746563801, 0.010592321645771568, 0.001319489597867307, 2.5005171849422756e-7, 685.1716959284345, 383.8850373273414, -0.004357702706928325, -0.2102600018915995, 0.0012308011329042216, 4386.471734829365, 299.46162807142196, 0.032107049701601456, -0.0283990798282996, 0.0001694558166896844, -0.0017373185331579818, 2.3180449882623577]
+Maximum log Prob from fit: -169.89955311896455
+No Walkers: 75 No. steps: 50000
+Number of steps: 1000 Acceptance Rate: 0.30176
+Number of steps: 2000 Acceptance Rate: 0.5724133333333333
+Number of steps: 3000 Acceptance Rate: 0.84832
+Number of steps: 4000 Acceptance Rate: 1.10592
+Number of steps: 5000 Acceptance Rate: 1.3504533333333333
+Number of steps: 6000 Acceptance Rate: 1.6005066666666667
+Number of steps: 7000 Acceptance Rate: 1.847
+Number of steps: 8000 Acceptance Rate: 2.0913466666666665
+Number of steps: 9000 Acceptance Rate: 2.3312133333333334
+Number of steps: 10000 Acceptance Rate: 2.57308
+Number of steps: 11000 Acceptance Rate: 2.8167733333333334
+Number of steps: 12000 Acceptance Rate: 3.0569866666666665
+Number of steps: 13000 Acceptance Rate: 3.297093333333333
+Number of steps: 14000 Acceptance Rate: 3.5421066666666667
+Number of steps: 15000 Acceptance Rate: 3.7865066666666665
+Number of steps: 16000 Acceptance Rate: 4.02796
+Number of steps: 17000 Acceptance Rate: 4.274706666666667
+Number of steps: 18000 Acceptance Rate: 4.52016
+Number of steps: 19000 Acceptance Rate: 4.767533333333334
+Number of steps: 20000 Acceptance Rate: 5.01488
+Number of steps: 21000 Acceptance Rate: 5.2589733333333335
+Number of steps: 22000 Acceptance Rate: 5.498466666666666
+Number of steps: 23000 Acceptance Rate: 5.74228
+Number of steps: 24000 Acceptance Rate: 5.9904
+Number of steps: 25000 Acceptance Rate: 6.236186666666667
+Number of steps: 26000 Acceptance Rate: 6.480266666666667
+Number of steps: 27000 Acceptance Rate: 6.72324
+Number of steps: 28000 Acceptance Rate: 6.9661333333333335
+Number of steps: 29000 Acceptance Rate: 7.208586666666666
+Number of steps: 30000 Acceptance Rate: 7.45288
+Number of steps: 31000 Acceptance Rate: 7.692946666666667
+Number of steps: 32000 Acceptance Rate: 7.93684
+Number of steps: 33000 Acceptance Rate: 8.177693333333334
+Number of steps: 34000 Acceptance Rate: 8.41544
+Number of steps: 35000 Acceptance Rate: 8.655986666666667
+Number of steps: 36000 Acceptance Rate: 8.893973333333333
+Number of steps: 37000 Acceptance Rate: 9.136533333333333
+Number of steps: 38000 Acceptance Rate: 9.378613333333334
+Number of steps: 39000 Acceptance Rate: 9.623373333333333
+Number of steps: 40000 Acceptance Rate: 9.868706666666666
+Number of steps: 41000 Acceptance Rate: 10.107066666666666
+Number of steps: 42000 Acceptance Rate: 10.351946666666667
+Number of steps: 43000 Acceptance Rate: 10.594493333333334
+Number of steps: 44000 Acceptance Rate: 10.82936
+Number of steps: 45000 Acceptance Rate: 11.06648
+Number of steps: 46000 Acceptance Rate: 11.30688
+Number of steps: 47000 Acceptance Rate: 11.543253333333332
+Number of steps: 48000 Acceptance Rate: 11.779066666666667
+Number of steps: 49000 Acceptance Rate: 12.00992
+Number of steps: 50000 Acceptance Rate: 12.24564
+Burn-in Number (ends): 4586
+Independent Sample Size: 2526.3337239781827
+Mean posteriors after burn-in: [2.728909964217131e-6, 224.7007610720518, 3503.769039848962, -0.003599642899993835, 0.0055951371566173285, 3.0186761609399206e-6, 365.25645321615303, 3624.407561431208, 0.010237722917673763, 0.00725561157526, 3.639361959606624e-7, 685.2699694974301, 388.4206612277003, -0.016602093385081833, -0.1743107000355808, 0.0012782083176677663, 4495.302724088913, 1.5957010280816837, 0.02663550809759343, -0.03366454708478581, 0.00027772083647077477, -0.0015220313935992527, 2.320257813142197]
+MCMC chi-square: 202.25021086814354 for total timing uncertainty of: [20.749611378654148] secs.
+1765.814664 seconds (205.39 M allocations: 1.370 TiB, 0.74% gc time)
+23 parameters from fit: [2.391211973884105e-6, 224.70076739485444, 3503.7689253493872, -0.003289901169648243, -0.001598589650647088, 3.032442751528377e-6, 365.2564581260849, 3624.4074752998517, 0.010536232426401353, 0.0017272804536356714, 2.395197465655942e-7, 685.2078424952849, 379.407125076251, 0.014266087833461184, -0.21556225476532606, 0.0012331917862986477, 4389.421534434636, 289.1912458433323, 0.03190111067768265, -0.028485053704638816, 0.00014896581580010163, -0.0017100120587312435, 2.316496015212609]
+Maximum log Prob from fit: -161.97476188191357
+No Walkers: 75 No. steps: 50000
+Number of steps: 1000 Acceptance Rate: 0.29070666666666667
+Number of steps: 2000 Acceptance Rate: 0.5624533333333334
+Number of steps: 3000 Acceptance Rate: 0.8257066666666667
+Number of steps: 4000 Acceptance Rate: 1.0906133333333334
+Number of steps: 5000 Acceptance Rate: 1.3340666666666667
+Number of steps: 6000 Acceptance Rate: 1.5710266666666666
+Number of steps: 7000 Acceptance Rate: 1.8203333333333334
+Number of steps: 8000 Acceptance Rate: 2.06444
+Number of steps: 9000 Acceptance Rate: 2.30784
+Number of steps: 10000 Acceptance Rate: 2.5514266666666665
+Number of steps: 11000 Acceptance Rate: 2.79912
+Number of steps: 12000 Acceptance Rate: 3.0400933333333335
+Number of steps: 13000 Acceptance Rate: 3.2799466666666666
+Number of steps: 14000 Acceptance Rate: 3.5178
+Number of steps: 15000 Acceptance Rate: 3.7543866666666665
+Number of steps: 16000 Acceptance Rate: 3.97548
+Number of steps: 17000 Acceptance Rate: 4.1985866666666665
+Number of steps: 18000 Acceptance Rate: 4.423026666666667
+Number of steps: 19000 Acceptance Rate: 4.63804
+Number of steps: 20000 Acceptance Rate: 4.861186666666667
+Number of steps: 21000 Acceptance Rate: 5.08132
+Number of steps: 22000 Acceptance Rate: 5.3045333333333335
+Number of steps: 23000 Acceptance Rate: 5.522106666666667
+Number of steps: 24000 Acceptance Rate: 5.743573333333333
+Number of steps: 25000 Acceptance Rate: 5.953613333333333
+Number of steps: 26000 Acceptance Rate: 6.161666666666667
+Number of steps: 27000 Acceptance Rate: 6.3752
+Number of steps: 28000 Acceptance Rate: 6.5814
+Number of steps: 29000 Acceptance Rate: 6.78344
+Number of steps: 30000 Acceptance Rate: 6.980813333333334
+Number of steps: 31000 Acceptance Rate: 7.175533333333333
+Number of steps: 32000 Acceptance Rate: 7.373066666666666
+Number of steps: 33000 Acceptance Rate: 7.577813333333333
+Number of steps: 34000 Acceptance Rate: 7.778146666666666
+Number of steps: 35000 Acceptance Rate: 7.974586666666666
+Number of steps: 36000 Acceptance Rate: 8.17348
+Number of steps: 37000 Acceptance Rate: 8.37156
+Number of steps: 38000 Acceptance Rate: 8.5636
+Number of steps: 39000 Acceptance Rate: 8.754146666666667
+Number of steps: 40000 Acceptance Rate: 8.947213333333334
+Number of steps: 41000 Acceptance Rate: 9.14084
+Number of steps: 42000 Acceptance Rate: 9.336666666666666
+Number of steps: 43000 Acceptance Rate: 9.535826666666667
+Number of steps: 44000 Acceptance Rate: 9.72764
+Number of steps: 45000 Acceptance Rate: 9.92552
+Number of steps: 46000 Acceptance Rate: 10.11824
+Number of steps: 47000 Acceptance Rate: 10.315546666666666
+Number of steps: 48000 Acceptance Rate: 10.504826666666666
+Number of steps: 49000 Acceptance Rate: 10.698506666666667
+Number of steps: 50000 Acceptance Rate: 10.89072
+Burn-in Number (ends): 4624
+Independent Sample Size: 1751.4252018694729
+Mean posteriors after burn-in: [2.8151844684682794e-6, 224.70076358556227, 3503.768994276544, -0.004215458212880611, 0.006605386732126796, 3.0346049146118356e-6, 365.2564503643179, 3624.4075870241863, 0.010082559472074197, 0.007808725285581028, 3.4661362103111195e-7, 685.4603027874814, 381.5095424656819, 0.00958388284570399, -0.14245163224612098, 0.0012863539640996543, 4492.804317624603, 1.5973652873869384, 0.027276720685677092, -0.03317235384727881, 0.00020052772422097907, -0.001473122176633079, 2.314253371082983]
+MCMC chi-square: 232.64581826095448 for total timing uncertainty of: [21.153476308500153] secs.
+1778.108525 seconds (201.86 M allocations: 1.971 TiB, 0.76% gc time)
+23 parameters from fit: [2.4048865274754133e-6, 224.70076439378096, 3503.7689560426766, -0.0040998764967236185, 0.0005368923036585377, 3.025019743065909e-6, 365.2564563718255, 3624.4074869869023, 0.01011987229296191, 0.003452185191937772, 2.8218793202338846e-7, 684.0268521600964, 391.8277590671986, 0.006256280342017167, -0.2169866213572704, 0.001311358872275266, 4393.135851498785, 259.0964729985962, 0.0342819010768539, -0.02787547483719592, 0.00017506791562945433, -0.0017538492995789092, 2.3184214532121743]
+Maximum log Prob from fit: -154.406001114376
+No Walkers: 75 No. steps: 50000
+Number of steps: 1000 Acceptance Rate: 0.29113333333333336
+Number of steps: 2000 Acceptance Rate: 0.55948
+Number of steps: 3000 Acceptance Rate: 0.8286933333333333
+Number of steps: 4000 Acceptance Rate: 1.0803333333333334
+Number of steps: 5000 Acceptance Rate: 1.32388
+Number of steps: 6000 Acceptance Rate: 1.5604
+Number of steps: 7000 Acceptance Rate: 1.7936933333333334
+Number of steps: 8000 Acceptance Rate: 2.02388
+Number of steps: 9000 Acceptance Rate: 2.2576533333333333
+Number of steps: 10000 Acceptance Rate: 2.48664
+Number of steps: 11000 Acceptance Rate: 2.7157333333333336
+Number of steps: 12000 Acceptance Rate: 2.94652
+Number of steps: 13000 Acceptance Rate: 3.173773333333333
+Number of steps: 14000 Acceptance Rate: 3.40508
+Number of steps: 15000 Acceptance Rate: 3.62868
+Number of steps: 16000 Acceptance Rate: 3.8460533333333333
+Number of steps: 17000 Acceptance Rate: 4.06956
+Number of steps: 18000 Acceptance Rate: 4.29532
+Number of steps: 19000 Acceptance Rate: 4.521813333333333
+Number of steps: 20000 Acceptance Rate: 4.751426666666666
+Number of steps: 21000 Acceptance Rate: 4.971933333333333
+Number of steps: 22000 Acceptance Rate: 5.18552
+Number of steps: 23000 Acceptance Rate: 5.404053333333334
+Number of steps: 24000 Acceptance Rate: 5.623613333333333
+Number of steps: 25000 Acceptance Rate: 5.8444666666666665
+Number of steps: 26000 Acceptance Rate: 6.06392
+Number of steps: 27000 Acceptance Rate: 6.275986666666666
+Number of steps: 28000 Acceptance Rate: 6.49064
+Number of steps: 29000 Acceptance Rate: 6.704293333333333
+Number of steps: 30000 Acceptance Rate: 6.917933333333333
+Number of steps: 31000 Acceptance Rate: 7.1324
+Number of steps: 32000 Acceptance Rate: 7.352533333333334
+Number of steps: 33000 Acceptance Rate: 7.566226666666667
+Number of steps: 34000 Acceptance Rate: 7.7788
+Number of steps: 35000 Acceptance Rate: 7.985213333333333
+Number of steps: 36000 Acceptance Rate: 8.193493333333333
+Number of steps: 37000 Acceptance Rate: 8.397453333333333
+Number of steps: 38000 Acceptance Rate: 8.604826666666666
+Number of steps: 39000 Acceptance Rate: 8.813493333333334
+Number of steps: 40000 Acceptance Rate: 9.02352
+Number of steps: 41000 Acceptance Rate: 9.234226666666666
+Number of steps: 42000 Acceptance Rate: 9.4458
+Number of steps: 43000 Acceptance Rate: 9.650773333333333
+Number of steps: 44000 Acceptance Rate: 9.854133333333333
+Number of steps: 45000 Acceptance Rate: 10.051946666666666
+Number of steps: 46000 Acceptance Rate: 10.247253333333333
+Number of steps: 47000 Acceptance Rate: 10.44532
+Number of steps: 48000 Acceptance Rate: 10.6426
+Number of steps: 49000 Acceptance Rate: 10.84068
+Number of steps: 50000 Acceptance Rate: 11.042093333333334
+Burn-in Number (ends): 3725
+Independent Sample Size: 2554.9426226184496
+Mean posteriors after burn-in: [2.829441187073974e-6, 224.7007628826804, 3503.7690040777698, -0.005272813923402593, 0.007923905060806478, 3.021478200293752e-6, 365.2564495975382, 3624.4075896209497, 0.009408681042170646, 0.008857363528986608, 3.6077029032790526e-7, 684.8909292318702, 387.0285362171938, 0.008122572506838807, -0.14861429011435134, 0.0013315708096579585, 4484.7146440761535, 1.622057256385562, 0.029278368264187078, -0.03299088858171198, 0.00021060163942166998, -0.001490354004453599, 2.314842957809669]
+MCMC chi-square: 208.9561621002039 for total timing uncertainty of: [20.649748819511803] secs.
+1822.613150 seconds (200.41 M allocations: 1.782 TiB, 2.86% gc time)
+23 parameters from fit: [2.4598742978709576e-6, 224.70076630678358, 3503.768918881988, -0.004244553105839794, 0.002124576042762023, 2.9973154215690384e-6, 365.25645749593593, 3624.4074704927234, 0.009775199387395924, 0.004868897176317002, 2.994342449172407e-7, 683.3779984932992, 399.7454870566184, 0.01889951269833445, -0.20046600868042141, 0.001308401142508378, 4384.43948206407, 248.68603793917106, 0.03333540417590345, -0.031266951743578186, 0.00018404008904504413, -0.001734173536953471, 2.318475990052081]
+Maximum log Prob from fit: -144.5563715799628
+No Walkers: 75 No. steps: 50000
+Number of steps: 1000 Acceptance Rate: 0.2898266666666667
+Number of steps: 2000 Acceptance Rate: 0.5610266666666667
+Number of steps: 3000 Acceptance Rate: 0.82464
+Number of steps: 4000 Acceptance Rate: 1.0797733333333333
+Number of steps: 5000 Acceptance Rate: 1.3218666666666667
+Number of steps: 6000 Acceptance Rate: 1.5606
+Number of steps: 7000 Acceptance Rate: 1.79328
+Number of steps: 8000 Acceptance Rate: 2.02544
+Number of steps: 9000 Acceptance Rate: 2.2500666666666667
+Number of steps: 10000 Acceptance Rate: 2.484506666666667
+Number of steps: 11000 Acceptance Rate: 2.71672
+Number of steps: 12000 Acceptance Rate: 2.9378933333333332
+Number of steps: 13000 Acceptance Rate: 3.1520533333333334
+Number of steps: 14000 Acceptance Rate: 3.3726266666666667
+Number of steps: 15000 Acceptance Rate: 3.59016
+Number of steps: 16000 Acceptance Rate: 3.80428
+Number of steps: 17000 Acceptance Rate: 4.0194133333333335
+Number of steps: 18000 Acceptance Rate: 4.237746666666666
+Number of steps: 19000 Acceptance Rate: 4.451186666666667
+Number of steps: 20000 Acceptance Rate: 4.65992
+Number of steps: 21000 Acceptance Rate: 4.86752
+Number of steps: 22000 Acceptance Rate: 5.070173333333333
+Number of steps: 23000 Acceptance Rate: 5.274013333333333
+Number of steps: 24000 Acceptance Rate: 5.4786
+Number of steps: 25000 Acceptance Rate: 5.682333333333333
+Number of steps: 26000 Acceptance Rate: 5.888626666666666
+Number of steps: 27000 Acceptance Rate: 6.100786666666667
+Number of steps: 28000 Acceptance Rate: 6.31144
+Number of steps: 29000 Acceptance Rate: 6.522546666666667
+Number of steps: 30000 Acceptance Rate: 6.738653333333334
+Number of steps: 31000 Acceptance Rate: 6.957893333333334
+Number of steps: 32000 Acceptance Rate: 7.172226666666667
+Number of steps: 33000 Acceptance Rate: 7.386973333333334
+Number of steps: 34000 Acceptance Rate: 7.59484
+Number of steps: 35000 Acceptance Rate: 7.799053333333333
+Number of steps: 36000 Acceptance Rate: 8.00124
+Number of steps: 37000 Acceptance Rate: 8.206493333333333
+Number of steps: 38000 Acceptance Rate: 8.41628
+Number of steps: 39000 Acceptance Rate: 8.62336
+Number of steps: 40000 Acceptance Rate: 8.824946666666667
+Number of steps: 41000 Acceptance Rate: 9.02608
+Number of steps: 42000 Acceptance Rate: 9.225893333333334
+Number of steps: 43000 Acceptance Rate: 9.423106666666667
+Number of steps: 44000 Acceptance Rate: 9.625733333333333
+Number of steps: 45000 Acceptance Rate: 9.824093333333334
+Number of steps: 46000 Acceptance Rate: 10.039146666666667
+Number of steps: 47000 Acceptance Rate: 10.2434
+Number of steps: 48000 Acceptance Rate: 10.446853333333333
+Number of steps: 49000 Acceptance Rate: 10.6474
+Number of steps: 50000 Acceptance Rate: 10.847066666666667
+Burn-in Number (ends): 5322
+Independent Sample Size: 2213.1846820209385
+Mean posteriors after burn-in: [2.84343510217116e-6, 224.70076733543019, 3503.768932781431, -0.0055792357799531195, 0.00847656896067231, 2.9893183692572303e-6, 365.2564533582431, 3624.407555382195, 0.008884524480412988, 0.009345125680119368, 3.591536872270704e-7, 685.1163696442023, 385.94917231329845, 0.02033532747201128, -0.1309701498152749, 0.0013241453028987715, 4481.156744669965, 1.5990361482610675, 0.02835271215203625, -0.03597356637532886, 0.0001899323858583358, -0.0014916948217573197, 2.3125892526895333]
+MCMC chi-square: 196.82222029705346 for total timing uncertainty of: [20.775956747228133] secs.
+1836.012282 seconds (202.84 M allocations: 1.879 TiB, 2.87% gc time)
+23 parameters from fit: [2.3673348678856027e-6, 224.70077137519064, 3503.7688615983175, -0.00039031892481883573, 0.001490639830741737, 3.0610400205202717e-6, 365.25645896772994, 3624.40745584199, 0.012292068048279313, 0.004045659997144315, 3.0311078285177395e-7, 683.3850300519069, 404.53108466939136, 0.013283217149353614, -0.18152081288425587, 0.0011705399737851146, 4364.0101355764, 296.9892335441378, 0.0241038000964417, -0.033870387716730455, 0.00022164468773425643, -0.001790992322024713, 2.3213169034510646]
+Maximum log Prob from fit: -131.48050736365738
+No Walkers: 75 No. steps: 50000
+Number of steps: 1000 Acceptance Rate: 0.2952
+Number of steps: 2000 Acceptance Rate: 0.5676533333333333
+Number of steps: 3000 Acceptance Rate: 0.8378533333333333
+Number of steps: 4000 Acceptance Rate: 1.0910933333333332
+Number of steps: 5000 Acceptance Rate: 1.3361466666666666
+Number of steps: 6000 Acceptance Rate: 1.56668
+Number of steps: 7000 Acceptance Rate: 1.7923466666666668
+Number of steps: 8000 Acceptance Rate: 2.017733333333333
+Number of steps: 9000 Acceptance Rate: 2.23956
+Number of steps: 10000 Acceptance Rate: 2.458746666666667
+Number of steps: 11000 Acceptance Rate: 2.6735066666666665
+Number of steps: 12000 Acceptance Rate: 2.8944666666666667
+Number of steps: 13000 Acceptance Rate: 3.11336
+Number of steps: 14000 Acceptance Rate: 3.334346666666667
+Number of steps: 15000 Acceptance Rate: 3.54628
+Number of steps: 16000 Acceptance Rate: 3.7526533333333334
+Number of steps: 17000 Acceptance Rate: 3.9538
+Number of steps: 18000 Acceptance Rate: 4.161013333333333
+Number of steps: 19000 Acceptance Rate: 4.365893333333333
+Number of steps: 20000 Acceptance Rate: 4.568746666666667
+Number of steps: 21000 Acceptance Rate: 4.779506666666666
+Number of steps: 22000 Acceptance Rate: 4.98736
+Number of steps: 23000 Acceptance Rate: 5.194906666666666
+Number of steps: 24000 Acceptance Rate: 5.400586666666666
+Number of steps: 25000 Acceptance Rate: 5.606413333333333
+Number of steps: 26000 Acceptance Rate: 5.820053333333333
+Number of steps: 27000 Acceptance Rate: 6.022386666666667
+Number of steps: 28000 Acceptance Rate: 6.225813333333333
+Number of steps: 29000 Acceptance Rate: 6.4319733333333335
+Number of steps: 30000 Acceptance Rate: 6.63428
+Number of steps: 31000 Acceptance Rate: 6.836213333333333
+Number of steps: 32000 Acceptance Rate: 7.044506666666667
+Number of steps: 33000 Acceptance Rate: 7.24952
+Number of steps: 34000 Acceptance Rate: 7.453426666666667
+Number of steps: 35000 Acceptance Rate: 7.65396
+Number of steps: 36000 Acceptance Rate: 7.8524
+Number of steps: 37000 Acceptance Rate: 8.0448
+Number of steps: 38000 Acceptance Rate: 8.239786666666667
+Number of steps: 39000 Acceptance Rate: 8.42996
+Number of steps: 40000 Acceptance Rate: 8.619893333333334
+Number of steps: 41000 Acceptance Rate: 8.81112
+Number of steps: 42000 Acceptance Rate: 9.003933333333332
+Number of steps: 43000 Acceptance Rate: 9.20428
+Number of steps: 44000 Acceptance Rate: 9.405133333333334
+Number of steps: 45000 Acceptance Rate: 9.604066666666666
+Number of steps: 46000 Acceptance Rate: 9.80896
+Number of steps: 47000 Acceptance Rate: 10.01224
+Number of steps: 48000 Acceptance Rate: 10.220373333333333
+Number of steps: 49000 Acceptance Rate: 10.42972
+Number of steps: 50000 Acceptance Rate: 10.64164
+Burn-in Number (ends): 5730
+Independent Sample Size: 1696.5085071262567
+Mean posteriors after burn-in: [2.8023875917759326e-6, 224.700773563045, 3503.768857304922, -0.003130108404812238, 0.00996966407564436, 3.039191588425785e-6, 365.2564607060773, 3624.4074905808784, 0.010614435388351509, 0.010187686122614188, 3.7059497691687625e-7, 686.7384002790635, 376.73052998117515, 0.016223865665591107, -0.12237328140120383, 0.001212820700855712, 4477.965107687202, 1.5830238647500674, 0.020202952606926814, -0.04115139444115904, 0.00022598611710299022, -0.0015028495495048326, 2.3152048201807967]
+MCMC chi-square: 167.61589439510402 for total timing uncertainty of: [20.691580554860213] secs.
+1944.879503 seconds (211.81 M allocations: 2.207 TiB, 3.18% gc time)
+23 parameters from fit: [2.5424844236324013e-6, 224.70078771689978, 3503.768651053885, 0.007567825333660329, -0.004458775757895127, 3.0777330850227126e-6, 365.26358120188826, 3624.3637818829075, 0.019031231891863534, -0.0015906053835199004, 2.410769885110442e-6, 733.4984309932809, 116.66747823190319, 0.09721610736722452, 0.006743971376048406, 0.0008662394542690607, 4346.480939710154, 365.08847661223825, 0.010529343132082904, -0.05238107213933125, -6.116730093354514e-5, -0.0016487006899203033, 2.3035945303859107]
+Maximum log Prob from fit: -125.6684865112739
+No Walkers: 75 No. steps: 50000
+Number of steps: 1000 Acceptance Rate: 0.27464
+Number of steps: 2000 Acceptance Rate: 0.46064
+Number of steps: 3000 Acceptance Rate: 0.6225466666666667
+Number of steps: 4000 Acceptance Rate: 0.7573066666666667
+Number of steps: 5000 Acceptance Rate: 0.87056
+Number of steps: 6000 Acceptance Rate: 0.96924
+Number of steps: 7000 Acceptance Rate: 1.0605866666666666
+Number of steps: 8000 Acceptance Rate: 1.1597066666666667
+Number of steps: 9000 Acceptance Rate: 1.25848
+Number of steps: 10000 Acceptance Rate: 1.3502266666666667
+Number of steps: 11000 Acceptance Rate: 1.4338666666666666
+Number of steps: 12000 Acceptance Rate: 1.5094133333333333
+Number of steps: 13000 Acceptance Rate: 1.5824666666666667
+Number of steps: 14000 Acceptance Rate: 1.6513733333333334
+Number of steps: 15000 Acceptance Rate: 1.7123066666666666
+Number of steps: 16000 Acceptance Rate: 1.76768
+Number of steps: 17000 Acceptance Rate: 1.8202533333333333
+Number of steps: 18000 Acceptance Rate: 1.8701866666666667
+Number of steps: 19000 Acceptance Rate: 1.9239333333333333
+Number of steps: 20000 Acceptance Rate: 1.9761866666666668
+Number of steps: 21000 Acceptance Rate: 2.0283866666666666
+Number of steps: 22000 Acceptance Rate: 2.0791333333333335
+Number of steps: 23000 Acceptance Rate: 2.12728
+Number of steps: 24000 Acceptance Rate: 2.1732533333333333
+Number of steps: 25000 Acceptance Rate: 2.21624
+Number of steps: 26000 Acceptance Rate: 2.25824
+Number of steps: 27000 Acceptance Rate: 2.2972
+Number of steps: 28000 Acceptance Rate: 2.33484
+Number of steps: 29000 Acceptance Rate: 2.376
+Number of steps: 30000 Acceptance Rate: 2.4150666666666667
+Number of steps: 31000 Acceptance Rate: 2.4535466666666665
+Number of steps: 32000 Acceptance Rate: 2.4924133333333334
+Number of steps: 33000 Acceptance Rate: 2.5285466666666667
+Number of steps: 34000 Acceptance Rate: 2.5631733333333333
+Number of steps: 35000 Acceptance Rate: 2.5966133333333334
+Number of steps: 36000 Acceptance Rate: 2.629373333333333
+Number of steps: 37000 Acceptance Rate: 2.6624666666666665
+Number of steps: 38000 Acceptance Rate: 2.69184
+Number of steps: 39000 Acceptance Rate: 2.7250133333333335
+Number of steps: 40000 Acceptance Rate: 2.756813333333333
+Number of steps: 41000 Acceptance Rate: 2.78888
+Number of steps: 42000 Acceptance Rate: 2.8189866666666665
+Number of steps: 43000 Acceptance Rate: 2.8522933333333333
+Number of steps: 44000 Acceptance Rate: 2.88472
+Number of steps: 45000 Acceptance Rate: 2.916253333333333
+Number of steps: 46000 Acceptance Rate: 2.945333333333333
+Number of steps: 47000 Acceptance Rate: 2.9757466666666668
+Number of steps: 48000 Acceptance Rate: 3.007346666666667
+Number of steps: 49000 Acceptance Rate: 3.0395866666666667
+Number of steps: 50000 Acceptance Rate: 3.0710933333333332
+Burn-in Number (ends): 50000
+Independent Sample Size: 346.805923099556
+Mean posteriors after burn-in: [3.046389228885771e-6, 224.70078714477287, 3503.76865730692, 0.0040863210734898795, 0.002469801196811188, 3.04819186816983e-6, 365.26408318376457, 3624.3602095172273, 0.017087284481975766, 0.00343658189638566, 2.5204909078435347e-6, 733.9548484875211, 113.05391368036382, 0.09826266170412734, 0.025151774889377032, 0.0009562122116547774, 4515.971879805687, 1.7021890912551907, 0.010151332971045137, -0.05866039848091681, -5.913831363780688e-5, -0.0013999536464791567, 2.296814883153975]
+MCMC chi-square: 1886.1601164334054 for total timing uncertainty of: [21.433712188680637] secs.
+4537.045612 seconds (477.87 M allocations: 6.452 TiB, 3.92% gc time)
