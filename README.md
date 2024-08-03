@@ -245,4 +245,3 @@ The data array contains parameters that describe a multi-transiting planet syste
   # Need first call to TTVFaster,without optimizing
   julia> dummy=TTVFaster.compute_ttv!(jmax,p1,p2,time1,time2,ttv1,ttv2)
 ```
--->
