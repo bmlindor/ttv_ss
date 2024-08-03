@@ -73,6 +73,8 @@ Note: the third planet can't be too close to the transiting planets.
     - Currently doing 5-22 years, but ran rebound simulations to test minimum orbit of jupiter analogue. Conditioned on retrieved V+E parameters, Jupiter orbit can go down to 1337.0 days but this doesn't account for the observed TTVs. Would need NbodyGradient to find actual minimum.
 
 fit_planet3(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p3in::Float64,p3out::Float64,np3::Int,nphase::Int,obs::String)
+do wide run first, for nper=500 points in grid
+then do nper=200 around peak
 
 2d). Search for moon. Initialize a grid of moon phases & compute the best-fit at each.
 Optimize the fit to the two sets of transit times by varying all of the
@@ -243,4 +245,3 @@ The data array contains parameters that describe a multi-transiting planet syste
   # Need first call to TTVFaster,without optimizing
   julia> dummy=TTVFaster.compute_ttv!(jmax,p1,p2,time1,time2,ttv1,ttv2)
 ```
--->
