@@ -5,7 +5,7 @@ rc("lines",linewidth=2)
 include("regress.jl")
 include("CGS.jl")
 # Load JPL ephemerides from data and set units
-eph = Ephem("../ttv_ss/INPUTS/DE440.bsp") ; prefetch(eph)
+eph = Ephem("../INPUTS/DE440.bsp") ; prefetch(eph)
 options = useNaifId+unitKM+unitDay # useNaifId + unitDay + unitAU
 AU = 149597870.700 #km
 Random.seed!(42)
@@ -255,7 +255,7 @@ function sim_obs_and_find_times(jd1::Float64,sigma::Real,nyear::Real,obs::String
 end
 # body,tt0,tt,sigtt=sim_obs_and_find_times(2.4332825e6,30,30,"fromEMB")
 # Simulate times starting at jd1 for nyear span with sigma Gaussian noise added, save to .txt
-function sim_times(jd1::Float64,sigma::Real,nyear::Real,obs::String,dir::String="INPUTS")
+function sim_times(jd1::Float64,sigma::Real,nyear::Real,obs::String,dir::String="../INPUTS")
   body,trans,tt,sigtt,tt0=sim_obs_and_find_times(jd1,sigma,nyear,obs)
   if obs=="fromEMB"
     name = string(dir,"/EMBtt_",sigma,"s",nyear,"yrs.txt")
@@ -500,7 +500,7 @@ function plot_orbits(dimension::Int;obs::String,nyear::Real=20,return_pva::Bool=
 
   # close()
 end
-function moon_times(jd1::Float64,sigma::Real,nyear::Real)
+function moon_times(sigma::Real,nyear::Real,jd1::Float64=2.4332825e6)
   # nyear = (jd2 - jd1)/365.25 
   jd2 = nyear*365.25 + jd1
   jdsize = 1000
@@ -535,20 +535,17 @@ function moon_times(jd1::Float64,sigma::Real,nyear::Real)
   P_venus = 225.0
   P_earth = 365.0
   P_err = 1.0
-  tt1 = transit_times(2,eph,t0,P_venus,P_err,n_obs,10)
-  nt1=length(tt1)
-  tt2 = transit_times(399,eph,t0,P_earth,P_err,n_obs,10)
-  nt2=length(tt2)
-  tt3 = transit_times(301,eph,t0,365.25,P_err,n_obs,10)
-  nt3=length(tt3)
+  tt1,nt1 = transit_times(2,eph,t0,P_venus,P_err,n_obs,10)
+  tt2,nt2 = transit_times(399,eph,t0,P_earth,P_err,n_obs,10)
+  tt3,nt3 = transit_times(301,eph,t0,365.25,P_err,n_obs,10)
 
-  sigtt1=fixed_noise(tt1,sigma)
-  sigtt2=fixed_noise(tt2,sigma)
-  sigtt3=fixed_noise(tt3,sigma)
+  sigtt1,noise1=fixed_noise(tt1,sigma)
+  sigtt2,noise2=fixed_noise(tt2,sigma)
+  sigtt3,noise3=fixed_noise(tt3,sigma)
 
-  x1,t01,per1 = linear_fit(tt1,P_venus,sigtt1)
-  x2,t02,per2 = linear_fit(tt2,P_earth,sigtt2)
-  x3,t03,per3 = linear_fit(tt3,365.25,sigtt2)
+  x1,t01,per1 = linear_fit(tt1 .+ noise1,P_venus,sigtt1)
+  x2,t02,per2 = linear_fit(tt2 .+ noise2,P_earth,sigtt2)
+  x3,t03,per3 = linear_fit(tt3 .+ noise3,365.25,sigtt2)
   println("moon_period=",per3)
   # println("coefficients: ",t02," , ",per2)
   tt=[tt1;tt2;tt3]
@@ -566,14 +563,15 @@ function moon_times(jd1::Float64,sigma::Real,nyear::Real)
   subplot(211)
   plot((t2.-t02)./per2,(tt2.-t2).*(24*60))
   xlabel("Time [years]")
-  ylabel("TTV [min]")
+  ylabel("TTVs for Earth [min]")
   subplot(212)
   plot((t3.-t03)./per2,(tt3.-t3).*(24*60))
   xlabel("Time")
-  ylabel("TTV [min]")
+  ylabel("TTVs for Moon [min]")
+  show()
   toff=((tt2.-t2).*(24*60)).-((tt3.-t3).*(24*60))
   a_s=toff/2pi
-  # return tt1,tt2,tt3
+  return tt1,tt2,tt3
   # f=  jldopen(String(FITS/p3moon_fit",sigma,"s",nyear,"yrs.jld2"),"r")
   # tt,tt0,sigtt,ttmodel=f["tt"],f["tt0"],f["sigtt"],f["ttmodel"]
   # pbest_global=f["best_dp"]
@@ -606,7 +604,6 @@ function moon_times(jd1::Float64,sigma::Real,nyear::Real)
   # minorticks_on()
   # tick_params(which="both",direction="in",top=true,right=true)
 end
-# moon_times(jd1,sigma,nyear)
 
   # function plot_ttvs(sigma)
   #   P_venus = 225

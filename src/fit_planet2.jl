@@ -3,7 +3,7 @@ include("misc.jl")
 include("CGS.jl")
 using TTVFaster,DelimitedFiles,JLD2,LsqFit,Statistics
 
-function fit_planet2(filename::String,jmax::Int,jd1,sigma,nyear,tref::Real,tol::Real,obs::String,dir::String="FITS")
+function fit_planet2(filename::String,jmax::Int,jd1,sigma,nyear,tref::Real,tol::Real,obs::String,dir::String="../FITS")
   if obs=="fromEMB"
     fitfile = string(dir,"/fromEMB/p2_fit",sigma,"s",nyear,"yrs.jld2")
   elseif obs=="fromEV"
@@ -99,13 +99,13 @@ end
 function fit_planet2(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,options::Array{String},save_as_jld2::Bool=false)
 	obs=options[1]
   if obs=="fromEMB"
-    datafile = string("INPUTS/EMBtt_",sigma,"s",nyear,"yrs.txt")
-    outfile = string("FITS/fromEMB/p2_fit",sigma,"s",nyear,"yrs.jld2")
-    results = string("results/fromEMB/p2_fit",sigma,"s",nyear,"yrs.txt")
+    datafile = string("../INPUTS/EMBtt_",sigma,"s",nyear,"yrs.txt")
+    outfile = string("../FITS/fromEMB/p2_fit",sigma,"s",nyear,"yrs.jld2")
+    results = string("../results/fromEMB/p2_fit",sigma,"s",nyear,"yrs.txt")
   elseif obs=="fromEV"
-    datafile = string("INPUTS/tt_",sigma,"s",nyear,"yrs.txt")
-    outfile = string("FITS/p2_fit",sigma,"s",nyear,"yrs.jld2")
-    results = string("results/p2_fit",sigma,"s",nyear,"yrs.txt")
+    datafile = string("../INPUTS/tt_",sigma,"s",nyear,"yrs.txt")
+    outfile = string("../FITS/p2_fit",sigma,"s",nyear,"yrs.jld2")
+    results = string("../results/p2_fit",sigma,"s",nyear,"yrs.txt")
   end
   @assert isfile(datafile)
   println(datafile," loaded.")

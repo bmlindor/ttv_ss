@@ -1,15 +1,14 @@
 .ipynb_checkpoints
 #results/
 deprecated/
-NbodyGradient/
 #OUTPUTS/
 MCMC/
-*.bsp
+grid_wide/
 */*.bsp
 *.jld2
 *.pdf
 *.mem
-TTVFaster/src/*.mem
+src/*.mem
 .DS_Store
 corner_plot.sublime-workspace
 /test

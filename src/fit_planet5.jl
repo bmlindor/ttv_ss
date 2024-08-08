@@ -2,13 +2,13 @@ include("sim_times.jl")
 include("misc.jl")
 using TTVFaster,DelimitedFiles,JLD2,LsqFit,Statistics,DataFrames,CSV
 
-function fit_planet5(filename::String,jmax::Int,jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p3in::Float64,p3out::Float64,np3::Int,nphase::Int,p4in::Float64,p4out::Float64,np4::Int,p5in::Float64,p5out::Float64,np5::Int,obs::String,dir::String="FITS")
+function fit_planet5(filename::String,jmax::Int,jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p3in::Float64,p3out::Float64,np3::Int,nphase::Int,p4in::Float64,p4out::Float64,np4::Int,p5in::Float64,p5out::Float64,np5::Int,obs::String,dir::String="../FITS")
   if obs=="fromEMB"
     fitfile = string(dir,"/fromEMB/p5_fit",sigma,"s",nyear,"yrs.jld2")
-    grid = string("grid/fromEMB/p5_grid",sigma,"s",nyear,"yrs.txt")
+    grid = string("../grid/fromEMB/p5_grid",sigma,"s",nyear,"yrs.txt")
   elseif obs=="fromEV"
     fitfile = string(dir,"/p5_fit",sigma,"s",nyear,"yrs.jld2")
-    grid = string("grid/p5_grid",sigma,"s",nyear,"yrs.txt")
+    grid = string("../grid/p5_grid",sigma,"s",nyear,"yrs.txt")
   end
    @assert isfile(filename)
   println(filename," loaded.")
@@ -289,15 +289,15 @@ end
 function fit_planet5(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p5in::Float64,p5out::Float64,np5::Int,nphase::Int,options::Array{String},save_as_jld2::Bool=false)
 	obs=options[1]; grid_type_nplanet=options[2]
 	if obs=="fromEMB"
-    infile = string("FITS/fromEMB/p4_fit",sigma,"s",nyear,"yrs.jld2")
-    outfile = string("FITS/fromEMB/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
-    results = string("results/fromEMB/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.txt")
-    grid = string("grid/fromEMB/",grid_type_nplanet,"_grid",sigma,"s",nyear,"yrs.csv")
+    infile = string("../FITS/fromEMB/p4_fit",sigma,"s",nyear,"yrs.jld2")
+    outfile = string("../FITS/fromEMB/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
+    results = string("../results/fromEMB/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.txt")
+    grid = string("../grid/fromEMB/",grid_type_nplanet,"_grid",sigma,"s",nyear,"yrs.csv")
   elseif obs=="fromEV"
-    infile = string("FITS/p4_fit",sigma,"s",nyear,"yrs.jld2")
-    outfile = string("FITS/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
-    results = string("results/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.txt")
-    grid = string("grid/",grid_type_nplanet,"_grid",sigma,"s",nyear,"yrs.csv")
+    infile = string("../FITS/p4_fit",sigma,"s",nyear,"yrs.jld2")
+    outfile = string("../FITS/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
+    results = string("../results/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.txt")
+    grid = string("../grid/",grid_type_nplanet,"_grid",sigma,"s",nyear,"yrs.csv")
 	end
   @assert isfile(infile)
   m = jldopen(String(infile),"r")

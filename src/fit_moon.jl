@@ -23,10 +23,10 @@ using TTVFaster,DelimitedFiles,JLD2,LsqFit,Statistics,DataFrames,CSV
 # If planet fit already exists, can just do moon search
 function fit_moon(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,dpin::Float64,dpout::Float64,ndp::Int,options::Array{String},save_as_jld2::Bool=false,nplanets::Real=3)
 	grid_type_nplanet=options[1]	
-  infile = string("FITS/p",nplanets,"_fit",sigma,"s",nyear,"yrs.jld2")
-  outfile = string("FITS/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
-  results = string("results/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.txt")
-  grid = string("grid/",grid_type_nplanet,"_grid",sigma,"s",nyear,"yrs.csv")
+  infile = string("../FITS/p",nplanets,"_fit",sigma,"s",nyear,"yrs.jld2")
+  outfile = string("../FITS/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
+  results = string("../results/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.txt")
+  grid = string("../grid/",grid_type_nplanet,"_grid",sigma,"s",nyear,"yrs.csv")
   @assert isfile(infile)
   m = jldopen(String(infile),"r")
   tt0,tt,ttmodel,sigtt=m["tt0"],m["tt"],m["ttmodel"],m["sigtt"]
@@ -137,10 +137,10 @@ end
 # If 3-planet fit with moon already exists, can do 4-planet search
 function fit_moon(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p4in::Float64,p4out::Float64,np4::Int,nphase::Int,options::Array{String},save_as_jld2::Bool=false)
 	grid_type_nplanet=options[1]
-  infile = string("FITS/p3moon_fit",sigma,"s",nyear,"yrs.jld2")
-  outfile = string("FITS/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
-  results = string("results/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.txt")
-  grid = string("grid/",grid_type_nplanet,"_grid",sigma,"s",nyear,"yrs.csv")
+  infile = string("../FITS/p3moon_fit",sigma,"s",nyear,"yrs.jld2")
+  outfile = string("../FITS/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
+  results = string("../results/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.txt")
+  grid = string("../grid/",grid_type_nplanet,"_grid",sigma,"s",nyear,"yrs.csv")
   @assert isfile(infile)
   m = jldopen(String(infile),"r")
   tt0,tt,ttmodel,sigtt=m["tt0"],m["tt"],m["ttmodel"],m["sigtt"]
