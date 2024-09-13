@@ -1,15 +1,15 @@
 include("sim_times.jl")
 include("misc.jl")
-include("CGS.jl")
-using TTVFaster,DelimitedFiles,JLD2,LsqFit,Statistics,DataFrames,CSV
+# include("CGS.jl")
+using TTVFaster,DelimitedFiles,JLD2,LsqFit,Statistics,DataFrames,CSV,PyPlot
 
-function fit_planet3(filename::String,jmax::Int,jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p3in::Float64,p3out::Float64,np3::Int,nphase::Int,obs::String,dir::String="../FITS")
+function fit_planet3(filename::String,jmax::Int,jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p3in::Float64,p3out::Float64,np3::Int,nphase::Int,obs::String,dir::String="../src")
   if obs=="fromEMB"
-    fitfile = string(dir,"/fromEMB/p3_fit",sigma,"s",nyear,"yrs.jld2")
-    grid = string("grid/fromEMB/p3_grid",sigma,"s",nyear,"yrs.txt")
+    fitfile = string(dir,"/FITS/fromEMB/p3_fit",sigma,"s",nyear,"yrs.jld2")
+    grid = string(dir,"/grid/fromEMB/p3_grid",sigma,"s",nyear,"yrs.txt")
   elseif obs=="fromEV"
-    fitfile = string(dir,"/p3_fit",sigma,"s",nyear,"yrs.jld2")
-    grid = string("grid/p3_grid",sigma,"s",nyear,"yrs.txt")
+    fitfile = string(dir,"/FITS/p3_fit",sigma,"s",nyear,"yrs.jld2")
+    grid = string(dir,"/grid/p3_grid",sigma,"s",nyear,"yrs.txt")
   end
   @assert isfile(filename)
   println(filename," loaded.")
@@ -89,46 +89,52 @@ function fit_planet3(filename::String,jmax::Int,jd1::Float64,sigma::Real,nyear::
   nparam = 15
   # Grid of periods to search over:
   p3 = 10 .^ range(log10(p3in),stop=log10(p3out),length=np3)
-  lprob_p3 = zeros(np3)
+  # lprob_p3 = zeros(np3)
   p3_cur = 11.86*365.25 #jupiter period in days,initial value
-  param_p3 = zeros(nparam,np3)
+  # param_p3 = zeros(nparam,np3)
   lprob_best = -1e100 #global best fit
   p3best = zeros(nparam)
+  # want a grid of masses instead of assuming its value
+  mu3= range(log10(1e-8), stop=log10(1e-2),length=100)
+  lprob_p3 = zeros(np3,length(mu3))
+  param_p3=zeros(nparam,np3,length(mu3))
   niter = 0
+  # Loop over planet 3 masses
+  for k=1:length(mu3)
   for j=1:np3
     phase = p3[j]*range(0,stop=1,length=nphase) 
     lprob_phase = zeros(nphase)
-    lprob_p3[j] = -1e100
+    lprob_p3[j,k] = -1e100
     # Loop over planet 3 phases:    
     for i=1:nphase
      # p3 param_names: mass ratio,phase,ecosw,esinw
-      param_tmp = [log10(1e-3),phase[i],0.01,0.01] 
+      param_tmp = [mu3[k],phase[i],0.01,0.01] 
       param3 = [best_p2;param_tmp] #concatenate 2 planet model to 3 planet model params
       p3_cur = p3[j] #sets jupiter period to global value
+      mu3_cur = mu3[k]
       param1 = param3 .+ 100.0
       niter=0
       while maximum(abs.(param1 .- param3)) > tol && niter < 20
         param1 = param3
-        fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,[params[1:10];10^params[11];p3_cur;params[12:end]],jmax,true),tt0,tt,weight,param3)
+        fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,[params[1:10];10^mu3_cur;p3_cur;params[12:end]],jmax,true),tt0,tt,weight,param3)
 
         param3 = fit.param
         niter+=1
         # println("init_param: ",param3)
         # println("New Initial chi-square: ",chisquare(tt0,nplanet,ntrans,param3,tt,sigtt,true,p3_cur))
       end
-      ttmodel = ttv_wrapper(tt0,nplanet,ntrans,[param3[1:10];10^param3[11];p3_cur;param3[12:end]],jmax,true)
+      ttmodel = ttv_wrapper(tt0,nplanet,ntrans,[param3[1:10];10^mu3_cur;p3_cur;param3[12:end]],jmax,true)
       lprob_phase[i]= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
       if lprob_phase[i] > lprob_best 
       # check that best fit for period is better than global best fit
         lprob_best = lprob_phase[i]
-        p3best = [fit.param[1:10];10^fit.param[11];p3_cur;fit.param[12:end]]
+        p3best = [fit.param[1:10];10^mu3_cur;p3_cur;fit.param[12:end]]
       end
       
       if lprob_phase[i] > lprob_p3[j] 
-      # checks best fit over all phases of jupiter for this particular period
-
-        lprob_p3[j] = lprob_phase[i]
-        param_p3[1:nparam,j] =  [fit.param[1:10];10^fit.param[11];p3_cur;fit.param[12:end]]
+      # checks best fit over all phases of jupiter for this particular period and mass
+        lprob_p3[j,k] = lprob_phase[i]
+        param_p3[1:nparam,j,k] =  [fit.param[1:10];10^m3_cur;p3_cur;fit.param[12:end]]
       end
 
       # if j>1 && abs(lprob_p3[j] - lprob_p3[j-1])>5
@@ -136,6 +142,7 @@ function fit_planet3(filename::String,jmax::Int,jd1::Float64,sigma::Real,nyear::
       #   lprob_p3[j] = lprob_p3[j-1]
       #   param_p3[1:nparam,j] = [fit.param[1:10];10^fit.param[11];p3_cur;fit.param[12:end]]
       # end
+    end
     end
     # println("Period: ",p3[j]," log Prob: ",lprob_p3[j]," Param: ",vec(param_p3[1:nparam,j]))
   end
@@ -203,7 +210,7 @@ end
 - `lprob_best_p3::Float64`: log probability of detecting 3 planets with the given properties.
 """
 # If the 2-planet fit already exists, just do 3-planet fit.
-function fit_planet3(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p3in::Float64,p3out::Float64,np3::Int,nphase::Int,options::Array{String},save_as_jld2::Bool=false)
+function fit_planet3(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p3in::Float64,p3out::Float64,np3::Int,nphase::Int,options::Array{String},save_as_jld2::Bool=true)
 	obs=options[1]; grid_type_nplanet=options[2]
 	if obs=="fromEMB"
     infile = string("../FITS/fromEMB/p2_fit",sigma,"s",nyear,"yrs.jld2")
@@ -233,57 +240,67 @@ function fit_planet3(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
   nplanet = 3
   nparam = 15
   # Grid of periods to search over:
-  p3 = 10 .^ range(log10(p3in),stop=log10(p3out),length=np3)
-  lprob_p3 = zeros(np3)
+   p3 = 10 .^ range(log10(p3in),stop=log10(p3out),length=np3)
+  # lprob_p3 = zeros(np3)
   p3_cur = 11.86*365.25 #jupiter period in days,initial value
-  param_p3 = zeros(nparam,np3)
+  # param_p3 = zeros(nparam,np3)
   lprob_best = -1e100 #global best fit
   p3best = zeros(nparam)
+  # want a grid of masses instead of assuming its value
+  mu3= range(log10(1e-8), stop=log10(1e-2),length=10)
+  lprob_p3 = zeros(np3,length(mu3))
+  param_p3=zeros(nparam,np3,length(mu3))
   niter = 0
-  for j=1:np3
-    phase = p3[j]*range(0,stop=1,length=nphase) 
-    lprob_phase = zeros(nphase)
-    lprob_p3[j] = -1e100
-    # Loop over planet 3 phases:
-    for i=1:nphase 
-     # p3 param_names: mass ratio,phase,ecosw,esinw
-      param_tmp = [log10(1e-3),phase[i],0.01,0.01] 
-      param3 = [best_p2;param_tmp] 
-      p3_cur = p3[j] 
-      param1 = param3 .+ 100.0
-      niter=0
-      while maximum(abs.(param1 .- param3)) > tol && niter < 20
-        param1 = param3
-        fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,[params[1:10];10^params[11];p3_cur;params[12:end]],jmax,true),tt0,tt,weight,param3)
-        param3 = fit.param
-        niter+=1
-        # println("init_param: ",param3)
-        # println("New Initial chi-square: ",chisquare(tt0,nplanet,ntrans,param3,tt,sigtt,true,p3_cur))
+  # Loop over planet 3 masses
+  for k=1:length(mu3)
+    mu3_cur = mu3[k]
+    for j=1:np3
+      phase = p3[j]*range(0,stop=1,length=nphase) 
+      lprob_phase = zeros(nphase)
+      lprob_p3[j,k] = -1e100
+      # Loop over planet 3 phases:    
+      for i=1:nphase
+       # p3 param_names: mass ratio,phase,ecosw,esinw
+        param_tmp = [mu3_cur,phase[i],0.01,0.01] 
+        param3 = [best_p2;param_tmp] #concatenate 2 planet model to 3 planet model params
+        p3_cur = p3[j] #sets jupiter period to global value
+        param1 = param3 .+ 100.0
+        niter=0
+        while maximum(abs.(param1 .- param3)) > tol && niter < 20
+          param1 = param3
+          fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,[params[1:10];10^mu3_cur;p3_cur;params[12:end]],jmax,true),tt0,tt,weight,param3)
+          param3 = fit.param
+          niter+=1
+          # println("init_param: ",param3)
+          # println("New Initial chi-square: ",chisquare(tt0,nplanet,ntrans,param3,tt,sigtt,true,p3_cur))
+        end
+        ttmodel = ttv_wrapper(tt0,nplanet,ntrans,[param3[1:10];10^mu3_cur;p3_cur;param3[12:end]],jmax,true)
+        lprob_phase[i]= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
+        if lprob_phase[i] > lprob_best 
+        # check that best fit for period is better than global best fit
+          lprob_best = lprob_phase[i]
+          p3best = [fit.param[1:10];10^mu3_cur;p3_cur;fit.param[12:end]]
+        end
+        if lprob_phase[i] > lprob_p3[j,k] 
+        # checks best fit over all phases of jupiter for this particular period and mass
+          lprob_p3[j,k] = lprob_phase[i]
+          param_p3[1:nparam,j,k] = [fit.param[1:10];10^mu3_cur;p3_cur;fit.param[12:end]]
+        end
+        # if j>1 && abs(lprob_p3[j] - lprob_p3[j-1])>5
+        #  Check that best fit for current period is close to that of previous period
+        #   lprob_p3[j,k] = lprob_p3[j-1,k]
+        #   param_p3[1:nparam,j,k] = [fit.param[1:10];10^fit.param[11];p3_cur;fit.param[12:end]]
+        # end
       end
-      ttmodel = ttv_wrapper(tt0,nplanet,ntrans,[param3[1:10];10^param3[11];p3_cur;param3[12:end]],jmax,true)
-      lprob_phase[i]= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
-      if lprob_phase[i] > lprob_best # check that best fit for period is better than global best fit
-        lprob_best = lprob_phase[i]
-        p3best = [fit.param[1:10];10^fit.param[11];p3_cur;fit.param[12:end]]
-      end
-      if lprob_phase[i] > lprob_p3[j] # checks best fit over all phases of jupiter for this particular period
-        lprob_p3[j] = lprob_phase[i]
-        param_p3[1:nparam,j] = [fit.param[1:10];10^fit.param[11];p3_cur;fit.param[12:end]]
-      end
-  #    if j<nper && (lprob_per[j+1]-lprob_per[j]) > 10
-  # # Check that best fit for current period is close to that of previous period
-  #   lprob_per[j+1] = lprob_per[j]
-  #   param_per[1:nparam,j+1] = param_per[1:nparam,j] #[fit.param[1:10];10^fit.param[11];per_cur;fit.param[12:end]]
-  # end
+      println("Period: ",p3[j]," Mass-ratio: ",10^mu3[k]," log Prob: ",lprob_p3[j,k],'\n'," Param: ",vec(param_p3[1:nparam,j,k]))
     end
-    # println("Period: ",p3[j]," log Prob: ",lprob_p3[j]," Param: ",vec(param_p3[1:nparam,j]))
   end
   println("Finished 3-planet fit w/ fixed period: ",p3best," in ",niter," iterations")
-	df=DataFrame(mu_1=param_p3[1,:],P_1=param_p3[2,:],t01=param_p3[3,:],ecos1=param_p3[4,:],esin1=param_p3[5,:],
-								mu_2=param_p3[6,:],P_2=param_p3[7,:],t02=param_p3[8,:],ecos2=param_p3[9,:],esin2=param_p3[10,:],
-								mu_3=param_p3[11,:],P_3=param_p3[12,:],t03=param_p3[13,:],ecos3=param_p3[14,:],esin3=param_p3[15,:],
-								lprob=lprob_p3[:])
-	CSV.write(grid,df)
+	# df=DataFrame(mu_1=param_p3[1,:],P_1=param_p3[2,:],t01=param_p3[3,:],ecos1=param_p3[4,:],esin1=param_p3[5,:],
+	# 							mu_2=param_p3[6,:],P_2=param_p3[7,:],t02=param_p3[8,:],ecos2=param_p3[9,:],esin2=param_p3[10,:],
+	# 							mu_3=param_p3[11,:],P_3=param_p3[12,:],t03=param_p3[13,:],ecos3=param_p3[14,:],esin3=param_p3[15,:],
+	# 							lprob=lprob_p3[:])
+	# CSV.write(grid,df)
 
   fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,true),tt0,tt,weight,p3best)
   cov=estimate_covar(fit) ;  best_p3 = fit.param 
@@ -302,16 +319,16 @@ function fit_planet3(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
   mp_errs=[err[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
   mean_ecc=[sqrt(best_p3[(iplanet-1)*5+4]^2 + best_p3[(iplanet-1)*5+5]^2) for iplanet=1:nplanet]
 
-  open(results,"w") do io
-    println(io,"Global Fit Results.",'\n',"chi^2: ",chi2,'\n',"per 3 range=[",p3in," - ",p3out,", length=",np3,"]")
-    for i=1:nparam
-      println(io,pname[i],": ",best_p3[i]," ± ",err[i])
-    end
-    println(io,"Retrieved Earth masses:",'\n',mean_mp,'\n'," ± ",mp_errs)
-    println(io,"Retrieved eccentricity:",'\n',mean_ecc)
-  end
+  # open(results,"w") do io
+  #   println(io,"Global Fit Results.",'\n',"chi^2: ",chi2,'\n',"per 3 range=[",p3in," - ",p3out,", length=",np3,"]")
+  #   for i=1:nparam
+  #     println(io,pname[i],": ",best_p3[i]," ± ",err[i])
+  #   end
+  #   println(io,"Retrieved Earth masses:",'\n',mean_mp,'\n'," ± ",mp_errs)
+  #   println(io,"Retrieved eccentricity:",'\n',mean_ecc)
+  # end
 	if save_as_jld2
-  @save outfile p3 lprob_p3 best_p3 lprob_best_p3 ntrans nplanet tt0 tt ttmodel sigtt nphase
+  @save outfile p3 lprob_p3 best_p3 lprob_best_p3 ntrans nplanet tt0 tt ttmodel sigtt nphase param_p3
 	end
   return best_p3,lprob_best_p3
 end

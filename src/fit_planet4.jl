@@ -233,7 +233,7 @@ end
 - `lprob_best_p3::Float64`: log probability of detecting 4 planets with the given properties.
 """
 # If 3-planet fit already exists, can just do 4-planet search
-function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p4in::Float64,p4out::Float64,np4::Int,nphase::Int,options::Array{String},save_as_jld2::Bool=false)
+function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p4in::Float64,p4out::Float64,np4::Int,nphase::Int,options::Array{String},save_as_jld2::Bool=true)
 	obs=options[1]; grid_type_nplanet=options[2]
   if obs=="fromEMB"
     infile = string("../FITS/fromEMB/p3_fit",sigma,"s",nyear,"yrs.jld2")
@@ -266,18 +266,23 @@ function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
   # Grid of periods to search over:
   p4 = 10 .^ range(log10(p4in),stop=log10(p4out),length=np4)
   p4_cur =  1.88*365.25 
-  lprob_p4 = zeros(np4)
-  param_p4 = zeros(nparam,np4)
+  mu4=range(log10(1e-8),stop=log10(1e-2),length=10)
+  lprob_p4=zeros(np4,length(mu4))
+  param_p4=zeros(nparam,np4,length(mu4))
+  # lprob_p4 = zeros(np4)
+  # param_p4 = zeros(nparam,np4)
   lprob_best = -1e100 
   p4best = zeros(nparam)
   niter = 0
+  for k=1:length(mu4)
+    mu4_cur=mu4[k]
   for j=1:np4
     phase = p4[j]*range(0,stop=1,length=nphase)  
     lprob_phase = zeros(nphase) 
     lprob_p4[j] = -1e100
     for i=1:nphase
      # p4 param_names: mass ratio,phase,ecosw,esinw; uses same nphase as p3
-      param_tmp = [log10(1e-7),phase[i],0.01,0.01]
+      param_tmp = [mu4_cur,phase[i],0.01,0.01]
       # Mars' period is shorter than Jupiter's, so need to keep sorted for now
       param4 = [best_p3[1:10];param_tmp;best_p3[11:15]]   
       p4_cur = p4[j]
@@ -285,30 +290,31 @@ function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
       niter=0
       while maximum(abs.(param1 .- param4)) > tol && niter < 20
         param1 = param4
-        fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,[params[1:10];10^params[11];p4_cur;params[12:end]],jmax,true),tt0,tt,weight,param4)
+        fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,[params[1:10];10^mu4_cur;p4_cur;params[12:end]],jmax,true),tt0,tt,weight,param4)
         param4 = fit.param 
         niter+=1
       end
-      ttmodel=ttv_wrapper(tt0,nplanet,ntrans,[param4[1:10];10^param4[11];p4_cur;param4[12:end]],jmax,true)
+      ttmodel=ttv_wrapper(tt0,nplanet,ntrans,[param4[1:10];10^mu4_cur;p4_cur;param4[12:end]],jmax,true)
       lprob_phase[i]= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
       if lprob_phase[i] > lprob_best
         lprob_best = lprob_phase[i]
-        p4best = [fit.param[1:10];10^fit.param[11];p4_cur;fit.param[12:end]]
+        p4best = [fit.param[1:10];10^mu4_cur;p4_cur;fit.param[12:end]]
       end
-      if lprob_phase[i] > lprob_p4[j] 
-        lprob_p4[j] = lprob_phase[i]
-        param_p4[1:nparam,j] =  [fit.param[1:10];10^fit.param[11];p4_cur;fit.param[12:end]]
+      if lprob_phase[i] > lprob_p4[j,k] 
+        lprob_p4[j,k] = lprob_phase[i]
+        param_p4[1:nparam,j,k] =  [fit.param[1:10];10^mu4_cur;p4_cur;fit.param[12:end]]
       end
     end
-    # println("Period: ",p4[j]," log Prob: ",lprob_p4[j]," Param: ",vec(param_p4[1:nparam,j]))
+      println("Period: ",p4[j]," Mass-ratio: ",10^mu4[k]," log Prob: ",lprob_p4[j,k],'\n',"Param: ",vec(param_p4[1:nparam,j,k]))
+    end
   end
   println("Finished 4-planet fit w/ fixed period: ",p4best," in ",niter," iterations")
-	df=DataFrame(mu_1=param_p4[1,:],P_1=param_p4[2,:],t01=param_p4[3,:],ecos1=param_p4[4,:],esin1=param_p4[5,:],
-								mu_2=param_p4[6,:],P_2=param_p4[7,:],t02=param_p4[8,:],ecos2=param_p4[9,:],esin2=param_p4[10,:],
-								mu_3=param_p4[11,:],P_3=param_p4[12,:],t03=param_p4[13,:],ecos3=param_p4[14,:],esin3=param_p4[15,:],
-								mu_4=param_p4[16,:],P_4=param_p4[17,:],t04=param_p4[18,:],ecos4=param_p4[19,:],esin4=param_p4[20,:],
-								lprob=lprob_p4[:])
-	CSV.write(grid,df)
+	# df=DataFrame(mu_1=param_p4[1,:],P_1=param_p4[2,:],t01=param_p4[3,:],ecos1=param_p4[4,:],esin1=param_p4[5,:],
+	# 							mu_2=param_p4[6,:],P_2=param_p4[7,:],t02=param_p4[8,:],ecos2=param_p4[9,:],esin2=param_p4[10,:],
+	# 							mu_3=param_p4[11,:],P_3=param_p4[12,:],t03=param_p4[13,:],ecos3=param_p4[14,:],esin3=param_p4[15,:],
+	# 							mu_4=param_p4[16,:],P_4=param_p4[17,:],t04=param_p4[18,:],ecos4=param_p4[19,:],esin4=param_p4[20,:],
+	# 							lprob=lprob_p4[:])
+	# CSV.write(grid,df)
 
   fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,true),tt0,tt,weight,p4best)
   cov=estimate_covar(fit) ;  best_p4 = fit.param 
@@ -328,14 +334,14 @@ function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
   mp_errs=[err[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
   mean_ecc=[sqrt(best_p4[(iplanet-1)*5+4]^2 + best_p4[(iplanet-1)*5+5]^2) for iplanet=1:nplanet]
 	
-  open(results,"w") do io
-    println(io,"Global Fit Results.",'\n',"chi^2: ",chi2,'\n',"per 4 range=[",p4in," - ",p4out,", length=",np4,"]")
-    for i=1:nparam
-      println(io,pname[i],": ",best_p4[i]," ± ",err[i])
-    end
-    println(io,"Retrieved Earth masses:",'\n',mean_mp,'\n'," ± ",mp_errs)
-    println(io,"Retrieved eccentricity:",'\n',mean_ecc)
-  end
+  # open(results,"w") do io
+  #   println(io,"Global Fit Results.",'\n',"chi^2: ",chi2,'\n',"per 4 range=[",p4in," - ",p4out,", length=",np4,"]")
+  #   for i=1:nparam
+  #     println(io,pname[i],": ",best_p4[i]," ± ",err[i])
+  #   end
+  #   println(io,"Retrieved Earth masses:",'\n',mean_mp,'\n'," ± ",mp_errs)
+  #   println(io,"Retrieved eccentricity:",'\n',mean_ecc)
+  # end
 	if save_as_jld2
   @save outfile p3 lprob_p3 best_p3 lprob_best_p3 p4 lprob_p4 best_p4 lprob_best_p4 ntrans nplanet tt0 tt ttmodel sigtt nphase
 	end

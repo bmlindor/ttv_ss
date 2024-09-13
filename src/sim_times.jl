@@ -5,7 +5,13 @@ rc("lines",linewidth=2)
 include("regress.jl")
 include("CGS.jl")
 # Load JPL ephemerides from data and set units
-eph = Ephem("../INPUTS/DE440.bsp") ; prefetch(eph)
+path_to_file="/work/washington/ttvs/ttv_ss/INPUTS/DE440.bsp"
+if isfile(path_to_file)
+  eph=Ephem(path_to_file)
+else
+  eph = Ephem("../INPUTS/DE440.bsp") 
+end
+ prefetch(eph)
 options = useNaifId+unitKM+unitDay # useNaifId + unitDay + unitAU
 AU = 149597870.700 #km
 Random.seed!(42)
@@ -51,7 +57,7 @@ function find_transit(body_id::Int,eph::CALCEPH.Ephem,jd1::Float64,jd2::Float64,
   iter = 0
   # ITMAX = 20
   ITMAX = 6 
-  # we've found that we don't need large ITMAX to find solution; does that change for different bodies?
+  # EA: we've found that we don't need large ITMAX to find solution; BL: does that change for different bodies?
   for iter=0:ITMAX
       JD_n2 = JD_n1
       JD_n1 = JD_n
@@ -169,10 +175,10 @@ function sim_obs_and_find_times(jd1::Float64,sigma::Real,nyear::Real,obs::String
 
   # Compute ephemerides of Sun, Venus and Earth (or EMB):
   pva_sun = Array{Float64}(undef, 9, jdsize)
-  pva_venus = Array{Float64}(undef, 9, jdsize)
+  pva_venus = Array{Float64}(undef, 9, jdsize);
   pva_earth = Array{Float64}(undef, 9, jdsize)
   for i=1:jdsize
-    pva_sun[1:9,i] = compute(eph,t0[i],0.0,10,10,options,2)./AU
+    # pva_sun[1:9,i] = compute(eph,t0[i],0.0,10,10,options,2)./AU
     pva_venus[1:9,i] = compute(eph,t0[i],0.0,2,10,options,2)./AU
     if obs=="fromEMB"
       pva_earth[1:9,i] = compute(eph,t0[i],0.0,3,10,options,2)./AU 
@@ -383,6 +389,7 @@ function plot_orbits(dimension::Int;obs::String,nyear::Real=20,return_pva::Bool=
   tt4,nt4 = transit_times(4,eph,t0,truep3,2.0,n_obs,10) #mars
   tt5,nt5 = transit_times(5,eph,t0,truep4,3.0,n_obs,10) #jupiter
   tt6,nt6 = transit_times(6,eph,t0,truep5,3.0,n_obs,10) # saturn
+  ttmoon,ntmoon=transit_times(301,eph,t0,truep2,P_err,n_obs,3)
   if obs=="fromEMB"
     tt3,nt3 = transit_times(3,eph,t0,truep2,P_err,n_obs,10)
   else
@@ -400,7 +407,7 @@ function plot_orbits(dimension::Int;obs::String,nyear::Real=20,return_pva::Bool=
     if obs=="fromEMB"
       trans_pva_emb[1:6,i] = compute(eph,tt[i],0.0,3,10,options) ./AU
     else
-      trans_pva_moon = compute(eph,tt[i],0.0,301,10,options)./AU
+      trans_pva_moon = compute(eph,tt[i],0.0,301,399,options)./AU # or naif_target_id=399?
       trans_pva_earth[1:6,i] = compute(eph,tt[i],0.0,399,10,options)./AU
     end
 
@@ -495,7 +502,7 @@ function plot_orbits(dimension::Int;obs::String,nyear::Real=20,return_pva::Bool=
     return pva_venus,pva_earth
   else
   println("Returns TT calculated from Ephem.")
-  return tt1,tt2,tt3,tt4,tt5,tt6
+  return tt1,tt2,tt3,tt4,tt5,tt6,ttmoon
   end
 
   # close()
@@ -630,4 +637,4 @@ end
   #   ylabel("TTVs")
   #   # savefig("OUTPUTs/")
   # end
-
+#positionRecords(eph)

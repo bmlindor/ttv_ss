@@ -1,4 +1,6 @@
+# import Pkg; Pkg.add("DataFrames");Pkg.add("CSV");Pkg.add("LsqFit");Pkg.add("Statistics")
 using Profile,TTVFaster,DelimitedFiles,JLD2,DataFrames,CSV,LsqFit,Statistics
+using Pkg; #Pkg.activate("../ttv_ss")
 include("regress.jl")
 include("sim_times.jl")
 include("fit_planet2.jl")
@@ -44,13 +46,13 @@ np3,np4,ndp,np5=[nper, nper, nper, nper]
 # Run markov chains
 function planet_mcmc(sigma,nyear,nplanet,nsteps,obs::String)
 	if obs=="fromEMB"
-	fitfile=string("FITS/fromEMB/p",nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
-	foutput=string("MCMC/fromEMB/p",nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
-	results=string("MCMC/fromEMB/p",nplanet,"_results",sigma,"s",nyear,"yrs.txt")
+	fitfile=string("../FITS/fromEMB/p",nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
+	foutput=string("../MCMC/fromEMB/p",nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+	results=string("../MCMC/fromEMB/p",nplanet,"_results",sigma,"s",nyear,"yrs.txt")
 	elseif obs=="fromEV"
-	fitfile=string("FITS/p",nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
-	foutput=string("MCMC/p",nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
-	results=string("MCMC/p",nplanet,"_results",sigma,"s",nyear,"yrs.txt")
+	fitfile=string("../FITS/p",nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
+	foutput=string("../MCMC/p",nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+	results=string("../MCMC/p",nplanet,"_results",sigma,"s",nyear,"yrs.txt")
 	end
 	p=jldopen(String(fitfile),"r")
 	println(p," loaded.")
@@ -58,13 +60,13 @@ function planet_mcmc(sigma,nyear,nplanet,nsteps,obs::String)
 end 
 function moon_mcmc(sigma,nyear,nplanet,nsteps,label::String)
 	if label=="Hppmpp" # load p4 search after moon fit
-	fitfile=string("FITS/p3moonp4_fit",sigma,"s",nyear,"yrs.jld2")
-	foutput=string("MCMC/p3moonp4_mcmc",sigma,"s",nyear,"yrs.jld2")
+	fitfile=string("../FITS/p3moonp4_fit",sigma,"s",nyear,"yrs.jld2")
+	foutput=string("../MCMC/p3moonp4_mcmc",sigma,"s",nyear,"yrs.jld2")
 	m=jldopen(String(fitfile),"r")
 	MCMC(foutput,m["best_p4"],m["lprob_best_p4"],nsteps,nwalkers,4,m["ntrans"][1:4],m["tt0"],m["tt"],m["sigtt"],true,false)
 	else
-	fitfile=string("FITS/p",nplanet,"moon_fit",sigma,"s",nyear,"yrs.jld2")
-	foutput=string("MCMC/p",nplanet,"moon_mcmc",sigma,"s",nyear,"yrs.jld2")
+	fitfile=string("../FITS/p",nplanet,"moon_fit",sigma,"s",nyear,"yrs.jld2")
+	foutput=string("../MCMC/p",nplanet,"moon_mcmc",sigma,"s",nyear,"yrs.jld2")
 	m=jldopen(String(fitfile),"r")
 	println(m," loaded.")
 	MCMC(foutput,m["best_dp"],m["lprob_best_dp"],nsteps,nwalkers,nplanet,m["ntrans"][1:nplanet],m["tt0"],m["tt"],m["sigtt"],true,false)	
@@ -126,7 +128,7 @@ end
 
 function wide_run(sigma,nyear,label,obs)
 	nphase=36 #wide: 100,36,180 
-	p3in,p3out,np3=5*365.25,22*365.25,nper
+	p3in,p3out,np3=1.2*365.25,22*365.25,nper
 	dpin,dpout,ndp=0.0,2*pi,nper
 	p4in,p4out,np4=1.5*365.25,5*365.25,nper
 	p5in,p5out,np5=22*365.25,36*365.25,nper
@@ -170,14 +172,14 @@ if runtype=="wide"
 end
 if runtype=="widemcmc" 
 	if nmoon==0
-		fitfile=string("FITS/widep",nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
-       	foutput=string("MCMC/widep",nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+		fitfile=string("../FITS/widep",nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
+       	foutput=string("../MCMC/widep",nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
        	p=jldopen(String(fitfile),"r")
       	println(p," loaded.")
         @time MCMC(foutput,p[string("best_p",nplanet)],p[string("lprob_best_p",nplanet)],nsteps,nwalkers,nplanet,p["ntrans"][1:nplanet],p["tt0"],p["tt"],p["sigtt"],true,true)
     elseif nmoon>0 && nplanet>3
-    	fitfile=string("FITS/widep",nplanet-1,"moonp",nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
-       	foutput=string("MCMC/widep",nplanet-1,"moonp",nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+    	fitfile=string("../FITS/widep",nplanet-1,"moonp",nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
+       	foutput=string("../MCMC/widep",nplanet-1,"moonp",nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
        	p=jldopen(String(fitfile),"r")
       	println(p," loaded.")
         @time MCMC(foutput,p[string("best_dp")],p[string("lprob_best_dp")],nsteps,nwalkers,nplanet,p["ntrans"][1:nplanet],p["tt0"],p["tt"],p["sigtt"],true,false)
