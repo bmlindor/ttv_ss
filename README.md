@@ -207,11 +207,16 @@ and pass this to routines, or create a closure for this.
 2b). Fit for Moon deltaphi. [ x ]
 1). Makes plots of the contributions of individual bodies [ x ]
     (including the ones we are neglecting).   
-
+0). Perform blind search with grid of mass values. [ x ]
+	for some reason, p4 search after 1e-8 mu has log Prob=0. Suspicious.	
+	Did planet 3 blind search from 1.5-22 years with mu3= range(log10(1e-8), stop=log10(1e-2),length=10)
+	Period: 4688.458907918596 Mass: 0.00046415888336127773 log Prob: -70.64841984378207
+ Param: [3.229102087877594e-6, 224.70078943801425, 3503.7652300133477, 0.072123177437388, 0.01663534092534175, 3.7355579828157585e-6, 365.2563392722522, 3624.4030121657647, 0.07248675901291818, 0.01575585234473725, 0.00046415888336127773, 4688.458907918596, 4412.28248656925, -0.0704184842751125, -0.11044854248886007]
+Maximum: -70.50643217796816 Param: [3.1230621521044986e-6, 224.70078981620927, 3503.7652268268616, 0.06381024283182075, 0.01467017585785201, 3.6737518099368247e-6, 365.2563408499512, 3624.4030020472387, 0.06600671560322771, 0.014395938728827723, 0.0005176677418881699, 4679.573215570875, 4440.632991115392, -0.049571327470787144, -0.09811001147107432]
 
 #### Hyak  slurm example
-julia full_run.jl grid 30.0 40 ppp &> results/run.out &
-julia EMB_run.jl grid 10 40 ppppp &> results/p5test.out &
+julia full_run.jl Hppp wide fromEMB 200 30 15 &>  results/run.out &
+
 ......
 obs = "fromEMB" or "fromEV"
 label = [ppp, ppmp, pppp, etc.]
