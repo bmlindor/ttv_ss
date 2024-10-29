@@ -111,3 +111,27 @@ truee1,truee2,truee3,truee4=0.00677323,0.01671022,0.09341233,0.04839266
 true_vals=[truem1;truep1;0.0;trueec1;truees1;truem2;truep2;0.0;trueec2;truees2;
 #    truem3;truep3;0.0;trueec3;truees3;
 truem4;truep4;0.0;trueec4;truees4]
+  # Find Percentage of walkers where difference between median and quantile value is >100
+  # bad_walk=[]
+  # for i in 1:nwalkers
+  #   for j in 1:nparam
+  #     walker_med,walker_quant=quantile!(par_mcmc[i,jldmc["iburn"]+1:end,j],[0.5,0.9])
+  #     walk_start=par_mcmc[i,jldmc["iburn"]+1,j] 
+  #     walk_end = par_mcmc[i,jldmc["iburn"]+1,j]
+  #     ratio = walk_end/walk_start
+  #     walker_prob=median(lprob_mcmc[i,jldmc["iburn"]+1:end])
+  #     if abs(walk_end-walk_start)/walk_start > 0.1
+  #       #abs(walker_med-walker_end)>30
+  #       # println(i," ",walker_prob[i])
+  #       append!(bad_walk,i)
+  #     end
+  #   end
+  # If prob for a given chain is low, reject it
+
+  #     # If systematic uncertainty > injected uncertainty, reject
+  #   # if median(par_mcmc[i,jldmc["iburn"]:end,end]).*3600*24 >= sigma
+  #   #   # println("Reject results?")
+  #   #   append!(bad_walk,i)
+  #   # end
+  # end
+  # println("Bad walkers: ",bad_walk)

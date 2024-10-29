@@ -130,7 +130,7 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,nsteps
          lprob_trial += (-0.5 * sum((tt-model).^2 ./(sigtt.^2 .+ par_trial[end].^2) .+ log.(sigtt.^2 .+ par_trial[end].^2)))
         else
     # ll = log(sum((tt-model).^2 ./sigtt.^2))
-          lprob_trial += log(sum((tt-model).^2 ./sigtt.^2))*(1 - Nobs/2) #mostly useful for grid search
+          lprob_trial += sum((tt-model).^2 ./sigtt.^2)*(1 - Nobs/2) #mostly useful for grid search
         end
       end
       # println("Trial Log Prob: ",lprob_trial)
@@ -164,7 +164,7 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,nsteps
         if use_sigsys
          lprob_trial += (-0.5 * sum((tt-model_trial).^2 ./(sigtt.^2 .+ par_trial[end].^2) .+ log.(sigtt.^2 .+ par_trial[end].^2)))
         else
-          lprob_trial += log(sum((tt-model_trial).^2 ./sigtt.^2))*(1 - Nobs/2) 
+          lprob_trial += sum((tt-model_trial).^2 ./sigtt.^2)*(1 - Nobs/2) 
         end 
       end   
   # Next,determine whether to accept this trial step:

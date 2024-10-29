@@ -88,7 +88,7 @@ function fit_moon(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,dpin
   cov=estimate_covar(fit) ;  best_dp = fit.param 
   err=[sqrt(cov[i,j]) for i=1:nparam, j=1:nparam if i==j ]
   ttmodel = ttv_wrapper(tt0,nplanet,ntrans,best_dp,jmax,false)
-  lprob_best_dp = (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
+  lprob_best_dp = (1 - Nobs/2) * sum((tt-ttmodel).^2 ./sigtt.^2)
   # println("Finished global moon fit.")
   chi2=chisquare(tt0,nplanet,ntrans,best_dp,tt,sigtt,jmax,false)
   println("Lunar chi-square: ",chi2)
