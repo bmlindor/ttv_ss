@@ -171,11 +171,11 @@ function fit_planet4(filename::String,jmax::Int,jd1::Float64,sigma::Real,nyear::
       lprob_phase[i]= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
       if lprob_phase[i] > lprob_best
         lprob_best = lprob_phase[i]
-        p4best = [fit.param[1:10];10^param4[11];p4_cur;fit.param[12:end]]
+        p4best = [fit.param[1:10];10^fit.param[11];p4_cur;fit.param[12:end]]
       end
       if lprob_phase[i] > lprob_p4[j] 
         lprob_p4[j] = lprob_phase[i]
-        param_p4[1:nparam,j] =  [fit.param[1:10];10^param4[11];p4_cur;fit.param[12:end]]
+        param_p4[1:nparam,j] =  [fit.param[1:10];10^fit.param[11];p4_cur;fit.param[12:end]]
       end
     end
     # println("Period: ",p4[j]," log Prob: ",lprob_p4[j]," Param: ",vec(param_p4[1:nparam,j]))
@@ -266,23 +266,18 @@ function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
   # Grid of periods to search over:
   p4 = 10 .^ range(log10(p4in),stop=log10(p4out),length=np4)
   p4_cur =  1.88*365.25 
-  mu4=range(log10(1e-8),stop=log10(1e-2),length=10)
-  lprob_p4=zeros(np4,length(mu4))
-  param_p4=zeros(nparam,np4,length(mu4))
-  # lprob_p4 = zeros(np4)
-  # param_p4 = zeros(nparam,np4)
+  lprob_p4 = zeros(np4)
+  param_p4 = zeros(nparam,np4)
   lprob_best = -1e100 
   p4best = zeros(nparam)
   niter = 0
-  for k=1:length(mu4)
-    mu4_cur=mu4[k]
   for j=1:np4
     phase = p4[j]*range(0,stop=1,length=nphase)  
     lprob_phase = zeros(nphase) 
     lprob_p4[j] = -1e100
     for i=1:nphase
      # p4 param_names: mass ratio,phase,ecosw,esinw; uses same nphase as p3
-      param_tmp = [mu4_cur,phase[i],0.01,0.01]
+      param_tmp = [log10(1e-7),phase[i],0.01,0.01]
       # Mars' period is shorter than Jupiter's, so need to keep sorted for now
       param4 = [best_p3[1:10];param_tmp;best_p3[11:15]]   
       p4_cur = p4[j]
@@ -290,23 +285,22 @@ function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
       niter=0
       while maximum(abs.(param1 .- param4)) > tol && niter < 20
         param1 = param4
-        fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,[params[1:10];10^mu4_cur;p4_cur;params[12:end]],jmax,true),tt0,tt,weight,param4)
+        fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,[params[1:10];10^params[11];p4_cur;params[12:end]],jmax,true),tt0,tt,weight,param4)
         param4 = fit.param 
         niter+=1
       end
-      ttmodel=ttv_wrapper(tt0,nplanet,ntrans,[param4[1:10];10^mu4_cur;p4_cur;param4[12:end]],jmax,true)
+      ttmodel=ttv_wrapper(tt0,nplanet,ntrans,[param4[1:10];10^param4[11];p4_cur;param4[12:end]],jmax,true)
       lprob_phase[i]= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
       if lprob_phase[i] > lprob_best
         lprob_best = lprob_phase[i]
-        p4best = [fit.param[1:10];10^mu4_cur;p4_cur;fit.param[12:end]]
+        p4best = [fit.param[1:10];10^fit.param[11];p4_cur;fit.param[12:end]]
       end
-      if lprob_phase[i] > lprob_p4[j,k] 
-        lprob_p4[j,k] = lprob_phase[i]
-        param_p4[1:nparam,j,k] =  [fit.param[1:10];10^mu4_cur;p4_cur;fit.param[12:end]]
+      if lprob_phase[i] > lprob_p4[j] 
+        lprob_p4[j] = lprob_phase[i]
+        param_p4[1:nparam,j] =  [fit.param[1:10];10^fit.param[11];p4_cur;fit.param[12:end]]
       end
     end
-      println("Period: ",p4[j]," Mass-ratio: ",10^mu4[k]," log Prob: ",lprob_p4[j,k],'\n',"Param: ",vec(param_p4[1:nparam,j,k]))
-    end
+    # println("Period: ",p4[j]," log Prob: ",lprob_p4[j]," Param: ",vec(param_p4[1:nparam,j]))
   end
   println("Finished 4-planet fit w/ fixed period: ",p4best," in ",niter," iterations")
 	# df=DataFrame(mu_1=param_p4[1,:],P_1=param_p4[2,:],t01=param_p4[3,:],ecos1=param_p4[4,:],esin1=param_p4[5,:],

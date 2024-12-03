@@ -359,7 +359,7 @@ function fit_planet5(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
 								mu_2=param_p5[6,:],P_2=param_p5[7,:],t02=param_p5[8,:],ecos2=param_p5[9,:],esin2=param_p5[10,:],
 								mu_3=param_p5[11,:],P_3=param_p5[12,:],t03=param_p5[13,:],ecos3=param_p5[14,:],esin3=param_p5[15,:],
 								mu_4=param_p5[16,:],P_4=param_p5[17,:],t04=param_p5[18,:],ecos4=param_p5[19,:],esin4=param_p5[20,:],
-								mu_5=param_p5[16,:],P_5=param_p5[17,:],t05=param_p5[18,:],ecos5=param_p5[19,:],esin5=param_p5[20,:],
+								mu_5=param_p5[21,:],P_5=param_p5[22,:],t05=param_p5[23,:],ecos5=param_p5[24,:],esin5=param_p5[25,:],
 								lprob=lprob_p5[:])
 	CSV.write(grid,df)
 

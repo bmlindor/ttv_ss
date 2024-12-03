@@ -1,5 +1,17 @@
 include("CGS.jl")
 using TTVFaster,DataFrames,CSV,LsqFit,Statistics,JLD2,PyPlot
+using GSL
+avg(x,y)=(x + y)/2
+gaussian(x,mu,sig)=exp.(-((x .- mu).^2) ./ (2 * sig^.2))
+xprob(lprob)=exp.(lprob .- maximum(lprob))
+
+function xprob(lprob,tt,lprob_max)
+  # xprob=[]
+    # @show i
+    # @show x
+  xprob=exp.(actual_logL(lprob,tt) .- actual_logL(lprob_max,tt))
+  return xprob
+end
 
 function chisquare(tt0,nplanet,ntrans,params,tt,sigtt,jmax,EM)
   chisq = 0.0  #check memory allocation >>>>>>>>>>>>
@@ -9,9 +21,23 @@ function chisquare(tt0,nplanet,ntrans,params,tt,sigtt,jmax,EM)
   end
   return chisq
 end
-avg(x,y)=(x + y)/2
-gaussian(x,mu,sig)=exp.(-((x .- mu).^2) ./ (2 * sig^.2))
-function calc_BIC(lprob,tt0,tt,sigtt,nplanet,ntrans,par_mcmc;EM=false)
+
+function chi_from_est(lprob,N)
+  chisq= exp.(lprob ./ (1 - N/2))
+  return chisq
+end
+
+function actual_logL(lprob,tt) # marginalized
+  Nobs=length(tt)
+  chi2=chi_from_est(lprob,Nobs)
+  # logL= sf_gamma_inc_P.(Nobs/2-1,0.5.*chi2)/sf_gamma_inc_P(Nobs/2-1,Nobs/2) .*(Nobs ./chi2).^(Nobs/2-1)
+  logL=log.(sf_gamma_inc_P.(Nobs/2-1,0.5.*chi2))  .+ (1-Nobs/2-1) .*log.(chi2)
+  # what about lnsig term ? 
+  return logL
+end
+
+function calc_BIC(lprob,tt0,tt,sigtt,nplanet,ntrans,par_mcmc;EM=false) # for systematic error added
+  # lprob from estimate
     imax=argmax(lprob)
     prob_max=exp.(lprob[imax])
     function calc_chisq(par_mcmc,nplanet,ntrans)
@@ -28,18 +54,29 @@ function calc_BIC(lprob,tt0,tt,sigtt,nplanet,ntrans,par_mcmc;EM=false)
     #println("[N_obs]= ",N," [no. of model params]= ",k)
     #println("chi^2=",chisq)
     # println("max Prob=",prob_max)
-    reduced_chisq=chisq/(N-k)
-    BIC_chi(chisq,k,N)=chisq + k*log(N)
-    BIC=-2*log(prob_max) + k*log(N)
-    @show BIC
-    return reduced_chisq, BIC,chisq
+    # reduced_chisq=chisq/(N-k)
+    BIC_chi(chisq,k,N)=chisq .+ k*log(N)
+    BIC_from_mc=-2*log(prob_max) + k*log(N)
+    actual_chisq=chi_from_est(lprob,length(tt0))
+    BIC_from_est=BIC_chi(actual_chisq,k,N)
+    # @show BIC
+    return BIC_from_mc,BIC_from_est
   end
-
-function fit_BIC(tt0,nplanet,ntrans,params,tt,sigtt,jmax,EM)
-	chi2 = chisquare(tt0,nplanet,ntrans,params,tt,sigtt,jmax,EM)
+function fit_BIC(lprob,tt0,tt,sigtt,nplanet,ntrans,params;EM::Bool)
+	#imax=argmax(lprob)
+	prob_max=exp.(lprob)
+	jmax=5
+	chisq = chisquare(tt0,nplanet,ntrans,params,tt,sigtt,jmax,EM)
 	N=length(tt0) ; k=length(params)
-	BIC=chi2 + k*ln(N)
-	return chi2,BIC
+	reduced_chisq=chisq/(N-k)
+	BIC=-2*log(prob_max) + k*log(N)
+	return reduced_chisq,BIC,chisq
+end
+function marg_BIC(lprob_max,tt0,tt,sigtt,nplanet,ntrans,params;EM)
+  prob_max=exp.(lprob_max)
+  N=length(tt0) ; k=length(params)
+  BIC=-2*log(prob_max) + k*log(N)
+	return BIC
 end
 G=CGS.GRAV /1e3 #in MKS units
 AU=CGS.AU /1e2 #in MKS units
@@ -91,10 +128,6 @@ function second_peak_params(grid_file::String)
   new_params=df[indxs,:]
 	return new_params
 end
-function calc_quad_errs(xcos,xcos_err,xsin,xsin_err)
-	x = sqrt(xcos^2 .+ xsin^2)
-	return sqrt(((xcos^2 * xcos_err^2) + (xsin^2 * xsin_err^2))/x^2)
-end
 
 parname=[
 	L"$m_b / M_{\odot}$",L"$P_b$",L"$t_{0,b}$",L"$e_b cos(ω_b)$",L"$e_b sin(ω_b)$",
@@ -111,27 +144,12 @@ truee1,truee2,truee3,truee4=0.00677323,0.01671022,0.09341233,0.04839266
 true_vals=[truem1;truep1;0.0;trueec1;truees1;truem2;truep2;0.0;trueec2;truees2;
 #    truem3;truep3;0.0;trueec3;truees3;
 truem4;truep4;0.0;trueec4;truees4]
-  # Find Percentage of walkers where difference between median and quantile value is >100
-  # bad_walk=[]
-  # for i in 1:nwalkers
-  #   for j in 1:nparam
-  #     walker_med,walker_quant=quantile!(par_mcmc[i,jldmc["iburn"]+1:end,j],[0.5,0.9])
-  #     walk_start=par_mcmc[i,jldmc["iburn"]+1,j] 
-  #     walk_end = par_mcmc[i,jldmc["iburn"]+1,j]
-  #     ratio = walk_end/walk_start
-  #     walker_prob=median(lprob_mcmc[i,jldmc["iburn"]+1:end])
-  #     if abs(walk_end-walk_start)/walk_start > 0.1
-  #       #abs(walker_med-walker_end)>30
-  #       # println(i," ",walker_prob[i])
-  #       append!(bad_walk,i)
-  #     end
-  #   end
-  # If prob for a given chain is low, reject it
+function calc_quad_errs(xcos,xcos_err,xsin,xsin_err)
+  x = sqrt(xcos^2 .+ xsin^2)
+  return sqrt(((xcos^2 * xcos_err^2) + (xsin^2 * xsin_err^2))/x^2)
+end
 
-  #     # If systematic uncertainty > injected uncertainty, reject
-  #   # if median(par_mcmc[i,jldmc["iburn"]:end,end]).*3600*24 >= sigma
-  #   #   # println("Reject results?")
-  #   #   append!(bad_walk,i)
-  #   # end
-  # end
-  # println("Bad walkers: ",bad_walk)
+function calc_quad(x,y)
+  r=sqrt(x^2 + y^2)
+  return r
+end

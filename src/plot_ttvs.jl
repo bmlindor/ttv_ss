@@ -1,5 +1,5 @@
 using TTVFaster,PyPlot,Statistics,JLD2,DelimitedFiles,Distributions
-rc("font",family="sans-serif")
+# rc("font",family="sans-serif")
 # rc("lines",linewidth=2)
 include("decompose_ttvs.jl")
 include("histogram.jl")
@@ -104,21 +104,21 @@ function plot_res(sigma::Real,nyear::Real,options,include_moon::Bool=false)
   res42=ttv2-(p4_ttvs[2,3,1:n2]+p4_ttvs[2,1,1:n2]+p4_ttvs[2,4,1:n2])
 
   # plt.hist(sigtt,bins=50,histtype="step",label=string(L"$\sigma_{obs}$"))
-  s2=std([res21;res22]) ;   s3=std([res31;res32]) ; s4=std([res41;res42]) 
-  # println("Std of residuls for V,",model2," : ",std(res21).*60)
-  # println("Std of residuls for E,",model2," : ",std(res22).*60)
-  # println("Std of residuls for V,",model3," : ",std(res31).*60)
-  # println("Std of residuls for E,",model3," : ",std(res32).*60)
-  # println("Std of residuls for V,",model4," : ",std(res41).*60)
-  # println("Std of residuls for E,",model4," : ",std(res42).*60)
-  #   println("Std of noise "," : ",std(sim_noise).*60)
+  s2=[res21;res22] ;   s3=std([res31;res32]) ; s4=std([res41;res42]) 
+  println("Std of residuls for V,",model2," : ",std(res21).*60)
+  println("Std of residuls for E,",model2," : ",std(res22).*60)
+  println("Std of residuls for V,",model3," : ",std(res31).*60)
+  println("Std of residuls for E,",model3," : ",std(res32).*60)
+  println("Std of residuls for V,",model4," : ",std(res41).*60)
+  println("Std of residuls for E,",model4," : ",std(res42).*60)
+  println("Std of noise "," : ",std(sim_noise).*60)
   noise1=sim_noise[1:n1] ; noise2=sim_noise[n1+1:end]
 
   # savefig("IMAGES/scatter.png",dpi=150)
   # show()
   # return x1,x2#res1,res2
-
-  fig=figure(figsize=(10,4))#,dpi=150)
+function plot_scatter()
+  fig=figure(figsize=(11,4))#,dpi=150)
   gs = fig.add_gridspec(2, 3,  width_ratios=(2, 2, 1), height_ratios=(4, 1),
                       left=0.1, right=0.95, bottom=0.1, top=0.9,
                       wspace=0.15, hspace=0.05)
@@ -217,7 +217,7 @@ function plot_res(sigma::Real,nyear::Real,options,include_moon::Bool=false)
   fig.legend(loc="upper center",ncol=4,fontsize="medium",bbox_to_anchor=(0.025,0.9,0.8,.102))#,mode="expand")
 
   ax6=fig.add_axes([0.8,0.1,0.15,0.4])
-  ax5=fig.add_axes([0.8,0.5,0.15,0.4])
+  ax5=fig.add_axes([0.8,0.5,0.15,0.4],sharex=ax6)
   # ax5.set_title("B '\t' '\t'")
   # plt.hist(sigsys2,bins=50,histtype="step",label=string(model2))
   # ax1=fig2.add_subplot(121)
@@ -247,12 +247,13 @@ function plot_res(sigma::Real,nyear::Real,options,include_moon::Bool=false)
   # y1=dist.(xs,-0.05832820512820513,0.46756977921508136)
   ax5.plot(xs,y1.*15,linestyle="--",alpha=0.75,linewidth=1)
   ax6.plot(xs,y2.*7,linestyle="--",alpha=0.75,linewidth=1)
-  ax5.tick_params(labeltop=true, labelbottom=false)
+  ax5.tick_params(labeltop=false, labelbottom=false)
 
-  # tight_layout()
-  return A_ttvs,s2,s3,s4#p4_ttvs
+  tight_layout()
+end
+  return #A_ttvs,s2,s3,s4#p4_ttvs
   # savefig(string("IMAGES/ttv/case",case,"ttv_residuals",sigma,nyear,".pdf"))
-  show()
+  # show()
 
 end
 # Plot moon signal from subtracting EMB times from Earth times
@@ -396,18 +397,20 @@ function plot_contrib(sigma::Real,nyear::Real,options::Array{String},include_moo
   mc=jldopen(String(mcfile),"r")
   f3=jldopen(String(fitfile3),"r")
   mc3=jldopen(String(mcfile3),"r")
-  fig=figure(figsize=(8,3),dpi=150)
-  gs = fig.add_gridspec(2, 2,
-                      left=0.1, right=0.95, bottom=0.1, top=0.9,
-                      wspace=0.15, hspace=0.15)
-    ax1 = fig.add_subplot(gs[1, 2])
-    ax2 = fig.add_subplot(gs[2, 2],sharex=ax1)
-    ax3 = fig.add_subplot(gs[1, 1], sharex=ax1)
-    ax4 = fig.add_subplot(gs[2, 1], sharex=ax2)
-    ax3.set_ylabel("TTV [min]",fontsize="large")
-    ax4.set_xlabel("Time [years]",fontsize="large")
-    ax2.set_xlabel("Time [years]",fontsize="large")
-    ax4.set_ylabel("TTV [min]",fontsize="large")
+  fig,axs=subplots(2,2,figsize=(8,4))#,dpi=150)
+  ax1=axs[1];ax2=axs[2];ax3=axs[3];ax4=axs[4]
+  # gs = fig.add_gridspec(2, 2,
+  #                     left=0.1, right=0.95, bottom=0.1, top=0.9,
+  #                     wspace=0.15, hspace=0.15)
+  #   ax1 = fig.add_subplot(gs[1, 2])
+  #   ax2 = fig.add_subplot(gs[2, 2],sharex=ax1)
+  #   ax3 = fig.add_subplot(gs[1, 1], sharex=ax1)
+  #   ax4 = fig.add_subplot(gs[2, 1], sharex=ax2)
+    # ax3.set_ylabel("TTV [min]",fontsize="large")
+    # ax4.set_xlabel("Time [years]",fontsize="large")
+    # ax2.set_xlabel("Time [years]",fontsize="large")
+    # ax4.set_ylabel("TTV [min]",fontsize="large")
+  fig.supylabel("TTV [min]",fontsize="large");fig.supxlabel("Time [years]",fontsize="large")
 
   function make_plot(mc,f,ax1,ax2,bestfit)
     par_mcmc=vec(mc["par_mcmc"][:,mc["iburn"]:end,:])
@@ -422,11 +425,11 @@ function plot_contrib(sigma::Real,nyear::Real,options::Array{String},include_moo
     end
     # pbest_global=avg[1:end-1]
     # function make_plot()
-    pair_ttvs=decompose_ttvs(nplanet,ntrans[1:nplanet],pbest_global) .* (24 * 60)
+    pair_ttvs=decompose_ttvs(nplanet,ntrans[1:nplanet],avg) .* (24 * 60)
     # println(bestfit)
     n1,n2=ntrans[1],ntrans[2]
-    mu1,P1,t01,ecos1,esin1=pbest_global[1:5]
-    mu2,P2,t02,ecos2,esin2=pbest_global[6:10]
+    mu1,P1,t01,ecos1,esin1=avg[1:5]
+    mu2,P2,t02,ecos2,esin2=avg[6:10]
     # mu3,P3,t03,ecos3,esin3=pbest_global[11:15]
     time1=collect(t01 .+ range(0,stop=n1-1,length=n1) .* P1)
     time2=collect(t02 .+ range(0,stop=n2-1,length=n2) .* P2)
@@ -437,26 +440,17 @@ function plot_contrib(sigma::Real,nyear::Real,options::Array{String},include_moo
     ttv1,ttv2=(tt1.-time1).* (24 * 60),(tt2.-time2).* (24 * 60) #in minutes
     sigtt1,sigtt2=sigtt[1:n1].* (24 * 60),sigtt[n1+1:n1+n2].* (24 * 60) 
     total1=0;total2=0
-
-    # fig=figure(figsize=(5,5))#,dpi=150)
     # title="Planet Contributions"
     # suptitle(string(title," [",nyear," yr span], ",L"$\sigma_{obs}=$",sigma," sec "))
     # subplots_adjust(hspace=0.25)
-    # ax1=subplot(211)
-    ax1.plot(ttsim1,pair_ttvs[1,2,1:n1],color="forestgreen",label="planet c",linewidth=1.5)
+    ax1.plot(ttsim1,pair_ttvs[1,2,1:n1],color="forestgreen",label="planet c",linewidth=1.5,linestyle="-.")
     ax1.errorbar(ttsim1,ttv1,sigtt1,fmt="v",color="black",mfc="white",capsize=3,ms=3)
-    ax1.text(-1,7,"planet b",fontweight="bold",fontsize="medium")
-    # text(0,5,"Venus",fontsize="xx-large")
     ax1.set_ylim(-10,10)
     ax1.minorticks_on()
     ax1.tick_params(which="both",direction="in",top=true,right=true)
-    # ax2=subplot(212,sharex=ax1)
+
     ax2.plot(ttsim2,pair_ttvs[2,1,1:n2],color="salmon",label="planet b",linewidth=1.5)
     ax2.errorbar(ttsim2,ttv2,sigtt2,fmt=".",color="black",mfc="white",capsize=3,ms=5)#,label="Earth")
-    ax2.text(-1,7,"planet c",fontweight="bold",fontsize="medium")
-    # text(0,-5.5,label,fontsize="xx-large")
-    # ax2.set_xlabel("Time [years]",fontsize="x-large")
-    # ax2.set_ylabel("TTV [min]",fontsize="x-large")
     ax2.set_ylim(-10,10)
     ax2.minorticks_on()
     ax2.tick_params(which="both",direction="in",top=true,right=true)
@@ -468,7 +462,7 @@ function plot_contrib(sigma::Real,nyear::Real,options::Array{String},include_moo
 
       ax2.plot(ttsim2,pair_ttvs[2,3,1:n2],linestyle="--",color="orange",label="e",alpha=0.9,linewidth=1.5)
       ax2.plot(ttsim2,pair_ttvs[2,4,1:n2],color="firebrick",label="d",linewidth=1.5)
-      ax1.set_title(L"Contributions to $\mathcal{H}_{PPPP}$ Fit",fontsize="large")
+      ax1.set_title(L"Contributions to $\mathcal{H}_{PPPP}$",fontsize="large")
     elseif f["nplanet"]==5
       total1=pair_ttvs[1,3,1:n1]+pair_ttvs[1,2,1:n1]+pair_ttvs[1,4,1:n1]+pair_ttvs[1,5,1:n1]
       total2=pair_ttvs[2,3,1:n2]+pair_ttvs[2,1,1:n2]+pair_ttvs[2,4,1:n2]+pair_ttvs[2,5,1:n2]
@@ -478,13 +472,13 @@ function plot_contrib(sigma::Real,nyear::Real,options::Array{String},include_moo
       ax2.plot(ttsim2,pair_ttvs[2,3,1:n2],linestyle="--",color="orange",label="e",alpha=0.9,linewidth=1.5)
       ax2.plot(ttsim2,pair_ttvs[2,4,1:n2],color="firebrick",label="d",linewidth=1.5)
       ax2.plot(ttsim2,pair_ttvs[2,5,1:n2],linestyle="--",color="tan",label="f",linewidth=1.5)
-      ax1.set_title(L"Contributions to $\mathcal{H}_{PPPPP}$ Fit",fontsize="large")
+      ax1.set_title(L"$\mathcal{H}_{PPPPP}$",fontsize="large")
     elseif f["nplanet"]==3
       total1=pair_ttvs[1,3,1:n1]+pair_ttvs[1,2,1:n1]
       total2=pair_ttvs[2,3,1:n2]+pair_ttvs[2,1,1:n2]
       ax1.plot(ttsim1,pair_ttvs[1,3,1:n1],color="firebrick",label="d",linewidth=1.5)
       ax2.plot(ttsim2,pair_ttvs[2,3,1:n2],color="firebrick",label="d",linewidth=1.5)
-      ax1.set_title(L"Contributions to $\mathcal{H}_{PPP}$ Fit",fontsize="large")
+      ax1.set_title(L"Contributions to $\mathcal{H}_{PPP}$",fontsize="large")
     elseif f["nplanet"]==2
       total1=pair_ttvs[1,2,1:n1]
       total2=pair_ttvs[2,1,1:n2]
@@ -506,21 +500,17 @@ function plot_contrib(sigma::Real,nyear::Real,options::Array{String},include_moo
       ax2.plot(ttsim2,vec(total2),color="grey")
     end
     sigsys=round(avg[end].*24*3600,sigdigits=3)
-    sim_obs_label= string(L"$\sigma_{obs}=$",sigma," s",'\n',L"$\sigma_{sys}=$",sigsys," s")
-    # ax1.set_title(L"Contributions to $\mathcal{H}_{PPPP}$ Fit",fontsize="x-large")
-    ax1.text(nyear-10,5,sim_obs_label)
-    # ax2.text(maximum(ttsim1)-5,5,sim_obs_label)
+    sim_obs_label= string(L"$\sigma_{sys}=$",sigsys," s")
+    ax1.text(0,7,sim_obs_label)
     ax1.legend(loc="lower left",fontsize="medium",ncol=nplanet)
-    # ax1.legend(loc="lower left",fontsize="large",title="Contributions",title_fontsize="large",ncol=4)
     ax2.legend(loc="lower left",ncol=nplanet,fontsize="medium")#,mode="expand")
   end
-  make_plot(mc,f,ax1,ax2,"best_p4")
-  make_plot(mc3,f3,ax3,ax4,"best_p3")
+  make_plot(mc,f,ax3,ax4,"best_p4")
+  make_plot(mc3,f3,ax1,ax2,"best_p3")
   tight_layout()
   # return ttv1,total1
   # legend(loc="upper right")
-  # title=string("IMAGES/ttvs/",sim,fitmodel,"ttvs-",sigma,"secs",nyear,"yrs.png")
-  # title=string("IMAGES/ttv/",fit_type_nplanet,"_",sigma,"s",nyear,"yrs.png")
-  # savefig(title)
+  title=string("IMAGES/ttv/",fit_type_nplanet,"_",sigma,"s",nyear,"yrs.png")
+  savefig(title,dpi=150)
   # show()
 end

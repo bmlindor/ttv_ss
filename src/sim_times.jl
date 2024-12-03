@@ -332,6 +332,7 @@ function sim_times(jd1,nyear,obs)
   end  
   return tt1,tt2
 end
+#TODO: fit keplerian to pos and vel of each planet, then subtract the keplerian from the actual 
 
   # Plot orbits along ecliptic and top-down,point to observer of Venus and Earth transits
 function plot_orbits(dimension::Int;obs::String,nyear::Real=20,return_pva::Bool=false)

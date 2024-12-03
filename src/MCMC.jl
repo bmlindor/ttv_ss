@@ -253,6 +253,7 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,nsteps
   #       append!(bad_walk,i)
   #     end
   #   end
+  # If prob for a given chain is low, reject it
   #     # If systematic uncertainty > injected uncertainty, reject
   #   # if median(par_mcmc[i,jldmc["iburn"]:end,end]).*3600*24 >= sigma
   #   #   println("Reject results?")
@@ -260,7 +261,6 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,nsteps
   #   # end
   # end
   # println("Bad walkers: ",bad_walk)
-
   # Plot traces
   # for i=2:nparam
   #   for j=1:i-1
@@ -298,7 +298,7 @@ function mc_vals(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num=Int,
     mcfile=string("MCMC/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
     fitfile=string("FITS/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
   else
-      return println("MCMC file for case ",case_num," with ",grid_type_nplanet," model at ",sigma," secs and ",nyear," yrs doesn't exist!!!!")
+    return println("MCMC file for case ",case_num," with ",grid_type_nplanet," model at ",sigma," secs and ",nyear," yrs doesn't exist!!!!")
   end
   if include_moon
     EM=false
@@ -315,50 +315,58 @@ function mc_vals(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num=Int,
   nt1,nt2=jldfit["ntrans"][1],jldfit["ntrans"][2]
   jmax=5
 
-  pl_num=parse(Int,grid_type_nplanet[end])
-  @show jldfit[string("best_p",pl_num)]
+  @info string("MC Values for ",sigma," s;",nyear," yr simulations of Venus and EV")
+  #pl_num=parse(Int,grid_type_nplanet[end])
+  #@show jldfit["best_p$pl_num"]
   # weight=ones(nt1+nt2)./ sigtt.^2 
   nparam=length(pname)
   prob_max=maximum(lprob_mcmc[:,iburn:end])
   sigsys=round((median(vec(par_mcmc[:,iburn:end,end]))).* 3600*24,sigdigits=3)
   sigsys_err=(std(vec(par_mcmc[:,iburn:end,end]))).* 3600*24
   sigtot=round(sqrt(sigsys^2 + sigma^2),sigdigits=4)
-  # function plot_trace()
-  # fig, axs = plt.subplots(4,nplanet,figsize=(3*nplanet,nplanet*3))
-  # figtitle=string("MC Traces for ",sigma," s;",nyear," yr simulations of Venus and EMB")
+  # @show jldfit["lprob_best_p2"]
+  function plot_trace()
+  fig, axs = plt.subplots(4,nplanet,figsize=(3*nplanet,nplanet*3))
+  # figtitle=string(
   # fig.suptitle(figtitle)
-  # count=0
-  # for j=1:nwalkers
-  #     axs[1,1].plot(par_mcmc[j,iburn:nsteps,end].*24*3600,lprob_mcmc[j,iburn:nsteps])
-  #     axs[1,2].plot(lprob_mcmc[j,iburn:nsteps])
-  #     # axs[1,2].plot(par_mcmc[j,iburn:nsteps,end].*24*3600)
-  #     for iplanet=1:nplanet
-  #         axs[2,iplanet].plot(par_mcmc[j,iburn:end,(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH)
-  #         axs[3,iplanet].plot(par_mcmc[j,iburn:end,(iplanet-1)*5+2])
-  #         axs[4,iplanet].plot(par_mcmc[j,iburn:end,(iplanet-1)*5+4])
-  # #         count+=1
-  #     end
-  # end
-  # # axs[1,4].set_ylabel("log Prob")
-  # axs[1,1].set_xlabel(L"$σ_{sys}$ [s]")
-  # axs[1,1].set_ylabel("log Prob")
-  # axs[1,2].set_ylabel(L"$σ_{sys}$ [s]")
-  # for iplanet=1:nplanet
-  #     axs[2,iplanet].set_ylabel(L"$M [M_{\oplus}]$")
-  #     axs[3,iplanet].set_ylabel(pname[(iplanet-1)*5+2])
-  #     axs[4,iplanet].set_ylabel(pname[(iplanet-1)*5+4])
-  #     if iplanet==3 || iplanet==4
-  #       plt.delaxes(ax=axs[1,iplanet])
-  #     end
-  # end
+  count=0
+  for j=1:nwalkers
+      axs[1,1].plot(par_mcmc[j,:,end].*24*3600,lprob_mcmc[j,:])
+      axs[1,2].plot(lprob_mcmc[j,:])
+      # axs[1,2].plot(par_mcmc[j,iburn:nsteps,end].*24*3600)
+      for iplanet=1:nplanet
+          axs[2,iplanet].plot(par_mcmc[j,:,(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH)
+          axs[3,iplanet].plot(par_mcmc[j,:,(iplanet-1)*5+2])
+          axs[4,iplanet].plot(par_mcmc[j,:,(iplanet-1)*5+4])
+  #         count+=1
+      end
+  end
+  # axs[1,4].set_ylabel("log Prob")
+  axs[1,1].set_xlabel(L"$σ_{sys}$ [s]")
+  axs[1,1].set_ylabel("log Prob")
+  axs[1,2].set_ylabel(L"$σ_{sys}$ [s]")
+  for iplanet=1:nplanet
+      axs[2,iplanet].set_ylabel(L"$M [M_{\oplus}]$")
+      axs[3,iplanet].set_ylabel("P_$iplanet [days]")
+      axs[4,iplanet].set_ylabel("ecosϖ$iplanet") 
+      if iplanet==3 || iplanet==4
+        plt.delaxes(ax=axs[1,iplanet])
+      end
+  end
 
-  # # tight_layout()
-  # title=string("IMAGES/trace/case",case_num,grid_type_nplanet,"-",sigma,"secs",nyear,"yrs.png")
-  # savefig(title)
-  # # end
+  tight_layout()
+  title=string("trace-case",case_num,grid_type_nplanet,"-",sigma,"secs",nyear,"yrs.png")
+  savefig(title)
+  return fig
+  end
+  # plot_trace()
+  # println("Hit return to continue")
+  # read(stdin,Char)
+  # close()
   vals=jldmc["par_mcmc"][:,jldmc["iburn"]:end,:]#,sigdigits=6)
   reduced_chisq, BIC,chisq=round.(calc_BIC(jldmc["lprob_mcmc"][:,jldmc["iburn"]:jldmc["nsteps"]],jldfit["tt0"],jldfit["tt"],jldfit["sigtt"],jldfit["nplanet"],jldfit["ntrans"],vals,EM=EM),sigdigits=6)
-  @show BIC,chisq,reduced_chisq
+
+  # @show BIC,chisq,reduced_chisq
 	avg=zeros(nparam)
   med=zeros(nparam)
   low=zeros(nparam)
@@ -371,7 +379,7 @@ function mc_vals(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num=Int,
    avg[i]=mean(vec(par_mcmc[:,iburn:end,i]))
    errors[1,i]=med[i]-low[i]; errors[2,i]=high[i]-med[i]
     # st_dev[i]=std(vec(par_mcmc[:,iburn:end,i]))
-   # println(pname[i]," = ",avg[i]," + ",abs(plus1sig[i]-avg[i])," _ ",abs(avg[i]-minus1sig[i]))
+   println(pname[i]," = ",avg[i]," + ",errors[2,i]," _ ",errors[1,i])
   end
   masses=[med[i-4] for i in 1:length(param) if i%5==0] .*CGS.MSUN/CGS.MEARTH
   ecc=[calc_ecc(med[i-1],med[i]) for i in 1:length(param) if i%5==0] 
@@ -448,9 +456,9 @@ function mc_table(sigma::Real,nyear::Real,options,include_moon::Bool=false)
   #   prob3=quantile(exp.(mc3["lprob_mcmc"][mc3["iburn"]:mc3["nsteps"]]),0.5);#prob_max3 = maximum(exp.(mc3["lprob_mcmc"][mc3["iburn"]:mc3["nsteps"]]))
   #println(" median Prob: ",prob,"      maximum Prob: ",prob_max)
   #chi2_avg = chi_mcmc(tt0,nplanet,ntrans,mean_posteriors,tt,sigtt,jmax,EM)
-  reduced_chi,BIC,chi=round.(calc_BIC(mc["lprob_mcmc"][:,mc["iburn"]:mc["nsteps"]],f["nplanet"],f["ntrans"],vals,EM=EM),sigdigits=6)
-  reduced_chi2,BIC2,chi2=round.(calc_BIC(mc2["lprob_mcmc"][:,mc2["iburn"]:mc2["nsteps"]],f2["nplanet"],f2["ntrans"],vals2,EM=EM),sigdigits=6)
-  reduced_chi3,BIC3,chi3=round.(calc_BIC(mc3["lprob_mcmc"][:,mc3["iburn"]:mc3["nsteps"]],f3["nplanet"],f3["ntrans"],vals3,EM=EM),sigdigits=6)
+  reduced_chi,BIC,chi=round.(calc_BIC(mc["lprob_mcmc"][:,mc["iburn"]:mc["nsteps"]],f["tt0"],f["tt"],f["sigtt"],f["nplanet"],f["ntrans"],vals,EM=EM),sigdigits=6)
+  reduced_chi2,BIC2,chi2=round.(calc_BIC(mc2["lprob_mcmc"][:,mc2["iburn"]:mc2["nsteps"]],f2["tt0"],f2["tt"],f2["sigtt"],f2["nplanet"],f2["ntrans"],vals2,EM=EM),sigdigits=6)
+  reduced_chi3,BIC3,chi3=round.(calc_BIC(mc3["lprob_mcmc"][:,mc3["iburn"]:mc3["nsteps"]],f3["tt0"],f3["tt"],f3["sigtt"],f3["nplanet"],f3["ntrans"],vals3,EM=EM),sigdigits=6)
 
   # scatter1=(ttvmodel1.-ttv1)
   # scatter2=(ttvmodel2.-ttv2)

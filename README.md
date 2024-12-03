@@ -105,9 +105,19 @@ sort them from smallest to largest value. Find where 68% of values is about a po
 
 If number of independent samples for each walker >= 100, get results. 
 09/22/2023 updated 12/13/2023
-12/18/23 : Somehow, routine with TTVFaster skips the transit for Venus (at t=14513.936223576813). 
-1/09/24 : Added break to while loop. Now stopping before t0[end]. Pre-2024 runs dont have this constraint, so they have   include a transit time after the end of our observation time (for each planet). Only noticed while comparing with NbodyGradient; and I'm not redoing the runs - since I don't think it would matter.
-%The values in parentheses are the actual transit counts, while the preceding values were including a transit time after the end of our observation' time.  
+12/18/23 : Somehow, routine with TTVFaster skips the transit for Venus (at t=14513.936223576813)?
+1/09/24 : Added break to while loop. Now stopping before t0[end]. Pre-2024 runs dont have this constraint, so they include a transit time after the end of our observation time (for each planet). Only noticed while comparing with NbodyGradient; and I'm not redoing the runs - since I don't think it would matter.
+9/16/24 : Blind runs varying mass *and* period.
+   mu3= range(log10(1e-8), stop=log10(1e-2),length=10)
+   - 10s blind run ?
+   - 30s blind run done
+- I started getting low probabilities for 30s - bug in code?
+no priors, so really high evectors
+
+Why did i stop at 90s? Fit results depend on getting a p2 fit. Can't get a p2 fit so can't do p3 and p4. 
+10/29/24 : looked at the differences for EV-p2 model between the old and new results (where old have those 2 extra TTs).
+    new results have wider posteriors, but overall the same resuts
+
 
 ##########################	Current State	##########################
 0). Updated TTVFaster to be compatible with Julia v1.3+

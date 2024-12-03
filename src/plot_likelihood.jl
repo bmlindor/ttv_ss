@@ -1,9 +1,8 @@
 using PyPlot,PyCall,Statistics,JLD2,DelimitedFiles,DataFrames
-rc("font",family="sans-serif")
-rc("lines",linewidth=2)
+# rc("font",family="sans-serif")
+rc("lines",linewidth=2,linestyle="--")
 include("histogram.jl")
 
-xprob(lprob)=exp.(lprob .- maximum(lprob))
  	# true_per3=1.8808476
  	# true_per4=11.862615
 	# prob(p3,p3prob,p3_cur,nbins,param,"firebrick","Jupiter")
@@ -11,26 +10,39 @@ xprob(lprob)=exp.(lprob .- maximum(lprob))
 function per_grid(sigma,nyear,grid_type_nplanet,per_col,true_per,pname,case_num,label_xloc)
 	if case_num==1
 	file=string("grid/fromEMB/",grid_type_nplanet,"_grid",sigma,"s",nyear,"yrs.csv")
+	fitfile=string("FITS/fromEMB/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
 	case_label="Case 1"
 	elseif case_num==2
 	file=string("grid/",grid_type_nplanet,"_grid",sigma,"s",nyear,"yrs.csv")
+	fitfile=string("FITS/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
 	case_label="Case 2"
 	end
 	if grid_type_nplanet=="p3" || grid_type_nplanet=="widep3"
     model=L"$\mathcal{H}_{PPP}$"
+    nplanet=3
     # per_col,true_per,pname,color=12,11.862615,"Jupiter","firebrick"; label_xloc=5
   elseif grid_type_nplanet=="p4" || grid_type_nplanet=="widep4"
     model=L"$\mathcal{H}_{PPPP}$"
+    nplanet=4
+  elseif grid_type_nplanet=="p5" || grid_type_nplanet=="widep5"
+    model=L"$\mathcal{H}_{PPPPP}$"
+    nplanet=5
     # per_col,true_per,pname,color=12,1.8808476,"Mars","orange"; label_xloc=2.75
   elseif grid_type_nplanet=="p3moon"
     model=L"$\mathcal{H}_{PPsP}$"
+    nplanet=3
     # per_col,true_per,pname,color=12,11.862615,"Jupiter","firebrick"; label_xloc=5
   elseif grid_type_nplanet=="p3moonp4"
     model=L"$\mathcal{H}_{PPsPP}$"
+    nplanet=4
     # per_col,true_per,pname,color=12,1.8808476,"Mars","orange"; label_xloc=2.75
   end
 	fit,header=readdlm(file,',',header=true)
+  jldfit=jldopen(String(fitfile),"r")
 	sim_obs_label= string(case_label," [",nyear," yr span]")
+	# @show jldfit["lprob_p5"]
+	if jldfit["p$nplanet"][1]==fit[1,per_col] 
+		# continue
 	# save_as =string("IMAGES/wide_grids/case",case_num,"_",grid_type_nplanet,pname,sigma,"secs",nyear,"yrs.png")
 	title(string(model," [",nyear," yr span]"))
 	axvline(true_per,linestyle="--",color="black")
@@ -40,7 +52,12 @@ function per_grid(sigma,nyear,grid_type_nplanet,per_col,true_per,pname,case_num,
  	xlabel("Planet Period Search Grid",fontsize="x-large")
  	ylabel("Probability",fontsize="x-large")
  	legend()
+	else
+	print("no match")
+	 	plot(jldfit["p$nplanet"]./365.25,xprob(jldfit["lprob_p$nplanet"]),label=string(L"$\sigma_{obs}=$",sigma," sec"))#label=string("[",nyear," yr span]",L"$\sigma_{obs}=$",sigma," sec"))
+	 end
  	# ylim(0,1.2)
+ 	return 
 end
 function moon_grid(sigma,nyear,grid_type_nplanet,per_col,true_per,color,pname,case_num,label_xloc)
 	if case_num==1
@@ -338,178 +355,104 @@ end
 ### compare_yrs(30,"p5",22,29.447,"Saturn",1)
 
 function compare_yrs(sigma,grid_type_nplanet,case_num)
-	if case_num==1
-	file1=string("grid/fromEMB/",grid_type_nplanet,"_grid",sigma,"s15yrs.csv")	
-	file2=string("grid/fromEMB/",grid_type_nplanet,"_grid",sigma,"s16yrs.csv")
-	file3=string("grid/fromEMB/",grid_type_nplanet,"_grid",sigma,"s17yrs.csv")
-	file4=string("grid/fromEMB/",grid_type_nplanet,"_grid",sigma,"s18yrs.csv")
-	file5=string("grid/fromEMB/",grid_type_nplanet,"_grid",sigma,"s19yrs.csv")
-	file6=string("grid/fromEMB/",grid_type_nplanet,"_grid",sigma,"s20yrs.csv")
-	file7=string("grid/fromEMB/",grid_type_nplanet,"_grid",sigma,"s21yrs.csv")
-	file8=string("grid/fromEMB/",grid_type_nplanet,"_grid",sigma,"s22yrs.csv")
-	file9=string("grid/fromEMB/",grid_type_nplanet,"_grid",sigma,"s23yrs.csv")
-	file10=string("grid/fromEMB/",grid_type_nplanet,"_grid",sigma,"s24yrs.csv")
-	file11=string("grid/fromEMB/",grid_type_nplanet,"_grid",sigma,"s25yrs.csv")
-	file12=string("grid/fromEMB/",grid_type_nplanet,"_grid",sigma,"s26yrs.csv")
-	file13=string("grid/fromEMB/",grid_type_nplanet,"_grid",sigma,"s27yrs.csv")
-	file14=string("grid/fromEMB/",grid_type_nplanet,"_grid",sigma,"s28yrs.csv")
-	file15=string("grid/fromEMB/",grid_type_nplanet,"_grid",sigma,"s29yrs.csv")
-	file16=string("grid/fromEMB/",grid_type_nplanet,"_grid",sigma,"s30yrs.csv")
-	elseif case_num==2
-	# file1=string("grid/",grid_type_nplanet,"_grid",sigma,"s15yrs.csv")
-	# file2=string("grid/",grid_type_nplanet,"_grid",sigma,"s16yrs.csv")
-	file3=string("grid/",grid_type_nplanet,"_grid",sigma,"s17yrs.csv")
-	file4=string("grid/",grid_type_nplanet,"_grid",sigma,"s18yrs.csv")
-	file5=string("grid/",grid_type_nplanet,"_grid",sigma,"s19yrs.csv")
-	file6=string("grid/",grid_type_nplanet,"_grid",sigma,"s20yrs.csv")
-	file7=string("grid/",grid_type_nplanet,"_grid",sigma,"s21yrs.csv")
-	file8=string("grid/",grid_type_nplanet,"_grid",sigma,"s22yrs.csv")
-	file9=string("grid/",grid_type_nplanet,"_grid",sigma,"s23yrs.csv")
-	file10=string("grid/",grid_type_nplanet,"_grid",sigma,"s24yrs.csv")
-	file11=string("grid/",grid_type_nplanet,"_grid",sigma,"s25yrs.csv")
-	file12=string("grid/",grid_type_nplanet,"_grid",sigma,"s26yrs.csv")
-	file13=string("grid/",grid_type_nplanet,"_grid",sigma,"s27yrs.csv")
-	file14=string("grid/",grid_type_nplanet,"_grid",sigma,"s28yrs.csv")
-	file15=string("grid/",grid_type_nplanet,"_grid",sigma,"s29yrs.csv")
-	file16=string("grid/",grid_type_nplanet,"_grid",sigma,"s30yrs.csv")
-	case_label=string(L"$σ_{obs}=$",sigma,"s")
-	end
-	# fit1,header1=readdlm(file1,',',header=true)
-			# if grid_type_nplanet=="p3" || grid_type_nplanet=="widep3"
-	# fit2,header2=readdlm(file2,',',header=true)
-	# fit3,header3=readdlm(file3,',',header=true)
-	fit4,header4=readdlm(file4,',',header=true)
-	fit5,header5=readdlm(file5,',',header=true)
-	fit6,header6=readdlm(file6,',',header=true)
-	fit7,header7=readdlm(file7,',',header=true)
-	fit8,header8=readdlm(file8,',',header=true)
-	fit9,header9=readdlm(file9,',',header=true)
-	fit10,header10=readdlm(file10,',',header=true)
-	fit11,header11=readdlm(file11,',',header=true)
-	fit12,header12=readdlm(file12,',',header=true)
-	fit13,header13=readdlm(file13,',',header=true)
-	fit14,header14=readdlm(file14,',',header=true)
-	fit15,header15=readdlm(file15,',',header=true)
-	fit16,header16=readdlm(file16,',',header=true)
 	if grid_type_nplanet=="p3" || grid_type_nplanet=="widep3"
     model=L"$\mathcal{H}_{PPP}$"
     per_col,true_per,pname,color=12,11.862615,"Jupiter","firebrick";
-    pnum="3rd"
+    pnum="3rd";nplanet=3
   elseif grid_type_nplanet=="p4" || grid_type_nplanet=="widep4"
     model=L"$\mathcal{H}_{PPPP}$"
     per_col,true_per,pname,color=12,1.8808476,"Mars","orange";
-    pnum="4th"
+    pnum="4th";nplanet=4
   elseif grid_type_nplanet=="p3moon" ||   grid_type_nplanet=="widep3moon"
     model=L"$\mathcal{H}_{PPsP}$"
     per_col,true_per,pname,color=12,11.862615,"Jupiter","firebrick";
-    pnum="3rd"
+    pnum="3rd";nplanet=3
   elseif grid_type_nplanet=="p3moonp4" ||  grid_type_nplanet=="widep3moonp4"
     model=L"$\mathcal{H}_{PPsPP}$"
     per_col,true_per,pname,color=12,1.8808476,"Mars","orange";
-    pnum="4th"
+    pnum="4th";nplanet=4
+  elseif grid_type_nplanet=="p5" || grid_type_nplanet=="widep5"
+    model=L"$\mathcal{H}_{PPPPP}$"
+    per_col,true_per,pname,color=22,29.447,"Saturn","tan";
+    pnum="5th";nplanet=5
   end
-
-	fig,ax=subplots(figsize=(7,5),dpi=150)
-	title(string("Search for ",pnum," Planet in ",model),fontsize="xx-large")
-	# ax.plot(fit1[:,per_col]./365.25 ,xprob(fit1[:,end]),label="15 yrs")
-	if grid_type_nplanet=="p3" || grid_type_nplanet=="widep3"
-	ax.plot(fit2[:,per_col]./365.25 ,xprob(fit2[:,end]),label="16 yrs",linewidth=1)
-	ax.plot(fit3[:,per_col]./365.25 ,xprob(fit3[:,end]),label="17 yrs",linewidth=1)
+	files=[];fits=[]
+	case_label=string(L"$σ_{obs}=$",sigma,"s")
+	if case_num==1
+	for i=15:30
+    push!(files,string("grid/fromEMB/",grid_type_nplanet,"_grid",sigma,"s",i,"yrs.csv")        )
+   	push!(fits,string("FITS/fromEMB/",grid_type_nplanet,"_fit",sigma,"s",i,"yrs.jld2"))
+  end
+	elseif case_num==2
+	for i=15:30
+    push!(files,string("grid/",grid_type_nplanet,"_grid",sigma,"s",i,"yrs.csv"))
+   	push!(fits,string("FITS/",grid_type_nplanet,"_fit",sigma,"s",i,"yrs.jld2"))
+  end
 	end
-	ax.plot(fit4[:,per_col]./365.25 ,xprob(fit4[:,end]),label="18 yrs",linewidth=1)
-	ax.plot(fit5[:,per_col]./365.25 ,xprob(fit5[:,end]),label="19 yrs",linewidth=1)
-	ax.plot(fit6[:,per_col]./365.25 ,xprob(fit6[:,end]),label="20 yrs",linewidth=1)
-	ax.plot(fit7[:,per_col]./365.25 ,xprob(fit7[:,end]),label="21 yrs",linewidth=1)
-	ax.plot(fit8[:,per_col]./365.25 ,xprob(fit8[:,end]),label="22 yrs",linewidth=1)#,linestyle="--")	
-	ax.plot(fit9[:,per_col]./365.25 ,xprob(fit9[:,end]),label="23 yrs",linewidth=1)#,linestyle="--")
-	ax.plot(fit10[:,per_col]./365.25 ,xprob(fit10[:,end]),label="24 yrs",linewidth=1)#,linestyle="--")
-	ax.plot(fit11[:,per_col]./365.25 ,xprob(fit11[:,end]),label="25 yrs",linewidth=1)#,linestyle="--")
-	ax.plot(fit12[:,per_col]./365.25 ,xprob(fit12[:,end]),label="26 yrs",linewidth=1,linestyle="--")
-	ax.plot(fit13[:,per_col]./365.25 ,xprob(fit13[:,end]),label="27 yrs",linewidth=1,linestyle="--")  
-	ax.plot(fit14[:,per_col]./365.25 ,xprob(fit14[:,end]),label="28 yrs",linewidth=1,linestyle="--")  
-	ax.plot(fit15[:,per_col]./365.25 ,xprob(fit15[:,end]),label="29 yrs",linewidth=1,linestyle="--")  
+	fig,ax=subplots(figsize=(7,5))#,dpi=150)
+	title(string("Search for ",pnum," Planet in ",model),fontsize="xx-large")
+	for (i,file) in enumerate(files)
+		if isfile(fits[i])
+		fit,header=readdlm(file,',',header=true)
+		jldfit=jldopen(fits[i],"r")
+		if jldfit["p$nplanet"][1]==fit[1,per_col] 
+		ax.plot(fit[:,per_col]./365.25,fit[:,end],label=string(i+14),linewidth=1)
+		else
+	 	ax.plot(jldfit["p$nplanet"]./365.25,xprob(jldfit["lprob_p$nplanet"]),label=string(i+14))#
+		end
+	end
+	end
 	# ax.plot(fit16[:,per_col]./365.25 ,xprob(fit16[:,end]),label="30 yrs",linewidth=1,linestyle="--")      
-	axvline(true_per,linestyle="--",color="black")
-	text(1.01*true_per,0.96,pname,fontsize="large")
-	tick_params(which="both",direction="in")
-	# text(true_per + true_per/100,1.01,pname,fontsize="large")
+	ax.axvline(true_per,linestyle="--",color="black")
+	# ax.text(1.01*true_per,0.96,pname,fontsize="large")
+	ax.tick_params(which="both",direction="in")
 	#inset 
 	# text(label_xloc,1.05,sim_obs_label)
 	case_label=string("σ=",sigma,"s")
-	ax.legend(loc="upper right",fontsize="large",bbox_to_anchor=(0.,0.9,1.,.102),ncol=6,mode="expand",borderaxespad=0.0,title=case_label,title_fontsize="large")
-	# legend(fontsize="medium",title_fontsize="medium",title=case_label)
-	# if grid_type_nplanet=="p4" #|| grid_type_nplanet=="p3moonp4"
-	# ax2=fig.add_axes([0.5,0.2,0.3,0.5])
-	# ax2.plot(fit1[:,per_col]./365.25 ,xprob(fit1[:,end]),label="15 yrs")
-	# # ax2.plot(fit2[:,per_col]./365.25 ,xprob(fit2[:,end]),label="16 yrs")
-	# ax2.plot(fit3[:,per_col]./365.25 ,xprob(fit3[:,end]),label="17 yrs")
-	# # ax2.plot(fit4[:,per_col]./365.25 ,xprob(fit4[:,end]),label="18 yrs")
-	# ax2.plot(fit5[:,per_col]./365.25 ,xprob(fit5[:,end]),label="19 yrs")
-	# # ax2.plot(fit6[:,per_col]./365.25 ,xprob(fit6[:,end]),label="20 yrs")
-	# ax2.plot(fit7[:,per_col]./365.25 ,xprob(fit7[:,end]),label="21 yrs")
-	# # ax2.plot(fit8[:,per_col]./365.25 ,xprob(fit8[:,end]),label="22 yrs")
-	# ax2.plot(fit9[:,per_col]./365.25 ,xprob(fit9[:,end]),label="23 yrs")
-	# # ax2.plot(fit10[:,per_col]./365.25 ,xprob(fit10[:,end]),label="24 yrs")
-	# ax2.set_xlim(1.81,1.9)
-	# ax2.axvline(true_per,linestyle="--",color="black")
-	# ax2.tick_params(which="both",direction="in")
-	# end
+	fig.legend(fontsize="large",bbox_to_anchor=(0.,0.9,1.,.102),borderaxespad=0.02,title=L"$n_{year}$",title_fontsize="large")
 	ax.set_xlabel("Planet Period Search Grid [years]",fontsize="xx-large")
 	# # xlim(minimum(xgrid_in_yrs)-minimum(xgrid_in_yrs)/10,maximum(xgrid_in_yrs)+.05)
-	ax.set_ylabel("Probability",fontsize="xx-large")
-	ax.set_ylim(0,1.3)
+	ax.set_ylabel("logL",fontsize="xx-large")
+	# ax.set_ylim(0,1.3)
 	# #ax.set_xlim(1.8,1.9)
 	ax.minorticks_on()
 	tight_layout()
+	return 
 end
 function wide_yrs(sigma,grid_type_nplanet,per_col,true_per,pname,case_num)
+	files=[]
+	case_label=string(L"$σ_{obs}=$",sigma,"s")
 	if case_num==1
-	file2=string("grid_wide/fromEMB/",grid_type_nplanet,"_grid",sigma,"s16yrs.csv")
-	file4=string("grid_wide/fromEMB/",grid_type_nplanet,"_grid",sigma,"s18yrs.csv")
-	file6=string("grid_wide/fromEMB/",grid_type_nplanet,"_grid",sigma,"s20yrs.csv")
-	file8=string("grid_wide/fromEMB/",grid_type_nplanet,"_grid",sigma,"s22yrs.csv")
-	file10=string("grid_wide/fromEMB/",grid_type_nplanet,"_grid",sigma,"s24yrs.csv")
+	for i=15:30
+    push!(files,string("grid_wide/fromEMB/",grid_type_nplanet,"_grid",sigma,"s",i,"yrs.csv")        )
+  end
 	case_label=string("Case 1"," [σ=",sigma," sec]")
 	elseif case_num==2
-	file2=string("grid_wide/",grid_type_nplanet,"_grid",sigma,"s16yrs.csv")
-	file4=string("grid_wide/",grid_type_nplanet,"_grid",sigma,"s18yrs.csv")
-	file6=string("grid_wide/",grid_type_nplanet,"_grid",sigma,"s20yrs.csv")
-	file8=string("grid_wide/",grid_type_nplanet,"_grid",sigma,"s22yrs.csv")
-	file10=string("grid_wide/",grid_type_nplanet,"_grid",sigma,"s24yrs.csv")
+	for i=15:30
+    push!(files,string("grid_wide/",grid_type_nplanet,"_grid",sigma,"s",i,"yrs.csv")        )
+  end
 	case_label=string("Case 2"," [σ=",sigma," sec]")
 	end
-	fit2,header2=readdlm(file2,',',header=true)
-	fit4,header4=readdlm(file4,',',header=true)
-	fit6,header6=readdlm(file6,',',header=true)
-	fit8,header8=readdlm(file8,',',header=true)
-	fit10,header10=readdlm(file10,',',header=true)
-	fig,ax=subplots(figsize=(8,6))#,dpi=150)
-	ax.plot(fit2[:,per_col]./365.25 ,xprob(fit2[:,end]),label="16 yrs")
-	ax.plot(fit4[:,per_col]./365.25 ,xprob(fit4[:,end]),label="18 yrs")
-	ax.plot(fit6[:,per_col]./365.25 ,xprob(fit6[:,end]),label="20 yrs")
-	ax.plot(fit8[:,per_col]./365.25 ,xprob(fit8[:,end]),label="22 yrs")
-	ax.plot(fit10[:,per_col]./365.25 ,xprob(fit10[:,end]),label="24 yrs")
-	axvline(true_per,linestyle="--",color="black")
-	text(true_per + true_per/100,1.01,pname,fontsize="large")
+	fig,ax=subplots(figsize=(8,6),dpi=150)
+	title(string("Search for ",pnum," Planet in ",model),fontsize="xx-large")
+	for (i,file) in enumerate(files)
+		if isfile(file)
+		fit,header=readdlm(file,',',header=true)
+		ax.plot(fit[:,per_col]./365.25 ,xprob(fit[:,end]),label=string(i+14),linewidth=1)
+		if grid_type_nplanet=="p4"
+			ax2=fig.add_axes([0.5,0.2,0.3,0.5])
+			ax2.plot(fit1[:,per_col]./365.25 ,xprob(fit1[:,end]),label=string(i+14))
+			ax2.set_xlim(1.81,1.9)
+			ax2.axvline(true_per,linestyle="--",color="black")
+			ax2.tick_params(which="both",direction="in")
+		end
+		end
+	end
+	ax.axvline(true_per,linestyle="--",color="black")
+	ax.text(true_per + true_per/100,1.01,pname,fontsize="large")
 	#inset 
 	# text(label_xloc,1.05,sim_obs_label)
 	legend(loc="upper right",fontsize="large",title=case_label,title_fontsize="large",bbox_to_anchor=(0.,1.02,1.,.102),ncol=5,mode="expand",borderaxespad=0.0)
-	if grid_type_nplanet=="p4"
-	ax2=fig.add_axes([0.5,0.2,0.3,0.5])
-	ax2.plot(fit1[:,per_col]./365.25 ,xprob(fit1[:,end]),label="15 yrs")
-	ax2.plot(fit2[:,per_col]./365.25 ,xprob(fit2[:,end]),label="16 yrs")
-	ax2.plot(fit3[:,per_col]./365.25 ,xprob(fit3[:,end]),label="17 yrs")
-	ax2.plot(fit4[:,per_col]./365.25 ,xprob(fit4[:,end]),label="18 yrs")
-	ax2.plot(fit5[:,per_col]./365.25 ,xprob(fit5[:,end]),label="19 yrs")
-	ax2.plot(fit6[:,per_col]./365.25 ,xprob(fit6[:,end]),label="20 yrs")
-	ax2.plot(fit7[:,per_col]./365.25 ,xprob(fit7[:,end]),label="21 yrs")
-	ax2.plot(fit8[:,per_col]./365.25 ,xprob(fit8[:,end]),label="22 yrs")
-	ax2.plot(fit9[:,per_col]./365.25 ,xprob(fit9[:,end]),label="23 yrs")
-	ax2.plot(fit10[:,per_col]./365.25 ,xprob(fit10[:,end]),label="24 yrs")
-	ax2.set_xlim(1.81,1.9)
-	ax2.axvline(true_per,linestyle="--",color="black")
-	ax2.tick_params(which="both",direction="in")
-	end
 	ax.set_xlabel("Planet Period Search Grid [years]",fontsize="x-large")
 	# xlim(minimum(xgrid_in_yrs)-minimum(xgrid_in_yrs)/10,maximum(xgrid_in_yrs)+.05)
 	ax.set_ylabel("Probability",fontsize="x-large")
