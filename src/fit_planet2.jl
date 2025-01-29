@@ -16,8 +16,8 @@ function fit_planet2(filename::String,jmax::Int,jd1,sigma,nyear,tref::Real,tol::
   nt2 = sum(data_file[:,1] .== 2.0)
   tt1 = vec(data_file[1:nt1,3]) .- tref
   tt2 = vec(data_file[nt1+1:nt1+nt2,3]) .- tref
-  sigtt1 = data_file[1:nt1,4]
-  sigtt2 = data_file[nt1+1:nt1+nt2,4]
+  sigtt1 = data_file[1:nt1,7]
+  sigtt2 = data_file[nt1+1:nt1+nt2,7]
   # Okay,let's do a linear fit to the transit times (third column):
   # Guess the planets' period by finding median of transit times
   p1est = median(tt1[2:end] - tt1[1:end-1])
@@ -99,9 +99,9 @@ end
 function fit_planet2(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,options::Array{String},save_as_jld2::Bool=false)
 	obs=options[1]
   if obs=="fromEMB"
-    datafile = string("../INPUTS/EMBtt_",sigma,"s",nyear,"yrs.txt")
-    outfile = string("../FITS/fromEMB/p2_fit",sigma,"s",nyear,"yrs.jld2")
-    results = string("../results/fromEMB/p2_fit",sigma,"s",nyear,"yrs.txt")
+    datafile = string("../ttv_ss/INPUTS/EMBtt_",sigma,"s",nyear,"yrs.txt")
+    outfile = string("../ttv_ss/FITS/fromEMB/p2_fit",sigma,"s",nyear,"yrs.jld2")
+    results = string("../ttv_ss/results/fromEMB/p2_fit",sigma,"s",nyear,"yrs.txt")
   elseif obs=="fromEV"
     datafile = string("../INPUTS/tt_",sigma,"s",nyear,"yrs.txt")
     outfile = string("../FITS/p2_fit",sigma,"s",nyear,"yrs.jld2")
@@ -114,8 +114,9 @@ function fit_planet2(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,o
   nt2 = sum(data1[:,1] .== 2.0)
   tt1 = vec(data1[1:nt1,3]) .- tref
   tt2 = vec(data1[nt1+1:nt1+nt2,3]) .- tref
-  sigtt1 = data1[1:nt1,4]
-  sigtt2 = data1[nt1+1:nt1+nt2,4]
+  sigtt1 = data1[1:nt1,7]
+  sigtt2 = data1[nt1+1:nt1+nt2,7]
+  # @show tt1,sigtt1
 
   # Okay,let's do a linear fit to the transit times (third column):
   p1est = median(tt1[2:end] - tt1[1:end-1])
@@ -182,7 +183,7 @@ function fit_planet2(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,o
           "mu_2","P_2","t02","ecos2","esin2"]
   mean_mp=[best_p2[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
   mp_errs=[err[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
-  mean_ecc=[sqrt(best_p2[(iplanet-1)*5+4]^2 + best_p2[(iplanet-1)*5+4]^2) for iplanet=1:nplanet]
+  mean_ecc=[sqrt(best_p2[(iplanet-1)*5+4]^2 + best_p2[(iplanet-1)*5+5]^2) for iplanet=1:nplanet]
 
   open(results,"w") do io
     println(io,"Global Fit Results.",'\n',"chi^2: ",chi2)

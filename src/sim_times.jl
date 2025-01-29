@@ -5,11 +5,11 @@ rc("lines",linewidth=2)
 include("regress.jl")
 include("CGS.jl")
 # Load JPL ephemerides from data and set units
-path_to_file="/work/washington/ttvs/ttv_ss/INPUTS/DE440.bsp"
+path_to_file="~/work/washington/ttvs/ttv_ss/INPUTS/DE440.bsp"
 if isfile(path_to_file)
   eph=Ephem(path_to_file)
 else
-  eph = Ephem("../INPUTS/DE440.bsp") 
+  eph = Ephem("../ttv_ss/INPUTS/DE440.bsp") 
 end
  prefetch(eph)
 options = useNaifId+unitKM+unitDay # useNaifId + unitDay + unitAU
@@ -217,7 +217,7 @@ function sim_obs_and_find_times(jd1::Float64,sigma::Real,nyear::Real,obs::String
   # for i=1:length(tt2)
   #   println(tt2[i], " ",tt2[i]+noise2[i])
   # end
-  tref=2450000
+  tref=2430000
   x1,t01,per1 = linear_fit(tt1.+noise1,P_venus,sigtt1)
   x2,t02,per2 = linear_fit(tt2.+noise2,P_earth,sigtt2)
   println("P1 linear coefficients: ",t01.-tref," , ",per1)
@@ -232,6 +232,7 @@ function sim_obs_and_find_times(jd1::Float64,sigma::Real,nyear::Real,obs::String
   # println(t1)
   tt0 = [t1;t2]
 	sigtt=[sigtt1;sigtt2]
+  noise = [noise1 ; noise2]
 
   body = zeros((nt1+nt2))
   body[1:nt1] .= 1.0
@@ -243,35 +244,40 @@ function sim_obs_and_find_times(jd1::Float64,sigma::Real,nyear::Real,obs::String
   function make_transit_times_table()
     name= string("INPUTS/",obs,"transit_times",nyear,".txt")
     open(name,"w+") do io
-      println(io,"# body ntrans  tcalc ttv noise sigma",'\n',"#   JED-2430000 min min min")
+      println(io,"# body ntrans  tt t0 ttv noise sigma",'\n',"#   JED-2430000 min min min")
       for i=1:nt1
-        println(io,"1.0",'\t',i-1,'\t',round(t1[i].-tref,sigdigits=10),'\t',round(ttv1[i],sigdigits=4),'\t',round(noise1[i].*24*60,sigdigits=2),'\t',sigtt1[i].*24*60)
+        println(io,"1.0",',',i-1,',',round(tt1[i].-tref,sigdigits=10),',',round(t1[i].-tref,sigdigits=10),',',round(ttv1[i],sigdigits=4),',',round(noise1[i].*24*60,sigdigits=2),',')
       end
       for i=1:nt2
-        println(io,"2.0",'\t',i-1,'\t',round(t2[i].-tref,sigdigits=10),'\t',round(ttv2[i],sigdigits=4),'\t',round(noise2[i].*24*60,sigdigits=2),'\t',sigtt2[i].*24*60)
+        println(io,"2.0",',',i-1,',',round(tt2[i].-tref,sigdigits=10),',',round(t2[i].-tref,sigdigits=10),',',round(ttv2[i],sigdigits=4),',',round(noise2[i].*24*60,sigdigits=2),',')
       end
     end
   end
+   for i=1:length(tt)
+      println(body[i],'\t',trans[i],'\t',tt[i])#'\t',tt0[i],'\t',tt[i]-tt0[i],'\t',noise[i],'\t',sigtt[i])
+    end
+  # println(tt1+noise1,tt2+noise2)
   # make_transit_times_table()
   println("Peak amplitude")
   println("A_TTV1= ",maximum(abs.(ttv1)))#)#-abs(minimum(ttv1)))
   println("A_TTV2= ",maximum(abs.(ttv2)))#)#-abs(minimum(ttv2)))
-  return body,trans,tt,sigtt,tt0
+  return body,trans,tt,sigtt,tt0,noise
   # return pva_venus,pva_earth
 end
 # body,tt0,tt,sigtt=sim_obs_and_find_times(2.4332825e6,30,30,"fromEMB")
 # Simulate times starting at jd1 for nyear span with sigma Gaussian noise added, save to .txt
-function sim_times(jd1::Float64,sigma::Real,nyear::Real,obs::String,dir::String="../INPUTS")
-  body,trans,tt,sigtt,tt0=sim_obs_and_find_times(jd1,sigma,nyear,obs)
+function sim_times(jd1::Float64,sigma::Real,nyear::Real,obs::String,dir::String="../ttv_ss/INPUTS")
+  body,trans,tt,sigtt,tt0,noise=sim_obs_and_find_times(jd1,sigma,nyear,obs)
   if obs=="fromEMB"
     name = string(dir,"/EMBtt_",sigma,"s",nyear,"yrs.txt")
   else
     name = string(dir,"/tt_",sigma,"s",nyear,"yrs.txt")
   end
+  println("Create ",name)
   open(name,"w+") do io
-    # println(io,"#body",'\t',"tt0",'\t',"tt",'\t',"sigtt")
+    println(io,"#body",'\t',"ntrans",'\t',"tt",'\t',"tt0",'\t',"ttv",'\t',"noise",'\t',"sigtt")
     for i=1:length(tt)
-      println(io,body[i],'\t',trans[i],'\t',tt[i],'\t',sigtt[i])
+      println(io,body[i],'\t',trans[i],'\t',tt[i],'\t',tt0[i],'\t',tt[i]-tt0[i],'\t',noise[i],'\t',sigtt[i])
     end
   end
 end

@@ -25,20 +25,28 @@ jmax = 5
 planet="p3"
 #sigma,nyear=parse(Int64,ARGS[1]),parse(Int64,ARGS[2])
 datafile=string("INPUTS/EMBtt_",sigma,"s",nyear,"yrs.txt")
-save_as_jld2=true
+save_as_jld2=false
+p4=jldopen("FITS/fromEMB/p4_fit30s30yrs.jld2","r")
 
-function fit_mysteryplanet() #fit_mysteryplanet(datafile::String,jd1::Float64,tref::Real,tol::Real,obs::String)#::Int,mratio::Float64,per_guess::Float64,per_in::Float64,per_out::Float64,nper::Int,nphase::Int,
+function fit_mysteryplanet(;is_txt_file=false,is_jld_file=false) #fit_mysteryplanet(datafile::String,jd1::Float64,tref::Real,tol::Real,obs::String)#::Int,mratio::Float64,per_guess::Float64,per_in::Float64,per_out::Float64,nper::Int,nphase::Int,
   #outfile = string("FITS/",obs,"/mystery_",planet,"_fit",jd1,"JED.jld2")
+  if is_txt_file
   outfile = string("FITS/mystery_",planet,"_fit",jd1,".txt")
   @assert isfile(datafile)
   println(datafile," loaded.")
   data1 = readdlm(datafile,Float64)
   tt = data1[:,3] .- tref
   sigtt = data1[:,4]
-  nplanet_cond = 2
-	nparam=10
   ntrans = zeros(nplanet_cond)
   ntrans=[sum(data1[:,1] .== i) for i=1:nplanet_cond]
+  end
+  if is_jld_file
+    ntrans=[49,31]
+    tt=p4["tt"]
+    sigtt=p4["sigtt"]
+  end
+  nplanet_cond = 2
+  nparam=10
   Nobs = sum(ntrans)
   # Actual transit times:
   nt1,nt2 = ntrans
@@ -49,18 +57,18 @@ function fit_mysteryplanet() #fit_mysteryplanet(datafile::String,jd1::Float64,tr
   p1est = median(tt1[2:end] - tt1[1:end-1])
   p2est = median(tt2[2:end] - tt2[1:end-1])
   # Okay,let's do a linear fit to the transit times:
-  coeff1,covcoeff1 = find_coeffs(tt1,p1est,sigtt1)
-  coeff2,covcoeff2 = find_coeffs(tt2,p2est,sigtt2)
+  x1,t01,per1 = linear_fit(tt1,p1est,sigtt1)
+  x2,t02,per2 = linear_fit(tt2,p2est,sigtt2)
   # Best-fit linear transit times without TTVs:
-  t01 = coeff1[1]; per1 = coeff1[2]
-  t02 = coeff2[1]; per2 = coeff2[2]
+  # t01 = coeff1[1]; per1 = coeff1[2]
+  # t02 = coeff2[1]; per2 = coeff2[2]
   t1  = collect(t01 .+ per1 .* range(0,stop=nt1-1,length=nt1)) 
   t2  = collect(t02 .+ per2 .* range(0,stop=nt2-1,length=nt2))
   tt0 = [t1;t2]
 
   # Okay,now let's do a 2-planet fit:
     # param_names = mass ratio,period,initial transit time,e*cos(omega),e*sin(omega)
-	init_param_guess = [3e-6,per1,t01,0.01,0.01,
+init_param_guess = [3e-6,per1,t01,0.01,0.01,
                       3e-6,per2,t02,0.01,0.01] 
     # println("Initial parameters: ",init_param)
 function global_fit(tt0,nplanet,ntrans,init_param,jmax,EM) 
@@ -100,8 +108,8 @@ function fit_cond_planets(tt0,tt,sigtt,jmax,nplanet,init_param)
       res = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,true),tt0,tt,weight,init_param)
       init_param = res.param
       niter += 1
-      # println("init_param: ",init_param)
-      # println("New Initial chi-square: ",chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt))
+      println("init_param: ",init_param)
+      println("New Initial chi-square: ",chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt,jmax,true))
     end
     println("New initial 2-planet fit: ",init_param," in ",niter," iterations.")
 
@@ -118,13 +126,13 @@ function fit_cond_planets(tt0,tt,sigtt,jmax,nplanet,init_param)
   # want a grid of masses instead of assuming its value
   mu= range(log10(1e-8), stop=log10(1e-2),length=nmu)
   lprob_best = -1e100 #global best fit
-  chisq=zerps(naparam)
-  actual_
+  chisq=zeros(nparam)
 
-  lprob_per = zeros(np3,length(mu3))#zeros(nper)
+
+  lprob_per = zeros(nper,nmu)#zeros(nper)
   perbest = zeros(nparam)
   per_cur = per_guess 
-  param_per = zeros(nparam,np3,length(mu3))#zeros(nparam,nper)
+  param_per = zeros(nparam,nper,nmu)#zeros(nparam,nper)
   niter = 0
   # p3best = zeros(nparam)
   # lprob_p3 = zeros(np3,length(mu3))
@@ -173,7 +181,7 @@ function fit_cond_planets(tt0,tt,sigtt,jmax,nplanet,init_param)
     end # phase loop
   end # mass loop
   # println("Finished ",planet," planet fit w/ fixed period: ",perbest," in ",niter," iterations")
-  
+  best_per,err=global_fit(tt0,nplanet,ntrans,perbest,jmax,true)  
 # writedlm(outfile,zip(per,lprob_per))
   # df=DataFrame(mu_1=param_per[1,:],P_1=param_per[2,:],t01=param_per[3,:],ecos1=param_per[4,:],esin1=param_per[5,:],
   #             mu_2=param_per[6,:],P_2=param_per[7,:],t02=param_per[8,:],ecos2=param_per[9,:],esin2=param_per[10,:],
@@ -181,11 +189,11 @@ function fit_cond_planets(tt0,tt,sigtt,jmax,nplanet,init_param)
   #             lprob=lprob_per[:,i])
 # CSV.write(grid,df)
 	
-	best_per,err=global_fit(tt0,nplanet,ntrans,perbest,jmax,true)
+# end
   # @save outfile per lprob_per best_per lprob_best_per ntrans nplanet tt0 tt ttmodel sigtt
-  pname=["mu_1","P_1","t01","ecos1","esin1",
-          "mu_2","P_2","t02","ecos2","esin2",
-          "mu_3","P_3","t03","ecos3","esin3"]
+  # pname=["mu_1","P_1","t01","ecos1","esin1",
+  #         "mu_2","P_2","t02","ecos2","esin2",
+  #         "mu_3","P_3","t03","ecos3","esin3"]
   #for i=1:nparam
   #  println(pname[i]," : ",best_per[i]," ± ",err[i])
   #end
@@ -194,7 +202,7 @@ function fit_cond_planets(tt0,tt,sigtt,jmax,nplanet,init_param)
   mean_ecc=[sqrt(best_per[(iplanet-1)*5+4]^2 + best_per[(iplanet-1)*5+4]^2) for iplanet=1:nplanet]
   ecc_errs=[sqrt(err[(iplanet-1)*5+4]^2 + err[(iplanet-1)*5+4]^2) for iplanet=1:nplanet]
 
-  results = string("results/mystery",planet,"_fitresults.txt")
+  # results = string("results/mystery",planet,"_fitresults.txt")
   # open(results,"w") do io
   # 	println(io,"Global Fit Results.",'\n',"per=[",per_in," - ",per_out,", length=",nper,"]")
   # 	for i=1:nparam
@@ -228,11 +236,11 @@ col_cycler=plt.cycler("color",cmap(range(0,1,length=nmu)))
 ls_cycler=plt.cycler("linestyle",repeat(["--",":"],5))
 wp3=jldopen("FITS/fromEMB/widep3_fit100s30yrs.jld2","r")
 data=wp3["tt"]
-
+label_cycle = plt.cycler(label=["set {n}" for n in 1:4])
 # println(xprob(wp3["lprob_p3"],data))
 # logL=xprob(actual_logL(wp3["lprob_p3"][:,1],data))
 # print("lnL",logL)
-# mu= range(log10(1e-8), stop=log10(1e-2),length=nmu)
+mu= range(log10(1e-8), stop=log10(1e-2),length=nmu)
 function plot_mu()# plot grid 
   fig,ax=subplots(1,3,figsize=(11,4))
   ax[1].set_prop_cycle(col_cycler+ls_cycler)
@@ -253,7 +261,7 @@ function plot_mu()# plot grid
   end
   # ax3.set_xlim(10,13)
   # ax3.tick_params(left="false",labelleft="false",right="true",labelright="true")
-  fig.legend(loc="upper right",title=string(L"$\gamma$ values"),fontsize="medium",title_fontsize="large",bbox_to_anchor=(0.025,0.9,0.8,.102))
+  fig.legend(loc="upper right",title=string(L"$\gamma$ values"),fontsize="medium",title_fontsize="large",bbox_to_anchor=(0.09,0.8,0.9,.102))
   fac(true_per)=true_per + true_per/100
   ax[2].text(fac(1.88),1.0,"Mars",color="black")
   ax[2].text(fac(11.88),1.0,"Jupiter",color="black")
@@ -271,7 +279,7 @@ function plot_mu()# plot grid
   fig.supxlabel("Orbital Period [years]",fontsize="x-large")
   # fig.suptitle("Difference between actual and approximate logL in blind search")
   tight_layout()
-  savefig("IMAGES/actual_logL_zoom_jup_norm.png",dpi=150)
+  # savefig("IMAGES/actual_logL_zoom_jup_norm.png",dpi=150)
 end
 # plot_mu()
 # show()

@@ -111,6 +111,7 @@ If number of independent samples for each walker >= 100, get results.
    mu3= range(log10(1e-8), stop=log10(1e-2),length=10)
    - 10s blind run ?
    - 30s blind run done
+   - 100s blind run done
 - I started getting low probabilities for 30s - bug in code?
 no priors, so really high evectors
 
@@ -152,11 +153,10 @@ Q). Wrong signs for evectors? <-- not first time this has been found
 2). Write up methods description [ x ]
 3). Write up analysis description [ x ]
 4). Create tables for parameters. [ x ]
-5) Make likelihood profiles continuous [ ]
+5) Make likelihood profiles continuous [  ]
 6). Make plots of orbits with 1-sigma uncertainties overplotted with the correct orbits. [  ] 
      - how to do this with eccentricities and omega? Need pomega and Omega?
-7). Figure out whether the Earth-Moon barycenter offset causes
-bias in measurements and if so, why.
+7). Figure out whether the Earth-Moon barycenter offset causes bias in measurements and if so, why.
 8). Schedule parallel fit and chain runs on hyak.mox using slurm scheduler [  ]
      - exits prematurely, times out, or returns error in regress.jl assertion
 10). Condense results to 1 equation fit (ex. how much of X to get Y uncertainty). [  ]

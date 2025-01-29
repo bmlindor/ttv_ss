@@ -1,6 +1,6 @@
 using TTVFaster,PyPlot,Statistics,JLD2,DelimitedFiles,Distributions
 # rc("font",family="sans-serif")
-# rc("lines",linewidth=2)
+rc("lines",linewidth=2)
 include("decompose_ttvs.jl")
 include("histogram.jl")
 include("misc.jl")
@@ -56,12 +56,13 @@ function plot_res(sigma::Real,nyear::Real,options,include_moon::Bool=false)
   avg3=[mean(vec(mc3["par_mcmc"][:,mc3["iburn"]:end,i])) for i=1:16]
   # avg4=[mean(vec(mc["par_mcmc"][:,mc["iburn"]:end,i])) for i=1:18]
 
-  pbest_global=avg[1:end-1]
+  # pbest_global=avg[1:end-1]
+  pbest_global=f[bestfit]
   nplanet,ntrans=f["nplanet"],f["ntrans"]
   # pair_ttvs=decompose_ttvs(nplanet,ntrans,f["best_p3"][1:15]) .* (24 * 60)
-  p2_ttvs=decompose_ttvs(2,ntrans[1:2],avg2[1:10]) .* (24 * 60)
-  p3_ttvs=decompose_ttvs(3,ntrans[1:3],avg3[1:15]) .* (24 * 60)
-  p4_ttvs=decompose_ttvs(4,ntrans[1:4],avg[1:20]) .* (24 * 60)
+  p2_ttvs=decompose_ttvs(2,ntrans[1:2],f2["best_p2"]) .* (24 * 60)
+  p3_ttvs=decompose_ttvs(3,ntrans[1:3],f3["best_p3"]) .* (24 * 60)
+  p4_ttvs=decompose_ttvs(4,ntrans[1:4],f["best_p4"]) .* (24 * 60)
   n1,n2=ntrans[1],ntrans[2]
   mu1,P1,t01,ecos1,esin1=pbest_global[1:5]
   mu2,P2,t02,ecos2,esin2=pbest_global[6:10]
@@ -105,40 +106,44 @@ function plot_res(sigma::Real,nyear::Real,options,include_moon::Bool=false)
 
   # plt.hist(sigtt,bins=50,histtype="step",label=string(L"$\sigma_{obs}$"))
   s2=[res21;res22] ;   s3=std([res31;res32]) ; s4=std([res41;res42]) 
-  println("Std of residuls for V,",model2," : ",std(res21).*60)
-  println("Std of residuls for E,",model2," : ",std(res22).*60)
-  println("Std of residuls for V,",model3," : ",std(res31).*60)
-  println("Std of residuls for E,",model3," : ",std(res32).*60)
-  println("Std of residuls for V,",model4," : ",std(res41).*60)
-  println("Std of residuls for E,",model4," : ",std(res42).*60)
+  # println("Std of residuls for V,",model2," : ",std(res21).*60)
+  # println("Std of residuls for E,",model2," : ",std(res22).*60)
+  # println("Std of residuls for V,",model3," : ",std(res31).*60)
+  # println("Std of residuls for E,",model3," : ",std(res32).*60)
+  # println("Std of residuls for V,",model4," : ",std(res41).*60)
+  # println("Std of residuls for E,",model4," : ",std(res42).*60)
   println("Std of noise "," : ",std(sim_noise).*60)
   noise1=sim_noise[1:n1] ; noise2=sim_noise[n1+1:end]
 
   # savefig("IMAGES/scatter.png",dpi=150)
   # show()
   # return x1,x2#res1,res2
-function plot_scatter()
-  fig=figure(figsize=(11,4))#,dpi=150)
-  gs = fig.add_gridspec(2, 3,  width_ratios=(2, 2, 1), height_ratios=(4, 1),
-                      left=0.1, right=0.95, bottom=0.1, top=0.9,
-                      wspace=0.15, hspace=0.05)
-  # gs = fig.add_gridspec(2, 2,  width_ratios=(2, 2), height_ratios=(4, 1),
+function make_plot()
+  fig=figure(figsize=(11,5))#,dpi=150)
+  ax1=plt.subplot2grid((3,3),(0,0),rowspan=2)
+  ax2=plt.subplot2grid((3,3),(0,1),rowspan=2)
+  ax3=plt.subplot2grid((3,3),(2,0))
+  ax4=plt.subplot2grid((3,3),(2,1))
+  ax5=plt.subplot2grid((3,3),(0,2))
+  ax6=plt.subplot2grid((3,3),(1,2))
+  # gs = fig.add_gridspec(2, 3,  width_ratios=(2, 2, 1), height_ratios=(4, 1),
   #                     left=0.1, right=0.95, bottom=0.1, top=0.9,
-  #                     wspace=0.125, hspace=0.05)
+  #                     wspace=0.15, hspace=0.05)
   # # Create the Axes.
-  ax1 = fig.add_subplot(gs[1, 1])
+  # ax1 = fig.add_subplot(gs[1, 1])
     # ax3 = fig.add_subplot(gs[2, 1], sharex=ax1)
     # ax2 = fig.add_subplot(gs[1, 2],sharey=ax1)
     # ax4 = fig.add_subplot(gs[2, 2], sharex=ax2)
   # # ax1.plot(x,y,color="red")
+  ax1.set_title("A)",loc="left",fontweight="bold")
   ax1.set_ylabel(L"$O-C$ [min]",fontsize="large")
-  ax1.errorbar(ttsim1,ttv1,sigtt1,fmt=".",color="black",mec="black",mfc="white",label=string("data, ",L"$\sigma_{obs}=$",sigma," s"),capsize=2)
-  ax1.plot(ttsim1,p2_ttvs[1,2,1:n1],label=string(model2,L", $\sigma_{sys}=$",sigsys2," s"),linestyle="--")
-  ax1.plot(ttsim1,p3_ttvs[1,3,1:n1]+p3_ttvs[1,2,1:n1],label=string(model3,L", $\sigma_{sys}=$",sigsys3," s"))
-  ax1.text(0,5,"planet b",fontweight="bold",fontsize="medium")
-  ylim(low_lim,high_lim)
+  d1=ax1.errorbar(ttsim1,ttv1,sigtt1,fmt=".",color="black",mec="black",mfc="white",label=string("data"),capsize=2)
+  m1=ax1.plot(ttsim1,p2_ttvs[1,2,1:n1],label=string(model2,L", $\sigma_{sys}=$",sigsys2," s"),linestyle="--")
+  m2=ax1.plot(ttsim1,p3_ttvs[1,3,1:n1]+p3_ttvs[1,2,1:n1],label=string(model3,L", $\sigma_{sys}=$",sigsys3," s"))
+  ax1.text(0,-6,"planet b",fontsize="medium")
+  ax1.set_ylim(low_lim,high_lim)
 
-  ax3 = fig.add_subplot(gs[2, 1], sharex=ax1)
+  # ax3 = fig.add_subplot(gs[2, 1], sharex=ax1)
   # ax3.plot(x,y,color="blue")
   ax3.axhline(y=0, color="grey",linewidth=1.0,linestyle="--")
   ax3.plot(ttsim1,ttv1-(p2_ttvs[1,2,1:n1]),linestyle="--")#,label=string(model2,'\n',L"$\sigma_{sys}=$",sigsys2," s"))
@@ -146,19 +151,20 @@ function plot_scatter()
   # ylim(-3,3)
   ax3.set_ylabel("Residuals",fontsize="large")
   ax3.set_xlabel("Time Observed [yrs]",fontsize="large")
+  ax3.set_ylim(-2.5,2.5)
   ax1.tick_params(which="both",  direction="in",labelbottom= false )
   ax3.tick_params(which="both", direction="in",top=true)
 
-  ax2 = fig.add_subplot(gs[1, 2],sharey=ax1)
+  # ax2 = fig.add_subplot(gs[1, 2],sharey=ax1)
   ax2.errorbar(ttsim2,ttv2,sigtt2,fmt=".",color="black",mec="black",mfc="white",capsize=2)#,label="Earth")
   ax2.plot(ttsim2,p2_ttvs[2,1,1:n2],linestyle="--")#,label=string(model2,'\n',L"$\sigma_{sys}=$",sigsys2," s"))
   ax2.plot(ttsim2,p3_ttvs[2,3,1:n2]+p3_ttvs[2,1,1:n2])#,label=string(model3,'\n',L"$\sigma_{sys}=$",sigsys3," s"))
-  ax2.text(0,5,"planet c",fontweight="bold",fontsize="medium")
-  ax4 = fig.add_subplot(gs[2, 2], sharex=ax2)
+  ax2.text(0,-6,"planet c",fontsize="medium")
+  # ax4 = fig.add_subplot(gs[2, 2], sharex=ax2)
   ax4.axhline(y=0, color="grey",linewidth=1.0,linestyle="--")
   ax4.plot(ttsim2,ttv2-(p2_ttvs[2,1,1:n2]),linestyle="--")#,label=string(model2,'\n',L"$\sigma_{sys}=$",sigsys2," s"))
   ax4.plot(ttsim2,ttv2-(p3_ttvs[2,3,1:n2]+p3_ttvs[2,1,1:n2]))#,label=string(model3,'\n',L"$\sigma_{sys}=$",sigsys3," s"))
-  ax2.tick_params(which="both",  direction="in",labelbottom= false,labelleft=false,right=true)
+  ax2.tick_params(which="both",  direction="in",labelbottom= false,labelleft=true,right=true)
   ax4.tick_params(which="both", direction="in",top=true,labelleft=true,right=true)
   ax4.set_xlabel("Time Observed [yrs]",fontsize="large")
 
@@ -168,8 +174,8 @@ function plot_scatter()
   if fit_type_nplanet=="p4" || fit_type_nplanet=="p3moonp4" || fit_type_nplanet=="p3moon"
     p4_ttvs=0
     if obs=="fromEMB"
-    p4_ttvs=decompose_ttvs(4,ntrans[1:4],avg[1:20]) .* (24 * 60)
-    ax1.plot(ttsim1,p4_ttvs[1,4,1:n1]+p4_ttvs[1,3,1:n1]+p4_ttvs[1,2,1:n1],linestyle="-.",label=string(model4,L", $\sigma_{sys}=$",sigsys," s"))
+    p4_ttvs=decompose_ttvs(4,ntrans[1:4],f["best_p4"]) .* (24 * 60)
+    m3=ax1.plot(ttsim1,p4_ttvs[1,4,1:n1]+p4_ttvs[1,3,1:n1]+p4_ttvs[1,2,1:n1],linestyle="-.",label=string(model4,L", $\sigma_{sys}=$",sigsys," s"))
 
     elseif obs=="fromEV"
     # println("p4=",avg4)
@@ -213,45 +219,49 @@ function plot_scatter()
   elseif include_moon
     # fig.legend(loc="upper center",ncol=4,fontsize="large",mode="expand")#,title="Uncertainty")
   end
-  ax1.minorticks_on();  ax2.minorticks_on();  #ax2.minorticks_on();  ax2.minorticks_on()
-  fig.legend(loc="upper center",ncol=4,fontsize="medium",bbox_to_anchor=(0.025,0.9,0.8,.102))#,mode="expand")
+  ax1.minorticks_on();  ax2.minorticks_on();  ax3.minorticks_on();  ax4.minorticks_on()
+  ax1.tick_params(which="both",  direction="in",right=true,top=true )
+  ax2.tick_params(which="both",  direction="in",right=true,top=true )
 
-  ax6=fig.add_axes([0.8,0.1,0.15,0.4])
-  ax5=fig.add_axes([0.8,0.5,0.15,0.4],sharex=ax6)
-  # ax5.set_title("B '\t' '\t'")
-  # plt.hist(sigsys2,bins=50,histtype="step",label=string(model2))
-  # ax1=fig2.add_subplot(121)
-  # ax2=fig2.add_subplot(122)
-  nbins=10
-  ax5.text(-2,12,"b",fontweight="bold",fontsize="medium")
-  ax6.text(-3,6,"c",fontweight="bold",fontsize="medium")
-  ax5.hist([res21],bins=nbins,label=string(model2," Res."))#,density=true)
-  ax6.hist([res22],bins=nbins)#,label=string("Residuals to ",model2))
-  ax5.hist([res31],histtype="step",bins=nbins,label=string(model3," Res."),linewidth=1)#,density=true)
-  ax6.hist([res32],histtype="step",bins=nbins,linewidth=1)
-  ax5.hist([res41],histtype="step",bins=nbins,label=string(model4," Res."),linewidth=1)#,density=true)
-  ax6.hist([res42],histtype="step",bins=nbins,linewidth=1)
-  ax5.hist(noise1,histtype="step",bins=nbins,label="Injection",color="black",linewidth=1)#density=true)
-  ax6.hist(noise2,histtype="step",bins=nbins,color="black",linewidth=1)
-  ax5.tick_params(which="both",  direction="in",right=true,top=true )
-  ax6.tick_params(which="both",  direction="in",right=true,top=true )
-  # plt.hist(sigsys,bins=50,histtype="step",label=string(model4))
-  ax5.legend(loc="lower right",fontsize="small",bbox_to_anchor=(0.35,0.6,1.,.102))
-  ax6.set_xlabel("Scatter [min]",fontsize="large");  ax5.set_ylabel("Number",fontsize="large")
-  ax6.set_ylabel("Number",fontsize="large"); # ax.set_ylabel("Minutes")6
   # Gaussian fit to noise
-  x1=fit(Normal,noise1) ; x2=fit(Normal,noise2)
+  # @show(length(noise1))
+  x1_fit=fit(Normal,noise1) ; x2_fit=fit(Normal,noise2)
   dist(x,mu,sigma) =exp.(-.5 .*((x .-mu) ./ sigma) .^ 2) ./ (sigma .* sqrt(2pi))
-  xs=range(-2.5,length=100,stop=2.5)
-  y1=dist.(xs,-0.01264897959183672,0.5048564274077108) ; y2=dist.(xs,-0.13551034482758623,0.38454441862154826)
-  # y1=dist.(xs,-0.05832820512820513,0.46756977921508136)
-  ax5.plot(xs,y1.*15,linestyle="--",alpha=0.75,linewidth=1)
-  ax6.plot(xs,y2.*7,linestyle="--",alpha=0.75,linewidth=1)
-  ax5.tick_params(labeltop=false, labelbottom=false)
+  xs=range(-4,length=100,stop=4)
+  exp_dist=dist.(xs,0.0,0.5)
+  y1=dist.(range(-4,length=49,stop=4),x1_fit.μ,x1_fit.σ) ; y2=dist.(range(-4,length=31,stop=4),x2_fit.μ,x2_fit.σ)
+  nbins=10
 
-  tight_layout()
+  op_cycle=plt.cycler("alpha",[0.9,0.6,0.6])
+  ls_cycle=plt.cycler("linestyle",["--","-","-."])
+  ax5.set_prop_cycle(op_cycle+ls_cycle);  ax6.set_prop_cycle(op_cycle+ls_cycle)
+  ax5.set_title("B)",loc="left",fontweight="bold")
+  stacked_hist(ax5,[res21,res31,res41],["$model2","$model3","$model4"];nbins=10)
+  ax5.plot(range(-4,length=49,stop=4),y1,linewidth=1.5,color="k")
+  ax5.plot(xs,exp_dist,linewidth=1.5,color="r",linestyle="-")
+  ax6.plot(xs,exp_dist,linewidth=1.5,color="r",label=L"$\mathcal{N( \mu = 0,\sigma = 0.5 )}$",linestyle="-")
+  ax6.plot(range(-4,length=31,stop=4),y2,linewidth=1.5,color="k",linestyle="--")
+  fig.legend(loc="lower right",fontsize="medium",bbox_to_anchor=(0.9,0.05,0.09,.102),ncol=2)
+  lined_hist_stack(ax5,[res21,res31,res41],["$model2","$model3","$model4"];nbins=10)
+  stacked_hist(ax6,[res22,res32,res42],["$model2","$model3","$model4"];nbins=10)
+  lined_hist_stack(ax6,[res22,res32,res42],["$model2","$model3","$model4"];nbins=10)
+
+  # h=ax5.hist(noise1,histtype="step",bins=nbins,label="Injection",color="black",linewidth=1.5,density=true,linestyle="-")#density=true)
+  # ax6.hist(noise2,histtype="step",bins=nbins,color="black",linewidth=1.5,density=true,linestyle="-")
+  ax6.set_ylabel("Density");ax5.minorticks_on()
+  ax5.set_ylabel("Density");ax6.minorticks_on()
+  ax6.set_xlabel("Scatter [min]")
+  ax5.text(2,0.8,"planet b")
+  ax6.text(2,1.75,"planet c")
+  ax5.tick_params(axis="x",direction="in",which="both")
+  ax5.set_yticks((0,0.2,0.4,0.6,0.8,1))
+  fig.subplots_adjust(hspace=0.0,wspace=0.2,left=0.07,right=0.98,top=0.95)
+  # tight_layout()
+  fig.savefig("IMAGES/ttv/residuals.jpg",dpi=200)
+  return x1_fit,x2_fit
 end
-  return #A_ttvs,s2,s3,s4#p4_ttvs
+  return make_plot()
+#A_ttvs,s2,s3,s4#p4_ttvs
   # savefig(string("IMAGES/ttv/case",case,"ttv_residuals",sigma,nyear,".pdf"))
   # show()
 

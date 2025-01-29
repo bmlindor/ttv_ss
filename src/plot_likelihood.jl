@@ -1,6 +1,6 @@
 using PyPlot,PyCall,Statistics,JLD2,DelimitedFiles,DataFrames
 # rc("font",family="sans-serif")
-rc("lines",linewidth=2,linestyle="--")
+rc("lines",linewidth=2,linestyle="-")
 include("histogram.jl")
 
  	# true_per3=1.8808476
@@ -48,15 +48,17 @@ function per_grid(sigma,nyear,grid_type_nplanet,per_col,true_per,pname,case_num,
 	axvline(true_per,linestyle="--",color="black")
 	text(1.1*true_per,1.01,pname,fontsize="large")
 	#text(label_xloc,1.05,sim_obs_label,fontsize="medium")
- 	plot(fit[:,per_col]./365.25,xprob(fit[:,end]),label=string(L"$\sigma_{obs}=$",sigma," sec"))#label=string("[",nyear," yr span]",L"$\sigma_{obs}=$",sigma," sec"))
- 	xlabel("Planet Period Search Grid",fontsize="x-large")
+	rel_prob=xprob(fit[:,end])
+ 	plot(fit[:,per_col]./365.25,rel_prob,label=string(L"$\sigma_{obs}=$",sigma," sec"))#label=string("[",nyear," yr span]",L"$\sigma_{obs}=$",sigma," sec"))
+ 	xlabel("Planet Period [yrs]",fontsize="x-large")
  	ylabel("Probability",fontsize="x-large")
  	legend()
 	else
 	print("no match")
 	 	plot(jldfit["p$nplanet"]./365.25,xprob(jldfit["lprob_p$nplanet"]),label=string(L"$\sigma_{obs}=$",sigma," sec"))#label=string("[",nyear," yr span]",L"$\sigma_{obs}=$",sigma," sec"))
 	 end
- 	# ylim(0,1.2)
+	 per_fit=fit(Normal,rel_prob)
+  dist(x,mu,sigma) =exp.(-.5 .*((x .-mu) ./ sigma) .^ 2) ./ (sigma .* sqrt(2pi))
  	return 
 end
 function moon_grid(sigma,nyear,grid_type_nplanet,per_col,true_per,color,pname,case_num,label_xloc)
@@ -74,7 +76,7 @@ function moon_grid(sigma,nyear,grid_type_nplanet,per_col,true_per,color,pname,ca
 	text(true_per + true_per/100,1.01,pname,fontsize="large")
 	text(label_xloc,1.05,sim_obs_label,fontsize="medium")
  	plot(fit[:,per_col],xprob(fit[:,end]),color)
- 	xlabel("Planet Period Search Grid",fontsize="x-large")
+ 	xlabel("Planet Period [yrs]",fontsize="x-large")
  	ylabel("Probability",fontsize="x-large")
  	ylim(0.98,1.2)
 end
@@ -113,7 +115,7 @@ function wide_grid(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::Bo
 	sim_obs_label= string(" [",nyear," yr span]",'\n',L"$\sigma_{obs}=$",sigma," sec")
 	fig=figure(figsize=(5,5),dpi=150)
 	ax1=subplot(211)
-	ax1.set_title(string(title),fontsize="x-large")
+	# ax1.set_title(string(title),fontsize="x-large")
 	ax1.text(label_xloc,0.86,sim_obs_label,fontsize="small")
 	ax1.axvline(true_per,linestyle="--",color="black")
  	ax1.plot(wide[:,per_col]./365.25,xprob(wide[:,end]),color="black")
@@ -127,7 +129,7 @@ function wide_grid(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::Bo
  	ax2.plot(fit[:,per_col]./365.25,xprob(fit[:,end]),color,label=string(model))
 	# plot(fit[:,per_col]./365.25,xprob(fit[:,end]),".",label="pts")
 	ax2.legend()
- 	xlabel("Planet Period Search Grid",fontsize="x-large")
+ 	xlabel("Planet Period [yrs]",fontsize="x-large")
  	ylabel("Probability",fontsize="x-large")
  	ax2.minorticks_on()
 	ax2.tick_params(which="both",direction="in")
@@ -215,14 +217,14 @@ end
 	# subplots_adjust(hspace=0.2,wspace=0.15)
 	# ax1.title()
 	ax1=subplot(211)
-	ax1.set_title(string(title),fontsize="x-large")
+	# ax1.set_title(string(title),fontsize="x-large")
 	axvline(true_per3,linestyle="--",color="black")
  	axvline(true_per4,linestyle="--",color="black")
 	text(label_xloc,0.8,sim_obs_label,fontsize="medium")
 	# text(true_per + true_per/100,1.01,pname,fontsize="large")
 	# text(minimum(wide[:,per_col]./365.25),1.05,sim_obs_label,fontsize="medium")
 	ax1.axvspan(1.8,2,color="lightblue",alpha=0.45)
-	# ax1.axvspan(11.0,12.5,color="lightblue",alpha=0.45)
+	ax1.axvspan(11.0,12.5,color="lightblue",alpha=0.45)
  	ax1.plot(wide3[:,12]./365.25,xprob(wide3[:,end]),color="orange")
 	ax1.plot(wide4[:,12]./365.25,xprob(wide4[:,end]),color="firebrick")
  	ax1.set_xlabel("Planet Period [yrs]",fontsize="x-large")
@@ -240,25 +242,30 @@ end
 	name=string("IMAGES/likelihood/wide_case",case_num,"_",sigma,"s",nyear,"_p4.png")
 	end
 	# text(1.83,1.1,"a)",fontweight="bold")
+	alpha=0.3
+	color="orange"
 	axvline(true_per3,linestyle="--",color="black")
 	text(1.89,0.96,"Mars",fontsize="medium")
+	# ax2.hist(par_mcmc3,nbins*10,histtype="step",fill=true,facecolor=color,edgecolor=color,density=true,linewidth=2,zorder=1,alpha=alpha)
+	# ax2.hist(par_mcmc3,nbins*10,histtype="step",alpha=1.0,density=true,color=color,linewidth=2)
 	xbin,xhist,xbin_square,hist_square=histogram(par_mcmc3,5000)
 	# ax2.hist(par_mcmc3,bins=nbins,histtype="step",density=tr,color="orange")
  	ax2.plot(fit3[:,12]./365.25,xprob(fit3[:,end]),color="orange",label="Fit")
- 	ax2.plot(xbin_square,hist_square./maximum(hist_square),color="orange",label="Posterior",alpha=0.75)
+  ax2.plot(xbin_square,hist_square./maximum(hist_square),color="orange",label="Posterior",alpha=0.75)
+  ax2.fill_between(xbin_square, hist_square./maximum(hist_square),alpha=0.25,color=color)
  	minorticks_on()
  	# legend()
 	tick_params(which="both",direction="in")
 	ax2.set_xlim(1.83,1.95)
 		# ax2.set_xlim(quantile(par_mcmc3,0.1587))
-	ax2.set_xlabel(L"Per$_4$ [yrs]",fontsize="large")
+	ax2.set_xlabel(L"P$_e$ [yrs]",fontsize="large")
 	ylabel("Probability",fontsize="x-large")
 	if include_moon
 	  p3mcfile=string("MCMC/","p3","_mcmc",sigma,"s",nyear,"yrs.jld2")
    	p3mc=jldopen(String(p3mcfile),"r")
  		par_mcmc=vec(p3mc["par_mcmc"][:,p3mc["iburn"]:end,12])./365.25
-		xbin,xhist,xbin_square,hist_square=histogram(par_mcmc,50)
-		ax1.plot(xbin_square,hist_square./maximum(hist_square),color="firebrick",label="Poster",alpha=0.75)
+		# xbin,xhist,xbin_square,hist_square=histogram(par_mcmc,50)
+		# ax1.plot(xbin_square,hist_square./maximum(hist_square),color="firebrick",label="Poster",alpha=0.75)
 
 
 		phi_col,true_phi,color=18,2.31586,"purple"; label_xloc=2.75
@@ -290,22 +297,24 @@ end
 	# text(11,1.1,"b)",fontweight="bold")
  	axvline(true_per4,linestyle="--",color="black")
 	text(12,0.96,"Jupiter",fontsize="medium")
+	color="firebrick"
 	xbin,xhist,xbin_square,hist_square=histogram(par_mcmc4,50)
-	# ax3.hist(par_mcmc4,bins=nbins,histtype="step",density=tr,color="firebrick")
- 	ax3.plot(fit4[:,12]./365.25,xprob(fit4[:,end]),color="firebrick",label="Fit")
  	ax3.plot(xbin_square,hist_square./maximum(hist_square),color="firebrick",label="Poster",alpha=0.75)
+ 	 ax3.fill_between(xbin_square, hist_square./maximum(hist_square),alpha=0.2,color=color)
+	ax3.plot(fit4[:,12]./365.25,xprob(fit4[:,end]),color="firebrick",label="Fit")
+	# ax3.hist(par_mcmc4,bins=nbins,histtype="step",density=tr,color="firebrick")
  	minorticks_on()
 	# legend(loc="upper right",fontsize="medium",title="Jupiter",title_fontsize="medium",bbox_to_anchor=(0.,1.02,1.,.102),ncol=5,mode="expand",borderaxespad=0.0)	
 	ax3.set_xlim(11,12.5)
 	ax3.tick_params(which="both",direction="in",left=true,labelleft=false)
-	ax3.set_xlabel(L"Per$_3$ [yrs]",fontsize="large")
+	ax3.set_xlabel(L"P$_d$ [yrs]",fontsize="large")
 	end
 	tight_layout()
  	savefig(name,dpi=150)
 	# if include_moon
 	# 	
-	#   #title2=string("IMAGES/likelihood/",grid_type_nplanet,"Moon",sigma,"s",nyear,"yrs.png")
-	#   #savefig(title2)
+	  # title2=string("IMAGES/likelihood/",grid_type_nplanet,"Moon",sigma,"s",nyear,"yrs.png")
+	  # savefig(title2)
 	# end
 	# close()
 end
@@ -438,7 +447,6 @@ function wide_yrs(sigma,grid_type_nplanet,per_col,true_per,pname,case_num)
 	for (i,file) in enumerate(files)
 		if isfile(file)
 		fit,header=readdlm(file,',',header=true)
-		ax.plot(fit[:,per_col]./365.25 ,xprob(fit[:,end]),label=string(i+14),linewidth=1)
 		if grid_type_nplanet=="p4"
 			ax2=fig.add_axes([0.5,0.2,0.3,0.5])
 			ax2.plot(fit1[:,per_col]./365.25 ,xprob(fit1[:,end]),label=string(i+14))

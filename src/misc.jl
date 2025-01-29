@@ -6,9 +6,6 @@ gaussian(x,mu,sig)=exp.(-((x .- mu).^2) ./ (2 * sig^.2))
 xprob(lprob)=exp.(lprob .- maximum(lprob))
 
 function xprob(lprob,tt,lprob_max)
-  # xprob=[]
-    # @show i
-    # @show x
   xprob=exp.(actual_logL(lprob,tt) .- actual_logL(lprob_max,tt))
   return xprob
 end
@@ -27,7 +24,7 @@ function chi_from_est(lprob,N)
   return chisq
 end
 
-function actual_logL(lprob,tt) # marginalized
+function actual_logL(lprob,tt) # use lprob margin. estimate
   Nobs=length(tt)
   chi2=chi_from_est(lprob,Nobs)
   # logL= sf_gamma_inc_P.(Nobs/2-1,0.5.*chi2)/sf_gamma_inc_P(Nobs/2-1,Nobs/2) .*(Nobs ./chi2).^(Nobs/2-1)
@@ -36,10 +33,10 @@ function actual_logL(lprob,tt) # marginalized
   return logL
 end
 
-function calc_BIC(lprob,tt0,tt,sigtt,nplanet,ntrans,par_mcmc;EM=false) # for systematic error added
+function calc_actual_chi(lprob_mc,tt0,tt,sigtt,nplanet,ntrans,par_mcmc;EM=false) # for systematic error added
   # lprob from estimate
-    imax=argmax(lprob)
-    prob_max=exp.(lprob[imax])
+    imax=argmax(lprob_mc)
+    prob_max=exp.(lprob_mc[imax])
     function calc_chisq(par_mcmc,nplanet,ntrans)
     chisq = 0.0  
     jmax=5
@@ -50,17 +47,17 @@ function calc_BIC(lprob,tt0,tt,sigtt,nplanet,ntrans,par_mcmc;EM=false) # for sys
     return chisq
     end
     chisq=calc_chisq(par_mcmc,nplanet,ntrans)
-    N=length(tt0) ; k=nplanet*5 + 1
+    # N=length(tt0) ; k=nplanet*5 + 1
     #println("[N_obs]= ",N," [no. of model params]= ",k)
     #println("chi^2=",chisq)
     # println("max Prob=",prob_max)
     # reduced_chisq=chisq/(N-k)
-    BIC_chi(chisq,k,N)=chisq .+ k*log(N)
-    BIC_from_mc=-2*log(prob_max) + k*log(N)
-    actual_chisq=chi_from_est(lprob,length(tt0))
-    BIC_from_est=BIC_chi(actual_chisq,k,N)
+    # BIC_chi(chisq,k,N)=chisq .+ k*log(N)
+    # BIC_from_mc=-2*log(prob_max) + k*log(N)
+    # actual_chisq=chi_from_est(lprob_fit,length(tt0))
+    # BIC_from_est=BIC_chi(actual_chisq,k,N)
     # @show BIC
-    return BIC_from_mc,BIC_from_est
+    return chisq#BIC_from_mc,BIC_from_est
   end
 function fit_BIC(lprob,tt0,tt,sigtt,nplanet,ntrans,params;EM::Bool)
 	#imax=argmax(lprob)
@@ -72,11 +69,15 @@ function fit_BIC(lprob,tt0,tt,sigtt,nplanet,ntrans,params;EM::Bool)
 	BIC=-2*log(prob_max) + k*log(N)
 	return reduced_chisq,BIC,chisq
 end
-function marg_BIC(lprob_max,tt0,tt,sigtt,nplanet,ntrans,params;EM)
+function marg_BIC(lprob_max,tt0,tt,sigtt,nplanet,ntrans,params;EM) # approximate solution of lnL
   prob_max=exp.(lprob_max)
   N=length(tt0) ; k=length(params)
   BIC=-2*log(prob_max) + k*log(N)
 	return BIC
+end
+
+function actual_BIC(lprob_fit)
+  chisq_0=chi_from_est(lprob_fit)
 end
 G=CGS.GRAV /1e3 #in MKS units
 AU=CGS.AU /1e2 #in MKS units
@@ -141,9 +142,10 @@ truep1,truep2,truep3,truep4=224.7007992,365.2564,686.9795859,4332.82012875
 trueec1,trueec2,trueec3,trueec4=calc_evec1(0.00677323,131.53298),calc_evec1(0.01671022,102.94719),calc_evec1(0.09341233,336.04084),calc_evec1(0.04839266,14.75385)
 truees1,truees2,truees3,truees4=calc_evec2(0.00677323,131.53298),calc_evec2(0.01671022,102.94719),calc_evec2(0.09341233,336.04084),calc_evec2(0.04839266,14.75385)
 truee1,truee2,truee3,truee4=0.00677323,0.01671022,0.09341233,0.04839266
-true_vals=[truem1;truep1;0.0;trueec1;truees1;truem2;truep2;0.0;trueec2;truees2;
-#    truem3;truep3;0.0;trueec3;truees3;
-truem4;truep4;0.0;trueec4;truees4]
+truet01,truet02,truet03,truet04=3503.7644,3624.4054,333.7268,383.823
+# true_vals=[truem1;truep1;0.0;trueec1;truees1;truem2;truep2;0.0;trueec2;truees2;
+# #    truem3;truep3;0.0;trueec3;truees3;
+# truem4;truep4;0.0;trueec4;truees4]
 function calc_quad_errs(xcos,xcos_err,xsin,xsin_err)
   x = sqrt(xcos^2 .+ xsin^2)
   return sqrt(((xcos^2 * xcos_err^2) + (xsin^2 * xsin_err^2))/x^2)
