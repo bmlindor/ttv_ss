@@ -8,15 +8,15 @@ include("misc.jl")
 function plot_res(sigma::Real,nyear::Real,options,include_moon::Bool=false)
   obs=options[1]; fit_type_nplanet=options[2]; bestfit=options[3]
   if obs=="fromEMB"
-    fitfile=string("FITS/fromEMB/",fit_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
-    fitfile2=string("FITS/fromEMB/p2_fit",sigma,"s",nyear,"yrs.jld2")
-    fitfile3=string("FITS/fromEMB/p3_fit",sigma,"s",nyear,"yrs.jld2")
-    mcfile=string("MCMC/fromEMB/",fit_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
-    mcfile2=string("MCMC/fromEMB/p2_mcmc",sigma,"s",nyear,"yrs.jld2")
-    mcfile3=string("MCMC/fromEMB/p3_mcmc",sigma,"s",nyear,"yrs.jld2")
+    fitfile=string("2025/",fit_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
+    fitfile2=string("2025/p2_fit",sigma,"s",nyear,"yrs.jld2")
+    fitfile3=string("2025/p3_fit",sigma,"s",nyear,"yrs.jld2")
+    mcfile=string("2025/",fit_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+    mcfile2=string("2025/p2_mcmc",sigma,"s",nyear,"yrs.jld2")
+    mcfile3=string("2025/p3_mcmc",sigma,"s",nyear,"yrs.jld2")
     label="EMB";case=1
     low_lim=-6.5;high_lim=6.5
-    data=readdlm("INPUTS/EMBtransit_times30.txt",comments=true)
+    data=readdlm("2025/EMBtt_30s30yrs.txt",comments=true)
   elseif obs=="fromEV"
     fitfile=string("FITS/",fit_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
     fitfile2=string("FITS/p2_fit",sigma,"s",nyear,"yrs.jld2")
@@ -113,8 +113,14 @@ function plot_res(sigma::Real,nyear::Real,options,include_moon::Bool=false)
   # println("Std of residuls for V,",model4," : ",std(res41).*60)
   # println("Std of residuls for E,",model4," : ",std(res42).*60)
   println("Std of noise "," : ",std(sim_noise).*60)
-  noise1=sim_noise[1:n1] ; noise2=sim_noise[n1+1:end]
-
+  noise1=sim_noise[1:n1] .* (24 * 60); noise2=sim_noise[n1+1:end] .* (24 * 60)
+  # Gaussian fit to noise
+  x1_fit=fit(Normal,noise1) ; x2_fit=fit(Normal,noise2)
+  dist(x,mu,sigma) =exp.(-.5 .*((x .-mu) ./ sigma) .^ 2) ./ (sigma .* sqrt(2pi))
+  xs=range(-4,length=100,stop=4)
+  exp_dist=dist.(xs,0.0,0.5)
+  y1=dist.(range(-4,length=48,stop=4),x1_fit.μ,x1_fit.σ) ; y2=dist.(range(-4,length=30,stop=4),x2_fit.μ,x2_fit.σ)
+  nbins=10
   # savefig("IMAGES/scatter.png",dpi=150)
   # show()
   # return x1,x2#res1,res2
@@ -222,32 +228,24 @@ function make_plot()
   ax1.minorticks_on();  ax2.minorticks_on();  ax3.minorticks_on();  ax4.minorticks_on()
   ax1.tick_params(which="both",  direction="in",right=true,top=true )
   ax2.tick_params(which="both",  direction="in",right=true,top=true )
-
-  # Gaussian fit to noise
   # @show(length(noise1))
-  x1_fit=fit(Normal,noise1) ; x2_fit=fit(Normal,noise2)
-  dist(x,mu,sigma) =exp.(-.5 .*((x .-mu) ./ sigma) .^ 2) ./ (sigma .* sqrt(2pi))
-  xs=range(-4,length=100,stop=4)
-  exp_dist=dist.(xs,0.0,0.5)
-  y1=dist.(range(-4,length=49,stop=4),x1_fit.μ,x1_fit.σ) ; y2=dist.(range(-4,length=31,stop=4),x2_fit.μ,x2_fit.σ)
-  nbins=10
 
   op_cycle=plt.cycler("alpha",[0.9,0.6,0.6])
   ls_cycle=plt.cycler("linestyle",["--","-","-."])
   ax5.set_prop_cycle(op_cycle+ls_cycle);  ax6.set_prop_cycle(op_cycle+ls_cycle)
   ax5.set_title("B)",loc="left",fontweight="bold")
   stacked_hist(ax5,[res21,res31,res41],["$model2","$model3","$model4"];nbins=10)
-  ax5.plot(range(-4,length=49,stop=4),y1,linewidth=1.5,color="k")
+  ax5.plot(collect(range(-4,length=48,stop=4)),y1,linewidth=1.5,color="k")
   ax5.plot(xs,exp_dist,linewidth=1.5,color="r",linestyle="-")
   ax6.plot(xs,exp_dist,linewidth=1.5,color="r",label=L"$\mathcal{N( \mu = 0,\sigma = 0.5 )}$",linestyle="-")
-  ax6.plot(range(-4,length=31,stop=4),y2,linewidth=1.5,color="k",linestyle="--")
+  ax6.plot(range(-4,length=30,stop=4),y2,linewidth=1.5,color="k",linestyle="--")
   fig.legend(loc="lower right",fontsize="medium",bbox_to_anchor=(0.9,0.05,0.09,.102),ncol=2)
   lined_hist_stack(ax5,[res21,res31,res41],["$model2","$model3","$model4"];nbins=10)
   stacked_hist(ax6,[res22,res32,res42],["$model2","$model3","$model4"];nbins=10)
   lined_hist_stack(ax6,[res22,res32,res42],["$model2","$model3","$model4"];nbins=10)
 
-  # h=ax5.hist(noise1,histtype="step",bins=nbins,label="Injection",color="black",linewidth=1.5,density=true,linestyle="-")#density=true)
-  # ax6.hist(noise2,histtype="step",bins=nbins,color="black",linewidth=1.5,density=true,linestyle="-")
+  #ax5.hist(noise1,histtype="step",bins=nbins,label="Injection",color="black",linewidth=1.5,density=true,linestyle="-")#density=true)
+  #ax6.hist(noise2,histtype="step",bins=nbins,color="black",linewidth=1.5,density=true,linestyle="-")
   ax6.set_ylabel("Density");ax5.minorticks_on()
   ax5.set_ylabel("Density");ax6.minorticks_on()
   ax6.set_xlabel("Scatter [min]")
@@ -257,13 +255,14 @@ function make_plot()
   ax5.set_yticks((0,0.2,0.4,0.6,0.8,1))
   fig.subplots_adjust(hspace=0.0,wspace=0.2,left=0.07,right=0.98,top=0.95)
   # tight_layout()
-  fig.savefig("IMAGES/ttv/residuals.jpg",dpi=200)
-  return x1_fit,x2_fit
+  # fig.savefig("IMAGES/ttv/residuals.jpg",dpi=200)
+  return 
 end
-  return make_plot()
+  # return x1_fit,x2_fit,y1,y2,noise1,noise2 
+return make_plot()
 #A_ttvs,s2,s3,s4#p4_ttvs
-  # savefig(string("IMAGES/ttv/case",case,"ttv_residuals",sigma,nyear,".pdf"))
-  # show()
+  savefig(string("IMAGES/ttv/2025case",case,"ttv_residuals",sigma,nyear,".pdf"))
+  show()
 
 end
 # Plot moon signal from subtracting EMB times from Earth times
@@ -520,7 +519,7 @@ function plot_contrib(sigma::Real,nyear::Real,options::Array{String},include_moo
   tight_layout()
   # return ttv1,total1
   # legend(loc="upper right")
-  title=string("IMAGES/ttv/",fit_type_nplanet,"_",sigma,"s",nyear,"yrs.png")
+  title=string("IMAGES/ttv/2025",fit_type_nplanet,"_",sigma,"s",nyear,"yrs.png")
   savefig(title,dpi=150)
   # show()
 end

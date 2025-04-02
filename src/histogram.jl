@@ -94,9 +94,9 @@ function comp_hist(sigma,nyear,grid_type_nplanet,nbins,case=1,include_moon=false
    model4=L"$\mathcal{H}_{PPPP}$"
     model2=L"$\mathcal{H}_{PP}$"
   model3=L"$\mathcal{H}_{PPP}$"
-   mcfile=string("MCMC/fromEMB/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
-  mcfile2=string("MCMC/fromEMB/",grid_type_nplanet2,"_mcmc",sigma,"s",nyear,"yrs.jld2")
-  mcfile3=string("MCMC/fromEMB/",grid_type_nplanet3,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+   mcfile=string("2025/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+  mcfile2=string("2025/",grid_type_nplanet2,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+  mcfile3=string("2025/",grid_type_nplanet3,"_mcmc",sigma,"s",nyear,"yrs.jld2")
   function make_plot(ax,param_col,label,linestyle=nothing,color=nothing;nbins=50)
     values=[];labels=[]
     if isfile(mcfile)
@@ -154,7 +154,7 @@ function comp_hist(sigma,nyear,grid_type_nplanet,nbins,case=1,include_moon=false
   # fig.suptitle
   fig.subplots_adjust(wspace=0.4,hspace=0.5,bottom=0.05,right=0.98,top=0.92)
    # tight_layout()
-   title=string("IMAGES/discussion/case",case,"_",grid_type_nplanet,"_",sigma,"s",nyear,"yrs_common1D.png")
+   title=string("IMAGES/discussion/2025case",case,"_",grid_type_nplanet,"_",sigma,"s",nyear,"yrs_common1D.png")
   savefig(title,dpi=200)
 end
 

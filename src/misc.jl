@@ -29,7 +29,6 @@ function actual_logL(lprob,tt) # use lprob margin. estimate
   chi2=chi_from_est(lprob,Nobs)
   # logL= sf_gamma_inc_P.(Nobs/2-1,0.5.*chi2)/sf_gamma_inc_P(Nobs/2-1,Nobs/2) .*(Nobs ./chi2).^(Nobs/2-1)
   logL=log.(sf_gamma_inc_P.(Nobs/2-1,0.5.*chi2))  .+ (1-Nobs/2-1) .*log.(chi2)
-  # what about lnsig term ? 
   return logL
 end
 

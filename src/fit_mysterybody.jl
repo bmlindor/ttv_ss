@@ -5,14 +5,14 @@
 # using Main.TTVFaster
 # import Main.TTVFaster.ttv_wrapper
 # import Main.TTVFaster.chisquare
-#include("sim_times.jl")
+include("sim_times.jl") 
 include("misc.jl")
 # include("plot_likelihood.jl")
 using TTVFaster,DelimitedFiles,JLD2,LsqFit,Statistics,Profile,PyPlot,CSV,DataFrames
 rc("lines",linewidth=2)
 
 # using PyPlot,Unitful,UnitfulAstro,LinearAlgebra
-sigma=100; nyear=30
+sigma=35; nyear=30
 jd1=2.4332825e6
 tref = 2430000
 tol = 1e-5
@@ -22,13 +22,13 @@ per_out=3.0*365.25
 nper, nphase = 100, 36
 nmu=10
 jmax = 5
-planet="p3"
+planet="p3";obs= "fromEMB"
 #sigma,nyear=parse(Int64,ARGS[1]),parse(Int64,ARGS[2])
 datafile=string("INPUTS/EMBtt_",sigma,"s",nyear,"yrs.txt")
 save_as_jld2=false
-p4=jldopen("FITS/fromEMB/p4_fit30s30yrs.jld2","r")
-
-function fit_mysteryplanet(;is_txt_file=false,is_jld_file=false) #fit_mysteryplanet(datafile::String,jd1::Float64,tref::Real,tol::Real,obs::String)#::Int,mratio::Float64,per_guess::Float64,per_in::Float64,per_out::Float64,nper::Int,nphase::Int,
+# p4=jldopen("FITS/fromEMB/p4_fit30s30yrs.jld2","r")
+body,trans,tt,sigtt,tt0,noise=sim_obs_and_find_times(jd1,sigma,nyear,obs)
+function fit_mysteryplanet(tt,sigtt;is_txt_file=false,is_jld_file=false) #fit_mysteryplanet(datafile::String,jd1::Float64,tref::Real,tol::Real,obs::String)#::Int,mratio::Float64,per_guess::Float64,per_in::Float64,per_out::Float64,nper::Int,nphase::Int,
   #outfile = string("FITS/",obs,"/mystery_",planet,"_fit",jd1,"JED.jld2")
   if is_txt_file
   outfile = string("FITS/mystery_",planet,"_fit",jd1,".txt")
@@ -47,15 +47,17 @@ function fit_mysteryplanet(;is_txt_file=false,is_jld_file=false) #fit_mysterypla
   end
   nplanet_cond = 2
   nparam=10
+  ntrans=[sum(body .== i) for i=1:nplanet_cond]
   Nobs = sum(ntrans)
   # Actual transit times:
-  nt1,nt2 = ntrans
-  tt1,sigtt1 = tt[1:nt1], sigtt[1:nt1]
-  tt2,sigtt2 = tt[nt1+1:nt1+nt2], sigtt[nt1+1:nt1+nt2]
+  nt1,nt2 = ntrans[1],ntrans[2]
+  tt1,sigtt1 = tt[1:nt1].-tref, sigtt[1:nt1]
+  tt2,sigtt2 = tt[nt1+1:nt1+nt2].-tref, sigtt[nt1+1:nt1+nt2]
   weight = ones(nt1+nt2)./ sigtt.^2 #assigns each data point stat weight d.t. noise = 1/σ^2
   # Estimate the periods of each conditioned planet:
   p1est = median(tt1[2:end] - tt1[1:end-1])
   p2est = median(tt2[2:end] - tt2[1:end-1])
+  @show p1est,p2est
   # Okay,let's do a linear fit to the transit times:
   x1,t01,per1 = linear_fit(tt1,p1est,sigtt1)
   x2,t02,per2 = linear_fit(tt2,p2est,sigtt2)
@@ -65,27 +67,33 @@ function fit_mysteryplanet(;is_txt_file=false,is_jld_file=false) #fit_mysterypla
   t1  = collect(t01 .+ per1 .* range(0,stop=nt1-1,length=nt1)) 
   t2  = collect(t02 .+ per2 .* range(0,stop=nt2-1,length=nt2))
   tt0 = [t1;t2]
-
+  @show tt0
+  subplot(111)
+  plot(t1,tt1.-t1,".",color="green")
+  plot(t1,tt1.-t1,color="black")
+  plot(t2,tt2.-t2,".",color="salmon")
+  plot(t2,tt2.-t2,color="black")
+  clf()
   # Okay,now let's do a 2-planet fit:
     # param_names = mass ratio,period,initial transit time,e*cos(omega),e*sin(omega)
-init_param_guess = [3e-6,per1,t01,0.01,0.01,
+  init_param_guess = [3e-6,per1,t01,0.01,0.01,
                       3e-6,per2,t02,0.01,0.01] 
     # println("Initial parameters: ",init_param)
-function global_fit(tt0,nplanet,ntrans,init_param,jmax,EM) 
-	  # Perform fit with best params, and calculate covariances for parameters: 
-  fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,EM),tt0,tt,weight,init_param)
-  covar=estimate_covar(fit)
-  best_global = fit.param ;   nparam=length(best_global)
-  err=[sqrt(covar[i,j]) for i=1:nparam, j=1:nparam if i==j ]
-  ttmodel = ttv_wrapper(tt0,nplanet,ntrans,best_global,jmax,EM)
-  lprob_best_global= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
-  println("Finished global fit.")
-  # println("New chi-square: ",chisquare(tt0,nplanet,ntrans,best_global,tt,sigtt,jmax,EM))
-  # println("Maximum: ",lprob_best_global,'\n'," Param: ",best_global)
-  return best_global,err
- end
+  function global_fit(tt0,nplanet,ntrans,init_param,jmax,EM) 
+  	  # Perform fit with best params, and calculate covariances for parameters: 
+    fit = curve_fit((tt0,params) -> ttv_wrapper(tt0,nplanet,ntrans,params,jmax,EM),tt0,tt,weight,init_param)
+    covar=estimate_covar(fit)
+    best_global = fit.param ;   nparam=length(best_global)
+    err=[sqrt(covar[i,j]) for i=1:nparam, j=1:nparam if i==j ]
+    ttmodel = ttv_wrapper(tt0,nplanet,ntrans,best_global,jmax,EM)
+    lprob_best_global= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
+    println("Finished global fit.")
+    # println("New chi-square: ",chisquare(tt0,nplanet,ntrans,best_global,tt,sigtt,jmax,EM))
+    # println("Maximum: ",lprob_best_global,'\n'," Param: ",best_global)
+    return best_global,err
+   end
 
-function fit_cond_planets(tt0,tt,sigtt,jmax,nplanet,init_param)
+  function fit_cond_planets(tt0,tt,sigtt,jmax,nplanet,init_param)
     # Set up data structure to hold planet properties,passed to TTVFaster
     data=init_param
     p1=TTVFaster.Planet_plane_hk(data[1],data[2],data[3],data[4],data[ 5])
@@ -98,7 +106,7 @@ function fit_cond_planets(tt0,tt,sigtt,jmax,nplanet,init_param)
     ttv2 = zeros(nt2)
     # Need first call to TTVFaster,without optimizing
     dummy=TTVFaster.compute_ttv!(jmax,p1,p2,time1,time2,ttv1,ttv2)
-
+    @show init_param
     # Now,optimize 2-planet fit
     println("Initial chi-square: ",chisquare(tt0,nplanet,ntrans,init_param,tt,sigtt,jmax,true))
     param1 = init_param .+ 100.0
@@ -159,6 +167,7 @@ function fit_cond_planets(tt0,tt,sigtt,jmax,nplanet,init_param)
           niter+=1
           # println("New Initial chi-square: ",chisquare(tt0,nplanet,ntrans,param3,tt,sigtt,true,per_cur))
         end
+        # @show fit.param
         ttmodel = ttv_wrapper(tt0,nplanet,ntrans,[param3[1:10];10^mu_cur;per_cur;param3[12:end]],jmax,true)
         lprob_phase[i]= (1 - Nobs/2) * log(sum((tt-ttmodel).^2 ./sigtt.^2))
         if lprob_phase[i] > lprob_best 
@@ -176,9 +185,9 @@ function fit_cond_planets(tt0,tt,sigtt,jmax,nplanet,init_param)
         #   lprob_p3[j] = lprob_p3[j-1]
         #   param_p3[1:nparam,j] = [fit.param[1:10];10^fit.param[11];p3_cur;fit.param[12:end]]
         # end
-      end
-      println("Period: ",per[j]," Mass-ratio: ",10^mu3[k]," log Prob: ",lprob_per[j,k])#" Param: ",vec(param_per[1:nparam,j]))
-    end # phase loop
+      end # phase loop
+      # println("Period: ",per[j]," Mass-ratio: ",10^mu3[k]," log Prob: ",lprob_per[j,k])#" Param: ",vec(param_per[1:nparam,j]))
+    end # per loop
   end # mass loop
   # println("Finished ",planet," planet fit w/ fixed period: ",perbest," in ",niter," iterations")
   best_per,err=global_fit(tt0,nplanet,ntrans,perbest,jmax,true)  
@@ -197,10 +206,10 @@ function fit_cond_planets(tt0,tt,sigtt,jmax,nplanet,init_param)
   #for i=1:nparam
   #  println(pname[i]," : ",best_per[i]," ± ",err[i])
   #end
-  mean_mp=[best_per[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
-  mp_errs=[err[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
-  mean_ecc=[sqrt(best_per[(iplanet-1)*5+4]^2 + best_per[(iplanet-1)*5+4]^2) for iplanet=1:nplanet]
-  ecc_errs=[sqrt(err[(iplanet-1)*5+4]^2 + err[(iplanet-1)*5+4]^2) for iplanet=1:nplanet]
+  # mean_mp=[best_per[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
+  # mp_errs=[err[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
+  # mean_ecc=[sqrt(best_per[(iplanet-1)*5+4]^2 + best_per[(iplanet-1)*5+4]^2) for iplanet=1:nplanet]
+  # ecc_errs=[sqrt(err[(iplanet-1)*5+4]^2 + err[(iplanet-1)*5+4]^2) for iplanet=1:nplanet]
 
   # results = string("results/mystery",planet,"_fitresults.txt")
   # open(results,"w") do io
@@ -221,20 +230,20 @@ function fit_cond_planets(tt0,tt,sigtt,jmax,nplanet,init_param)
   ax1.axvline(per_guess/365.25,linestyle="--",color="black")
   ax1.text((per_guess/365.25) + .1,1.01,planet)
   ax1.set_xlabel("Planet Period Search Grid [years]")
-  ax1.set_ylabel("Probability")
+  ax1.set_ylabel("Relative Probability")
   ax1.minorticks_on()
   ax1.tick_params(which="both",direction="in")
   show()
   if save_as_jld2
   @save outfile per lprob_per best_per lprob_best_per ntrans nplanet tt0 tt ttmodel sigtt nphase param_per
   end
-  return #best_per
+  return best_per
 end
-
+best_per = fit_mysteryplanet(tt,sigtt)
 cmap=plt.cm.get_cmap("plasma")
 col_cycler=plt.cycler("color",cmap(range(0,1,length=nmu)))
 ls_cycler=plt.cycler("linestyle",repeat(["--",":"],5))
-wp3=jldopen("FITS/fromEMB/widep3_fit100s30yrs.jld2","r")
+wp3=jldopen(string("FITS/fromEMB/widep3_fit",sigma,"s",nyear,"yrs.jld2"),"r")
 data=wp3["tt"]
 label_cycle = plt.cycler(label=["set {n}" for n in 1:4])
 # println(xprob(wp3["lprob_p3"],data))
@@ -261,25 +270,26 @@ function plot_mu()# plot grid
   end
   # ax3.set_xlim(10,13)
   # ax3.tick_params(left="false",labelleft="false",right="true",labelright="true")
-  fig.legend(loc="upper right",title=string(L"$\gamma$ values"),fontsize="medium",title_fontsize="large",bbox_to_anchor=(0.09,0.8,0.9,.102))
+  fig.legend(loc="upper right",title=string(L"$\gamma$ values"),fontsize="medium",title_fontsize="large",bbox_to_anchor=(0.09,0.8,0.95,.102))
   fac(true_per)=true_per + true_per/100
   ax[2].text(fac(1.88),1.0,"Mars",color="black")
   ax[2].text(fac(11.88),1.0,"Jupiter",color="black")
-  ax[1].text(15,-165,string(L"$σ_{obs}$","=100 s",'\n',L"$m_p/ M_{\odot}$=",L"$10^γ$"),color="black")
+  ax[1].text(2,0.85,string(L"$σ_{obs}$","=",sigma," s",'\n',L"$m_p/ M_{\odot}$=",L"$10^γ$"),color="black",fontsize="large")
   # ax[1].text(3,10000,string(L"$m_p/ M_{\odot}$=",L"$10^γ$"),color="black")
   ax[1].set_ylim(-190,-160)
   ax[1].minorticks_on()
   ax[2].minorticks_on()
   ax[3].minorticks_on()
 
-  ax[3].set_ylabel("Globally Normalized Prob.",fontsize="x-large")
-  ax[2].set_ylabel("Normalized Probability",fontsize="x-large")
-  ax[1].set_ylabel("Marginalized logLikelihood",fontsize="x-large")
+  ax[3].set_ylabel("Relative Probability",fontsize="x-large")
+  ax[2].set_ylabel("Relative Probability",fontsize="x-large")
+  # ax[3].set_title("As a function of mass-ratio")
+  ax[1].set_ylabel("logLikelihood",fontsize="x-large")
   ax[3].tick_params(top=true,direction="in")
   fig.supxlabel("Orbital Period [years]",fontsize="x-large")
   # fig.suptitle("Difference between actual and approximate logL in blind search")
   tight_layout()
-  # savefig("IMAGES/actual_logL_zoom_jup_norm.png",dpi=150)
+  savefig("IMAGES/actual_logL_zoom_jup_norm.png",dpi=150)
 end
 # plot_mu()
 # show()

@@ -139,9 +139,29 @@ function corner(xs,labels,nbins,force_range::Bool=true;quantiles=[],levels=[],sh
 	left=lb, bottom=lb, right=tr, top=tr, wspace=whspace, hspace=whspace)
 end
 
-function plot_traces()
-  fig=figure(figsize=(8,6))
-  fig,axs=plt.subplots(nrows=5,ncols=nplanet)
+function plot_traces(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::Bool=false) 
+  # EM=true
+  # if case_num==1  #&& isfile(string("MCMC/fromEMB/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
+  #   mcfile=string("2025/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+  #   fitfile=string("2025/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
+  # elseif case_num==2 #&& isfile(string("MCMC/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
+  #   mcfile=string("MCMC/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+  #   fitfile=string("FITS/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
+  # else
+  #   return  println("MCMC file for case",case_num," with ",grid_type_nplanet," model at ",sigma," secs and ",nyear," yrs doesn't exist!!!!")
+  # end
+  # if include_moon
+  #   EM=false
+  # end
+
+  # jldmc=jldopen(String(mcfile),"r")
+  # jldfit=jldopen(String(fitfile),"r")
+  # nwalkers,nsteps=jldmc["nwalkers"],jldmc["nsteps"]
+  # iburn,samples=jldmc["iburn"], jldmc["indepsamples"]
+  # par_mcmc=jldmc["par_mcmc"]; lprob_mcmc=jldmc["lprob_mcmc"]  ; param=jldmc["param"]
+  # pname=jldmc["pname"]
+  # fig=figure(figsize=(8,6))
+  # fig,axs=plt.subplots(nrows=5,ncols=nplanet)
   fig.suptitle(string(model," traces; BIC=",BIC))
   for ax in axs
     for i=1:nparam
@@ -151,15 +171,15 @@ function plot_traces()
     ax.set_ylabel(pname[i])
     end
   end
-  title=string("IMAGES/trace/case",case_num,grid_type_nplanet,"-",sigma,"secs",nyear,"yrs.png")
-  savefig(title)
+  # title=string("IMAGES/trace/2025case",case_num,grid_type_nplanet,"-",sigma,"secs",nyear,"yrs.png")
+  # savefig(title)
 end
 # Create a corner plot for posterior distributions of planet parameters
 function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::Bool=false) 
   EM=true
   if case_num==1  #&& isfile(string("MCMC/fromEMB/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
-    mcfile=string("../MCMC/fromEMB/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
-    fitfile=string("../FITS/fromEMB/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
+    mcfile=string("2025/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+    fitfile=string("2025/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
   elseif case_num==2 #&& isfile(string("MCMC/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
     mcfile=string("MCMC/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
     fitfile=string("FITS/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
@@ -275,15 +295,15 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
     # parname[8];
     parname[9];
     parname[10];
-   #  parname[11];
-   # parname[12];
-   # # parname[13];
-   # parname[14];parname[15]
+    parname[11];
+   parname[12];
+   # parname[13];
+   parname[14];parname[15]]
 
-   parname[16];parname[17];parname[19];parname[20]]
+   # parname[16];parname[17];parname[19];parname[20]]
     corner(values,labels,nbins)
     # show()
-    title=string("../IMAGES/corner/case",case_num,grid_type_nplanet,"-",sigma,"secs",nyear,"yrs.png")
+    title=string("/IMAGES/corner/2025case",case_num,grid_type_nplanet,"-",sigma,"secs",nyear,"yrs.png")
     # fig1=corner([m1,ec1,p1,m2,ec2,p2],[truem1,trueec1,truep1,truem2,trueec2,truep2],labels,nbins)
     # fig1.suptitle(string(model," Posteriors for Planet 1"))
     # fig1.text(0.36,0.8,string(L"$\sigma_{sys}=$",sigsys," sec",'\n',L"$\sigma_{tot}=$",sigtot," sec",'\n',"BIC= ",BIC,'\n',L"$\chi^2 =$",chi))

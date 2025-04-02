@@ -9,7 +9,7 @@ path_to_file="~/work/washington/ttvs/ttv_ss/INPUTS/DE440.bsp"
 if isfile(path_to_file)
   eph=Ephem(path_to_file)
 else
-  eph = Ephem("../ttv_ss/INPUTS/DE440.bsp") 
+  eph = Ephem("../INPUTS/DE440.bsp") 
 end
  prefetch(eph)
 options = useNaifId+unitKM+unitDay # useNaifId + unitDay + unitAU
@@ -254,7 +254,7 @@ function sim_obs_and_find_times(jd1::Float64,sigma::Real,nyear::Real,obs::String
     end
   end
    for i=1:length(tt)
-      println(body[i],'\t',trans[i],'\t',tt[i])#'\t',tt0[i],'\t',tt[i]-tt0[i],'\t',noise[i],'\t',sigtt[i])
+      println(body[i],'\t',trans[i],'\t',tt[i],'\t',tt[i]-tt0[i],'\t',noise[i])
     end
   # println(tt1+noise1,tt2+noise2)
   # make_transit_times_table()

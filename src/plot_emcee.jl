@@ -3,7 +3,7 @@ include("CGS.jl")
 # Plot MCMC mass vs period traces 
 function plot_trace(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num,include_moon::Bool=false)
   if case_num==1 #&& isfile(string("MCMC/fromEMB/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jl"))
-    mcfile=string("MCMC/fromEMB/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+    mcfile=string("2025/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
     case_label="Case 1"
     title="Posteriors from Venus + EMB TTVs"
   elseif case_num==2 #&& isfile(string("MCMC/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
@@ -103,10 +103,10 @@ function plot_trace(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num,i
 ##plotting vs prob
   function jup_traces()
     ax1=subplot(221) # planet 4 probability traces
-    suptitle(string(title,'\n'," [",nyear," yr span] ",L"$\sigma_{obs}=$",sigma," sec ",L"$\sigma_{sys}=$",round(sigsys,sigdigits=3)," sec"))
+    suptitle(string(title,'\n'," [",nyear," yr span] ",L"$\sigma_{obs}=$",sigma," sec ; ",L"$\sigma_{sys}=$",round(sigsys,sigdigits=3)," sec"))
       for j=1:nwalkers
       plot(vec(par_mcmc[j,iburn:nsteps,end]).* 3600*24,lprob_mcmc[j,iburn:nsteps])
-      xlabel(L"$\sigma_{sys}$ [sec]")
+      xlabel(L"$\sigma_{sys}$ [min]")
         # plot(vec(lprob_mcmc[j,iburn:nsteps]),label=string("walker=",j))
       end
       subplot(222)
@@ -134,7 +134,7 @@ function plot_trace(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num,i
     suptitle(string(title,'\n'," [",nyear," yr span] ",L"$\sigma_{obs}=$",sigma," sec ",L"$\sigma_{sys}=$",round(sigsys,sigdigits=3)," sec"))
       for j=1:nwalkers
       plot(vec(par_mcmc[j,iburn:nsteps,end]).* 3600*24,lprob_mcmc[j,iburn:nsteps])
-      xlabel(L"$\sigma_{sys}$ [set]")
+      xlabel(L"$\sigma_{sys}$ [min]")
       end
       subplot(222)
       for j=1:nwalkers
@@ -188,7 +188,7 @@ function plot_trace(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num,i
   #   ax8.set_ylabel(L"$t_{max}$ [days]")
   # end
   # mars_traces()
-  name=string("IMAGES/trace/case",case_num,"main",grid_type_nplanet,sigma,"s",nyear,"yrs.png")
+  name=string("IMAGES/trace/2025case",case_num,"main",grid_type_nplanet,sigma,"s",nyear,"yrs.png")
   main_traces()
   # tight_layout()
   savefig(name)
@@ -226,19 +226,19 @@ function plot_emcee(sigma::Real,nyear::Real,sim::String,model::String,include_mo
   ax1.set_ylabel(parname[i])
   end
   tight_layout()
-  title=string("IMAGES/traces/",sim,model,"Venus-",sigma,"secs",nyear,"yrs.png")
+  title=string("IMAGES/traces/",sim,model,"testVenus-",sigma,"secs",nyear,"yrs.png")
   savefig(title)
   clf()
   figure(figsize=(8,6))
   for i=1:5
-    ax2=subplot(3,2,i)
-    for j=1:nwalkers 
-    ax2.plot(par_mcmc[j,iburn:nsteps,i+5])
-    end
-    ax2.set_ylabel(parname[i+5])
+  ax2=subplot(3,2,i)
+  for j=1:nwalkers 
+  ax2.plot(par_mcmc[j,iburn:nsteps,i+5])
+  end
+  ax2.set_ylabel(parname[i+5])
   end
   tight_layout()
-  title=string("IMAGES/traces/",sim,model,"Earth-",sigma,"secs",nyear,"yrs.png")
+  title=string("IMAGES/traces/",sim,model,"testEarth-",sigma,"secs",nyear,"yrs.png")
   savefig(title)
   clf()
   if String(model)=="p5"
@@ -251,7 +251,7 @@ function plot_emcee(sigma::Real,nyear::Real,sim::String,model::String,include_mo
     ax3.set_ylabel(parname[i+20])
     end
     tight_layout()
-    title=string("IMAGES/traces/",sim,model,"Saturn-",sigma,"secs",nyear,"yrs.png")
+    title=string("IMAGES/traces/",sim,model,"testSaturn-",sigma,"secs",nyear,"yrs.png")
     savefig(title)
     clf()
     figure(figsize=(8,6))
@@ -263,7 +263,7 @@ function plot_emcee(sigma::Real,nyear::Real,sim::String,model::String,include_mo
     ax3.set_ylabel(parname[i+10])
     end
     tight_layout()
-    title=string("IMAGES/traces/",sim,model,"Mars-",sigma,"secs",nyear,"yrs.png")
+    title=string("IMAGES/traces/",sim,model,"testMars-",sigma,"secs",nyear,"yrs.png")
     savefig(title)
     clf()
     figure(figsize=(8,6))
@@ -280,29 +280,29 @@ function plot_emcee(sigma::Real,nyear::Real,sim::String,model::String,include_mo
       ax4.set_ylabel(parname[end])
     end
     tight_layout()
-    title=string("IMAGES/traces/",sim,model,"Jupiter-",sigma,"secs",nyear,"yrs.png")
+    title=string("IMAGES/traces/",sim,model,"testJupiter-",sigma,"secs",nyear,"yrs.png")
     savefig(title)
     clf()
   elseif String(model)=="p4"
     figure(figsize=(8,6))
     for i=1:5
-      ax3=subplot(3,2,i)
-      for j=1:nwalkers 
-      ax3.plot(par_mcmc[j,iburn:nsteps,i+10])
-      end
-      ax3.set_ylabel(parname[i+10])
+    ax3=subplot(3,2,i)
+    for j=1:nwalkers 
+    ax3.plot(par_mcmc[j,iburn:nsteps,i+10])
+    end
+    ax3.set_ylabel(parname[i+10])
     end
     tight_layout()
-    title=string("IMAGES/traces/",sim,model,"Mars-",sigma,"secs",nyear,"yrs.png")
+    title=string("IMAGES/traces/",sim,model,"testMars-",sigma,"secs",nyear,"yrs.png")
     savefig(title)
     clf()
     figure(figsize=(8,6))
     for i=1:5
-      ax3=subplot(3,2,i)
-      for j=1:nwalkers 
-      ax3.plot(par_mcmc[j,iburn:nsteps,i+15])
-      end
-      ax3.set_ylabel(parname[i+15])
+    ax3=subplot(3,2,i)
+    for j=1:nwalkers 
+    ax3.plot(par_mcmc[j,iburn:nsteps,i+15])
+    end
+    ax3.set_ylabel(parname[i+15])
     end
     ax4=subplot(3,2,6)
     for j=1:nwalkers
@@ -310,7 +310,7 @@ function plot_emcee(sigma::Real,nyear::Real,sim::String,model::String,include_mo
       ax4.set_ylabel(parname[end])
     end
     tight_layout()
-    title=string("IMAGES/traces/",sim,model,"Jupiter-",sigma,"secs",nyear,"yrs.png")
+    title=string("IMAGES/traces/",sim,model,"testJupiter-",sigma,"secs",nyear,"yrs.png")
     savefig(title)
     clf()
   else
@@ -328,7 +328,7 @@ function plot_emcee(sigma::Real,nyear::Real,sim::String,model::String,include_mo
       ax4.set_ylabel(parname[end])
     end
     tight_layout()
-    title=string("IMAGES/traces/",sim,model,"Jupiter-",sigma,"secs",nyear,"yrs.png")
+    title=string("IMAGES/traces/",sim,model,"testJupiter-",sigma,"secs",nyear,"yrs.png")
     savefig(title)
     clf()
   end
@@ -352,7 +352,55 @@ function plot_emcee(sigma::Real,nyear::Real,sim::String,model::String,include_mo
     clf()
   end
 end
+	function all_traces(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num::Int=1,include_moon::Bool=false)
+  EM=true
+  if case_num==1 && isfile(string("MCMC/fromEMB/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
+    mcfile=string("2025/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+    fitfile=string("2025/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
+  elseif case_num==2 && isfile(string("MCMC/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
+    mcfile=string("MCMC/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+    fitfile=string("FITS/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
+  else
+    return println("MCMC file for case ",case_num," with ",grid_type_nplanet," model at ",sigma," secs and ",nyear," yrs doesn't exist!!!!")
+  end
+  if include_moon
+    EM=false
+  end
+	  jldmc=jldopen(String(mcfile),"r")
+  jldfit=jldopen(String(fitfile),"r")
+  nwalkers,nsteps=jldmc["nwalkers"],jldmc["nsteps"]
+  iburn,samples=jldmc["iburn"], jldmc["indepsamples"]
+  par_mcmc=jldmc["par_mcmc"]; lprob_mcmc=jldmc["lprob_mcmc"]  ; param=jldmc["param"]
+  pname=jldmc["pname"]
+  tt0,tt,ttmodel,sigtt=jldfit["tt0"],jldfit["tt"],jldfit["ttmodel"],jldfit["sigtt"]
+  nplanet,ntrans=jldfit["nplanet"],jldfit["ntrans"]
+  nt1,nt2=jldfit["ntrans"][1],jldfit["ntrans"][2]
+  jmax=5
 
+	fig, axs = plt.subplots(5,nplanet,figsize=(3*nplanet,nplanet*3))
+
+	include("src/CGS.jl")
+
+	for iplanet=1:nplanet
+	    # axs[1,iplanet].axvline(iburn,color="k");          axs[2,iplanet].axvline(iburn,color="k");          axs[3,iplanet].axvline(iburn,color="k");          axs[4,iplanet].axvline(iburn,color="k");          axs[5,iplanet].axvline(iburn,color="k")
+	    axs[1,iplanet].set_ylabel(L"$M [M_{\oplus}]$")
+      axs[2,iplanet].set_ylabel("P_$iplanet [days]");      axs[3,iplanet].set_ylabel("t_0$iplanet [days]")
+      axs[4,iplanet].set_ylabel("ecosϖ$iplanet") 
+      axs[5,iplanet].set_ylabel("esinϖ$iplanet") 
+	    for j=1:nwalkers
+          axs[1,iplanet].plot(par_mcmc[j,iburn:end,(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH)
+          axs[2,iplanet].plot(par_mcmc[j,iburn:end,(iplanet-1)*5+2])
+          axs[3,iplanet].plot(par_mcmc[j,iburn:end,(iplanet-1)*5+3])
+          axs[4,iplanet].plot(par_mcmc[j,iburn:end,(iplanet-1)*5+4])
+          axs[5,iplanet].plot(par_mcmc[j,iburn:end,(iplanet-1)*5+5])
+  #         count+=1
+      end
+  end
+    tight_layout()
+    name=string("IMAGES/trace/2025case",case_num,"all",grid_type_nplanet,sigma,"s",nyear,"yrs.png")
+    savefig(name)
+  end
+  # ax
 function plot_effects(sigma::Real,nyear::Real,sim::String,model::String)
   if String(sim)=="EMB" && isfile(string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
     mcfile=string("MCMC/fromEMB/",model,"_mcmc",sigma,"s",nyear,"yrs.jld2")
@@ -395,15 +443,80 @@ function plot_effects(sigma::Real,nyear::Real,sim::String,model::String)
   nsteps=m["nsteps"]
   accept=m["accept"]
   iburn=m["iburn"]
-
-  fig=figure(figsize=(8,6))
-  for i=2:nparam
-    for j=1:i-1
-    scatter(vec(par_mcmc[1:nwalkers,iburn:nsteps,i]),vec(par_mcmc[1:nwalkers,iburn:nsteps,j]))
-    xlabel(pname[i])
-    ylabel(pname[j])
-    end
-  end
+  plot()
 end
 
+
+function compare_effectivesamples(min_sample,case_num,maxy=NaN,include_moon::Bool=false)
+  if include_moon
+      EM=false
+    end
+    sigmas=[10,30,60,90]#,100,120]
+    nyears=[15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30]
+   values_p3=ones(length(sigmas),length(nyears)) .* NaN
+    values_pn=ones(length(sigmas),length(nyears)) .* NaN
+    errors_pn=ones(length(sigmas),length(nyears)) .* NaN
+    errors_p3=ones(length(sigmas),length(nyears)) .* NaN
+		fig,axs=subplots(2,2,figsize=(11,6))
+		images=[];datasets=[[values_pn] [values_pn]];errors=[[values_pn] [values_pn]]
+
+function get_eff(grid_type_nplanet,values_pn,ax,errors_pn)
+ if  grid_type_nplanet=="p2" 
+    model2=L"$\mathcal{H}_{PP}$"
+  elseif grid_type_nplanet=="p3" || grid_type_nplanet=="widep3"
+    model3=L"$\mathcal{H}_{PPP}$"
+  elseif grid_type_nplanet=="p4" || grid_type_nplanet=="widep4"
+    model4=L"$\mathcal{H}_{PPPP}$"
+  elseif grid_type_nplanet=="p3moon" || grid_type_nplanet=="widep3moon"
+    model=L"$\mathcal{H}_{PPsP}$"
+  elseif grid_type_nplanet=="p3moonp4" || grid_type_nplanet=="widep3moonp4"
+    model=L"$\mathcal{H}_{PPsPP}$"
+  end  
+
+    for (i,sigma) in enumerate(sigmas)
+        for (j,nyear) in enumerate(nyears)
+  #mcfile2=string("MCMC/fromEMB/",grid_type_nplanet2,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+       mcfile=string("MCMC/fromEMB/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+    if case_num==2
+  mcfile=string("MCMC/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+  #    fitfile=string("FITS/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
+    end
+   if isfile(mcfile) #&& isfile(mcfile2) ##&& isfile(fitfile2) && isfile(fitfile)
+       m=jldopen(String(mcfile),"r");#f2=jldopen(String(fitfile2),"r");f3=jldopen(String(fitfile3),"r") 
+   			values_pn[i,j]=m["indepsamples"]
+   			errors_pn[i,j]=median(vec(m["par_mcmc"][:,m["iburn"]:end,end]).* 60*24)
+   end # is file
+			end #loop
+		end # loop
+		return values_pn,errors_pn
+		end #plot function
+	datasets[1],errors[1]=get_eff("p3",values_p3,axs,errors_p3)
+	datasets[2],errors[2]=get_eff("p4",values_pn,axs,errors_pn)
+
+	for i=1:2
+   axs[i].set_yticklabels(["","10","","30","","60","","90"])
+	 axs[i].set_xticklabels(["","15","17","19","21","23","25","27","29"])
+	 axs[i+2].set_yticklabels(["","10","","30","","60","","90"])
+	 axs[i+2].set_xticklabels(["","15","17","19","21","23","25","27","29"])
+   axs[i+2].set_xlabel(string("Baseline, ",L"$n_{year}$ [yrs]"),fontsize="large")
+   axs[i].set_ylabel(string("Injected Noise, ",L"$\sigma_{obs}$ [s]"),fontsize="large")
+   push!(images,axs[i].imshow(datasets[i],origin="lower",cmap="viridis",aspect=2,interpolation="nearest",vmin=min_sample))
+      push!(images,axs[i+2].imshow(errors[i],origin="lower",cmap="viridis",aspect=2,interpolation="nearest",vmin=0))
+   end
+   fig.colorbar(images[1],ax=axs[1],fraction=0.1,label="Minimum Samples",orientation="horizontal")
+	fig.colorbar(images[2],ax=axs[2],fraction=0.1,label=string(L"$\sigma_{sys}$"),orientation="horizontal")
+	fig.colorbar(images[3],ax=axs[3],fraction=0.1,label="Minimum Samples",orientation="horizontal")
+	fig.colorbar(images[4],ax=axs[4],fraction=0.1,label=string(L"$\sigma_{sys}$"),orientation="horizontal")
+      name=string("IMAGES/discussion/eff_sample",case_num,"_",min_sample,"min_err.jpg") 
+    savefig(name,dpi=200)
+	show()
+	end # compare
+# # figsize=(8,6)
+# # for i=2:nparam
+# #   for j=1:i-1
+# #     scatter(vec(par_mcmc[1:nwalkers,iburn:nsteps,i]),vec(par_mcmc[1:nwalkers,iburn:nsteps,j]))
+# #     xlabel(pname[i])
+# #     ylabel(pname[j])
+# #   end
+# # end
 # # name=string("IMAGES/MCMCparams",label,".png")
