@@ -289,11 +289,11 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,nsteps
 end
 
 # Retrieve MCMC results after burn-in, remove bad walkers
-function mc_vals(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num=Int,include_moon::Bool=false)
+function mc_vals(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num::Int,include_moon::Bool=false)
   EM=true
-  if case_num==1 && isfile(string("MCMC/fromEMB/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
-    mcfile=string("MCMC/fromEMB/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
-    fitfile=string("FITS/fromEMB/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
+  if case_num==1 #&& isfile(string("MCMC/fromEMB/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
+    mcfile=string("2025/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+    fitfile=string("2025/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
   elseif case_num==2 && isfile(string("MCMC/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
     mcfile=string("MCMC/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
     fitfile=string("FITS/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
@@ -333,9 +333,19 @@ function mc_vals(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num=Int,
   @info string("chisq from MCMC:",chisq)
   BIC=marg_BIC(f["lprob_best_p$nplanet"],f["tt0"],f["tt"],f["sigtt"],f["nplanet"],f["ntrans"],f["best_p$nplanet"],EM=EM)
   @info string("BIC from marginal approx of lnL:",BIC)
+
+  samplesize = zeros(nparam)
+  for j=1:nwalkers
+    for i=1:nparam
+      samplesize[i] += effective_sample_size(par_mcmc[j,:,i])
+    end
+  end
+  indepsamples = minimum(samplesize)
+  println("Independent Sample Size: ",indepsamples)
+
   # @show jldfit["lprob_best_p2"]
   function plot_trace()
-  fig, axs = plt.subplots(4,nplanet,figsize=(3*nplanet,nplanet*3))
+  fig, axs = plt.subplots(2,nplanet,figsize=(3*nplanet,nplanet*3))
   # figtitle=string(
   # fig.suptitle(figtitle)
   count=0
@@ -345,8 +355,8 @@ function mc_vals(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num=Int,
       # axs[1,2].plot(par_mcmc[j,iburn:nsteps,end].*24*3600)
       for iplanet=1:nplanet
           axs[2,iplanet].plot(par_mcmc[j,:,(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH)
-          axs[3,iplanet].plot(par_mcmc[j,:,(iplanet-1)*5+2])
-          axs[4,iplanet].plot(par_mcmc[j,:,(iplanet-1)*5+4])
+          # axs[3,iplanet].plot(par_mcmc[j,:,(iplanet-1)*5+2])
+          # axs[4,iplanet].plot(par_mcmc[j,:,(iplanet-1)*5+4])
   #         count+=1
       end
   end
@@ -356,22 +366,22 @@ function mc_vals(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num=Int,
   axs[1,2].set_ylabel(L"$σ_{sys}$ [s]")
   for iplanet=1:nplanet
       axs[2,iplanet].set_ylabel(L"$M [M_{\oplus}]$")
-      axs[3,iplanet].set_ylabel("P_$iplanet [days]")
-      axs[4,iplanet].set_ylabel("ecosϖ$iplanet") 
+      # axs[3,iplanet].set_ylabel("P_$iplanet [days]")
+      # axs[4,iplanet].set_ylabel("ecosϖ$iplanet") 
       if iplanet==3 || iplanet==4
         plt.delaxes(ax=axs[1,iplanet])
       end
   end
 
   tight_layout()
-  title=string("trace-case",case_num,grid_type_nplanet,"-",sigma,"secs",nyear,"yrs.png")
+  title=string("2025trace-case",case_num,grid_type_nplanet,"-",sigma,"secs",nyear,"yrs.png")
   savefig(title)
   return fig
   end
-  # plot_trace()
+  plot_trace()
   # println("Hit return to continue")
   # read(stdin,Char)
-  # close()
+  close()
 
 	avg=zeros(nparam)
   med=zeros(nparam)
@@ -379,7 +389,7 @@ function mc_vals(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num=Int,
   errors=zeros((2,nparam))
   high=zeros(nparam)
   # st_dev=zeros(nparam)
-  @info "Prints median info; returns mean info."
+  # @info "Prints median info; returns mean info."
   for i=1:nparam
    med[i],low[i],high[i]=quantile(vec(par_mcmc[:,iburn:end,i]),[0.5,0.1587,0.8413])
    avg[i]=mean(vec(par_mcmc[:,iburn:end,i]))
@@ -393,29 +403,55 @@ function mc_vals(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num=Int,
   ecc_errs1=[calc_quad_errs(med[i-1],med[i],errors[1,i-1],errors[1,i]) for i in 1:length(param) if i%5==0 ]
   ecc_errs2=[calc_quad_errs(med[i-1],med[i],errors[2,i-1],errors[2,i]) for i in 1:length(param) if i%5==0]
 
+  ec1=vec(par_mcmc[:,iburn:nsteps,4])
+  es1=vec(par_mcmc[:,iburn:nsteps,5])
+  ec2=vec(par_mcmc[:,iburn:nsteps,9])
+  es2=vec(par_mcmc[:,iburn:nsteps,10])
+
+  e_err_low1,e_err_high1 = calc_ecc_err(ec1,es1)
+  ecc1=median(calc_ecc(ec1,es1))
+  e_err_low2,e_err_high2 = calc_ecc_err(ec2,es2)
+  ecc2=median(calc_ecc(ec2,es2))
+
+  # e_err_low,e_err_high = cacl_ecc_err(ec1,es1)
 	# periods=[med[i-3] for i in 1:length(param) if i%5==0]
-	sigsys_errs=[med[end], errors[2,end], errors[1,end]].*3600*24
+	sigsys_errs=round.([med[end], errors[2,end], errors[1,end]].*3600*24,sigdigits=3)
   println("Retrieved values.")
   println("M_p[M⊕]= ",masses," +/- ",mass_errs)
   # println("std(M_p)= ",mass_errs)
   # # println("Per [d]= ",periods)#," +/- ",per_errs)
-  println("eccen. =",ecc," + ",ecc_errs2," - ",ecc_errs1)
+  println("eccen_1. =",ecc1," + ",e_err_high1 .- ecc1," - ",ecc1 .- e_err_low1)
+  println("eccen_2. =",ecc2," + ",e_err_high2 .- ecc2," - ",ecc2 .- e_err_low2)
+    if "grid_type_nplanet" == "p3" || "grid_type_nplanet" == "p4"
+    ec3=vec(par_mcmc[:,iburn:nsteps,14])
+    es3=vec(par_mcmc[:,iburn:nsteps,15])
+    e_err_low3,e_err_high3 = calc_ecc_err(ec3,es3)
+    ecc3=median(calc_ecc(ec3,es3))
+    println("eccen_3. =",ecc3," + ",e_err_high3 .- ecc3," - ",ecc3 .- e_err_low3)
+  end 
+    if "grid_type_nplanet" == "p4"
+    ec4=vec(par_mcmc[:,iburn:nsteps,19])
+    es4=vec(par_mcmc[:,iburn:nsteps,20])
+    e_err_low4,e_err_high4 = calc_ecc_err(ec4,es4)
+    ecc4=median(calc_ecc(ec4,es4))
+    println("eccen_4. =",ecc4," + ",e_err_high4 .- ecc4," - ",ecc4 .- e_err_low4)
+  end 
   println("σsys[s] and ± errors: ",sigsys_errs)#," +/- ",sigsys_err)
   println("σtot[s]= ",sigtot)
 
-  return avg,errors
+  # return avg,errors
 end
 
 function mc_table(sigma::Real,nyear::Real,options,include_moon::Bool=false)
   obs=options[1]; fit_type_nplanet=options[2]; #bestfit=options[3]
   EM=true
   if obs=="fromEMB"
-    mcfile=string("MCMC/fromEMB/",fit_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
-    mcfile2=string("MCMC/fromEMB/p2_mcmc",sigma,"s",nyear,"yrs.jld2")
-    mcfile3=string("MCMC/fromEMB/p3_mcmc",sigma,"s",nyear,"yrs.jld2")
-    fitfile=string("FITS/fromEMB/",fit_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
-    fitfile2=string("FITS/fromEMB/p2_fit",sigma,"s",nyear,"yrs.jld2")
-    fitfile3=string("FITS/fromEMB/p3_fit",sigma,"s",nyear,"yrs.jld2")
+    mcfile=string("2025/",fit_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+    mcfile2=string("2025/p2_mcmc",sigma,"s",nyear,"yrs.jld2")
+    mcfile3=string("2025/p3_mcmc",sigma,"s",nyear,"yrs.jld2")
+    fitfile=string("2025/",fit_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
+    fitfile2=string("2025/p2_fit",sigma,"s",nyear,"yrs.jld2")
+    fitfile3=string("2025/p3_fit",sigma,"s",nyear,"yrs.jld2")
     label="EMB";case=1
     low_lim=-6.5;high_lim=6.5
   elseif obs=="fromEV"
@@ -449,29 +485,22 @@ function mc_table(sigma::Real,nyear::Real,options,include_moon::Bool=false)
   vals2=mc2["par_mcmc"][:,mc2["iburn"]:end,:]#,sigdigits=6)
   vals3=mc3["par_mcmc"][:,mc3["iburn"]:end,:]#,sigdigits=6)
 
-  avg=[mean(vec(mc["par_mcmc"][:,mc["iburn"]:end,i])) for i=1:nparam]#,sigdigits=6)
-  avg2=[mean(vec(mc["par_mcmc"][:,mc2["iburn"]:end,i])) for i=1:11]#,sigdigits=6)
-  avg3=[mean(vec(mc["par_mcmc"][:,mc3["iburn"]:end,i])) for i=1:16]#,sigdigits=6)
+  # avg=[mean(vec(mc["par_mcmc"][:,mc["iburn"]:end,i])) for i=1:nparam]#,sigdigits=6)
+  # avg2=[mean(vec(mc["par_mcmc"][:,mc2["iburn"]:end,i])) for i=1:11]#,sigdigits=6)
+  # avg3=[mean(vec(mc["par_mcmc"][:,mc3["iburn"]:end,i])) for i=1:16]#,sigdigits=6)
 
-  med=[quantile(vec(mc["par_mcmc"][:,mc["iburn"]:end,i]),0.5) for i=1:nparam]#,sigdigits=6)
-  med2=[quantile(vec(mc2["par_mcmc"][:,mc2["iburn"]:end,i]),0.5) for i=1:11]#,sigdigits=6)
-  med3=[quantile(vec(mc3["par_mcmc"][:,mc3["iburn"]:end,i]),0.5) for i=1:16]#,sigdigits=6)
+  avg=[quantile(vec(mc["par_mcmc"][:,mc["iburn"]:end,i]),0.5) for i=1:nparam]#,sigdigits=6)
+  avg2=[quantile(vec(mc2["par_mcmc"][:,mc2["iburn"]:end,i]),0.5) for i=1:11]#,sigdigits=6)
+  avg3=[quantile(vec(mc3["par_mcmc"][:,mc3["iburn"]:end,i]),0.5) for i=1:16]#,sigdigits=6)
 
-  low=round.([quantile(vec(mc["par_mcmc"][:,mc["iburn"]:end,i]),0.1587) for i=1:nparam],sigdigits=6)
-  low2=round.([quantile(vec(mc2["par_mcmc"][:,mc2["iburn"]:end,i]),0.1587) for i=1:11],sigdigits=6)
-  low3=round.([quantile(vec(mc3["par_mcmc"][:,mc3["iburn"]:end,i]),0.1587) for i=1:16],sigdigits=6)
+  low=[quantile(vec(mc["par_mcmc"][:,mc["iburn"]:end,i]),0.1587) for i=1:nparam]#,sigdigits=6)
+  low2=[quantile(vec(mc2["par_mcmc"][:,mc2["iburn"]:end,i]),0.1587) for i=1:11]#,sigdigits=6)
+  low3=[quantile(vec(mc3["par_mcmc"][:,mc3["iburn"]:end,i]),0.1587) for i=1:16]#,sigdigits=6)
 
-  high=round.([quantile(vec(mc["par_mcmc"][:,mc["iburn"]:end,i]),0.8413) for i=1:nparam],sigdigits=6)
-  high2=round.([quantile(vec(mc2["par_mcmc"][:,mc2["iburn"]:end,i]),0.8413) for i=1:11],sigdigits=6)
-  high3=round.([quantile(vec(mc3["par_mcmc"][:,mc3["iburn"]:end,i]),0.8413) for i=1:16],sigdigits=6)
+  high=[quantile(vec(mc["par_mcmc"][:,mc["iburn"]:end,i]),0.8413) for i=1:nparam]#,sigdigits=6)
+  high2=[quantile(vec(mc2["par_mcmc"][:,mc2["iburn"]:end,i]),0.8413) for i=1:11]#,sigdigits=6)
+  high3=[quantile(vec(mc3["par_mcmc"][:,mc3["iburn"]:end,i]),0.8413) for i=1:16]#,sigdigits=6)
 
-  errors=zeros(2,nparam)
-  for i=1:nparam
-  errors[1,i]=med[i]-low[i]; errors[2,i]=high[i]-med[i]
-  end
-  #   for j=1:3
-   # errors[1,1:11,1]=avg2-low2 ;errors[1,1:16,2]=avg3-low3 ;errors[1,1:21,3]=avg-low; 
-   # errors[2,1:11,1]=high2-avg2 ;errors[2,1:16,2]=high3-avg3 ; errors[2,1:21,3]=high-avg; 
 
   # prob=quantile(exp.(mc["lprob_mcmc"][mc["iburn"]:mc["nsteps"]]),0.5);#prob_max = maximum(exp.(mc["lprob_mcmc"][mc["iburn"]:mc["nsteps"]]))
   #  prob2=quantile(exp.(mc2["lprob_mcmc"][mc2["iburn"]:mc2["nsteps"]]),0.5);#prob_max2 = maximum(exp.(mc2["lprob_mcmc"][mc2["iburn"]:mc2["nsteps"]]))
@@ -481,7 +510,7 @@ function mc_table(sigma::Real,nyear::Real,options,include_moon::Bool=false)
 
   # marg_BIC2=marg_BIC(f2["lprob_best_p2"],f2["tt0"],f2["tt"],f2["sigtt"],f2["nplanet"],f2["ntrans"],f2["best_p2"],EM=EM)
   # marg_BIC3=marg_BIC(f3["lprob_best_p3"],f3["tt0"],f3["tt"],f3["sigtt"],f3["nplanet"],f3["ntrans"],f3["best_p3"],EM=EM) 
-  #   # values_p4[i,j]=fit_BIC(f4["lprob_best_p4"],f4["tt0"],f4["tt"],f4["sigtt"],f4["nplanet"],f4["ntrans"],f4["best_p4"],EM=EM)[2] 
+  # #   # values_p4[i,j]=fit_BIC(f4["lprob_best_p4"],f4["tt0"],f4["tt"],f4["sigtt"],f4["nplanet"],f4["ntrans"],f4["best_p4"],EM=EM)[2] 
   # marg_BIC=marg_BIC(f["lprob_best_p$nplanet"],f["tt0"],f["tt"],f["sigtt"],f["nplanet"],f["ntrans"],f["best_p$nplanet"],EM=EM)#,sigdigits=6)
 #  mc_BIC,est_BIC=calc_BIC(mc["lprob_mcmc"][:,mc["iburn"]:mc["nsteps"]],f["lprob_best_p4"],f["tt0"],f["tt"],f["sigtt"],f["nplanet"],f["ntrans"],vals;EM=EM)#,sigdigits=6)
 #   mc_BIC2,est_BIC=calc_BIC(mc2["lprob_mcmc"][:,mc2["iburn"]:mc2["nsteps"]],f2["lprob_best_p2"],f2["tt0"],f2["tt"],f2["sigtt"],f2["nplanet"],f2["ntrans"],vals2;EM=EM)#,sigdigits=6)
@@ -508,90 +537,33 @@ function mc_table(sigma::Real,nyear::Real,options,include_moon::Bool=false)
    model=L"$\mathcal{H}_{PPPP}$"
 
   function make_table()
-  if obs=="fromEMB"
-    name = string("OUTPUTS/EMBmc_table_",sigma,"s",nyear,"yrs.tex")
-  else
-    name = string("OUTPUTS/EVmc_table_",sigma,"s",nyear,"yrs.tex")
-  end
-  # open(name,"w") do io
-
-    println("Model",'\t',model2,'\t',model3,'\t',model,"\\")
-    # println("marg_BIC",'\t',marg_BIC2,'\t',marg_BIC3,'\t',marg_BIC," \\")
+    if obs=="fromEMB"
+      name = string("2025/EMBmc_table_",sigma,"s",nyear,"yrs.tex")
+    else
+      name = string("OUTPUTS/EVmc_table_",sigma,"s",nyear,"yrs.tex")
+    end
+  open(name,"w") do io
+    println(io,"Model",'\t',model2,'\t',model3,'\t',model,"\\")
+    # println(io,"χ^2",'\t',chi2,'\t',chi3,'\t',chi,"\\")
+    # println(io,"marg_BIC",'\t',marg_BIC2,'\t',marg_BIC3,'\t',marg_BIC," \\")
+    for i=1:nparam
+      if i<=10
+        println(io,parname[i],'\t',"\$",round(avg2[i],sigdigits=6),"_{-",round(avg2[i]-low2[i],sigdigits=6),"}^{+",round(high2[i]-avg2[i],sigdigits=6),"} \$ & ",'\t',"\$",round(avg3[i],sigdigits=6),"_{-",round(avg3[i]-low3[i],sigdigits=6),"}^{+",round(high3[i]-avg3[i],sigdigits=6),"} \$ & ",'\t',"\$",round(avg[i],sigdigits=6),"_{-",round(avg[i]-low[i],sigdigits=6),"}^{+",round(high[i]-avg[i],sigdigits=6),"} \$ \\")
+      end 
+      if i >=11 && i <= 15
+        println(io,parname[i],'\t','\t','\t',"\$",round(avg3[i],sigdigits=6),"_{-",round(avg3[i]-low3[i],sigdigits=6),"}^{+",round(high3[i]-avg3[i],sigdigits=6),"} \$ & ",'\t',"\$",round(avg[i],sigdigits=6),"_{-",round(avg[i]-low[i],sigdigits=6),"}^{+",round(high[i]-avg[i],sigdigits=6),"} \$ \\")
+      end
+      if i >=16 && i <= 20
+        println(io,parname[i],'\t','\t','\t','\t','\t',"\$",round(avg[i],sigdigits=6),"_{-",round(avg[i]-low[i],sigdigits=6),"}^{+",round(high[i]-avg[i],sigdigits=6),"} \$ \\")
+      end
+    end
     # println("BIC",'\t',BIC2,'\t',BIC3,'\t',BIC," \\")
- 		# println("χ^2",'\t',chi2,'\t',chi3,'\t',chi,"\\")
     # println("reduced χ^2",'\t',reduced_chi2,'\t',reduced_chi3,'\t',reduced_chi,"\\")
-  println(med[end].*24*3600,"_{-",low[end].*24*3600,"}^{+",high[end].*24*3600,"}")
-  for i=1:length(med)-1
-    println(med[i],"_{-",low[i],"}^{+",high[i],"}")
+  # println(med[end].*24*3600,"_{-",low[end].*24*3600,"}^{+",high[end].*24*3600,"}")
+  # for i=1:length(med)-1
+  #   println(med[i],"_{-",low[i],"}^{+",high[i],"}")
+  # end
   end
   end # make_table function
-
-
-
-labels=["planet b","planet c","planet e","planet d"]
-planets=["Venus", "Earth","Mars","Jupiter"]
-colors=["salmon","forestgreen","orange","firebrick"]
-true_Mp=[0.815, 1,0.1074,317.8]
-noise=[30, 30 ,30]
-# plt.figure()
-fig,axs=plt.subplots(3, 1,figsize=(6,4))
-function plot_noise(ax,true_Mp,med,errors)
-  # fig.subplots_adjust(hspace=0.05)  # adjust space between axes
-  ax1,ax2,ax3=ax[1],ax[2],ax[3]
-  # ax1.minorticks_on();ax2.minorticks_on();ax3.minorticks_on();
-
-  ax1.spines["bottom"].set_visible(false)
-  ax1.tick_params(labelbottom=false,bottom=false)
-  ax2.spines["top"].set_visible(false)
-  # ax2.tick_params(labeltop=false)  # don't put tick labels at the top
-  ax2.tick_params(labeltop=false,bottom=false,top=false,labelbottom=false)
-    ax0.tick_params(labelleft=false,bottom=false,left=false,labelbottom=false)  # don't put tick labels at the top
-  ax2.spines["bottom"].set_visible(false)
-  ax3.tick_params(labeltop=false,top=false)  # don't put tick labels at the top
-  ax3.spines["top"].set_visible(false)
-  ax1.set_ylim(225, 350)  # outliers only
-  ax2.set_ylim(.72, 1.1)  # most of the data
-  ax3.set_ylim(0.0, 0.3)  # most of the data
-  d =0.02  # proportion of vertical to horizontal extent of the slanted line
-  # kwargs = dict(marker=[(-1, -d), (1, d)], markersize=12,
-  #               linestyle="none", color='k', mec='k', mew=1, )
-  ax1.plot((-d, +d), (-d, +d), transform=ax1.transAxes, clip_on=false,linewidth=0.8,color="k")
-  ax1.plot((1-d,1 +d), (-d, +d), transform=ax1.transAxes, clip_on=false,linewidth=0.8,color="k")
-  ax2.plot((-d, +d), (1-d,1 +d), transform=ax2.transAxes, clip_on=false,linewidth=0.8,color="k")
-  ax2.plot((1-d,1 +d), (1-d, 1+d), transform=ax2.transAxes, clip_on=false,linewidth=0.8,color="k")
-  ax2.plot((-d, +d), (-d, +d), transform=ax2.transAxes, clip_on=false,linewidth=0.8,color="k")
-  ax2.plot((1-d,1 +d), (-d, +d), transform=ax2.transAxes, clip_on=false,linewidth=0.8,color="k")
-  ax3.plot((-d, +d), (1-d,1 +d), transform=ax3.transAxes, clip_on=false,linewidth=0.8,color="k")
-  ax3.plot((1-d,1 +d), (1-d, 1+d), transform=ax3.transAxes, clip_on=false,linewidth=0.8,color="k")
-
-  for iplanet=1:4
-  ax1.axhline(true_Mp[iplanet],linestyle="--",color=colors[iplanet])
-  ax2.axhline(true_Mp[iplanet],linestyle="--",color=colors[iplanet])
-  ax3.axhline(true_Mp[iplanet],linestyle="--",color=colors[iplanet])
-  ax3.errorbar(30,med[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH,yerr=[errors[1,(iplanet-1)*5+1] errors[2,(iplanet-1)*5+1]]' .*CGS.MSUN/CGS.MEARTH,color=colors[iplanet],fmt=".",capsize=4)
-  ax2.errorbar(30,med[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH,yerr=[errors[1,(iplanet-1)*5+1] errors[2,(iplanet-1)*5+1]]' .*CGS.MSUN/CGS.MEARTH,color=colors[iplanet],fmt=".",capsize=4)
-  ax1.errorbar(30,med[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH,yerr=[errors[1,(iplanet-1)*5+1] errors[2,(iplanet-1)*5+1]]' .*CGS.MSUN/CGS.MEARTH,color=colors[iplanet],fmt=".",capsize=4)
-
-  end
-
-  ax2.set_ylabel(L"M$_p$ [$M_{\oplus}$]",fontsize="large")
-  ax3.set_xlabel(L"$\sigma_{obs}$ (seconds)",fontsize="large")
-
-  end
-
-  println(parname[end],'\t',(avg2[end]).*24*3600,"_{-",(avg2[end]-low2[end]).*24*3600,"}^{+",(high2[end]-avg2[end]).*24*3600,"} & ",'\t',(avg3[end]).*24*3600,"_{-",(avg3[end]-low3[end]).*24*3600,"}^{+",(high3[end]-avg3[end]).*24*3600,"} & ",'\t',(avg[end]).*24*3600,"_{-",(avg[end]-low[end]).*24*3600,"}^{+",(high[end]-avg[end]).*24*3600,"} \\")
-  # for i=1:nparam
-  #   if i<=10
-  #     println(parname[i],'\t',avg2[i],"_{-",avg2[i]-low2[i],"}^{+",high2[i]-avg2[i],"} & ",'\t',avg3[i],"_{-",avg3[i]-low3[i],"}^{+",high3[i]-avg3[i],"} & ",'\t',avg[i],"_{-",avg[i]-low[i],"}^{+",high[i]-avg[i],"} \\")
-  #   end 
-  #   if i >=11 && i <= 15
-  #     println(parname[i],'\t','\t','\t',avg3[i],"_{-",avg3[i]-low3[i],"}^{+",high3[i]-avg3[i],"} & ",'\t',avg[i],"_{-",avg[i]-low[i],"}^{+",high[i]-avg[i],"} \\")
-  #   end
-  #   if i >=16 && i <= 20
-  #     println(io,parname[i],'\t','\t','\t','\t','\t',avg[i],"_{-",avg[i]-low[i],"}^{+",high[i]-avg[i],"} \\")
-  #   end
-  # end
-plot_noise(axs,true_Mp,med,errors)
-  return errors
+  make_table()
 end
-

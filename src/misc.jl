@@ -87,7 +87,7 @@ RV_semiamplitude(Per,mp,ecc,inc,mstar) = (((mp*sin(inc))^3/((Per*24*3600) * (1-e
 calc_deg(value)=value * 180/pi
 calc_evec1(e,omega)=e* cos(omega-77)
 calc_evec2(e,omega)=e* sin(omega-77)
-calc_ecc(ecosomega,esinomega)=sqrt(ecosomega^2 + esinomega^2)
+calc_ecc(ecosomega,esinomega)=sqrt.(ecosomega.^2 .+ esinomega.^2)
 calc_tmax(a_p,a_s,m_p,m_s,P_p)=(a_s*m_s*P_p) / (2*pi*a_p*(m_s+m_p))
 #Hill_radius((1733*24*3600),(27*5.9742e24),0.4,1.99e30)
 function mutual_Hill(Per1,mp1,mstar,Per2,mp2)
@@ -154,3 +154,16 @@ function calc_quad(x,y)
   r=sqrt(x^2 + y^2)
   return r
 end
+function calc_ecc_err(evec1,evec2)
+   ecc =  calc_ecc.(vec(evec1),vec(evec2))
+   # @show median(ecc)
+   ecc_sort = sort(ecc)
+   sm=cumsum(ecc_sort)/sum(ecc_sort)
+   levels =  [0.1587,0.8413];                 
+   val=zeros(length(levels))#[ 0.1175, 0.393, 0.6753, 0.8646]
+   for (i,v0) in enumerate(levels)
+     val[i]=ecc_sort[sm .<= (v0)][end]
+   end
+   # ecc_sort[sm .<= (v0)]
+   return val
+ end

@@ -9,14 +9,14 @@ function plot_res(sigma::Real,nyear::Real,options,include_moon::Bool=false)
   obs=options[1]; fit_type_nplanet=options[2]; bestfit=options[3]
   if obs=="fromEMB"
     fitfile=string("2025/",fit_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
-    fitfile2=string("2025/p2_fit",sigma,"s",nyear,"yrs.jld2")
-    fitfile3=string("2025/p3_fit",sigma,"s",nyear,"yrs.jld2")
+    fitfile2=string("2025/newp2_fit",sigma,"s",nyear,"yrs.jld2")
+    fitfile3=string("2025/newp3_fit",sigma,"s",nyear,"yrs.jld2")
     mcfile=string("2025/",fit_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
-    mcfile2=string("2025/p2_mcmc",sigma,"s",nyear,"yrs.jld2")
-    mcfile3=string("2025/p3_mcmc",sigma,"s",nyear,"yrs.jld2")
+    mcfile2=string("2025/newp2_mcmc",sigma,"s",nyear,"yrs.jld2")
+    mcfile3=string("2025/newp3_mcmc",sigma,"s",nyear,"yrs.jld2")
     label="EMB";case=1
     low_lim=-6.5;high_lim=6.5
-    data=readdlm("2025/EMBtt_30s30yrs.txt",comments=true)
+    data=readdlm("2025/newEMBtt_30s30yrs.txt",comments=true)
   elseif obs=="fromEV"
     fitfile=string("FITS/",fit_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
     fitfile2=string("FITS/p2_fit",sigma,"s",nyear,"yrs.jld2")
@@ -121,7 +121,7 @@ function plot_res(sigma::Real,nyear::Real,options,include_moon::Bool=false)
   exp_dist=dist.(xs,0.0,0.5)
   y1=dist.(range(-4,length=48,stop=4),x1_fit.μ,x1_fit.σ) ; y2=dist.(range(-4,length=30,stop=4),x2_fit.μ,x2_fit.σ)
   nbins=10
-  # savefig("IMAGES/scatter.png",dpi=150)
+
   # show()
   # return x1,x2#res1,res2
 function make_plot()
@@ -177,7 +177,7 @@ function make_plot()
   # ax2.text(maximum(ttsim1)-9,-4,string(L"$\sigma_{obs}=$",sigma," sec "),fontsize="medium")
   # ax4.text(maximum(ttsim2)-9,-5,string(L"$\sigma_{obs}=$",sigma," min "),fontsize="medium")
 
-  if fit_type_nplanet=="p4" || fit_type_nplanet=="p3moonp4" || fit_type_nplanet=="p3moon"
+  if fit_type_nplanet=="p4" || fit_type_nplanet=="p3moonp4" || fit_type_nplanet=="p3moon" || fit_type_nplanet=="newp4"
     p4_ttvs=0
     if obs=="fromEMB"
     p4_ttvs=decompose_ttvs(4,ntrans[1:4],f["best_p4"]) .* (24 * 60)
@@ -235,13 +235,13 @@ function make_plot()
   ax5.set_prop_cycle(op_cycle+ls_cycle);  ax6.set_prop_cycle(op_cycle+ls_cycle)
   ax5.set_title("B)",loc="left",fontweight="bold")
   stacked_hist(ax5,[res21,res31,res41],["$model2","$model3","$model4"];nbins=10)
-  ax5.plot(collect(range(-4,length=48,stop=4)),y1,linewidth=1.5,color="k")
-  ax5.plot(xs,exp_dist,linewidth=1.5,color="r",linestyle="-")
-  ax6.plot(xs,exp_dist,linewidth=1.5,color="r",label=L"$\mathcal{N( \mu = 0,\sigma = 0.5 )}$",linestyle="-")
-  ax6.plot(range(-4,length=30,stop=4),y2,linewidth=1.5,color="k",linestyle="--")
+  ax5.plot(collect(range(-4,length=48,stop=4)),y1,linewidth=1.5,color="k",alpha=0.9)
+  ax5.plot(xs,exp_dist,linewidth=1.5,color="r",linestyle="-",alpha=0.6)
+  ax6.plot(xs,exp_dist,linewidth=1.5,color="r",label=L"$\mathcal{N( \mu = 0,\sigma = 0.5 )}$",linestyle="-",alpha=0.6)
   fig.legend(loc="lower right",fontsize="medium",bbox_to_anchor=(0.9,0.05,0.09,.102),ncol=2)
-  lined_hist_stack(ax5,[res21,res31,res41],["$model2","$model3","$model4"];nbins=10)
   stacked_hist(ax6,[res22,res32,res42],["$model2","$model3","$model4"];nbins=10)
+  ax6.plot(collect(range(-4,length=30,stop=4)),y2,linewidth=1.5,color="k",linestyle="--",alpha=0.9)
+  lined_hist_stack(ax5,[res21,res31,res41],["$model2","$model3","$model4"];nbins=10)
   lined_hist_stack(ax6,[res22,res32,res42],["$model2","$model3","$model4"];nbins=10)
 
   #ax5.hist(noise1,histtype="step",bins=nbins,label="Injection",color="black",linewidth=1.5,density=true,linestyle="-")#density=true)
@@ -252,17 +252,19 @@ function make_plot()
   ax5.text(2,0.8,"planet b")
   ax6.text(2,1.75,"planet c")
   ax5.tick_params(axis="x",direction="in",which="both")
+  ax6.set_ylim(-0.05,2.05);ax5.set_ylim(-0.05,1.05)
   ax5.set_yticks((0,0.2,0.4,0.6,0.8,1))
   fig.subplots_adjust(hspace=0.0,wspace=0.2,left=0.07,right=0.98,top=0.95)
   # tight_layout()
   # fig.savefig("IMAGES/ttv/residuals.jpg",dpi=200)
+    savefig("2025/2025newscatter.png",dpi=150)
   return 
 end
   # return x1_fit,x2_fit,y1,y2,noise1,noise2 
 return make_plot()
 #A_ttvs,s2,s3,s4#p4_ttvs
-  savefig(string("IMAGES/ttv/2025case",case,"ttv_residuals",sigma,nyear,".pdf"))
-  show()
+  # savefig(string("IMAGES/ttv/2025case",case,"ttv_residuals",sigma,nyear,".pdf"))
+  # show()
 
 end
 # Plot moon signal from subtracting EMB times from Earth times
@@ -389,12 +391,12 @@ end
 function plot_contrib(sigma::Real,nyear::Real,options::Array{String},include_moon::Bool=false)
   obs=options[1]; fit_type_nplanet=options[2]; bestfit=options[3]
   if obs=="fromEMB"
-    fitfile=string("FITS/fromEMB/",fit_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
-    fitfile3=string("FITS/fromEMB/p3_fit",sigma,"s",nyear,"yrs.jld2")
+    fitfile=string("2025/",fit_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
+    fitfile3=string("2025/newp3_fit",sigma,"s",nyear,"yrs.jld2")
     label="EMB"
     case=1
-    mcfile=string("MCMC/fromEMB/",fit_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
-    mcfile3=string("MCMC/fromEMB/p3_mcmc",sigma,"s",nyear,"yrs.jld2")
+    mcfile=string("2025/",fit_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+    mcfile3=string("2025/newp3_mcmc",sigma,"s",nyear,"yrs.jld2")
   elseif obs=="fromEV"
     fitfile=string("FITS/",fit_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
     label="Earth"
@@ -519,7 +521,7 @@ function plot_contrib(sigma::Real,nyear::Real,options::Array{String},include_moo
   tight_layout()
   # return ttv1,total1
   # legend(loc="upper right")
-  title=string("IMAGES/ttv/2025",fit_type_nplanet,"_",sigma,"s",nyear,"yrs.png")
+  title=string("2025/2025new",fit_type_nplanet,"_",sigma,"s",nyear,"yrs.png")
   savefig(title,dpi=150)
   # show()
 end

@@ -178,8 +178,8 @@ end
 function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::Bool=false) 
   EM=true
   if case_num==1  #&& isfile(string("MCMC/fromEMB/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
-    mcfile=string("2025/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
-    fitfile=string("2025/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
+    mcfile=string("../2025/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+    fitfile=string("../2025/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
   elseif case_num==2 #&& isfile(string("MCMC/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2"))
     mcfile=string("MCMC/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
     fitfile=string("FITS/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
@@ -196,7 +196,7 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
   iburn,samples=jldmc["iburn"], jldmc["indepsamples"]
   par_mcmc=jldmc["par_mcmc"]; lprob_mcmc=jldmc["lprob_mcmc"]  ; param=jldmc["param"]
   pname=jldmc["pname"]
- 
+
   # println("# of independent samples: ",samples)
   # println("Burn-in number: ",iburn," out of ",nsteps," steps")
   tt0,tt,ttmodel,sigtt=jldfit["tt0"],jldfit["tt"],jldfit["ttmodel"],jldfit["sigtt"]
@@ -212,6 +212,7 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
    avg[i],minus1sig[i],plus1sig[i]=quantile(vec(par_mcmc[:,iburn:end,i]),[0.5,0.1587,0.8413])
    # println(pname[i]," = ",avg[i]," + ",abs(plus1sig[i]-avg[i])," _ ",abs(avg[i]-minus1sig[i]))
   end
+
   # stable=false 
   # mutual_radius=mutual_Hill(avg[2],avg[1].*CGS.MSUN/CGS.MEARTtranspose(H),CGS.MSUN,avg[7],avg[6].*CGS.MSUN/CGS.MEARTH)
  # if mutual_radius <
@@ -249,6 +250,7 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
     ec1=vec(par_mcmc[:,iburn:nsteps,4])#.*sqrt.(vec(par_mcmc[11:20,iburn:nsteps,4]).^2 .+ vec(par_mcmc[11:20,iburn:nsteps,5]).^2)
     es1=vec(par_mcmc[:,iburn:nsteps,5])#.*sqrt.(vec(par_mcmc[11:20,iburn:nsteps,4]).^2 .+ vec(par_mcmc[11:20,iburn:nsteps,5]).^2)
     p1=vec(par_mcmc[:,iburn:nsteps,2])#.-offset_p1
+
     truem1=0.815
     trueec1=calc_evec1(0.00677323,131.53298)
     truees1=calc_evec2(0.00677323,131.53298)
@@ -301,13 +303,14 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
    parname[14];parname[15]]
 
    # parname[16];parname[17];parname[19];parname[20]]
-    corner(values,labels,nbins)
+    # corner(values,labels,nbins)
     # show()
-    title=string("/IMAGES/corner/2025case",case_num,grid_type_nplanet,"-",sigma,"secs",nyear,"yrs.png")
+    # title=string("IMAGES/corner/2025case",case_num,grid_type_nplanet,"-",sigma,"secs",nyear,"yrs.png")
     # fig1=corner([m1,ec1,p1,m2,ec2,p2],[truem1,trueec1,truep1,truem2,trueec2,truep2],labels,nbins)
     # fig1.suptitle(string(model," Posteriors for Planet 1"))
     # fig1.text(0.36,0.8,string(L"$\sigma_{sys}=$",sigsys," sec",'\n',L"$\sigma_{tot}=$",sigtot," sec",'\n',"BIC= ",BIC,'\n',L"$\chi^2 =$",chi))
-    savefig(title)
+    # savefig(title)
+    # clf()
     # clf()
 end
     # if include_moon && grid_type_nplanet=="p3moon"

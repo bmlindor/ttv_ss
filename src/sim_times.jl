@@ -9,7 +9,7 @@ path_to_file="~/work/washington/ttvs/ttv_ss/INPUTS/DE440.bsp"
 if isfile(path_to_file)
   eph=Ephem(path_to_file)
 else
-  eph = Ephem("../INPUTS/DE440.bsp") 
+  eph = Ephem("/INPUTS/DE440.bsp") 
 end
  prefetch(eph)
 options = useNaifId+unitKM+unitDay # useNaifId + unitDay + unitAU

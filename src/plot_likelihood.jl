@@ -162,12 +162,12 @@ end
 
 function plot_profile(sigma::Real,nyear::Real,label_xloc::Real,case_num::Int,nbins=Int,include_moon=false,p3m=false)
 if case_num==1
-	fitfile3=string("grid/fromEMB/","p4","_grid",sigma,"s",nyear,"yrs.csv")
-	widefit3=string("grid/fromEMB/wide","p4","_grid",sigma,"s",nyear,"yrs.csv")
-  	mcfile3=string("MCMC/fromEMB/","p4","_mcmc",sigma,"s",nyear,"yrs.jld2")
-	fitfile4=string("grid/fromEMB/","p3","_grid",sigma,"s",nyear,"yrs.csv")
-	widefit4=string("grid/fromEMB/wide","p3","_grid",sigma,"s",nyear,"yrs.csv")
-  	mcfile4=string("MCMC/fromEMB/","p3","_mcmc",sigma,"s",nyear,"yrs.jld2")
+	fitfile3=string("2025/","pt2widep4","_grid",sigma,"s",nyear,"yrs.csv")
+	widefit3=string("2025/wide","p4","_grid",sigma,"s",nyear,"yrs.csv")
+  	mcfile3=string("2025/","p4","_mcmc",sigma,"s",nyear,"yrs.jld2")
+	fitfile4=string("2025/","p3","_grid",sigma,"s",nyear,"yrs.csv")
+	widefit4=string("2025/wide","p3","_grid",sigma,"s",nyear,"yrs.csv")
+  	mcfile4=string("2025/","p3","_mcmc",sigma,"s",nyear,"yrs.jld2")
 	case_label="Case 1"
 	title="Search from Venus + EMB TTVs"
 	label1=L"$\mathcal{H}_{PPPP}$ "
@@ -223,12 +223,12 @@ end
 	text(label_xloc,0.8,sim_obs_label,fontsize="medium")
 	# text(true_per + true_per/100,1.01,pname,fontsize="large")
 	# text(minimum(wide[:,per_col]./365.25),1.05,sim_obs_label,fontsize="medium")
-	ax1.axvspan(1.8,2,color="lightblue",alpha=0.45)
+	# ax1.axvspan(1.8,2,color="lightblue",alpha=0.45)
 	ax1.axvspan(11.0,12.5,color="lightblue",alpha=0.45)
  	ax1.plot(wide3[:,12]./365.25,xprob(wide3[:,end]),color="orange")
 	ax1.plot(wide4[:,12]./365.25,xprob(wide4[:,end]),color="firebrick")
  	ax1.set_xlabel("Planet Period [yrs]",fontsize="x-large")
- 	ax1.set_ylabel("Probability",fontsize="x-large")
+ 	ax1.set_ylabel("Relative Probability",fontsize="x-large")
  	# ylim(0,1.15)
  	minorticks_on()
 	tick_params(which="both",direction="in")
@@ -236,38 +236,60 @@ end
 	## plot Mars zoom-in
 	if include_moon
 	ax2=fig.add_subplot(223,title=string(label1,L"$\sigma_{sys}=$",round(sigsys3,sigdigits=3),"s"))
-	name=string("IMAGES/likelihood/wide_case",case_num,"_",sigma,"s",nyear,".png")
+	name=string("2025/2025wide_case",case_num,"_",sigma,"s",nyear,".png")
 	else
 	ax2=fig.add_subplot(223,title=string(L"$\mathcal{H}_{PPPP}$, ",L"$\sigma_{sys}=$",round(sigsys3,sigdigits=3)," s"))
-	name=string("IMAGES/likelihood/wide_case",case_num,"_",sigma,"s",nyear,"_p4.png")
+	name=string("2025/2025wide_case",case_num,"_",sigma,"s",nyear,"_p4.png")
 	end
 	# text(1.83,1.1,"a)",fontweight="bold")
+
 	alpha=0.3
 	color="orange"
 	axvline(true_per3,linestyle="--",color="black")
-	text(1.89,0.96,"Mars",fontsize="medium")
+	# text(1.89,0.96,"Mars",fontsize="medium")
 	# ax2.hist(par_mcmc3,nbins*10,histtype="step",fill=true,facecolor=color,edgecolor=color,density=true,linewidth=2,zorder=1,alpha=alpha)
 	# ax2.hist(par_mcmc3,nbins*10,histtype="step",alpha=1.0,density=true,color=color,linewidth=2)
-	xbin,xhist,xbin_square,hist_square=histogram(par_mcmc3,5000)
+	xbin,xhist,xbin_square,hist_square=histogram(par_mcmc3,50)
 	# ax2.hist(par_mcmc3,bins=nbins,histtype="step",density=tr,color="orange")
  	ax2.plot(fit3[:,12]./365.25,xprob(fit3[:,end]),color="orange",label="Fit")
   ax2.plot(xbin_square,hist_square./maximum(hist_square),color="orange",label="Posterior",alpha=0.75)
   ax2.fill_between(xbin_square, hist_square./maximum(hist_square),alpha=0.25,color=color)
+  # ax1.spines["bottom"].set_visible(false)
+  # ax1.tick_params(labelbottom=false,bottom=false)
+  # ax2.spines["top"].set_visible(false)
+  # # ax2.tick_params(labeltop=false)  # don't put tick labels at the top
+  # ax2.tick_params(labeltop=false,bottom=false,top=false,labelbottom=false)
+  #   ax0.tick_params(labelleft=false,bottom=false,left=false,labelbottom=false)  # don't put tick labels at the top
+  # ax2.spines["bottom"].set_visible(false)
+  # ax3.tick_params(labeltop=false,top=false)  # don't put tick labels at the top
+  # ax3.spines["top"].set_visible(false)
+  # ax1.set_ylim(225, 350)  # outliers only
+  # ax2.set_ylim(.72, 1.1)  # most of the data
+  # ax3.set_ylim(0.0, 0.3)  # most of the data
+  # d =0.02  # proportion of vertical to horizontal extent of the slanted line
+  # kwargs = dict(marker=[(-1, -d), (1, d)], markersize=12,
+  #               linestyle="none", color='k', mec='k', mew=1, )
+  # ax1.plot((-d, +d), (-d, +d), transform=ax1.transAxes, clip_on=false,linewidth=0.8,color="k")
+  # ax1.plot((1-d,1 +d), (-d, +d), transform=ax1.transAxes, clip_on=false,linewidth=0.8,color="k")
+  # ax2.plot((-d, +d), (1-d,1 +d), transform=ax2.transAxes, clip_on=false,linewidth=0.8,color="k")
+  # ax2.plot((1-d,1 +d), (1-d, 1+d), transform=ax2.transAxes, clip_on=false,linewidth=0.8,color="k")
+  # ax2.plot((-d, +d), (-d, +d), transform=ax2.transAxes, clip_on=false,linewidth=0.8,color="k")
+  # ax2.plot((1-d,1 +d), (-d, +d), transform=ax2.transAxes, clip_on=false,linewidth=0.8,color="k")
+  # ax3.plot((-d, +d), (1-d,1 +d), transform=ax3.transAxes, clip_on=false,linewidth=0.8,color="k")
+  # ax3.plot((1-d,1 +d), (1-d, 1+d), transform=ax3.transAxes, clip_on=false,linewidth=0.8,color="k")
  	minorticks_on()
  	# legend()
 	tick_params(which="both",direction="in")
-	ax2.set_xlim(1.83,1.95)
+	ax2.set_xlim(2.75,2.85)
 		# ax2.set_xlim(quantile(par_mcmc3,0.1587))
 	ax2.set_xlabel(L"P$_e$ [yrs]",fontsize="large")
-	ylabel("Probability",fontsize="x-large")
+	ylabel("Relative Probability",fontsize="x-large")
 	if include_moon
 	  p3mcfile=string("MCMC/","p3","_mcmc",sigma,"s",nyear,"yrs.jld2")
    	p3mc=jldopen(String(p3mcfile),"r")
  		par_mcmc=vec(p3mc["par_mcmc"][:,p3mc["iburn"]:end,12])./365.25
 		# xbin,xhist,xbin_square,hist_square=histogram(par_mcmc,50)
 		# ax1.plot(xbin_square,hist_square./maximum(hist_square),color="firebrick",label="Poster",alpha=0.75)
-
-
 		phi_col,true_phi,color=18,2.31586,"purple"; label_xloc=2.75
 		# lim=f["dpin"],f["dpout"]
 	  ax3=fig.add_subplot(224,title=string(L"$\mathcal{H}_{PPsP}$, ",L"$\sigma_{sys}=$",round(sigsys4,sigdigits=3)," s"))
@@ -300,7 +322,7 @@ end
 	color="firebrick"
 	xbin,xhist,xbin_square,hist_square=histogram(par_mcmc4,50)
  	ax3.plot(xbin_square,hist_square./maximum(hist_square),color="firebrick",label="Poster",alpha=0.75)
- 	 ax3.fill_between(xbin_square, hist_square./maximum(hist_square),alpha=0.2,color=color)
+ 	ax3.fill_between(xbin_square, hist_square./maximum(hist_square),alpha=0.2,color=color)
 	ax3.plot(fit4[:,12]./365.25,xprob(fit4[:,end]),color="firebrick",label="Fit")
 	# ax3.hist(par_mcmc4,bins=nbins,histtype="step",density=tr,color="firebrick")
  	minorticks_on()
