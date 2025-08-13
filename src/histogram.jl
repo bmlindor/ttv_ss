@@ -77,13 +77,13 @@ function comp_hist(sigma,nyear,grid_type_nplanet,nbins,case=1,include_moon=false
   if  grid_type_nplanet=="p2" 
       model=L"$\mathcal{H}_{PP}$"
     elseif grid_type_nplanet=="p3" || grid_type_nplanet=="widep3"
-      model=L"$\mathcal{H}_{PPP}$"
+      model=L"$\mathcal{H}_{PPP}$"; nplanet=3
     elseif grid_type_nplanet=="p4" || grid_type_nplanet=="widep4"
-      model=L"$\mathcal{H}_{PPPP}$"
+      model=L"$\mathcal{H}_{PPPP}$";nplanet=4
     elseif grid_type_nplanet=="p3moon" || grid_type_nplanet=="widep3moon"
-      model=L"$\mathcal{H}_{PPsP}$"
+      model=L"$\mathcal{H}_{PPsP}$";nplanet=3
     elseif grid_type_nplanet=="p3moonp4" || grid_type_nplanet=="widep3moonp4"
-      model=L"$\mathcal{H}_{PPsPP}$"
+      model=L"$\mathcal{H}_{PPsPP}$";nplanet=4
   end  
    parname=[
     L"$m_b / M_{⋆}$",L"$P_b$ [days]",L"$t_{0,b}$ [JD $- 2.43e6$]",L"$e_b cos(ω_b)$",L"$e_b sin(ω_b)$",
@@ -97,7 +97,16 @@ function comp_hist(sigma,nyear,grid_type_nplanet,nbins,case=1,include_moon=false
    mcfile=string("2025/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
   mcfile2=string("2025/",grid_type_nplanet2,"_mcmc",sigma,"s",nyear,"yrs.jld2")
   mcfile3=string("2025/",grid_type_nplanet3,"_mcmc",sigma,"s",nyear,"yrs.jld2")
-  function make_plot(ax,param_col,label,linestyle=nothing,color=nothing;nbins=50)
+  truem1,truem2,truem3,truem4=0.815.*CGS.MEARTH/CGS.MSUN,1.012.*CGS.MEARTH/CGS.MSUN,0.1074.*CGS.MEARTH/CGS.MSUN,317.8.*CGS.MEARTH/CGS.MSUN
+truep1,truep2,truep3,truep4=224.7007992,365.25636,686.9795859,4332.82012875
+trueec1,trueec2,trueec3,trueec4=calc_evec1(0.00677323,131.53298),calc_evec1(0.01671022,102.94719),calc_evec1(0.09341233,336.04084),calc_evec1(0.04839266,14.75385)
+truees1,truees2,truees3,truees4=calc_evec2(0.00677323,131.53298),calc_evec2(0.01671022,102.94719),calc_evec2(0.09341233,336.04084),calc_evec2(0.04839266,14.75385)
+truee1,truee2,truee3,truee4=0.00677323,0.01671022,0.09341233,0.04839266
+truet01,truet02,truet03,truet04=3503.7644189,3624.405369,333.7268,383.823#3503.7644,3624.4054,
+true_vals=[truem1;truep1;truet01;trueec1;truees1;truem2;truep2;truet02;trueec2;truees2;  
+#truem3;truep3;truet03;trueec3;truees3;
+  truem4;truep4;truet04;trueec4;truees4]
+  function make_plot(ax,param_col,label,linestyle=nothing,color=nothing;nbins=nbins)
     values=[];labels=[]
     if isfile(mcfile)
     jldmc=jldopen(mcfile,"r");    jldmc2=jldopen(mcfile2,"r");    jldmc3=jldopen(mcfile3,"r")
@@ -120,14 +129,17 @@ function comp_hist(sigma,nyear,grid_type_nplanet,nbins,case=1,include_moon=false
     labels=["$model4"]
     end
     ax.ticklabel_format(useMathText=true)
+    ax.minorticks_on()
     # ax.tick_params(bottom=false,top=true,labeltop=true,labelbottom=false)
+    ax.axvline(true_vals[param_col],ls="--",color="k",lw=1,label="truth")
     ax.set_title(label,loc="right")
     return lined_hist_stack(ax,values,labels,linestyle,color;nbins)
     end
   end
   fig,axs=subplots(3,5,figsize=(12,6.5))
   make_plot(axs[1,1],1,parname[1])
-  fig.legend(title="Models",title_fontsize="x-large",loc="upper left",fontsize="large",bbox_to_anchor=(0.0,0.88,0.4,0.1))
+  axs[1,1].axvline()
+  fig.legend(loc="upper left",fontsize="large",bbox_to_anchor=(0.0,0.88,0.4,0.1))#title="Models",title_fontsize="x-large",
   make_plot(axs[1,2],2,parname[2])
   make_plot(axs[1,3],3,parname[3]) # t0
   make_plot(axs[1,4],4,parname[4])
@@ -148,13 +160,23 @@ function comp_hist(sigma,nyear,grid_type_nplanet,nbins,case=1,include_moon=false
    # make_plot(axs[4,3],19,parname[14],["-."],["#2ca02c"])
    # make_plot(axs[4,4],20,parname[15],["-."],["#2ca02c"])
    # axs[4,2].set_xlim(650,800);   axs[4,4].set_xlim(-0.25,0.05);
-  axs[1,5].set_xlim(-0.05,0.05);  axs[2,5].set_xlim(-0.025,0.025);   axs[3,5].set_xlim(-0.1,0.025);
-  axs[1,4].set_xlim(-0.05,0.05); axs[2,4].set_xlim(-0.05,0.05);   axs[3,4].set_xlim(-0.1,0.1);
-  axs[2,1].set_xlim(2.35e-6,3.5e-6);  axs[1,1].set_xlim(1.6e-6,3.5e-6);
+
+  # for iplanet=2:nplanet
+  #   for j=1:5
+  #   axs[iplanet,j].axvline(true_vals[(iplanet-1)*5 +j],ls="--",color="k",lw=1,label="truth")
+  #   end
+  # end
+  # fig.supylabel("Counts")
+  axs[1,5].set_xlim(-0.05,0.05);  axs[2,5].set_xlim(-0.05,0.05);   
+  axs[3,5].set_xlim(-0.1,0.05);
+  axs[1,4].set_xlim(-0.05,0.05); axs[2,4].set_xlim(-0.05,0.05);  
+   axs[3,4].set_xlim(-0.1,0.1);
+  axs[2,1].set_xlim(1e-6,4e-6);  axs[1,1].set_xlim(1e-6,4e-6);
   # fig.suptitle
   fig.subplots_adjust(wspace=0.4,hspace=0.5,bottom=0.05,right=0.98,top=0.92)
    # tight_layout()
-   title=string("IMAGES/discussion/2025case",case,"_",grid_type_nplanet,"_",sigma,"s",nyear,"yrs_common1D.png")
+   # title=string("IMAGES/discussion/2025case",case,"_",grid_type_nplanet,"_",sigma,"s",nyear,"yrs_common1D.png")
+  title=string("2025/diff_limits_common1D.png")
   savefig(title,dpi=200)
 end
 

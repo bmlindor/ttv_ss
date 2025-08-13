@@ -237,8 +237,8 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
 	    model=L"$\mathcal{H}_{PPsPP}$"
   end
   parname=[
-    L"$m_b / M_{⋆}$",L"$P_b$",L"$t_{0,b}$",L"$e_b cos(ω_b)$",L"$e_b sin(ω_b)$",
-    L"$m_c / M_{⋆}$",L"$P_c$",L"$t_{0,c}$",L"$e_c cos(ω_c)$",L"$e_c sin(ω_c)$",
+    L"$m_b / M_{⋆}$",L"$P_b - 224.7007$",L"$t_{0,b}$",L"$e_b cos(ω_b)$",L"$e_b sin(ω_b)$",
+    L"$m_c / M_{⋆}$",L"$P_c - 365.2564$",L"$t_{0,c}$",L"$e_c cos(ω_c)$",L"$e_c sin(ω_c)$",
     L"$m_e / M_{⋆}$",L"$P_e$",L"$t_{0,e}$",L"$e_e cos(ω_e)$",L"$e_e sin(ω_e)$",
     L"$m_d / M_{⋆}$",L"$P_d$",L"$t_{0,d}$",L"$e_d cos(ω_d)$",L"$e_d sin(ω_d)$",
     L"$μ_f$",L"$P_f$ [days]",L"$t_{0,f}$",L"$e_f cos(ω_f)$",L"$e_f sin(ω_f)$",
@@ -270,12 +270,12 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
 
     values=[ 
     vec(par_mcmc[:,iburn:end,1]), 
-    vec(par_mcmc[:,iburn:end,2]),
+    vec(par_mcmc[:,iburn:end,2]).-2.247007e2,
     # vec(par_mcmc[:,iburn:end,3]), 
     vec(par_mcmc[:,iburn:end,4]), 
     vec(par_mcmc[:,iburn:end,5]), 
     vec(par_mcmc[:,iburn:end,6]),
-    vec(par_mcmc[:,iburn:end,7]), 
+    vec(par_mcmc[:,iburn:end,7]).-3.652564e2, 
     # vec(par_mcmc[:,iburn:end,8]), 
     vec(par_mcmc[:,iburn:end,9]),
     vec(par_mcmc[:,iburn:end,10]),
@@ -283,9 +283,9 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
     vec(par_mcmc[:,iburn:end,12]),
     # vec(par_mcmc[:,iburn:end,13]),
     vec(par_mcmc[:,iburn:end,14]), vec(par_mcmc[:,iburn:end,15])]
-    # vec(par_mcmc[:,iburn:end,16]), 
+    # vec(par_mcmc[:,iburn:end,16])]
     # vec(par_mcmc[:,iburn:end,17]),
-    # # vec(par_mcmc[:,iburn:end,18]),
+    # # # vec(par_mcmc[:,iburn:end,18]),
     # vec(par_mcmc[:,iburn:end,19]), vec(par_mcmc[:,iburn:end,20])]
     labels=[parname[1];
     parname[2];
@@ -297,13 +297,13 @@ function corner_plot(sigma,nyear,grid_type_nplanet,case_num,nbins,include_moon::
     # parname[8];
     parname[9];
     parname[10];
-    parname[11];
-   parname[12];
-   # parname[13];
-   parname[14];parname[15]]
+   #  parname[11];
+   # parname[12];
+   # # parname[13];
+   # parname[14];parname[15];
 
-   # parname[16];parname[17];parname[19];parname[20]]
-    # corner(values,labels,nbins)
+   parname[16];parname[17];parname[19];parname[20]]
+    corner(values,labels,nbins)
     # show()
     # title=string("IMAGES/corner/2025case",case_num,grid_type_nplanet,"-",sigma,"secs",nyear,"yrs.png")
     # fig1=corner([m1,ec1,p1,m2,ec2,p2],[truem1,trueec1,truep1,truem2,trueec2,truep2],labels,nbins)

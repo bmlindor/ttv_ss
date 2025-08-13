@@ -162,7 +162,7 @@ end
 
 function plot_profile(sigma::Real,nyear::Real,label_xloc::Real,case_num::Int,nbins=Int,include_moon=false,p3m=false)
 if case_num==1
-	fitfile3=string("2025/","pt2widep4","_grid",sigma,"s",nyear,"yrs.csv")
+	fitfile3=string("2025/","p4","_grid",sigma,"s",nyear,"yrs.csv")
 	widefit3=string("2025/wide","p4","_grid",sigma,"s",nyear,"yrs.csv")
   	mcfile3=string("2025/","p4","_mcmc",sigma,"s",nyear,"yrs.jld2")
 	fitfile4=string("2025/","p3","_grid",sigma,"s",nyear,"yrs.csv")
@@ -212,33 +212,34 @@ end
  	true_per3=1.8808476
  	true_per4=11.862615
 	sim_obs_label= string("[",nyear," yr span]",'\n',L"$\sigma_{obs}=$",sigma,"s")
-	fig=figure(figsize=(5,5),dpi=150)
+	fig=figure(figsize=(6,3.5),dpi=150)
 	# fig=figure(figsize=(5,5))
 	# subplots_adjust(hspace=0.2,wspace=0.15)
 	# ax1.title()
-	ax1=subplot(211)
+	# ax1=subplot(121)
 	# ax1.set_title(string(title),fontsize="x-large")
-	axvline(true_per3,linestyle="--",color="black")
- 	axvline(true_per4,linestyle="--",color="black")
-	text(label_xloc,0.8,sim_obs_label,fontsize="medium")
-	# text(true_per + true_per/100,1.01,pname,fontsize="large")
-	# text(minimum(wide[:,per_col]./365.25),1.05,sim_obs_label,fontsize="medium")
+	# axvline(true_per3,linestyle="--",color="black")
+ 	# axvline(true_per4,linestyle="--",color="black")
+	# text(label_xloc,0.8,sim_obs_label,fontsize="medium")
+	# # text(true_per + true_per/100,1.01,pname,fontsize="large")
+	# # text(minimum(wide[:,per_col]./365.25),1.05,sim_obs_label,fontsize="medium")
 	# ax1.axvspan(1.8,2,color="lightblue",alpha=0.45)
-	ax1.axvspan(11.0,12.5,color="lightblue",alpha=0.45)
- 	ax1.plot(wide3[:,12]./365.25,xprob(wide3[:,end]),color="orange")
-	ax1.plot(wide4[:,12]./365.25,xprob(wide4[:,end]),color="firebrick")
- 	ax1.set_xlabel("Planet Period [yrs]",fontsize="x-large")
- 	ax1.set_ylabel("Relative Probability",fontsize="x-large")
- 	# ylim(0,1.15)
- 	minorticks_on()
-	tick_params(which="both",direction="in")
+	# ax1.plot(range(3,stop=5,length=10),zeros(10),color="orange")
+	# ax1.axvspan(11.0,12.5,color="lightblue",alpha=0.45)
+ 	# ax1.plot(wide3[:,12]./365.25,xprob(wide3[:,end]),color="orange")
+	# ax1.plot(wide4[:,12]./365.25,xprob(wide4[:,end]),color="firebrick")
+ 	# ax1.set_xlabel("Planet Period [yrs]",fontsize="large")
+ 	# ax1.set_ylabel("Relative Probability",fontsize="large")
+ 	# # ylim(0,1.15)
+ 	# minorticks_on()
+	# tick_params(which="both",direction="in")
 
 	## plot Mars zoom-in
 	if include_moon
-	ax2=fig.add_subplot(223,title=string(label1,L"$\sigma_{sys}=$",round(sigsys3,sigdigits=3),"s"))
+	ax2=fig.add_subplot(122,title=string(label1))
 	name=string("2025/2025wide_case",case_num,"_",sigma,"s",nyear,".png")
 	else
-	ax2=fig.add_subplot(223,title=string(L"$\mathcal{H}_{PPPP}$, ",L"$\sigma_{sys}=$",round(sigsys3,sigdigits=3)," s"))
+	ax2=fig.add_subplot(122,title=string(L"$\mathcal{H}_{PPPP}$"))
 	name=string("2025/2025wide_case",case_num,"_",sigma,"s",nyear,"_p4.png")
 	end
 	# text(1.83,1.1,"a)",fontweight="bold")
@@ -246,14 +247,14 @@ end
 	alpha=0.3
 	color="orange"
 	axvline(true_per3,linestyle="--",color="black")
-	# text(1.89,0.96,"Mars",fontsize="medium")
+	text(1.89,0.96,"Mars",fontsize="medium")
 	# ax2.hist(par_mcmc3,nbins*10,histtype="step",fill=true,facecolor=color,edgecolor=color,density=true,linewidth=2,zorder=1,alpha=alpha)
 	# ax2.hist(par_mcmc3,nbins*10,histtype="step",alpha=1.0,density=true,color=color,linewidth=2)
 	xbin,xhist,xbin_square,hist_square=histogram(par_mcmc3,50)
 	# ax2.hist(par_mcmc3,bins=nbins,histtype="step",density=tr,color="orange")
- 	ax2.plot(fit3[:,12]./365.25,xprob(fit3[:,end]),color="orange",label="Fit")
-  ax2.plot(xbin_square,hist_square./maximum(hist_square),color="orange",label="Posterior",alpha=0.75)
-  ax2.fill_between(xbin_square, hist_square./maximum(hist_square),alpha=0.25,color=color)
+ 	ax2.plot(fit3[:,12]./365.25,xprob(fit3[:,end]),color="orange",label="Fit",alpha=0.75)
+  ax2.plot(xbin_square,hist_square./maximum(hist_square),color="orange",label="Posterior")
+  ax2.fill_between(xbin_square, hist_square./maximum(hist_square),alpha=0.2,color=color)
   # ax1.spines["bottom"].set_visible(false)
   # ax1.tick_params(labelbottom=false,bottom=false)
   # ax2.spines["top"].set_visible(false)
@@ -280,10 +281,10 @@ end
  	minorticks_on()
  	# legend()
 	tick_params(which="both",direction="in")
-	ax2.set_xlim(2.75,2.85)
+	ax2.set_xlim(1.85,2.16)
 		# ax2.set_xlim(quantile(par_mcmc3,0.1587))
-	ax2.set_xlabel(L"P$_e$ [yrs]",fontsize="large")
-	ylabel("Relative Probability",fontsize="x-large")
+	ax2.set_xlabel(L"$P_e$ [yrs]",fontsize="large")
+
 	if include_moon
 	  p3mcfile=string("MCMC/","p3","_mcmc",sigma,"s",nyear,"yrs.jld2")
    	p3mc=jldopen(String(p3mcfile),"r")
@@ -292,7 +293,7 @@ end
 		# ax1.plot(xbin_square,hist_square./maximum(hist_square),color="firebrick",label="Poster",alpha=0.75)
 		phi_col,true_phi,color=18,2.31586,"purple"; label_xloc=2.75
 		# lim=f["dpin"],f["dpout"]
-	  ax3=fig.add_subplot(224,title=string(L"$\mathcal{H}_{PPsP}$, ",L"$\sigma_{sys}=$",round(sigsys4,sigdigits=3)," s"))
+	  ax3=fig.add_subplot(123,title=string(L"$\mathcal{H}_{PPsP}$, ",L"$\sigma_{sys}=$",round(sigsys4,sigdigits=3)," s"))
 		ax3.axvline(true_phi,linestyle="--",color="black")
 		ax3.text(2.33,0.96,"Moon",fontsize="medium")
 		ax3.plot(fit4[:,18],xprob(fit4[:,end]),color="purple")
@@ -315,23 +316,26 @@ end
 	  # 		right="true",labelright="true")
 	else
  	## plot Jupiter zoom-in
- 	ax3=fig.add_subplot(224,sharey=ax2,title=string(L"$\mathcal{H}_{PPP}$, ",L"$\sigma_{sys}=$",round(sigsys4,sigdigits=3),"s"))
+ 	ax3=fig.add_subplot(121,sharey=ax2,title=string(L"$\mathcal{H}_{PPP}$"))
 	# text(11,1.1,"b)",fontweight="bold")
  	axvline(true_per4,linestyle="--",color="black")
 	text(12,0.96,"Jupiter",fontsize="medium")
 	color="firebrick"
 	xbin,xhist,xbin_square,hist_square=histogram(par_mcmc4,50)
- 	ax3.plot(xbin_square,hist_square./maximum(hist_square),color="firebrick",label="Poster",alpha=0.75)
+ 	ax3.plot(xbin_square,hist_square./maximum(hist_square),color="firebrick",label="Posterior")
  	ax3.fill_between(xbin_square, hist_square./maximum(hist_square),alpha=0.2,color=color)
-	ax3.plot(fit4[:,12]./365.25,xprob(fit4[:,end]),color="firebrick",label="Fit")
+	ax3.plot(fit4[:,12]./365.25,xprob(fit4[:,end]),color="firebrick",label="Fit",alpha=0.75)
 	# ax3.hist(par_mcmc4,bins=nbins,histtype="step",density=tr,color="firebrick")
  	minorticks_on()
 	# legend(loc="upper right",fontsize="medium",title="Jupiter",title_fontsize="medium",bbox_to_anchor=(0.,1.02,1.,.102),ncol=5,mode="expand",borderaxespad=0.0)	
 	ax3.set_xlim(11,12.5)
-	ax3.tick_params(which="both",direction="in",left=true,labelleft=false)
-	ax3.set_xlabel(L"P$_d$ [yrs]",fontsize="large")
+	ax3.tick_params(which="both",direction="in",left=true,labelleft=true)
+	ax3.set_xlabel(L"$P_d$ [yrs]",fontsize="large")
+	ax3.set_ylabel("Relative Probability",fontsize="large")
 	end
+
 	tight_layout()
+	# fig.legend()
  	savefig(name,dpi=150)
 	# if include_moon
 	# 	

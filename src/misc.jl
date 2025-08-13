@@ -167,3 +167,5 @@ function calc_ecc_err(evec1,evec2)
    # ecc_sort[sm .<= (v0)]
    return val
  end
+
+ calc_earth_masses(mu) = mu *CGS.MSUN/CGS.MEARTH

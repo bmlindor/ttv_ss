@@ -2,7 +2,7 @@ include("bounds.jl")
 #include("CGS.jl")
 include("misc.jl")
 using TTVFaster,DelimitedFiles,JLD2,LaTeXStrings,PyPlot
-using Statistics,StatsBase,MCMCDiagnostics
+using Statistics,StatsBase,MCMCDiagnosticTools,MCMCChains
 
 # Run a Markov chain:
 function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,nsteps::Int64,nwalkers::Int64,nplanet::Int64,ntrans::Array{Int64,1},tt0::Array{Float64,1},tt::Array{Float64,1},sigtt::Array{Float64,1},use_sigsys::Bool,EM::Bool) 
@@ -288,6 +288,33 @@ function MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,nsteps
   return lprob_mcmc #, param, nwalkers, nsteps, accept, iburn, indepsamples
 end
 
+function mat2chain(sigma,nyear,grid_type_nplanet)
+  mcfile=string("2025/",grid_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+  if isfile(mcfile)
+  jldmc=jldopen(String(mcfile),"r")
+  nwalkers,nsteps=jldmc["nwalkers"],jldmc["nsteps"]
+  iburn,samples=jldmc["iburn"], jldmc["indepsamples"]
+  par_mcmc=jldmc["par_mcmc"]; 
+  lprob_mcmc=jldmc["lprob_mcmc"]  
+  param=jldmc["param"]
+  pname=jldmc["pname"]
+  iters, samples, nparams = size(par_mcmc)
+  tmp = zeros(samples,nparams,iters)
+  for i=1:nparams
+    for j=1:iters
+      for k=iburn:samples
+        tmp[k,i,j] = par_mcmc[j,k,i] 
+      end
+    end
+  end
+  chn = Chains(tmp[iburn:end,:,:],pname)
+  close(jldmc)
+  return chn
+  else
+    println("File doesn't exist.")
+  end
+end
+
 # Retrieve MCMC results after burn-in, remove bad walkers
 function mc_vals(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num::Int,include_moon::Bool=false)
   EM=true
@@ -334,14 +361,14 @@ function mc_vals(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num::Int
   BIC=marg_BIC(f["lprob_best_p$nplanet"],f["tt0"],f["tt"],f["sigtt"],f["nplanet"],f["ntrans"],f["best_p$nplanet"],EM=EM)
   @info string("BIC from marginal approx of lnL:",BIC)
 
-  samplesize = zeros(nparam)
-  for j=1:nwalkers
-    for i=1:nparam
-      samplesize[i] += effective_sample_size(par_mcmc[j,:,i])
-    end
-  end
-  indepsamples = minimum(samplesize)
-  println("Independent Sample Size: ",indepsamples)
+  # samplesize = zeros(nparam)
+  # for j=1:nwalkers
+  #   for i=1:nparam
+  #     samplesize[i] += effective_sample_size(par_mcmc[j,:,i])
+  #   end
+  # end
+  # indepsamples = minimum(samplesize)
+  # println("Independent Sample Size: ",indepsamples)
 
   # @show jldfit["lprob_best_p2"]
   function plot_trace()
@@ -378,10 +405,10 @@ function mc_vals(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num::Int
   savefig(title)
   return fig
   end
-  plot_trace()
+  # plot_trace()
   # println("Hit return to continue")
   # read(stdin,Char)
-  close()
+  # close()
 
 	avg=zeros(nparam)
   med=zeros(nparam)
@@ -395,7 +422,7 @@ function mc_vals(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num::Int
    avg[i]=mean(vec(par_mcmc[:,iburn:end,i]))
    errors[1,i]=med[i]-low[i]; errors[2,i]=high[i]-med[i]
     # st_dev[i]=std(vec(par_mcmc[:,iburn:end,i]))
-   println(pname[i]," = ",med[i]," + ",errors[2,i]," _ ",errors[1,i])
+   # println(pname[i]," = ",med[i]," + ",errors[2,i]," _ ",errors[1,i])
   end
   masses=[med[i-4] for i in 1:length(param) if i%5==0] .*CGS.MSUN/CGS.MEARTH
   mass_errs=[[errors[2,i-4],errors[1,i-4]] for i in 1:length(param) if i%5==0] .*CGS.MSUN/CGS.MEARTH
@@ -422,14 +449,19 @@ function mc_vals(sigma::Real,nyear::Real,grid_type_nplanet::String,case_num::Int
   # # println("Per [d]= ",periods)#," +/- ",per_errs)
   println("eccen_1. =",ecc1," + ",e_err_high1 .- ecc1," - ",ecc1 .- e_err_low1)
   println("eccen_2. =",ecc2," + ",e_err_high2 .- ecc2," - ",ecc2 .- e_err_low2)
-    if "grid_type_nplanet" == "p3" || "grid_type_nplanet" == "p4"
+    if nplanet ==3#"grid_type_nplanet" == "p3" #|| "grid_type_nplanet" == "p4"
     ec3=vec(par_mcmc[:,iburn:nsteps,14])
     es3=vec(par_mcmc[:,iburn:nsteps,15])
     e_err_low3,e_err_high3 = calc_ecc_err(ec3,es3)
     ecc3=median(calc_ecc(ec3,es3))
     println("eccen_3. =",ecc3," + ",e_err_high3 .- ecc3," - ",ecc3 .- e_err_low3)
   end 
-    if "grid_type_nplanet" == "p4"
+    if nplanet ==4#"grid_type_nplanet" == "p4"
+          ec3=vec(par_mcmc[:,iburn:nsteps,14])
+    es3=vec(par_mcmc[:,iburn:nsteps,15])
+    e_err_low3,e_err_high3 = calc_ecc_err(ec3,es3)
+    ecc3=median(calc_ecc(ec3,es3))
+    println("eccen_3. =",ecc3," + ",e_err_high3 .- ecc3," - ",ecc3 .- e_err_low3)
     ec4=vec(par_mcmc[:,iburn:nsteps,19])
     es4=vec(par_mcmc[:,iburn:nsteps,20])
     e_err_low4,e_err_high4 = calc_ecc_err(ec4,es4)
@@ -526,6 +558,7 @@ function mc_table(sigma::Real,nyear::Real,options,include_moon::Bool=false)
   #sigsys=round(avg[end].*24*3600,sigdigits=3)
   #sigsys2=round(avg2[end].*24*3600,sigdigits=3)
   #sigsys3=round(avg3[end].*24*3600,sigdigits=3)
+  true_vals = [2.4464 , 224.7007, 3503.7644, -0.003, -0.006, 3.0369, 365.256355,3624.4054, 0.011, 0.012, 0.00095, 4332.82, 333.7268, 0.0403, 0.0268, 0.3227, 686.980, 383.823, 0.0131, 0.0925]
   parname=[L"$\mu_b \times 10^{-6}$",L"$P_1$ [days]",L"$t_{0,1}$ [days]",L"$e_1 \cos{\omega_1}$",L"$e_1 \sin{\omega_1}$",
             L"$\mu_c \times 10^{-6}$",L"$P_2$ [days]",L"$t_{0,2}$ [days]",L"$e_2 \cos{\omega_2}$",L"$e_2 \sin{\omega_2}$",
             L"$\mu_d$",               L"$P_3$ [days]",L"$t_{0,3}$ [days]",L"$e_3 \cos{\omega_3}$",L"$e_3 \sin{\omega_3}$",
@@ -535,6 +568,7 @@ function mc_table(sigma::Real,nyear::Real,options,include_moon::Bool=false)
    model2=L"$\mathcal{H}_{PP}$"
    model3=L"$\mathcal{H}_{PPP}$"
    model=L"$\mathcal{H}_{PPPP}$"
+   subscripts = ["b","c","d","e"] 
 
   function make_table()
     if obs=="fromEMB"
@@ -548,15 +582,28 @@ function mc_table(sigma::Real,nyear::Real,options,include_moon::Bool=false)
     # println(io,"marg_BIC",'\t',marg_BIC2,'\t',marg_BIC3,'\t',marg_BIC," \\")
     for i=1:nparam
       if i<=10
-        println(io,parname[i],'\t',"\$",round(avg2[i],sigdigits=6),"_{-",round(avg2[i]-low2[i],sigdigits=6),"}^{+",round(high2[i]-avg2[i],sigdigits=6),"} \$ & ",'\t',"\$",round(avg3[i],sigdigits=6),"_{-",round(avg3[i]-low3[i],sigdigits=6),"}^{+",round(high3[i]-avg3[i],sigdigits=6),"} \$ & ",'\t',"\$",round(avg[i],sigdigits=6),"_{-",round(avg[i]-low[i],sigdigits=6),"}^{+",round(high[i]-avg[i],sigdigits=6),"} \$ \\")
+        println(io,parname[i],'\t',"\$",round(avg2[i],sigdigits=6),"_{-",round(avg2[i]-low2[i],sigdigits=6),"}^{+",round(high2[i]-avg2[i],sigdigits=6),"} \$ & ",'\t',"\$",round(avg3[i],sigdigits=6),"_{-",round(avg3[i]-low3[i],sigdigits=6),"}^{+",round(high3[i]-avg3[i],sigdigits=6),"} \$ & ",'\t',"\$",round(avg[i],sigdigits=6),"_{-",round(avg[i]-low[i],sigdigits=6),"}^{+",round(high[i]-avg[i],sigdigits=6),"} \$ ", '\t', true_vals[i],"\\")
       end 
       if i >=11 && i <= 15
-        println(io,parname[i],'\t','\t','\t',"\$",round(avg3[i],sigdigits=6),"_{-",round(avg3[i]-low3[i],sigdigits=6),"}^{+",round(high3[i]-avg3[i],sigdigits=6),"} \$ & ",'\t',"\$",round(avg[i],sigdigits=6),"_{-",round(avg[i]-low[i],sigdigits=6),"}^{+",round(high[i]-avg[i],sigdigits=6),"} \$ \\")
+        println(io,parname[i],'\t'," & -- ","\$",round(avg3[i],sigdigits=6),"_{-",round(avg3[i]-low3[i],sigdigits=6),"}^{+",round(high3[i]-avg3[i],sigdigits=6),"} \$ & ",'\t',"\$",round(avg[i],sigdigits=6),"_{-",round(avg[i]-low[i],sigdigits=6),"}^{+",round(high[i]-avg[i],sigdigits=6),"} \$ ", '\t', true_vals[i],"\\")
       end
       if i >=16 && i <= 20
-        println(io,parname[i],'\t','\t','\t','\t','\t',"\$",round(avg[i],sigdigits=6),"_{-",round(avg[i]-low[i],sigdigits=6),"}^{+",round(high[i]-avg[i],sigdigits=6),"} \$ \\")
+        println(io,parname[i],'\t'," & -- ",'\t'," & -- ","\$",round(avg[i],sigdigits=6),"_{-",round(avg[i]-low[i],sigdigits=6),"}^{+",round(high[i]-avg[i],sigdigits=6),"} \$ ", '\t', true_vals[i],"\\")
       end
     end
+    # if i%5==0
+    # for iplanet=1:4
+    #   if iplanet < 3
+    #     println(io,"m_$iplanet",'\t', round(calc_earth_masses(avg2[(iplanet-1) * 5 +1]),sigdigits=4),"_{-",round(calc_earth_masses(avg2[(iplanet-1) * 5 +1]-low2[(iplanet-1) * 5 +1]),sigdigits=4),"}^{+",round(calc_earth_masses(high2[(iplanet-1) * 5 +1]-avg2[(iplanet-1) * 5 +1]),sigdigits=4),"} \$ & ",'\t', round(calc_earth_masses(avg3[(iplanet-1) * 5 +1]),sigdigits=4),"_{-",round(calc_earth_masses(avg3[(iplanet-1) * 5 +1]-low3[(iplanet-1) * 5 +1]),sigdigits=4),"}^{+",round(calc_earth_masses(high3[(iplanet-1) * 5 +1]-avg3[(iplanet-1) * 5 +1]),sigdigits=4),"} \$ & ",'\t', round(calc_earth_masses(avg[(iplanet-1) * 5 +1]),sigdigits=4),"_{-",round(calc_earth_masses(avg[(iplanet-1) * 5 +1]-low[(iplanet-1) * 5 +1]),sigdigits=4),"}^{+",round(calc_earth_masses(high[(iplanet-1) * 5 +1]-avg[(iplanet-1) * 5 +1]),sigdigits=4),"} \$ & ",'\t')#calc_earth_masses(true_val[(iplanet-1) * 5 +1]*10^(-6)),"\\")
+    #   end
+    #   if iplanet == 3
+    #     println(io,"m_$iplanet","[M_⊕]",'\t'," & -- ", round(calc_earth_masses(avg3[(iplanet-1) * 5 +1]),sigdigits=4),"_{-",round(calc_earth_masses(avg3[(iplanet-1) * 5 +1]-low3[(iplanet-1) * 5 +1]),sigdigits=4),"}^{+",round(calc_earth_masses(high3[(iplanet-1) * 5 +1]-avg3[(iplanet-1) * 5 +1]),sigdigits=4),"} \$ & ",'\t', round(calc_earth_masses(avg[(iplanet-1) * 5 +1]),sigdigits=4),"_{-",round(calc_earth_masses(avg[(iplanet-1) * 5 +1]-low[(iplanet-1) * 5 +1]),sigdigits=4),"}^{+",round(calc_earth_masses(high[(iplanet-1) * 5 +1]-avg[(iplanet-1) * 5 +1]),sigdigits=4),"} \$ & ",'\t',calc_earth_masses(true_val[(iplanet-1) * 5 +1]*10^(-6)),"\\")
+    #   end
+    #   if iplanet ==4
+    #     println(io,"m_$iplanet","[M_⊕]",'\t'," & -- ",'\t'," & -- ",round(calc_earth_masses(avg[(iplanet-1) * 5 +1]),sigdigits=4),"_{-",round(calc_earth_masses(avg[(iplanet-1) * 5 +1]-low[(iplanet-1) * 5 +1]),sigdigits=4),"}^{+",round(calc_earth_masses(high[(iplanet-1) * 5 +1]-avg[(iplanet-1) * 5 +1]),sigdigits=4),"} \$ & ",'\t',calc_earth_masses(true_val[(iplanet-1) * 5 +1]*10^(-6)),"\\")
+    #   end
+    #   # eccentricities
+    # end
     # println("BIC",'\t',BIC2,'\t',BIC3,'\t',BIC," \\")
     # println("reduced χ^2",'\t',reduced_chi2,'\t',reduced_chi3,'\t',reduced_chi,"\\")
   # println(med[end].*24*3600,"_{-",low[end].*24*3600,"}^{+",high[end].*24*3600,"}")

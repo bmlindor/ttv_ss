@@ -5,7 +5,7 @@ rc("lines",linewidth=2)
 include("regress.jl")
 include("CGS.jl")
 # Load JPL ephemerides from data and set units
-path_to_file="~/work/washington/ttvs/ttv_ss/INPUTS/DE440.bsp"
+path_to_file="/Users/bethleelindor/work/washington/ttvs/ttv_ss/INPUTS/DE440.bsp"
 if isfile(path_to_file)
   eph=Ephem(path_to_file)
 else
@@ -328,20 +328,20 @@ function sim_times(jd1,nyear,obs)
   body[1:nt1] .= 1.0
   body[nt1+1:nt1+nt2] .= 2.0
   tt=[tt1;tt2]
-  name= string("SS_transit_times.txt")
-  open(name,"w") do io
-    println(io,"## ",nyear," year long observations starting at ",jd1," JED")
-    println(io,"## body_num",'\t',"TT")
-  for i=1:length(tt)
-    println(io,body[i],'\t',tt[i])
-  end
-  end  
+  # name= string("SS_transit_times.txt")
+  # open(name,"w") do io
+  #   println(io,"## ",nyear," year long observations starting at ",jd1," JED")
+  #   println(io,"## body_num",'\t',"TT")
+  # for i=1:length(tt)
+  #   println(io,body[i],'\t',tt[i])
+  # end
+  # end  
   return tt1,tt2
 end
 #TODO: fit keplerian to pos and vel of each planet, then subtract the keplerian from the actual 
 
   # Plot orbits along ecliptic and top-down,point to observer of Venus and Earth transits
-function plot_orbits(dimension::Int;obs::String,nyear::Real=20,return_pva::Bool=false)
+function plot_orbits(dimension::Int;obs::String,nyear::Real=15,return_pva::Bool=false)
   jd1=2.445005e6 ; sigma=30 ;jdsize=1000
   jd2 = nyear*365.25 + jd1
   theta_sun=range(0, stop=2pi, length=100)
@@ -421,38 +421,38 @@ function plot_orbits(dimension::Int;obs::String,nyear::Real=20,return_pva::Bool=
   end
   ## Find position of Moon w.r.t. Earth when Earth transit occurs
   @show nt1, nt2
-  fig,(ax2,ax1)=subplots(1,2,figsize=(8,4))#,dpi=150)
+  fig,(ax1)=subplots(1,1,figsize=(4,4))#,dpi=150)
   # title(string("Location over ",nyear,"yrs"))
     #fig,ax2=subplots(1,1,figsize=(8,6))
      #ax1=fig.add_axes([0.6,0.6,0.35,0.35])
   ax1.fill(xsun.*5,ysun.*5,color="yellow")
-  ax2.fill(xsun.*30,ysun.*30,color="yellow")
+  # ax2.fill(xsun.*30,ysun.*30,color="yellow")
   ax1.plot(xsun,ysun,color="yellow")
-  ax2.plot(xsun,ysun,color="yellow")
+  # ax2.plot(xsun,ysun,color="yellow")
   ax1.plot(pva_mer[1,:],pva_mer[2,:],color="silver",linewidth=2,alpha=0.5)
   ax1.plot(pva_venus[1,:],pva_venus[2,:],color="salmon",linewidth=2,alpha=0.5)
   ax1.plot(pva_mars[1,:],pva_mars[2,:],color="orange",linewidth=2,alpha=0.5)
-  ax2.plot(pva_venus[1,:],pva_venus[2,:],color="salmon",linewidth=2,alpha=0.5)
-  ax2.plot(pva_mer[1,:],pva_mer[2,:],color="silver",linewidth=2,alpha=0.5)
-  ax2.plot(pva_mars[1,:],pva_mars[2,:],color="orange",linewidth=2,alpha=0.5)
-  ax2.plot(pva_jup[1,:],pva_jup[2,:],color="firebrick",linewidth=2,alpha=0.5)
-  ax2.plot(pva_sat[1,:],pva_sat[2,:],color="tan",linewidth=2,alpha=0.5)
+  # ax2.plot(pva_venus[1,:],pva_venus[2,:],color="salmon",linewidth=2,alpha=0.5)
+  # ax2.plot(pva_mer[1,:],pva_mer[2,:],color="silver",linewidth=2,alpha=0.5)
+  # ax2.plot(pva_mars[1,:],pva_mars[2,:],color="orange",linewidth=2,alpha=0.5)
+  # ax2.plot(pva_jup[1,:],pva_jup[2,:],color="firebrick",linewidth=2,alpha=0.5)
+  # ax2.plot(pva_sat[1,:],pva_sat[2,:],color="tan",linewidth=2,alpha=0.5)
   # plot(pva_venus[1,:],pva_venus[2,:],color="salmon",linewidth=1,alpha=0.5)
 
   # for i=1:nt1
   # ax1.scatter(trans_pva_venus[1,i],trans_pva_venus[2,i],marker="v",color="salmon")
   # end
-  ax1.scatter(trans_pva_venus[1,1:nt1],trans_pva_venus[2,1:nt1],marker="v",color="salmon",label="Venus")
+  ax1.scatter(trans_pva_venus[1,1:nt1],trans_pva_venus[2,1:nt1],marker="v",color="salmon",label="Venus",zorder=3)
     if obs=="fromEMB"
-      ax2.plot(pva_emb[1,:],pva_emb[2,:],color="forestgreen",linewidth=2,alpha=0.5)
+      # ax2.plot(pva_emb[1,:],pva_emb[2,:],color="forestgreen",linewidth=2,alpha=0.5)
       n_obs=calc_obs_loc(trans_pva_venus[1:3],trans_pva_venus[4:6],trans_pva_emb[1:3],trans_pva_emb[4:6])
       ax1.plot(pva_emb[1,:],pva_emb[2,:],color="forestgreen",linewidth=2,alpha=0.5)
-      ax1.scatter(trans_pva_emb[1,nt1+1:nt1+nt2],trans_pva_emb[2,nt1+1:nt1+nt2],marker=".",color="forestgreen",label="EMB")
+      ax1.scatter(trans_pva_emb[1,nt1+1:nt1+nt2],trans_pva_emb[2,nt1+1:nt1+nt2],marker=".",color="forestgreen",label="EM",zorder=3)
     # for i=1:nt2
     # ax1.scatter(trans_pva_emb[1,nt1+i],trans_pva_emb[2,nt1+i],marker=".",color="forestgreen")
     # end
     else
-    ax2.plot(pva_earth[1,:],pva_earth[2,:],color="forestgreen",linewidth=2,alpha=0.5)
+    # ax2.plot(pva_earth[1,:],pva_earth[2,:],color="forestgreen",linewidth=2,alpha=0.5)
     n_obs=calc_obs_loc(trans_pva_venus[1:3],trans_pva_venus[4:6],trans_pva_earth[1:3],trans_pva_earth[4:6])
     ax1.plot(pva_earth[1,:],pva_earth[2,:],color="forestgreen",linewidth=2,alpha=0.5)
     ax1.scatter(trans_pva_earth[1,nt1+1:nt1+nt2],trans_pva_earth[2,nt1+1:nt1+nt2],marker=".",color="forestgreen",label="Earth")
@@ -461,18 +461,19 @@ function plot_orbits(dimension::Int;obs::String,nyear::Real=20,return_pva::Bool=
     end
     end
   # arrow(0.0,0.0,n_obs[1],n_obs[2],facecolor="black")
-  ax1.plot([0,n_obs[1]*1.1],[0,n_obs[2]*1.1],"k--",linewidth=2,alpha=0.5)
-  ax1.annotate("Line of sight",xy=[n_obs[1];n_obs[2]], xytext=[n_obs[1]+0.05;n_obs[2]],xycoords="data",fontsize="medium") 
+  ax1.plot([0,n_obs[1]*1.1],[0,n_obs[2]*1.1],"k--",linewidth=1,alpha=0.5,zorder=1,label="line of sight")
+  ax1.annotate(L"\sphericalangle",xy=[0.195;1.015],xycoords="data",fontsize="medium",rotation=-104.37) 
  ### ax1.grid(linestyle="--",alpha=0.4)
-  ax2.set_xlabel("x [au]",fontsize="large")
-  ax2.set_ylabel("y [au]",fontsize="large")
+  # ax2.set_xlabel("x [au]",fontsize="large")
+  # ax2.set_ylabel("y [au]",fontsize="large")
   ax1.set_ylim(-1.1,1.1)
     ax1.set_xlim(-1.1,1.1)
-    ax2.set_xlim(-10,10)
-    ax2.set_ylim(-10,10)
-    ax1.legend(title="Mid-Transit",fontsize="large",title_fontsize="large",markerscale=1.5,loc="upper left")
+    # ax2.set_xlim(-10,10)
+    # ax2.set_ylim(-10,10)
+    ax1.legend(title="Mid-transit",fontsize="medium",title_fontsize="medium",loc="upper left")
     #ax1.tick_params(which="both",direction="in",top=true,bottom=true)
-  ax1.set_xlabel("x [au]",fontsize="large")
+  ax1.set_xlabel("x [au]")
+  ax1.set_ylabel("y [au]")
   # fill(xsun,ysun,color="yellow")
   # plot(xsun,ysun,color="black")
   # plot(pva_venus[1,:],pva_venus[2,:],color="orange",linewidth=1,alpha=0.5)
@@ -508,8 +509,9 @@ function plot_orbits(dimension::Int;obs::String,nyear::Real=20,return_pva::Bool=
   if return_pva
     return pva_venus,pva_earth
   else
-  println("Returns TT calculated from Ephem.")
-  return tt1,tt2,tt3,tt4,tt5,tt6,ttmoon
+    return n_obs
+  # println("Returns TT calculated from Ephem.")
+  # return tt1,tt2,tt3,tt4,tt5,tt6,ttmoon
   end
 
   # close()

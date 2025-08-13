@@ -1,0 +1,292 @@
+[ Info: MC Values for 10 s;15 yr simulations of Venus and E
+Retrieved values.
+mean and std: M_p[M⊕]= [[0.6466444410789467, 0.17656316522057164]; [0.9395156237142677, 0.15049130849195236];;]
+mean and std: P[yrs]= [[0.6151972627372845, 8.613215071893689e-8]; [1.0000174717078392, 1.7583388215721395e-7];;]
+median: σsys[s]= 0.001034032640249888
+mean and std: σsys[s]= 0.0010494514097972097 +/- 0.00014378132210585024
+median added in quad: σtot[s]= 89.9
+[ Info: MC Values for 10 s;16 yr simulations of Venus and E
+Retrieved values.
+mean and std: M_p[M⊕]= [[0.5918563108683501, 0.18268746198243163]; [0.957957680419289, 0.14966562227831717];;]
+mean and std: P[yrs]= [[0.615197246750982, 7.633238251614868e-8]; [1.0000175835241967, 1.607835173816092e-7];;]
+median: σsys[s]= 0.001036877091388589
+mean and std: σsys[s]= 0.0010511967849896027 +/- 0.00013443386087234026
+median added in quad: σtot[s]= 90.14
+[ Info: MC Values for 10 s;17 yr simulations of Venus and E
+Retrieved values.
+mean and std: M_p[M⊕]= [[0.7099200935734978, 0.17504577395278043]; [0.9605302776348057, 0.14102216720829902];;]
+mean and std: P[yrs]= [[0.6151972383679886, 7.163122700038182e-8]; [1.0000176275729986, 1.4419037678923273e-7];;]
+median: σsys[s]= 0.0010208558899215347
+mean and std: σsys[s]= 0.0010325129206100914 +/- 0.00012963264915049326
+median added in quad: σtot[s]= 88.77
+[ Info: MC Values for 10 s;18 yr simulations of Venus and E
+Retrieved values.
+mean and std: M_p[M⊕]= [[0.6415804242847047, 0.21558814175688853]; [0.8998899595505963, 0.23699313804791672];;]
+mean and std: P[yrs]= [[0.6151972232424678, 6.174144455370742e-8]; [1.0000176001302619, 1.2700399392188267e-7];;]
+median: σsys[s]= 0.0009583446874353258
+mean and std: σsys[s]= 0.0009899683524116762 +/- 0.00017225591807992655
+median added in quad: σtot[s]= 83.4
+[ Info: MC Values for 10 s;19 yr simulations of Venus and E
+Retrieved values.
+mean and std: M_p[M⊕]= [[0.6830040459364706, 0.16364957951055245]; [0.9530781824808557, 0.13228749801108655];;]
+mean and std: P[yrs]= [[0.6151972141960077, 5.768513645076072e-8]; [1.0000175512107545, 1.1534768747059619e-7];;]
+median: σsys[s]= 0.0009697786160649302
+mean and std: σsys[s]= 0.0009800172152331392 +/- 0.00011438493909893645
+median added in quad: σtot[s]= 84.38
+[ Info: MC Values for 10 s;20 yr simulations of Venus and E
+Retrieved values.
+mean and std: M_p[M⊕]= [[0.7734381889245765, 0.16222710092177758]; [0.9845674706050845, 0.12471896406325418];;]
+mean and std: P[yrs]= [[0.6151971922372805, 5.136527055937885e-8]; [1.0000174561264334, 1.042081907891308e-7];;]
+median: σsys[s]= 0.0009564564213636925
+mean and std: σsys[s]= 0.0009666886795212235 +/- 0.00010863332888365215
+median added in quad: σtot[s]= 83.24
+[ Info: MC Values for 10 s;21 yr simulations of Venus and E
+Retrieved values.
+mean and std: M_p[M⊕]= [[0.6849213606377802, 0.16553422843226195]; [0.9881932116593867, 0.12378077970892915];;]
+mean and std: P[yrs]= [[0.6151971913092775, 4.7806577578805446e-8]; [1.0000174025012905, 9.920235836358194e-8];;]
+median: σsys[s]= 0.0009859375626765539
+mean and std: σsys[s]= 0.0009942974569614876 +/- 0.00010812862809670338
+median added in quad: σtot[s]= 85.77
+[ Info: MC Values for 10 s;22 yr simulations of Venus and E
+Retrieved values.
+mean and std: M_p[M⊕]= [[0.7983588274292166, 0.1545541791111077]; [0.9859183219907117, 0.12061724103451911];;]
+mean and std: P[yrs]= [[0.6151971900128994, 4.578866450592965e-8]; [1.0000174375289401, 9.006860844937039e-8];;]
+median: σsys[s]= 0.0009717947141762908
+mean and std: σsys[s]= 0.0009803461903610188 +/- 0.00010430939891790405
+median added in quad: σtot[s]= 84.56
+MCMC file for case 1 with p2 model at 10 secs and 23 yrs doesn't exist!!!!
+MCMC file for case 1 with p2 model at 10 secs and 24 yrs doesn't exist!!!!
+MCMC file for case 1 with p2 model at 10 secs and 25 yrs doesn't exist!!!!
+MCMC file for case 1 with p2 model at 10 secs and 26 yrs doesn't exist!!!!
+MCMC file for case 1 with p2 model at 10 secs and 27 yrs doesn't exist!!!!
+MCMC file for case 1 with p2 model at 10 secs and 28 yrs doesn't exist!!!!
+MCMC file for case 1 with p2 model at 10 secs and 29 yrs doesn't exist!!!!
+MCMC file for case 1 with p2 model at 10 secs and 30 yrs doesn't exist!!!!
+
+[ Info: MC Values for 30 s;15 yr simulations of Venus and E
+Retrieved values.
+mean and std: M_p[M⊕]= [[0.6274182366489972, 0.17914534534789522]; [0.9334847090649965, 0.15392356610007016];;]
+mean and std: P[yrs]= [[0.6151972456136936, 8.79893013141928e-8]; [1.0000173673624655, 1.7925344115884968e-7];;]
+median: σsys[s]= 0.0010102161503472015
+mean and std: σsys[s]= 0.0010245093536721532 +/- 0.000153361675241917
+median added in quad: σtot[s]= 92.29
+[ Info: MC Values for 30 s;16 yr simulations of Venus and E
+Retrieved values.
+mean and std: M_p[M⊕]= [[0.4771448465407016, 0.18961995758979602]; [0.9589224520116978, 0.1594492880047635];;]
+mean and std: P[yrs]= [[0.6151972333249529, 8.238726605420998e-8]; [1.0000175677747625, 1.7330589294223988e-7];;]
+median: σsys[s]= 0.0010589498010830864
+mean and std: σsys[s]= 0.0010736116913199847 +/- 0.0001495004570772569
+median added in quad: σtot[s]= 96.29
+[ Info: MC Values for 30 s;17 yr simulations of Venus and E
+Retrieved values.
+mean and std: M_p[M⊕]= [[0.7383516243984203, 0.1905335037370288]; [0.9536359395112161, 0.1508931048241732];;]
+mean and std: P[yrs]= [[0.6151972264043295, 7.766710086119622e-8]; [1.0000176107000067, 1.57423744312336e-7];;]
+median: σsys[s]= 0.0010511117468243376
+mean and std: σsys[s]= 0.0010645049999633933 +/- 0.00014610212964015894
+median added in quad: σtot[s]= 95.64
+[ Info: MC Values for 30 s;18 yr simulations of Venus and E
+Retrieved values.
+mean and std: M_p[M⊕]= [[0.6758680742762957, 0.1633267267493596]; [0.9536078778913127, 0.1299698303206362];;]
+mean and std: P[yrs]= [[0.6151972077702524, 5.934357683004936e-8]; [1.0000175646182914, 1.2331231659353853e-7];;]
+median: σsys[s]= 0.0009044520409321479
+mean and std: σsys[s]= 0.0009151205555249247 +/- 0.00012392030457822266
+median added in quad: σtot[s]= 83.71
+[ Info: MC Values for 30 s;19 yr simulations of Venus and E
+Retrieved values.
+mean and std: M_p[M⊕]= [[0.7088323255410244, 0.16888220196941414]; [0.9421219352974806, 0.13618862412678684];;]
+mean and std: P[yrs]= [[0.6151971997872038, 6.101508447716873e-8]; [1.0000175209020223, 1.2136225666496822e-7];;]
+median: σsys[s]= 0.0009656897814346563
+mean and std: σsys[s]= 0.0009772818212631636 +/- 0.00012678171206175883
+median added in quad: σtot[s]= 88.67
+[ Info: MC Values for 30 s;20 yr simulations of Venus and E
+Retrieved values.
+mean and std: M_p[M⊕]= [[0.7948017458439746, 0.16075982733470903]; [0.9921237373402559, 0.12640423784878002];;]
+mean and std: P[yrs]= [[0.6151971705632323, 5.395925624146272e-8]; [1.0000173965639776, 1.0755830755919842e-7];;]
+median: σsys[s]= 0.0009313262271052636
+mean and std: σsys[s]= 0.000939624879190229 +/- 0.00011763943721618278
+median added in quad: σtot[s]= 85.88
+[ Info: MC Values for 30 s;21 yr simulations of Venus and E
+Retrieved values.
+mean and std: M_p[M⊕]= [[0.5603966352574421, 0.17350208625501698]; [1.0039029642127928, 0.13457586919238038];;]
+mean and std: P[yrs]= [[0.6151971704351485, 5.207732026138031e-8]; [1.0000173506390329, 1.096666432438177e-7];;]
+median: σsys[s]= 0.0010121645816773533
+mean and std: σsys[s]= 0.0010217272800740467 +/- 0.00012192632688983437
+median added in quad: σtot[s]= 92.45
+[ Info: MC Values for 30 s;22 yr simulations of Venus and E
+Retrieved values.
+mean and std: M_p[M⊕]= [[0.8293595155151229, 0.16559961291532205]; [0.9957192239849967, 0.12924439841290844];;]
+mean and std: P[yrs]= [[0.6151971715842987, 4.860672965378357e-8]; [1.0000173992852819, 9.978838775717622e-8];;]
+median: σsys[s]= 0.0009959409966638537
+mean and std: σsys[s]= 0.0010048701543197405 +/- 0.00011712572853335716
+median added in quad: σtot[s]= 91.13
+[ Info: MC Values for 30 s;23 yr simulations of Venus and E
+Retrieved values.
+mean and std: M_p[M⊕]= [[0.6869802461854275, 0.16568173605373884]; [1.014915567431668, 0.12574657290699953];;]
+mean and std: P[yrs]= [[0.6151971656931631, 4.4541648699199225e-8]; [1.000017501221595, 9.238106104402219e-8];;]
+median: σsys[s]= 0.0009900295497439785
+mean and std: σsys[s]= 0.0009990360535009329 +/- 0.0001142828556379675
+median added in quad: σtot[s]= 90.65
+[ Info: MC Values for 30 s;24 yr simulations of Venus and E
+Retrieved values.
+mean and std: M_p[M⊕]= [[0.7096603640985475, 0.18137652825738182]; [0.9988195697811602, 0.13522242203302448];;]
+mean and std: P[yrs]= [[0.6151971686106992, 4.591637606215964e-8]; [1.0000176234226126, 9.756087300715907e-8];;]
+median: σsys[s]= 0.0011180033043747444
+mean and std: σsys[s]= 0.0011273861431867923 +/- 0.00012152832615341416
+median added in quad: σtot[s]= 101.1
+[ Info: MC Values for 30 s;25 yr simulations of Venus and E
+Retrieved values.
+mean and std: M_p[M⊕]= [[0.6343144536990739, 0.18028100848050382]; [0.9823254178423175, 0.13492254465748924];;]
+mean and std: P[yrs]= [[0.6151971634366932, 4.414022944205645e-8]; [1.0000176629119342, 9.053160849422087e-8];;]
+median: σsys[s]= 0.0011027694148110173
+mean and std: σsys[s]= 0.0011114785685211747 +/- 0.00011807645304936884
+median added in quad: σtot[s]= 99.89
+[ Info: MC Values for 30 s;26 yr simulations of Venus and E
+Retrieved values.
+mean and std: M_p[M⊕]= [[0.6717968046231843, 0.16035354791893094]; [0.9856089063016379, 0.11932426402730519];;]
+mean and std: P[yrs]= [[0.6151971708254242, 3.642501384945157e-8]; [1.0000176532832525, 7.480414021843449e-8];;]
+median: σsys[s]= 0.0009700914654771828
+mean and std: σsys[s]= 0.000977603946524869 +/- 0.0001043990091169133
+median added in quad: σtot[s]= 89.02
+[ Info: MC Values for 30 s;27 yr simulations of Venus and E
+Retrieved values.
+mean and std: M_p[M⊕]= [[0.7665325599881069, 0.16920170745854765]; [0.9825606236182381, 0.12130243557739519];;]
+mean and std: P[yrs]= [[0.6151971735937083, 3.774193125575011e-8]; [1.000017658554844, 7.595368420411515e-8];;]
+median: σsys[s]= 0.0010491187843522315
+mean and std: σsys[s]= 0.001056233801033771 +/- 0.00010926478450112509
+median added in quad: σtot[s]= 95.48
+[ Info: MC Values for 30 s;28 yr simulations of Venus and E
+Retrieved values.
+mean and std: M_p[M⊕]= [[0.7543020235233023, 0.165012657317472]; [0.9747756486278629, 0.12312956699487648];;]
+mean and std: P[yrs]= [[0.6151971731940425, 3.5897500937314445e-8]; [1.0000176670829468, 7.223277878958926e-8];;]
+median: σsys[s]= 0.0010617097355905462
+mean and std: σsys[s]= 0.0010695005532404477 +/- 0.00010778594273180522
+median added in quad: σtot[s]= 96.51
+[ Info: MC Values for 30 s;29 yr simulations of Venus and E
+Retrieved values.
+mean and std: M_p[M⊕]= [[0.8185514399514764, 0.16445486722467592]; [1.0327014367211702, 0.11570961021093332];;]
+mean and std: P[yrs]= [[0.6151971863809874, 3.1036396588813525e-8]; [1.0000176849063256, 6.464903282924708e-8];;]
+median: σsys[s]= 0.0009873728910330518
+mean and std: σsys[s]= 0.0009935433163715676 +/- 9.847703724676276e-5
+median added in quad: σtot[s]= 90.43
+[ Info: MC Values for 30 s;30 yr simulations of Venus and E
+Retrieved values.
+mean and std: M_p[M⊕]= [[0.7855348733410301, 0.1616613371530256]; [1.0145295201285536, 0.11351769655971518];;]
+mean and std: P[yrs]= [[0.6151971812504153, 3.0054675236530145e-8]; [1.000017660294946, 6.137669771425399e-8];;]
+median: σsys[s]= 0.00099249337439286
+mean and std: σsys[s]= 0.000999057375153843 +/- 9.547325498534404e-5
+median added in quad: σtot[s]= 90.85
+
+[ Info: MC Values for 60 s;15 yr simulations of Venus and E
+Retrieved values.
+mean and std: M_p[M⊕]= [[0.6153051809290151, 0.19344081786535652]; [0.9198758156359192, 0.16344076139998115];;]
+mean and std: P[yrs]= [[0.6151972204873597, 9.663700514587392e-8]; [1.0000172078507203, 1.9501986317185294e-7];;]
+median: σsys[s]= 0.0009342978282053927
+mean and std: σsys[s]= 0.0009496259060864806 +/- 0.00019860516433048422
+median added in quad: σtot[s]= 100.6
+[ Info: MC Values for 60 s;16 yr simulations of Venus and E
+Retrieved values.
+mean and std: M_p[M⊕]= [[0.3118936658463316, 0.18055428664193904]; [0.9542803529285808, 0.17665469364296452];;]
+mean and std: P[yrs]= [[0.6151972174405683, 9.308255045479417e-8]; [1.0000175531150015, 1.9449571967756115e-7];;]
+median: σsys[s]= 0.0010367420117040288
+mean and std: σsys[s]= 0.0010509012256833333 +/- 0.0001917564809809933
+median added in quad: σtot[s]= 107.8
+[ Info: MC Values for 60 s;17 yr simulations of Venus and E
+Retrieved values.
+mean and std: M_p[M⊕]= [[0.7955448837427789, 0.21976776373571788]; [0.9494059937671053, 0.17331839244883177];;]
+mean and std: P[yrs]= [[0.6151972086898679, 8.960703403021289e-8]; [1.0000175915618543, 1.784802525237439e-7];;]
+median: σsys[s]= 0.0010703873542851747
+mean and std: σsys[s]= 0.0010839897640691153 +/- 0.00018872896588872478
+median added in quad: σtot[s]= 110.2
+[ Info: MC Values for 60 s;18 yr simulations of Venus and E
+Retrieved values.
+mean and std: M_p[M⊕]= [[0.6492201683468485, 0.17590445932345636]; [0.94020590242559, 0.14165883003548974];;]
+mean and std: P[yrs]= [[0.6151971859305946, 6.555260236020491e-8]; [1.000017497939988, 1.3527115675986813e-7];;]
+median: σsys[s]= 0.0007904836619626451
+mean and std: σsys[s]= 0.0007991219997174964 +/- 0.00017216950214084695
+median added in quad: σtot[s]= 90.91
+[ Info: MC Values for 60 s;19 yr simulations of Venus and E
+Retrieved values.
+mean and std: M_p[M⊕]= [[0.7421415725920076, 0.1809964267943448]; [0.9228012862111032, 0.1483971285386377];;]
+mean and std: P[yrs]= [[0.6151971802803885, 6.808916357029523e-8]; [1.0000174800538695, 1.3363697147080552e-7];;]
+median: σsys[s]= 0.0009019096824322069
+mean and std: σsys[s]= 0.0009134527741900561 +/- 0.0001669148279235823
+median added in quad: σtot[s]= 98.35
+[ Info: MC Values for 60 s;20 yr simulations of Venus and E
+Retrieved values.
+mean and std: M_p[M⊕]= [[0.8484462091742685, 0.17826182285027456]; [1.0186646357617462, 0.14063149030489602];;]
+mean and std: P[yrs]= [[0.6151971326529483, 5.877461506654822e-8]; [1.00001730831551, 1.2177125932013054e-7];;]
+median: σsys[s]= 0.0008628566119030032
+mean and std: σsys[s]= 0.0008718844307429778 +/- 0.00016059931144056337
+median added in quad: σtot[s]= 95.7
+[ Info: MC Values for 60 s;21 yr simulations of Venus and E
+Retrieved values.
+mean and std: M_p[M⊕]= [[0.37662799338353564, 0.17874423001609155]; [1.026349177521373, 0.1543998642776714];;]
+mean and std: P[yrs]= [[0.6151971426118334, 6.056296607436968e-8]; [1.000017280186406, 1.2476663990522642e-7];;]
+median: σsys[s]= 0.0010185513386977451
+mean and std: σsys[s]= 0.0010274000584739233 +/- 0.0001605509605026956
+median added in quad: σtot[s]= 106.5
+[ Info: MC Values for 60 s;22 yr simulations of Venus and E
+Retrieved values.
+mean and std: M_p[M⊕]= [[0.8784256175171287, 0.19544065845505165]; [1.0185777792069906, 0.14667437005932255];;]
+mean and std: P[yrs]= [[0.6151971442854745, 5.729799677432505e-8]; [1.0000173414952502, 1.1514475762619773e-7];;]
+median: σsys[s]= 0.0010098540413479064
+mean and std: σsys[s]= 0.0010188515424224762 +/- 0.00015541736936461895
+median added in quad: σtot[s]= 105.9
+[ Info: MC Values for 60 s;23 yr simulations of Venus and E
+Retrieved values.
+mean and std: M_p[M⊕]= [[0.6561423249272093, 0.1890207683612643]; [1.0276445505329095, 0.14371897182063534];;]
+mean and std: P[yrs]= [[0.6151971407974274, 5.136056628519839e-8]; [1.000017461588897, 1.0383737135268166e-7];;]
+median: σsys[s]= 0.0009611544368435302
+mean and std: σsys[s]= 0.0009705034032515114 +/- 0.00015103614332646114
+median added in quad: σtot[s]= 102.5
+[ Info: MC Values for 60 s;24 yr simulations of Venus and E
+Retrieved values.
+mean and std: M_p[M⊕]= [[0.7055385553776499, 0.1957812207317706]; [1.0016695421127328, 0.15378047838993245];;]
+mean and std: P[yrs]= [[0.6151971434516278, 5.425401599966683e-8]; [1.0000176287153797, 1.1054996384631929e-7];;]
+median: σsys[s]= 0.0011593885061551464
+mean and std: σsys[s]= 0.0011696856366979935 +/- 0.00015623011452999035
+median added in quad: σtot[s]= 116.8
+[ Info: MC Values for 60 s;25 yr simulations of Venus and E
+Retrieved values.
+mean and std: M_p[M⊕]= [[0.4794729341647072, 0.19224921741447823]; [0.9626459050619077, 0.1568585766529972];;]
+mean and std: P[yrs]= [[0.615197130689297, 5.110999200677417e-8]; [1.0000176548517297, 1.0221129191452379e-7];;]
+median: σsys[s]= 0.001131878916922641
+mean and std: σsys[s]= 0.001140767179427623 +/- 0.00015372872047900556
+median added in quad: σtot[s]= 114.7
+[ Info: MC Values for 60 s;26 yr simulations of Venus and E
+Retrieved values.
+mean and std: M_p[M⊕]= [[0.5526146202645823, 0.16980324640279118]; [0.961748839620518, 0.13055887079567557];;]
+mean and std: P[yrs]= [[0.6151971452659625, 4.0906120627129835e-8]; [1.0000176211389729, 8.342981692651923e-8];;]
+median: σsys[s]= 0.0009019934113798423
+mean and std: σsys[s]= 0.0009084265449849292 +/- 0.00013616465445870018
+median added in quad: σtot[s]= 98.35
+[ Info: MC Values for 60 s;27 yr simulations of Venus and E
+Retrieved values.
+mean and std: M_p[M⊕]= [[0.7581436508501737, 0.18832524743296147]; [0.9665540460355334, 0.13968184797303643];;]
+mean and std: P[yrs]= [[0.6151971543023761, 4.2925221755129624e-8]; [1.0000176411760482, 8.773410158246289e-8];;]
+median: σsys[s]= 0.0010704403160030247
+mean and std: σsys[s]= 0.0010791682341898168 +/- 0.00014110264198949072
+median added in quad: σtot[s]= 110.2
+[ Info: MC Values for 60 s;28 yr simulations of Venus and E
+Retrieved values.
+mean and std: M_p[M⊕]= [[0.7268974174681343, 0.18982117145858535]; [0.9403241340298463, 0.1413621463881969];;]
+mean and std: P[yrs]= [[0.6151971511313898, 4.1608942301664326e-8]; [1.0000176663602243, 8.561063651989683e-8];;]
+median: σsys[s]= 0.0011183985815115668
+mean and std: σsys[s]= 0.0011268180910035419 +/- 0.00013983653688599094
+median added in quad: σtot[s]= 113.7
+[ Info: MC Values for 60 s;29 yr simulations of Venus and E
+Retrieved values.
+mean and std: M_p[M⊕]= [[0.8357957702528097, 0.18845517270481899]; [1.0517237861978768, 0.1308693676975313];;]
+mean and std: P[yrs]= [[0.6151971760149936, 3.571114655463773e-8]; [1.000017701239183, 7.431974620760928e-8];;]
+median: σsys[s]= 0.0009881926632133939
+mean and std: σsys[s]= 0.0009946167065659763 +/- 0.00013028504620279078
+median added in quad: σtot[s]= 104.4
+[ Info: MC Values for 60 s;30 yr simulations of Venus and E
+Retrieved values.
+mean and std: M_p[M⊕]= [[0.503570821827932, 0.17181802850829053]; [0.9596775004703827, 0.13379001722407072];;]
+mean and std: P[yrs]= [[0.6151971607398281, 3.5828737306906204e-8]; [1.0000175822081099, 7.233465691787786e-8];;]
+median: σsys[s]= 0.0010182230033078253
+mean and std: σsys[s]= 0.0010234519842770174 +/- 0.0001305198040966863
+median added in quad: σtot[s]= 106.5
+
+
