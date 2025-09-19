@@ -1,7 +1,10 @@
+[![DOI](https://zenodo.org/badge/276759345.svg)](https://doi.org/10.5281/zenodo.17156391)
+
 Using the Solar System as a proxy for an exoplanetary system, 
 given transit timing variations of Venus and Earth, carry out
-a fit with TTVFaster and Nbody Grad to find period & mass of Jupiter.
-Learn Julia the Hard Way:
+a fit with TTVFaster and Nbody Grad to find properties of non-transiting objects (i.e. Jupiter, Mars).
+
+<!-- Learn Julia the Hard Way:
 https://github.com/chrisvoncsefalvay/learn-julia-the-hard-way/tree/master/_chapters
 
 Julia Data Module:
@@ -23,7 +26,7 @@ kilometers per second square at JD= 2451624.5 TDB timescale
 For best accuracy the first time argument should be the integer part 
 and the delta the fractional part (step through day).
 
-compute(eph,jd0,time,target,center)
+`compute(eph,jd0,time,target,center)`
 
 Compute position and velocity of target with respect to center at epoch
 jd0+time. This method does not support the NAIF numbering scheme.
@@ -33,56 +36,49 @@ be a fraction of the day. But you may call this function with time=0 and jd0,
 the desired time, if you don't care about precision.
 
 Note: For planets without moons, Mercury and Venus, the barycenter location 
-coincides with the body center of mass. compute(...) doesn't accept all NaifIDs
-NaifID: 
-    10          'SUN'
-    0           'SOLAR SYSTEM BARYCENTER'
-    2           'VENUS BARYCENTER'
-    3           'EARTH MOON BARYCENTER'
-    399         'EARTH'
-
+coincides with the body center of mass. compute(...) doesn't accept all NaifIDs 
 Observer is calculating barycentic julian date for theings outside SS, with light travel time correction.
 
-1). Simulate transit times from JPLEphemeris. Add noise option to data. 
+# 1). Simulate transit times from JPLEphemeris. Add noise option to data. 
 
-sim_obs_and_find_times(jd1::Float64,sigma::Real,nyear::Real,obs::String)
-NB:
-12/18/23 : Somehow, routine with TTVFaster skips the transit for Venus (at t=14513.936223576813).
-1/09/24 : Added break to while loop. Now stopping before t0[end]. pre-2024 runs dont have this constraint
+`sim_obs_and_find_times(jd1::Float64,sigma::Real,nyear::Real,obs::String)`
 
-2a). Carry out a linear fit to the transit times. 
+- 12/18/23 : Somehow, routine with TTVFaster skips the transit for Venus (at t=14513.936223576813).
+- 1/09/24 : Added break to while loop. Now stopping before t0[end]. pre-2024 runs dont have this constraint
 
-2b). Call ttv_nplanet.jl from wrapper then compute the chi-square 
+# 2a). Carry out a linear fit to the transit times. 
+
+## 2b). Call ttv_nplanet.jl from wrapper then compute the chi-square 
 of the fit. Carry out an initial fit of the 2 inner planets
 Note: jmax is the truncation of infinite [?] series in Laplace coefficients. It's larger when planets are closer to each other.
-ttv_nplanet(nplanet::Int64,jmax::Int64,ntrans::Vector{Int64},data::Vector{T}) where T<:Real
-ttv_wrapper(tt0,nplanet::Int64,ntrans::Vector{Int64},params::Vector{T},jmax::Integer,EM::Bool) 
+`ttv_nplanet(nplanet::Int64,jmax::Int64,ntrans::Vector{Int64},data::Vector{T}) where T<:Real`
+`ttv_wrapper(tt0,nplanet::Int64,ntrans::Vector{Int64},params::Vector{T},jmax::Integer,EM::Bool) `
 
-fit_planet2(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,options::Array{String},save_as_jld2::Bool=false)
+`fit_planet2(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,options::Array{String},save_as_jld2::Bool=false)`
 
-2c). Then add in the third (and later, fourth) planet. Initialize a grid of periods & 
+## 2c). Then add in the third (and later, fourth) planet. Initialize a grid of periods & 
 phases of the outer planet, compute the best-fit at each.
 Optimize the fit to the two sets of transit times by varying all of the
 other parameters. 
     - subtracted tref from times to increase speed/accuracy. 
     - added tolerance limit to optimization 
     - tref, jd1, and tol defined in full_run.jl 
+	
 Note: This assumes 2 transits for Jupiter/Mars-analogues because that is required for TTVFaster
 Show that likelihood curve peaks at real period of Jupiter.
 Note: the third planet can't be too close to the transiting planets. 
     - Currently doing 5-22 years, but ran rebound simulations to test minimum orbit of jupiter analogue. Conditioned on retrieved V+E parameters, Jupiter orbit can go down to 1337.0 days but this doesn't account for the observed TTVs. Would need NbodyGradient to find actual minimum.
 
-fit_planet3(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p3in::Float64,p3out::Float64,np3::Int,nphase::Int,obs::String)
+`fit_planet3(filename::String,jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p3in::Float64,p3out::Float64,np3::Int,nphase::Int,obs::String)`
 do wide run first, for nper=500 points in grid
 then do nper=200 around peak
 
-2d). Search for moon. Initialize a grid of moon phases & compute the best-fit at each.
+## 2d). Search for moon. Initialize a grid of moon phases & compute the best-fit at each.
 Optimize the fit to the two sets of transit times by varying all of the
 other parameters. 
-fit_moon(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,dpin::Float64,dpout::Float64,ndp::Int,nplanets::Real)
+`fit_moon(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,dpin::Float64,dpout::Float64,ndp::Int,nplanets::Real)`
 
-3).  Taking the minimum chi-square, or the maximum log-Probability,
-run a markov chain with all 3 planets:  
+# 3).  run a markov chain with all 3 planets for the maximum log-Probability  
 -Assuming the host star has the same mass as the Sun, which 3 planets did you detect?  
 -What are their masses and eccentricities (as well as uncertainties on these
 quantities)?
@@ -90,115 +86,98 @@ quantities)?
 3a). Run markov chain with planets + moon:
 Note: deltaphi dist. is multi-modal, so ensure that value is inside dp range.
 
- MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,
+ `MCMC(foutput::String,param::Array{Float64,1},lprob_best::Float64,
     nsteps::Int64,nwalkers::Int64,nplanet::Int64,ntrans::Array{Int64,1},
     tt0::Array{Float64,1},tt::Array{Float64,1},sigtt::Array{Float64,1},
-    use_sigsys::Bool,EM::Bool) 
+    use_sigsys::Bool,EM::Bool) `
 
 4).  Run routine for range of noise levels (sigmas) and observation time spans (nyears). 
 Which runs best detect perturbing objects? 
 For different time spans, there are diff. posterior distributions, 
 must change grid search to accommodate for width of dist.
 
-Creating contours in corner plots: take all pixels in 2d histogram, 
-sort them from smallest to largest value. Find where 68% of values is about a point (i.e. greather than )
-
+- Creating contours in corner plots: take all pixels in 2d histogram, sort them from smallest to largest value.  
+!-->
 If number of independent samples for each walker >= 100, get results. 
-09/22/2023 updated 12/13/2023
-12/18/23 : Somehow, routine with TTVFaster skips the transit for Venus (at t=14513.936223576813)?
-1/09/24 : Added break to while loop. Now stopping before t0[end]. Pre-2024 runs dont have this constraint, so they include a transit time after the end of our observation time (for each planet). Only noticed while comparing with NbodyGradient; and I'm not redoing the runs - since I don't think it would matter.
-9/16/24 : Blind runs varying mass *and* period.
-   mu3= range(log10(1e-8), stop=log10(1e-2),length=10)
-   - 10s blind run ?
-   - 30s blind run done
-   - 100s blind run done
-- I started getting low probabilities for 30s - bug in code?
-no priors, so really high evectors
+- 09/22/2023 updated 12/13/2023
+- 12/18/23 : Somehow, routine with TTVFaster skips the transit for Venus (at t=14513.936223576813)?
+- 1/09/24 : Added break to while loop. Now stopping before t0[end]. Pre-2024 runs dont have this constraint, so they include a transit time after the end of our observation time (for each planet). Only noticed while comparing with NbodyGradient; and I'm not redoing the runs - since I don't think it would matter.
+- 9/16/24 : Blind runs varying mass *and* period.
+  
+	- 	I started getting low probabilities for 30s - bug in code?
+	- 	no priors, so really high evectors
+	-	 Why did i stop at 90s? Fit results depend on getting a p2 fit. Can't get a p2 fit so can't do p3 and p4. 
+- 10/29/24 : looked at the differences for EV-p2 model between the old and new results (where old have those 2 extra TTs).
+    - new results have wider posteriors, but overall the same resuts
+- 2025 : I redid the runs that I previously said didn't matter in order to make better looking plots.
+	- 	New results are similar to old results but not exact. 
 
-Why did i stop at 90s? Fit results depend on getting a p2 fit. Can't get a p2 fit so can't do p3 and p4. 
-10/29/24 : looked at the differences for EV-p2 model between the old and new results (where old have those 2 extra TTs).
-    new results have wider posteriors, but overall the same resuts
+### Current State
 
-
-##########################	Current State	##########################
-0). Updated TTVFaster to be compatible with Julia v1.3+
-1). With transit times of Earth & Venus, can constrain both of their masses
-jd1=2.4332825e6; tref=2430000; tol=1e-5
-1a). Can infer existence of Jupiter first then Moon
-1b). clear gaussians in likelihood profiles, agrees with posterior dist.
-2). - For 30 sec noise, ~18 years is enough to constrain Jupiter period from E+V 
-        (mass?){
-            - For 30 sec noise, ~22 years is enough to constrain Mars period fr}}'
+- 0). Updated TTVFaster to be compatible with Julia v1.3+
+- 1). With transit times of Earth & Venus, can constrain both of their masses
+	jd1=2.4332825e6; tref=2430000; tol=1e-5
+ - 2). Can infer existence of Jupiter first then Moon
+	- For 30 sec noise, ~18 years is enough to constrain Jupiter period from E+V 
+	- For 30 sec noise, ~22 years is enough to constrain Mars period 
     - For 60secs and 90 secs, 30 years is enough
-    limits/constraints make sense based on TTVs
-3). Less time span or more noise overestimate (or underestimate?) Jupiter period
-        could be different definitions of period (linear ephemeris fit vs average time to orbit)
-4). Once t_maxsinphi and t_maxcosphi are approx 0, no constrain on deltaphi
+	- mass? limits/constraints make sense based on TTVs, similar to those from RV
+- 3). Less time span or more noise overestimate (or underestimate?) Jupiter period
+     -   could be different definitions of period (linear ephemeris fit vs average time to orbit)
+- 4). Once t_maxsinphi and t_maxcosphi are approx 0, no constrain on deltaphi
     Correlation betweem deltaphi and t_maxsinphi --> posterior broader than likelihood
-5). Four planet model preferred over model with moon and 3 planets. 
-        can't tell difference b/w Hppmp and Hpppp
-6). If wrong four planet params, wrong Jupiter params due to long term Mars TTV signal.
+- 5). Four planet model preferred over model with moon and 3 planets. 
+     -   can't tell difference b/w Hppmp and Hpppp
+- 6). If wrong four planet params, wrong Jupiter params due to long term Mars TTV signal.
 
-Q). Degenaracy b/w Jupiter and Moon? <--tail on Jupiter period with moon
+- Q). Degenaracy b/w Jupiter and Moon? <--tail on Jupiter period with moon
         if you don't have enough time spans
-Q). P-M_p degeneracy? <--tail on Jupiter distributions
-        assymetry for ecosw and esinw
-Q). Wrong signs for evectors? <-- not first time this has been found
+- Q). P-M_p degeneracy? <--tail on Jupiter distributions
+      -  assymetry for ecosw and esinw
+- Q). Wrong signs for evectors? <-- not first time this has been found
 
-##########################  Project Tasks   ##########################
-0). Complete bibliography. [  ]
-0a). Find relevant papers and add them to .bib file [  ]
+### Future Tasks  
+- Q: What really limits timing precision of Earth & Venus about the Sun? 
+- 1). How to account for missed transits in real data?
+- 	multiple coefficients -> loop over coefficients?
+- 2). Figure out whether the Earth-Moon barycenter offset causes bias in measurements and if so, why.
+- 3). Figure out what the actual expected timing precision would be 
+	- (limited by stellar noise -- related to Tyler's work). 
+	- 3a) Could use existing telescope precision info 
+- Q: The masses inferred with sufficient data are good, although still a bit more discrepant than I would like. need to implement an N-body fit?
+- 4a). Refine TTVFaster estimates from finding Jupiter by applying NbodyGradient.
+	- 	(should get better parameters for the masses of Venus and Earth)
+- 4b). Make plots of orbits with 1-sigma uncertainties overplotted with the correct orbits. [  ] 
+     - how to do this with eccentricities and omega? Need pomega and Omega?
+- 4c). Compare TTVFaster and NBody Grad fits. 
+- 5a). Figure out how to speed things up so I can do a global search, and explore duration & error bar dependence. 
+	- unlikely to converge when searching low duration (<22 years) datasets
+- 5b). Do inverse matrix fitting for linear parameters (Jupiter period & Moon deltaphi) to speed things up (might be more robust).
+- 5c). Maybe make a struct to hold the pre-computed Laplace coefficents, and pass this to routines, or create a closure for this.
+- 5d). Analytical Jacobian (could speed up TTVFaster). How do the finite differences compare to analytic derivatives?
+    - computate Laplace coefficients, need derivatives of coeffs from table 1 of Agol&Deck 2015
+    - write tests to show that analytic derivatives work.
+- 6). From posteriors, show how well we can measure mean insolation. 
+- 7). Show that model is correct either way (Moon first then Jupiter). 
+    - unrealistic because it's more likely that the giant planet would be discovered first since it's easier
+- 8). Make model of actual transit light curves (as opposed to just transit times).
+    - Show how well constrained densities are (for Earth and Venus).
+    - Show how well constrained densities are for Sun.
+
+<!-- 
+## Completed Tasks 
+### Manuscript Tasks
+0). Complete bibliography
+0a). Find relevant papers and add them to .bib file [ x ]
 0b). Read and summarize relevant papers [ x ]
 1). Write up model desctription (as above) [ x ]
 2). Write up methods description [ x ]
 3). Write up analysis description [ x ]
 4). Create tables for parameters. [ x ]
-5) Make likelihood profiles continuous [  ]
-6). Make plots of orbits with 1-sigma uncertainties overplotted with the correct orbits. [  ] 
-     - how to do this with eccentricities and omega? Need pomega and Omega?
-7). Figure out whether the Earth-Moon barycenter offset causes bias in measurements and if so, why.
-8). Schedule parallel fit and chain runs on hyak.mox using slurm scheduler [  ]
+8). Schedule parallel fit and chain runs on hyak.mox using slurm scheduler [ x ]
      - exits prematurely, times out, or returns error in regress.jl assertion
-10). Condense results to 1 equation fit (ex. how much of X to get Y uncertainty). [  ]
-
-############################ Future Tasks   ##########################
-Q: What really limits timing precision of Earth & Venus
-about the Sun? 
-1). How to account for missed transits in real data? 
-multiple coefficeints -> loop over coefficients?
-2). Could use existing telescope precision info 
-3). Figure out what the actual expected timing precision would be (limited by stellar noise -- related to Tyler's work). 
-Q: The masses inferred with sufficient data are good, although
-still a bit more discrepant than I would like. need to implement an N-body fit?
-4a). Refine TTVFaster estimates from finding Jupiter by applying NbodyGradient.
-(should get better parameters for the masses of Venus and Earth)
-Heirarchy example for Solar System:
-Sun Venus Earth Moon Jupiter Saturn ....
-indices = [[-1, 1, 0, 0, 0, 0],  # SUN & VENUS orbit in a binary
-           [ 0, 0,-1, 1, 0, 0],  # EARTH & MOON orbit in a binary 
-           [-1,-1, 1, 1, 0, 0],  # SUN & VENUS orbit about them 
-           [-1,-1,-1,-1, 1, 0],  # (optional) Jupiter orbits about them
-           [-1,-1,-1,-1,-1, 1],  # (optional) etc...
-           [ 1, 1, 1, 1, 1, 1]]  # center of mass of the system
-4c). Compare TTVFaster and NBody Grad fits. 
-5a). Figure out how to speed things up so I can do a global
-search, and explore duration & error bar dependence. 
-5b). Do inverse matrix fitting for linear parameters (Jupiter period & Moon deltaphi) to speed things up (might be more robust).
-5c). Maybe make a struct to hold the pre-computed Laplace coefficents,
-and pass this to routines, or create a closure for this.
-5d). Analytical Jacobian (could speed up TTVFaster). How do finite differences compare to analytic derivatives?
-    - computate Laplace coefficients, need derivatives of coeffs from table 1 of Agol&Deck 2015
-    - write tests to show that analytic derivatives work.
-6). From posteriors, show how well we can measure mean insolation. 
-7). Show that model is correct either way (Moon first then Jupiter). 
-    - unrealistic because it's more likely that the giant planet would be discovered first since it's easier
-8). Make model of actual transit light curves (as opposed to just transit times).
-    - Show how well constrained densities are (for Earth and Venus).
-    - Show how well constrained densities are for Sun.
-
-   
-<!-- 
-##########################  Completed Tasks  ##########################
+### Project Tasks
+10). Condense results to 1 equation fit (ex. how much of X to get Y uncertainty). [ x ]
 9). See if we can detect Mars [ x ] or Saturn. [ x ]
 8). See which scenario best fits simulated data [ x ]
 7). Add M_p > 0 prior to MCMC [ x ]
