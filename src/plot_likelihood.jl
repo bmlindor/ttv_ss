@@ -174,27 +174,33 @@ if case_num==1
 elseif case_num==2
 case_label="Case 2"
 	if include_moon
-		fitfile3=string("grid/","p3moonp4","_grid",sigma,"s",nyear,"yrs.csv")
-		widefit3=string("grid/wide","p3moonp4","_grid",sigma,"s",nyear,"yrs.csv")
-		mcfile3=string("MCMC/","p3moonp4","_mcmc",sigma,"s",nyear,"yrs.jld2")
+		fitfile5=string("moon_2025/","HRp3moonp4","_grid",sigma,"s",nyear,"yrs.csv")
+		widefit5=string("moon_2025/","HRp3moonp4","_grid",sigma,"s",nyear,"yrs.csv")
+		mcfile5=string("moon_2025/","p3moonp4","_mcmc",sigma,"s",nyear,"yrs.jld2")
 		title="Search from Venus + Earth TTVs"
 	 	label1=L"$\mathcal{H}_{PPsPP}$ "
-		fitfile4=string("grid/","p3moon","_grid",sigma,"s",nyear,"yrs.csv")
-	  widefit4=string("grid/wide","p3","_grid",sigma,"s",nyear,"yrs.csv")
-	  mcfile4=string("MCMC/","p3moon","_mcmc",sigma,"s",nyear,"yrs.jld2")
+
+		fitfile3=string("moon_2025/","HRwidep4","_grid",sigma,"s",nyear,"yrs.csv")
+		widefit3=string("moon_2025/","HR2widep4","_grid",sigma,"s",nyear,"yrs.csv")
+		mcfile3=string("moon_2025/","widep4","_mcmc",sigma,"s",nyear,"yrs.jld2")
+
+		fitfile4=string("moon_2025/","p3","_grid",sigma,"s",nyear,"yrs.csv")
+		widefit4=string("moon_2025/","p3","_grid",sigma,"s",nyear,"yrs.csv")
+		mcfile4=string("moon_2025/","p3","_mcmc",sigma,"s",nyear,"yrs.jld2")
 	else
-		fitfile3=string("grid/","p4","_grid",sigma,"s",nyear,"yrs.csv")
-		widefit3=string("grid/wide","p4","_grid",sigma,"s",nyear,"yrs.csv")
-		mcfile3=string("MCMC/","p4","_mcmc",sigma,"s",nyear,"yrs.jld2")
-		fitfile4=string("grid/","p3","_grid",sigma,"s",nyear,"yrs.csv")
-		widefit4=string("grid/wide","p3","_grid",sigma,"s",nyear,"yrs.csv")
-		mcfile4=string("MCMC/","p3","_mcmc",sigma,"s",nyear,"yrs.jld2")
+		fitfile3=string("moon_2025/","p4","_grid",sigma,"s",nyear,"yrs.csv")
+		widefit3=string("moon_2025/wide","p4","_grid",sigma,"s",nyear,"yrs.csv")
+		mcfile3=string("moon_2025/","p4","_mcmc",sigma,"s",nyear,"yrs.jld2")
+		fitfile4=string("moon_2025/","p3","_grid",sigma,"s",nyear,"yrs.csv")
+		widefit4=string("moon_2025/wide","p3","_grid",sigma,"s",nyear,"yrs.csv")
+		mcfile4=string("moon_2025/","p3","_mcmc",sigma,"s",nyear,"yrs.jld2")
 		title="Search from Venus + Earth TTVs"
 		label1=L"$\mathcal{H}_{PPPP}$ "
 	end
 end
 	mc3=jldopen(String(mcfile3),"r")
  	mc4=jldopen(String(mcfile4),"r")
+
 	fit3,header=readdlm(fitfile3,',',header=true)
 	wide3,header=readdlm(widefit3,',',header=true)
 	fit4,header=readdlm(fitfile4,',',header=true)
@@ -204,7 +210,7 @@ end
 	par_mcmc4=vec(mc4["par_mcmc"][:,mc4["iburn"]:end,12])./365.25
 	sigsys3=(median(vec(mc3["par_mcmc"][:,mc3["iburn"]:end,end]))).* 3600*24
 	sigsys_err3=(std(vec(mc3["par_mcmc"][:,mc3["iburn"]:end,end]))).* 3600*24
-  sigtot3=sqrt(sigsys3^2 + sigma^2) 
+	sigtot3=sqrt(sigsys3^2 + sigma^2) 
 	sigsys4=(median(vec(mc4["par_mcmc"][:,mc4["iburn"]:end,end]))).* 3600*24
 	sigsys_err4=(std(vec(mc4["par_mcmc"][:,mc4["iburn"]:end,end]))).* 3600*24
 	sigtot4=sqrt(sigsys4^2 + sigma^2) 
@@ -212,7 +218,7 @@ end
  	true_per3=1.8808476
  	true_per4=11.862615
 	sim_obs_label= string("[",nyear," yr span]",'\n',L"$\sigma_{obs}=$",sigma,"s")
-	fig=figure(figsize=(6,3.5),dpi=150)
+	fig=figure(figsize=(8,3.5),dpi=150)
 	# fig=figure(figsize=(5,5))
 	# subplots_adjust(hspace=0.2,wspace=0.15)
 	# ax1.title()
@@ -236,103 +242,119 @@ end
 
 	## plot Mars zoom-in
 	if include_moon
-	ax2=fig.add_subplot(122,title=string(label1))
-	name=string("2025/2025wide_case",case_num,"_",sigma,"s",nyear,".png")
+	mc5=jldopen(String(mcfile5),"r")
+	fit5,header=readdlm(fitfile5,',',header=true)
+	wide5,header=readdlm(widefit5,',',header=true)
+	par_mcmc5=vec(mc5["par_mcmc"][:,mc5["iburn"]:end,12])./365.25
+	sigsys5=(median(vec(mc5["par_mcmc"][:,mc5["iburn"]:end,end]))).* 3600*24
+	sigsys_err5=(std(vec(mc5["par_mcmc"][:,mc5["iburn"]:end,end]))).* 3600*24
+	sigtot5=sqrt(sigsys5^2 + sigma^2) 
+	true_per5 = 1.8808476
+	gs = fig.add_gridspec(1,3,figure=fig)
+	
+	ax3=fig.add_subplot(gs[1,1],title=string(L"$\mathcal{H}_{PPP}$"))
+	ax3.minorticks_on()
+	ax3.tick_params(which="both",direction="in",left=true,labelleft=true)
+	ax2=fig.add_subplot(gs[1,2],sharey=ax3,title=string(L"$\mathcal{H}_{PPPP}$"))
+	ax2.spines["right"].set_visible(false)
+	ax2.spines["left"].set_visible(false)
+	ax2.spines["bottom"].set_visible(false)
+	ax2.spines["top"].set_visible(false)
+	ax2.tick_params(labelleft=false,left=false,labelbottom=false,bottom=false)
+	ax1=fig.add_subplot(gs[1,3],sharey=ax3,title=string(label1))
+
+	color="orange"
+	ax1.axvline(true_per3,linestyle="--",color="black")
+	ax1.text(1.89,0.96,"Mars",fontsize="medium")
+	xbin,xhist,xbin_square,hist_square=histogram(par_mcmc5,50)
+	ax1.plot(fit5[:,12]./365.25,xprob(fit5[:,end]),color="orange",label="Fit",alpha=0.75)
+	ax1.plot(xbin_square,hist_square./maximum(hist_square),color="orange",label="Posterior")
+	ax1.fill_between(xbin_square, hist_square./maximum(hist_square),alpha=0.2,color=color)
+
+	name=string("moon_2025/2025wide_case",case_num,"_",sigma,"s",nyear,".pdf")
 	else
 	ax2=fig.add_subplot(122,title=string(L"$\mathcal{H}_{PPPP}$"))
-	name=string("2025/2025wide_case",case_num,"_",sigma,"s",nyear,"_p4.png")
+	ax3=fig.add_subplot(121,sharey=ax2,title=string(L"$\mathcal{H}_{PPP}$"))
+
+	name=string("2025/2025wide_case",case_num,"_",sigma,"s",nyear,"_p4.pdf")
 	end
 	# text(1.83,1.1,"a)",fontweight="bold")
 
+	# add subgrid spec for outliers
+	gs01=gs[2].subgridspec(1,2)
+	ax11=fig.add_subplot(gs01[1,1])
+	ax12=fig.add_subplot(gs01[1,2])
+	d=0.015
+	ax11.spines["right"].set_visible(false)
+	ax11.plot((1-d, 1+d),(-d,+d),transform=ax11.transAxes,clip_on=false,linewidth=0.8,color="k")
+	ax11.plot((1-d, 1+d),(1-d,1+d),transform=ax11.transAxes,clip_on=false,linewidth=0.8,color="k")
+
+	ax12.spines["left"].set_visible(false)
+	ax12.tick_params(labelleft=false,left=false)
+	# ax2.tick_params(labelleft=false,left=false,labelbottom=false,bottom=false)
+	ax12.plot((-d, +d),(-d,+d),transform=ax12.transAxes,clip_on=false,linewidth=0.8,color="k")
+	ax12.plot((-d, +d),(1-d,1+d),transform=ax12.transAxes,clip_on=false,linewidth=0.8,color="k")
+
 	alpha=0.3
 	color="orange"
-	axvline(true_per3,linestyle="--",color="black")
-	text(1.89,0.96,"Mars",fontsize="medium")
-	# ax2.hist(par_mcmc3,nbins*10,histtype="step",fill=true,facecolor=color,edgecolor=color,density=true,linewidth=2,zorder=1,alpha=alpha)
-	# ax2.hist(par_mcmc3,nbins*10,histtype="step",alpha=1.0,density=true,color=color,linewidth=2)
+	ax11.axvline(true_per3,linestyle="--",color="black")
+	ax11.text(1.89,0.96,"Mars",fontsize="medium")
 	xbin,xhist,xbin_square,hist_square=histogram(par_mcmc3,50)
-	# ax2.hist(par_mcmc3,bins=nbins,histtype="step",density=tr,color="orange")
- 	ax2.plot(fit3[:,12]./365.25,xprob(fit3[:,end]),color="orange",label="Fit",alpha=0.75)
-  ax2.plot(xbin_square,hist_square./maximum(hist_square),color="orange",label="Posterior")
-  ax2.fill_between(xbin_square, hist_square./maximum(hist_square),alpha=0.2,color=color)
-  # ax1.spines["bottom"].set_visible(false)
-  # ax1.tick_params(labelbottom=false,bottom=false)
-  # ax2.spines["top"].set_visible(false)
-  # # ax2.tick_params(labeltop=false)  # don't put tick labels at the top
-  # ax2.tick_params(labeltop=false,bottom=false,top=false,labelbottom=false)
-  #   ax0.tick_params(labelleft=false,bottom=false,left=false,labelbottom=false)  # don't put tick labels at the top
-  # ax2.spines["bottom"].set_visible(false)
-  # ax3.tick_params(labeltop=false,top=false)  # don't put tick labels at the top
-  # ax3.spines["top"].set_visible(false)
-  # ax1.set_ylim(225, 350)  # outliers only
-  # ax2.set_ylim(.72, 1.1)  # most of the data
-  # ax3.set_ylim(0.0, 0.3)  # most of the data
-  # d =0.02  # proportion of vertical to horizontal extent of the slanted line
-  # kwargs = dict(marker=[(-1, -d), (1, d)], markersize=12,
-  #               linestyle="none", color='k', mec='k', mew=1, )
-  # ax1.plot((-d, +d), (-d, +d), transform=ax1.transAxes, clip_on=false,linewidth=0.8,color="k")
-  # ax1.plot((1-d,1 +d), (-d, +d), transform=ax1.transAxes, clip_on=false,linewidth=0.8,color="k")
-  # ax2.plot((-d, +d), (1-d,1 +d), transform=ax2.transAxes, clip_on=false,linewidth=0.8,color="k")
-  # ax2.plot((1-d,1 +d), (1-d, 1+d), transform=ax2.transAxes, clip_on=false,linewidth=0.8,color="k")
-  # ax2.plot((-d, +d), (-d, +d), transform=ax2.transAxes, clip_on=false,linewidth=0.8,color="k")
-  # ax2.plot((1-d,1 +d), (-d, +d), transform=ax2.transAxes, clip_on=false,linewidth=0.8,color="k")
-  # ax3.plot((-d, +d), (1-d,1 +d), transform=ax3.transAxes, clip_on=false,linewidth=0.8,color="k")
-  # ax3.plot((1-d,1 +d), (1-d, 1+d), transform=ax3.transAxes, clip_on=false,linewidth=0.8,color="k")
- 	minorticks_on()
- 	# legend()
-	tick_params(which="both",direction="in")
-	ax2.set_xlim(1.85,2.16)
+	ax11.plot(fit3[:,12]./365.25,xprob(fit3[:,end]),color="orange",label="Fit",alpha=0.75)
+	ax11.set_xlim(1.85,2)
+	ax12.plot(wide3[:,12]./365.25,xprob(wide3[:,end]),color="orange",label="Fit",alpha=0.75)
+	ax12.plot(xbin_square,hist_square./maximum(hist_square),color="orange",label="Posterior")
+	ax12.fill_between(xbin_square, hist_square./maximum(hist_square),alpha=0.2,color=color)
+	ax12.set_xlim(4.65,4.85)
+
+	# ax2.plot(fit3[:,12]./365.25,xprob(fit3[:,end]),color="orange",label="Fit",alpha=0.75)
+	ax1.set_xlabel(L"$P_e$ [yrs]",fontsize="large")
+	ax1.set_xlim(1.85,2.0)
 		# ax2.set_xlim(quantile(par_mcmc3,0.1587))
-	ax2.set_xlabel(L"$P_e$ [yrs]",fontsize="large")
+	ax2.set_xlabel(L"$P_e$ [yrs]",fontsize="large",labelpad=20)
+	# if include_moon
+	#   p3mcfile=string("moon_2025/","p3","_mcmc",sigma,"s",nyear,"yrs.jld2")
+	# 	p3mc=jldopen(String(p3mcfile),"r")
+ 	# 	par_mcmc=vec(p3mc["par_mcmc"][:,p3mc["iburn"]:end,12])./365.25
+	# 	# xbin,xhist,xbin_square,hist_square=histogram(par_mcmc,50)
+	# 	# ax1.plot(xbin_square,hist_square./maximum(hist_square),color="firebrick",label="Poster",alpha=0.75)
+	# 	phi_col,true_phi,color=18,2.31586,"purple"; label_xloc=2.75
+	# 	# lim=f["dpin"],f["dpout"]
+	#   ax3=fig.add_subplot(123,title=string(L"$\mathcal{H}_{PPsP}$, ",L"$\sigma_{sys}=$",round(sigsys4,sigdigits=3)," s"))
+	# 	ax3.axvline(true_phi,linestyle="--",color="black")
+	# 	ax3.text(2.33,0.96,"Moon",fontsize="medium")
+	# 	ax3.plot(fit4[:,18],xprob(fit4[:,end]),color="purple")
+	# 	par_mcmc5=vec(mc4["par_mcmc"][:,mc4["iburn"]:end,18])
+	# 	xbin,xhist,xbin_square,hist_square=histogram(par_mcmc5,nbins)
+	#   ax3.plot(xbin_square,hist_square./maximum(hist_square),color="purple",alpha=0.5)
+	# 	# tight_layout()
+	# 	# ax3.plot(grid_wide,lprob_wide,color="red") 
+	# 	ax3.set_xlabel("Phase Offset [rad]",fontsize="large")
+	# 	# ylabel("Probability",fontsize="large")
+	# 	ax3.minorticks_on()
+	# 	ax3.tick_params(which="both",direction="in")
+	# 	# Inset zoom of finer δϕ grid 
+	# 	# ax4=fig.add_axes([0.68,0.4,0.2,0.4])
+	#   # ax4.plot(fit3[:,18]./365.25,xprob(fit3[:,end]),color="purple") 
 
-	if include_moon
-	  p3mcfile=string("MCMC/","p3","_mcmc",sigma,"s",nyear,"yrs.jld2")
-   	p3mc=jldopen(String(p3mcfile),"r")
- 		par_mcmc=vec(p3mc["par_mcmc"][:,p3mc["iburn"]:end,12])./365.25
-		# xbin,xhist,xbin_square,hist_square=histogram(par_mcmc,50)
-		# ax1.plot(xbin_square,hist_square./maximum(hist_square),color="firebrick",label="Poster",alpha=0.75)
-		phi_col,true_phi,color=18,2.31586,"purple"; label_xloc=2.75
-		# lim=f["dpin"],f["dpout"]
-	  ax3=fig.add_subplot(123,title=string(L"$\mathcal{H}_{PPsP}$, ",L"$\sigma_{sys}=$",round(sigsys4,sigdigits=3)," s"))
-		ax3.axvline(true_phi,linestyle="--",color="black")
-		ax3.text(2.33,0.96,"Moon",fontsize="medium")
-		ax3.plot(fit4[:,18],xprob(fit4[:,end]),color="purple")
-		par_mcmc5=vec(mc4["par_mcmc"][:,mc4["iburn"]:end,18])
-		xbin,xhist,xbin_square,hist_square=histogram(par_mcmc5,nbins)
-	  ax3.plot(xbin_square,hist_square./maximum(hist_square),color="purple",alpha=0.5)
-		# tight_layout()
-		# ax3.plot(grid_wide,lprob_wide,color="red") 
-		ax3.set_xlabel("Phase Offset [rad]",fontsize="large")
-		# ylabel("Probability",fontsize="large")
-		ax3.minorticks_on()
-		ax3.tick_params(which="both",direction="in")
-		# Inset zoom of finer δϕ grid 
-		# ax4=fig.add_axes([0.68,0.4,0.2,0.4])
-	  # ax4.plot(fit3[:,18]./365.25,xprob(fit3[:,end]),color="purple") 
-
-	  # xlim(2.24,2.37)
-	  # ax4.minorticks_on()
-	  # ax4.tick_params(which="both",direction="in",left="false",labelleft="false",
-	  # 		right="true",labelright="true")
-	else
+	#   # xlim(2.24,2.37)
+	#   # ax4.minorticks_on()
+	#   # ax4.tick_params(which="both",direction="in",left="false",labelleft="false",
+	#   # 		right="true",labelright="true")
+	# else
  	## plot Jupiter zoom-in
- 	ax3=fig.add_subplot(121,sharey=ax2,title=string(L"$\mathcal{H}_{PPP}$"))
 	# text(11,1.1,"b)",fontweight="bold")
- 	axvline(true_per4,linestyle="--",color="black")
-	text(12,0.96,"Jupiter",fontsize="medium")
+ 	ax3.axvline(true_per4,linestyle="--",color="black")
+	ax3.text(11.9,0.96,"Jupiter",fontsize="medium")
 	color="firebrick"
 	xbin,xhist,xbin_square,hist_square=histogram(par_mcmc4,50)
  	ax3.plot(xbin_square,hist_square./maximum(hist_square),color="firebrick",label="Posterior")
  	ax3.fill_between(xbin_square, hist_square./maximum(hist_square),alpha=0.2,color=color)
 	ax3.plot(fit4[:,12]./365.25,xprob(fit4[:,end]),color="firebrick",label="Fit",alpha=0.75)
-	# ax3.hist(par_mcmc4,bins=nbins,histtype="step",density=tr,color="firebrick")
- 	minorticks_on()
-	# legend(loc="upper right",fontsize="medium",title="Jupiter",title_fontsize="medium",bbox_to_anchor=(0.,1.02,1.,.102),ncol=5,mode="expand",borderaxespad=0.0)	
 	ax3.set_xlim(11,12.5)
-	ax3.tick_params(which="both",direction="in",left=true,labelleft=true)
 	ax3.set_xlabel(L"$P_d$ [yrs]",fontsize="large")
 	ax3.set_ylabel("Relative Probability",fontsize="large")
-	end
+	# end
 
 	tight_layout()
 	# fig.legend()

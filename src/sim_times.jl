@@ -6,12 +6,12 @@ include("regress.jl")
 include("CGS.jl")
 # Load JPL ephemerides from data and set units
 path_to_file="/Users/bethleelindor/work/washington/ttvs/ttv_ss/INPUTS/DE440.bsp"
-if isfile(path_to_file)
-  eph=Ephem(path_to_file)
-else
-  eph = Ephem("/INPUTS/DE440.bsp") 
-end
- prefetch(eph)
+#if isfile(path_to_file)
+ # eph=Ephem(path_to_file)
+#else
+ # eph = Ephem("/INPUTS/DE440.bsp") 
+#end
+# prefetch(eph)
 options = useNaifId+unitKM+unitDay # useNaifId + unitDay + unitAU
 AU = 149597870.700 #km
 Random.seed!(42)

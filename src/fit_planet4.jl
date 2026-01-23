@@ -241,10 +241,10 @@ function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
     results = string("../results/fromEMB/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.txt")
     grid = string("../grid/fromEMB/",grid_type_nplanet,"_grid",sigma,"s",nyear,"yrs.csv")
   elseif obs=="fromEV"
-    infile = string("../FITS/p3_fit",sigma,"s",nyear,"yrs.jld2")
-    outfile = string("../FITS/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
-    results = string("../results/",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.txt")
-    grid = string("../grid/",grid_type_nplanet,"_grid",sigma,"s",nyear,"yrs.csv")
+    infile = string("../moon_2025/p3_fit",sigma,"s",nyear,"yrs.jld2")
+    outfile = string("../moon_2025/HR_",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.jld2")
+    results = string("../moon_2025/HR_",grid_type_nplanet,"_fit",sigma,"s",nyear,"yrs.txt")
+    grid = string("../moon_2025/HR_",grid_type_nplanet,"_grid",sigma,"s",nyear,"yrs.csv")
   end
   @assert isfile(infile)
   m = jldopen(String(infile),"r")
@@ -327,7 +327,7 @@ function fit_planet4(jd1::Float64,sigma::Real,nyear::Real,tref::Real,tol::Real,p
   mean_mp=[best_p4[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
   mp_errs=[err[(iplanet-1)*5+1].*CGS.MSUN/CGS.MEARTH for iplanet=1:nplanet]
   mean_ecc=[sqrt(best_p4[(iplanet-1)*5+4]^2 + best_p4[(iplanet-1)*5+5]^2) for iplanet=1:nplanet]
-	
+  
   # open(results,"w") do io
   #   println(io,"Global Fit Results.",'\n',"chi^2: ",chi2,'\n',"per 4 range=[",p4in," - ",p4out,", length=",np4,"]")
   #   for i=1:nparam

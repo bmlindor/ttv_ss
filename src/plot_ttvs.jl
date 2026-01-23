@@ -25,7 +25,7 @@ function plot_res(sigma::Real,nyear::Real,options,include_moon::Bool=false)
     mcfile=string("moon_2025/",fit_type_nplanet,"_mcmc",sigma,"s",nyear,"yrs.jld2")
     mcfile2=string("moon_2025/p2_mcmc",sigma,"s",nyear,"yrs.jld2")
     mcfile3=string("moon_2025/p3_mcmc",sigma,"s",nyear,"yrs.jld2")
-    data=readdlm("moon_2025/fromEVtransit_times10s17yrs.txt",',';comments=true)
+    data=readdlm("moon_2025/fromEVtransit_times10s29yrs.txt",',';comments=true)
     # mcfile4=string("moon_2025/widep4_mcmc",sigma,"s",nyear,"yrs.jld2")
     # f4=jldopen(String(fitfile4),"r")
     # mc4=jldopen(String(mcfile4),"r")
@@ -442,9 +442,9 @@ function plot_contrib(sigma::Real,nyear::Real,options::Array{String},include_moo
   #   ax2 = fig.add_subplot(gs[2, 2],sharex=ax1)
   #   ax3 = fig.add_subplot(gs[1, 1], sharex=ax1)
   #   ax4 = fig.add_subplot(gs[2, 1], sharex=ax2)
-    # ax3.set_ylabel("TTV [min]",fontsize="large")
-    # ax4.set_xlabel("Time [years]",fontsize="large")
-    # ax2.set_xlabel("Time [years]",fontsize="large")
+   # ax3.set_ylabel("TTV [min]",fontsize="large")
+   # ax4.set_xlabel("Time [years]",fontsize="large")
+   # ax2.set_xlabel("Time [years]",fontsize="large")
     # ax4.set_ylabel("TTV [min]",fontsize="large")
 
   function make_plot(mc,f,ax1,ax2,bestfit,include_moon)
@@ -463,17 +463,21 @@ function plot_contrib(sigma::Real,nyear::Real,options::Array{String},include_moo
     pair_ttvs=decompose_ttvs(nplanet,ntrans[1:nplanet],avg) .* (24 * 60)
     # println(bestfit)
     n1,n2=ntrans[1],ntrans[2]
+    tt1,tt2=tt[1:n1],tt[n1+1:n1+n2]
+    sigtt1,sigtt2=sigtt[1:n1].* (24 * 60),sigtt[n1+1:n1+n2].* (24 * 60) 
     mu1,P1,t01,ecos1,esin1=avg[1:5]
     mu2,P2,t02,ecos2,esin2=avg[6:10]
     # mu3,P3,t03,ecos3,esin3=pbest_global[11:15]
-    time1=collect(t01 .+ range(0,stop=n1-1,length=n1) .* P1)
-    time2=collect(t02 .+ range(0,stop=n2-1,length=n2) .* P2)
-    tt1,tt2=tt[1:n1],tt[n1+1:n1+n2]
+
+    x1,t0_est1,per1=linear_fit(tt1,mean(diff(tt1)),sigtt1)
+    x2,t0_est2,per2=linear_fit(tt2,mean(diff(tt2)),sigtt2)      
+    time1=collect(t01 .+ range(0,stop=n1-1,length=n1) .* per1)
+    time2=collect(t02 .+ range(0,stop=n2-1,length=n2) .* per2)
+   
     ttmodel1,ttmodel2 = ttmodel[1:n1],ttmodel[n1+1:n1+n2]
     ttsim1,ttsim2=(time1.-t01)./365.25,(time2.-t02)./365.25 #in years
     ttvmodel1,ttvmodel2=(ttmodel1.-time1).*(24*60),(ttmodel2.-time2).*(24*60)
     ttv1,ttv2=(tt1.-time1).* (24 * 60),(tt2.-time2).* (24 * 60) #in minutes
-    sigtt1,sigtt2=sigtt[1:n1].* (24 * 60),sigtt[n1+1:n1+n2].* (24 * 60) 
     total1=0;total2=0
     # title="Planet Contributions"
     # suptitle(string(title," [",nyear," yr span], ",L"$\sigma_{obs}=$",sigma," sec "))
@@ -497,7 +501,7 @@ function plot_contrib(sigma::Real,nyear::Real,options::Array{String},include_moo
 
       ax2.plot(ttsim2,pair_ttvs[2,3,1:n2],linestyle="--",color="orange",label="e",alpha=0.9,linewidth=1.5)
       ax2.plot(ttsim2,pair_ttvs[2,4,1:n2],color="firebrick",label="d",linewidth=1.5)
-      ax1.set_title(L"Contributions to $\mathcal{H}_{PPPP}$",fontsize="medium")
+      ax1.set_title(L"Contributions to $\mathcal{H}_{PPPP}$",fontsize="large")
     elseif f["nplanet"]==5
       total1=pair_ttvs[1,3,1:n1]+pair_ttvs[1,2,1:n1]+pair_ttvs[1,4,1:n1]+pair_ttvs[1,5,1:n1]
       total2=pair_ttvs[2,3,1:n2]+pair_ttvs[2,1,1:n2]+pair_ttvs[2,4,1:n2]+pair_ttvs[2,5,1:n2]
@@ -513,7 +517,7 @@ function plot_contrib(sigma::Real,nyear::Real,options::Array{String},include_moo
       total2=pair_ttvs[2,3,1:n2]+pair_ttvs[2,1,1:n2]
       ax1.plot(ttsim1,pair_ttvs[1,3,1:n1],color="firebrick",label="d",linewidth=1.5)
       ax2.plot(ttsim2,pair_ttvs[2,3,1:n2],color="firebrick",label="d",linewidth=1.5)
-      ax1.set_title(L"Contributions to $\mathcal{H}_{PPP}$",fontsize="medium")
+      ax1.set_title(L"Contributions to $\mathcal{H}_{PPP}$ Fit",fontsize="large")
     elseif f["nplanet"]==2
       total1=pair_ttvs[1,2,1:n1]
       total2=pair_ttvs[2,1,1:n2]
@@ -522,8 +526,8 @@ function plot_contrib(sigma::Real,nyear::Real,options::Array{String},include_moo
     if include_moon 
       moon=moon_ttvs(ntrans,pbest_global) .* (24 * 60)
       ax2.plot(ttsim2,total2+moon,color="grey",alpha=0.6,lw=1.5)
-      ax2.plot(ttsim2,moon,linestyle="-.",color="purple",label="satellite",linewidth=1.5,alpha=0.6)
-      ax1.set_title(L"Contributions to $\mathcal{H}_{PPsP}$ Fit",fontsize="medium")
+      ax2.plot(ttsim2,moon,linestyle="-.",color="purple",label="satellite",linewidth=1.5,alpha=0.9)
+      ax1.set_title(L"Contributions to $\mathcal{H}_{PPsP}$ Fit",fontsize="large")
 
       # text(0,-5.5,label,fontsize="xx-large")
       # xlabel("Time [years]",fontsize=20)
@@ -537,22 +541,176 @@ function plot_contrib(sigma::Real,nyear::Real,options::Array{String},include_moo
     sigsys=round(avg[end].*24*3600,sigdigits=3)
     sim_obs_label= string(L"$\sigma_{sys}=$",sigsys," s")
     # ax1.text(22.5,7,sim_obs_label)
-    ax1.text(12.5,-7,sim_obs_label)
-    ax1.legend(loc="upper right",fontsize="small",ncol=nplanet)
-    ax2.legend(loc="upper right",ncol=nplanet,fontsize="small")#,mode="expand")
+    ax1.text(21.5,7,sim_obs_label)
+    ax1.legend(loc="upper left",fontsize="small",ncol=nplanet)
+    ax2.legend(loc="upper left",ncol=nplanet,fontsize="small")#,mode="expand")
     ax2.set_xlabel("Time [years]",fontsize="medium")
     return ttv1,ttv2
   end
   ttv11, ttv21=make_plot(mc,f,ax3,ax4,"best_dp",true)
   ttv12, ttv22= make_plot(mc3,f3,ax1,ax2,"best_p4",false)
+  close()
+
+
   # ttv11, ttv21=make_plot(mc,f,ax3,ax4,"best_dp",true)
   # ttv12, ttv22=make_plot(mc3,f3,ax1,ax2,"best_p4",false)
-  # fig.supylabel("TTV [min]",fontsize="medium")
-  # fig.tight_layout()
+  fig.supylabel("TTV [min]",fontsize="large")
+  fig.tight_layout()
   # # return ttv1,total1
   # # legend(loc="upper right")
-  # title=string("2025/2025new",fit_type_nplanet,"_",sigma,"s",nyear,"yrs.png")
-  # savefig(title,dpi=150)
+  title=string("moon_2025/2025new",fit_type_nplanet,"_",sigma,"s",nyear,"yrs.pdf")
+  savefig(title,dpi=150)
+  close()
   # show()
-  return ttv11, ttv21, ttv12, ttv22
+#  return ttv11, ttv21, ttv12, ttv22
+end
+
+function get_fit_values(mc,f,bestfit,include_moon)
+    par_mcmc=vec(mc["par_mcmc"][:,mc["iburn"]:end,:])
+    tt,tt0,sigtt,ttmodel=f["tt"],f["tt0"],f["sigtt"],f["ttmodel"]
+    pbest_global=f[bestfit]
+    ntrans=f["ntrans"]
+    nplanet=f["nplanet"]
+    pname=mc["pname"];nparam=length(pname)
+    avg=zeros(nparam)
+    for i=1:nparam
+        avg[i]=median(vec(mc["par_mcmc"][:,mc["iburn"]:end,i]))
+    end
+    # pbest_global=avg[1:end-1]
+    # function make_plot()
+    pair_ttvs=decompose_ttvs(nplanet,ntrans[1:nplanet],avg) .* (24 * 60)
+    # println(bestfit)
+    n1,n2=ntrans[1],ntrans[2]
+    tt1,tt2=tt[1:n1],tt[n1+1:n1+n2]
+    sigtt1,sigtt2=sigtt[1:n1].* (24 * 60),sigtt[n1+1:n1+n2].* (24 * 60) 
+    mu1,P1,t01,ecos1,esin1=avg[1:5]
+    mu2,P2,t02,ecos2,esin2=avg[6:10]
+    # mu3,P3,t03,ecos3,esin3=pbest_global[11:15]
+
+    x1,t0_est1,per1=linear_fit(tt1,mean(diff(tt1)),sigtt1)
+    x2,t0_est2,per2=linear_fit(tt2,mean(diff(tt2)),sigtt2)      
+    time1=collect(t01 .+ range(0,stop=n1-1,length=n1) .* per1)
+    time2=collect(t02 .+ range(0,stop=n2-1,length=n2) .* per2)
+   
+    ttmodel1,ttmodel2 = ttmodel[1:n1],ttmodel[n1+1:n1+n2]
+    ttsim1,ttsim2=(time1.-t01)./365.25,(time2.-t02)./365.25 #in years
+
+    ttv1,ttv2=(tt1.-time1).* (24 * 60),(tt2.-time2).* (24 * 60) #in minutes
+    # res =   res21=ttv1-(p2_ttvs[1,2,1:n1])
+    # res31=ttv1-(p3_ttvs[1,3,1:n1]+p3_ttvs[1,2,1:n1])
+    # res32=ttv2-(p3_ttvs[2,3,1:n2]+p3_ttvs[2,1,1:n2])
+    # res41=ttv1-(p4_ttvs[1,3,1:n1]+p4_ttvs[1,2,1:n1]+p4_ttvs[1,4,1:n1])
+    # res42=ttv2-(p4_ttvs[2,3,1:n2]+p4_ttvs[2,1,1:n2]+p4_ttvs[2,4,1:n2])
+
+    if include_moon
+      moon=moon_ttvs(ntrans,pbest_global) .* (24 * 60)
+      return time1,time2,ttsim2,moon,avg
+    else 
+      return time1,time2,ttsim2,pair_ttvs[2,3,1:n2],avg
+    end
+  end
+
+function compare_contrib(sigma::Real,nyear::Real,options::Array{String}=["widep4","p3moon","best_p4","best_dp"],include_moon::Bool=false)
+  fit_type_nplanet1 = options[1]
+  fit_type_nplanet2 = options[2]
+  best_fit1 = options[3]
+  best_fit2 = options[4]
+  case=2
+  fitfile1=string("moon_2025/",fit_type_nplanet1,"_fit",sigma,"s",nyear,"yrs.jld2")
+  fitfile2=string("moon_2025/",fit_type_nplanet2,"_fit",sigma,"s",nyear,"yrs.jld2")
+  label="Earth"
+  mcfile1=string("moon_2025/",fit_type_nplanet1,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+  mcfile2=string("moon_2025/",fit_type_nplanet2,"_mcmc",sigma,"s",nyear,"yrs.jld2")
+ 
+  f1=jldopen(String(fitfile1),"r")
+  mc1=jldopen(String(mcfile1),"r")
+  f2=jldopen(String(fitfile2),"r")
+  mc2=jldopen(String(mcfile2),"r")
+  time1_1,time2_1,tt2_sim1,mars_contrib,avg1=get_fit_values(mc1,f1,best_fit1,false)
+  time2_2,tt2_2,tt2_sim2,moon,avg2=get_fit_values(mc2,f2,best_fit2,true)
+  tt0 = f1["tt0"]
+  tt = f1["tt"]
+  ttmodel1 = f1["ttmodel"]
+  ttmodel2 = f2["ttmodel"]
+  close()
+
+  # fig=figure(figsize=(6,4))
+  # fig,ax1=subplots(1,1,figsize=(9,2),sharex=true)#,dpi=150)
+  # # ax1=axs[1];ax2=axs[2]#;ax3=axs[3]
+  # ax1.set_ylim(-10,10); #ax2.set_ylim(-10,10)
+  # ax1.plot(tt2_sim1,mars_contrib,linestyle="--",color="orange",label="planet e contribution",linewidth=1.5)
+  # ax1.plot(tt2_sim2,moon,linestyle="-.",color="purple",label="satellite contribution",linewidth=1.5)
+  # # ax2.plot(tt2_sim2,moon.-mars_contrib,linestyle="-",color="k",label="difference",linewidth=1.5)
+  # ax1.legend(fontsize="small");#ax2.legend(fontsize="small");#ax3.legend()
+  # # fig.title("Contributions to Earth")
+  # # ax3.set_xlabel("Time [years]",fontsize="large")
+  # ax1.set_ylabel("Effect on Earth [min]",fontsize="medium")
+  # # ax2.set_ylabel("Earth TTV")
+  # # ax2.set_ylabel("Difference",fontsize="medium")
+  # # ax3.tick_params(which="both",direction="in",top=true,right=true)
+  # # ax2.tick_params(which="both",direction="in",top=true,right=true,labelleft=true)
+  # # fig.legend()
+  # ax1.set_xlabel("Time [years]",fontsize="medium")
+  # ax1.tick_params(which="both",direction="in",top=true,right=true)
+  # fig.tight_layout()
+  # minorticks_on()
+  println("max difference: ",maximum(abs.(moon.-mars_contrib)))
+  # fig.supylabel("TTV [min]",fontsize="large")
+  # savefig("moon_2025/mars_moon.pdf",dpi=150)
+  # ax=fig.add_subplot(111)
+  # ax.plot(tt2_1,(moon.-mars_contrib).*60)
+  # ax.set_title("Moon versus 'Mars'")
+  # ax.set_ylabel("Contribution Difference [seconds]")
+  # ax.set_xlabel("Time [yrs]")
+  # close()
+
+  data=readdlm("moon_2025/fromEVtransit_times10s29yrs.txt",',';comments=true)
+  sim_noise=data[:,6]
+  println("Std of noise "," : ",std(sim_noise).*60)
+
+  noise1=sim_noise[1:47]# .* (24 * 60 );
+  noise2=sim_noise[47+1:end] #.* (24 * 60 )
+  # # Gaussian fit to noise
+  x1_fit=fit(Normal,noise1) ;
+  x2_fit=fit(Normal,noise2) ;
+  norm_fit = fit(Normal,sim_noise)
+  dist(x,mu,sigma) =exp.(-.5 .*((x .-mu) ./ sigma) .^ 2) ./ (sigma .* sqrt(2pi))
+  xs=range(-1,length=100,stop=1)
+  exp_dist=dist.(xs,0.0,0.5)
+  y1=dist.(range(-1,length=47,stop=1),x1_fit.μ,x1_fit.σ) ; 
+  y2=dist.(range(-1,length=29,stop=1),x2_fit.μ,x2_fit.σ)
+  # # return y1,y2
+  # # op_cycle=plt.cycler("alpha",[0.9,0.6,0.6])
+  # # ls_cycle=plt.cycler("linestyle",["--","-","-."])
+
+  fig,axs=subplots(2,1,figsize=(5,5))
+  # ax=fig2.add_subplot(121)
+  axs[1].hist((ttmodel1.-tt)[1:47].*24*60,bins=20,label="$fit_type_nplanet1",histtype="step",density=true)
+  axs[2].hist((ttmodel2.-tt)[48:end].*24*60,bins=20,label="$fit_type_nplanet2",histtype="step",density=true)
+  axs[1].hist((ttmodel1.-tt)[1:47].*24*60,bins=20,label="$fit_type_nplanet1",histtype="step",density=true)
+  axs[2].hist((ttmodel2.-tt)[48:end].*24*60,bins=20,label="$fit_type_nplanet2",histtype="step",density=true)
+  # axs[1].hist((sim_noise),bins=20,color="k",linestyle="--",alpha=0.9,histtype="step")
+  # axs[2].hist((sim_noise),bins=20,color="k",linestyle="--",alpha=0.9,histtype="step")
+  # # ax2.set_prop_cycle(op_cycle+ls_cycle); 
+  axs[1].plot(xs,exp_dist,linewidth=1.5,color="r",linestyle="-",alpha=0.6,label=L"$\mathcal{N( \mu = 0,\sigma = 0.5 )}$")
+  axs[2].plot(xs,exp_dist,linewidth=1.5,color="r",linestyle="-",alpha=0.6,label=L"$\mathcal{N( \mu = 0,\sigma = 0.5 )}$")
+
+  # axs[1].hist(noise1,bins=20,density=true,color="salmon",histtype="step")
+  # axs[2].hist(noise2,bins=20,density=true,color="forestgreen",histtype="step")
+  # ax.plot(xs,exp_dist,linewidth=1.5,color="r",linestyle="-",alpha=0.6)
+
+  axs[1].plot(collect(range(-1,length=47,stop=1)),y1,linewidth=1.5,color="k",linestyle="--",alpha=0.9)
+  axs[2].plot(collect(range(-1,length=29,stop=1)),y2,linewidth=1.5,color="k",linestyle="--",alpha=0.9)
+
+    # ax.hist(xs,y1)
+  # ax.hist(avg1[end].*24*3600)
+  # ax.hist(avg2[end].*24*3600)
+  # ax.set_title("Moon versus 'Mars'")
+  # ax.set_ylabel("Contribution Difference [seconds]")
+  # ax.set_xlabel("Time [yrs]")
+  # ax.plot(tt2_1,mars_contrib)
+  fig.legend()
+  show()
+
+  
 end
